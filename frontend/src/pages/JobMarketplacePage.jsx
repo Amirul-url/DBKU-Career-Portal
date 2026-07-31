@@ -197,20 +197,20 @@ export default function LandingPage() {
         <nav className="nav-inner" aria-label="Main navigation">
           <Link className="brand" to="/">
             <span className="brand-mark">
-              <img src="/logo-dbku.png" alt="DBKU logo" />
+              <img src="/logo-dbku.png" alt="Logo DBKU" />
             </span>
             <span translate="no">DBKU Career Portal</span>
           </Link>
 
           <div className="nav-links">
-            <Link to="/">Home</Link>
-            <a className="active" href="#jobs">Jobs</a>
-            <a href="#jobs">Internships</a>
+            <Link to="/">Laman Utama</Link>
+            <a className="active" href="#jobs">Kerja Kosong</a>
+            <a href="#jobs">Latihan Industri</a>
           </div>
 
           <div className="market-nav-actions">
-            <Link to="/login">Login</Link>
-            <Link to="/register" className="market-register-link">Register</Link>
+            <Link to="/login">Log Masuk</Link>
+            <Link to="/register" className="market-register-link">Daftar Akaun</Link>
           </div>
         </nav>
       </header>

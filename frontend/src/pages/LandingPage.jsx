@@ -63,7 +63,7 @@ export default function LandingPage() {
           </Link>
 
           <div className="nav-links">
-            <Link className="active" to="/">Utama</Link>
+            <Link className="active" to="/">Laman Utama</Link>
             <Link to="/jobs">Kerja Kosong</Link>
             <Link to="/jobs">Latihan Industri</Link>
           </div>
