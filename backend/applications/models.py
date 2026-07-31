@@ -1,0 +1,77 @@
+from django.conf import settings
+from django.db import models
+
+
+class CandidateApplication(models.Model):
+    STATUS_CHOICES = (
+        ("draft", "Draft"),
+        ("submitted", "Submitted"),
+        ("screening", "Screening"),
+        ("shortlisted", "Shortlisted"),
+        ("interview", "Interview"),
+        ("offered", "Offered"),
+        ("accepted", "Accepted"),
+        ("rejected", "Rejected"),
+        ("withdrawn", "Withdrawn"),
+    )
+
+    vacancy = models.ForeignKey(
+        "jobs.Vacancy",
+        on_delete=models.CASCADE,
+        related_name="applications",
+    )
+    applicant = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="candidate_applications",
+    )
+    reference_no = models.CharField(max_length=40, unique=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="draft")
+    cover_letter = models.TextField(blank=True)
+    resume = models.FileField(upload_to="resumes/", blank=True)
+    profile_data = models.JSONField(default=dict, blank=True)
+    latest_remark = models.TextField(blank=True)
+    submitted_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-updated_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["vacancy", "applicant"],
+                name="unique_application_per_vacancy_applicant",
+            )
+        ]
+        indexes = [
+            models.Index(fields=["status", "-updated_at"], name="cand_status_updated_idx"),
+            models.Index(fields=["applicant", "-updated_at"], name="cand_applicant_updated_idx"),
+            models.Index(fields=["vacancy", "status"], name="cand_vacancy_status_idx"),
+        ]
+
+    @classmethod
+    def next_reference_no(cls):
+        prefix = "DBKU-CAR-"
+        last = (
+            cls.objects.exclude(reference_no="")
+            .filter(reference_no__startswith=prefix)
+            .order_by("-reference_no")
+            .values_list("reference_no", flat=True)
+            .first()
+        )
+        next_number = 1
+        if last:
+            try:
+                next_number = int(last.replace(prefix, "")) + 1
+            except ValueError:
+                next_number = cls.objects.count() + 1
+        return f"{prefix}{next_number:05d}"
+
+    def save(self, *args, **kwargs):
+        if not self.reference_no:
+            self.reference_no = self.next_reference_no()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.reference_no} - {self.vacancy.title}"
+
