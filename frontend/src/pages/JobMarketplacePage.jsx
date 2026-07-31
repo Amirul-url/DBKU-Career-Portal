@@ -136,7 +136,15 @@ const filters = [
 ];
 
 function Icon({ children, className = "" }) {
-  return <span className={`material-symbols-outlined ${className}`}>{children}</span>;
+  return (
+    <span
+      className={`material-symbols-outlined notranslate ${className}`}
+      aria-hidden="true"
+      translate="no"
+    >
+      {children}
+    </span>
+  );
 }
 
 function OpportunityCard({ opportunity, selected, onSelect }) {
@@ -191,7 +199,7 @@ export default function LandingPage() {
             <span className="brand-mark">
               <img src="/logo-dbku.png" alt="DBKU logo" />
             </span>
-            <span>DBKU Career Portal</span>
+            <span translate="no">DBKU Career Portal</span>
           </Link>
 
           <div className="nav-links">

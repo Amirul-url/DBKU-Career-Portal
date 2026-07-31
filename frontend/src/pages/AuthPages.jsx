@@ -1,7 +1,15 @@
 import { Link } from "react-router-dom";
 
 function Icon({ children, className = "" }) {
-  return <span className={`material-symbols-outlined ${className}`}>{children}</span>;
+  return (
+    <span
+      className={`material-symbols-outlined notranslate ${className}`}
+      aria-hidden="true"
+      translate="no"
+    >
+      {children}
+    </span>
+  );
 }
 
 function AuthNav() {
@@ -12,7 +20,7 @@ function AuthNav() {
           <span className="brand-mark">
             <img src="/logo-dbku.png" alt="DBKU logo" />
           </span>
-          <span>DBKU Career Portal</span>
+            <span translate="no">DBKU Career Portal</span>
         </Link>
 
         <div className="nav-links">
@@ -258,7 +266,7 @@ export function RegisterPage() {
         </form>
       </main>
       <footer className="register-footer">
-        <strong>DBKU Career Portal</strong>
+        <strong translate="no">DBKU Career Portal</strong>
         <span>Copyright 2026 Kuching North City Commission (DBKU). All Rights Reserved.</span>
       </footer>
     </div>
