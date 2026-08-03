@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getCities, getPostcodes, getStates } from "malaysia-postcodes";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { clearAuthSession, getStoredUser, updateCurrentUser } from "../../lib/authApi";
+import { clearAuthSession, fetchAuthenticatedBlob, getStoredUser, updateCurrentUser } from "../../lib/authApi";
 import { Icon } from "./ApplicantAuthShared";
 
 const sidebarNavItems = [
@@ -537,24 +537,53 @@ function ProfileCard({ children, id, isEditing = false, onEdit, title }) {
 }
 
 function ProfileDownloadLinks({ resumeUrl, videoUrl }) {
+  const [openingFile, setOpeningFile] = useState("");
+  const [openError, setOpenError] = useState("");
+
   if (!resumeUrl && !videoUrl) {
     return null;
+  }
+
+  async function openBlobInNewTab(url, fileType) {
+    const newTab = window.open("about:blank", "_blank");
+
+    if (!newTab) {
+      setOpenError("Tab baru tidak dapat dibuka. Sila benarkan pop-up untuk portal ini.");
+      return;
+    }
+
+    newTab.opener = null;
+    setOpenError("");
+    setOpeningFile(fileType);
+
+    try {
+      const blob = await fetchAuthenticatedBlob(url);
+      const blobUrl = URL.createObjectURL(blob);
+      newTab.location.href = blobUrl;
+      window.setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+    } catch (error) {
+      newTab.close();
+      setOpenError(error.message || "Fail tidak dapat dibuka. Sila cuba lagi.");
+    } finally {
+      setOpeningFile("");
+    }
   }
 
   return (
     <div className="profile-download-links" aria-label="Fail profil">
       {resumeUrl ? (
-        <a href={resumeUrl} download>
+        <button type="button" onClick={() => openBlobInNewTab(resumeUrl, "resume")} disabled={openingFile === "resume"}>
           <Icon>description</Icon>
-          <span>Muat Turun Resume (PDF)</span>
-        </a>
+          <span>{openingFile === "resume" ? "Membuka Resume..." : "Muat Turun Resume (PDF)"}</span>
+        </button>
       ) : null}
       {videoUrl ? (
-        <a href={videoUrl} download>
+        <button type="button" onClick={() => openBlobInNewTab(videoUrl, "video")} disabled={openingFile === "video"}>
           <Icon>movie</Icon>
-          <span>Muat Turun Video (MP4)</span>
-        </a>
+          <span>{openingFile === "video" ? "Membuka Video..." : "Muat Turun Video (MP4)"}</span>
+        </button>
       ) : null}
+      {openError ? <small>{openError}</small> : null}
     </div>
   );
 }

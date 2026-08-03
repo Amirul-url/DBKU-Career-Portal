@@ -105,6 +105,23 @@ export function clearAuthSession() {
   localStorage.removeItem(TOKEN_STORAGE_KEYS.user);
 }
 
+export async function fetchAuthenticatedBlob(url) {
+  const accessToken = getAccessToken();
+  const headers = {};
+
+  if (accessToken) {
+    headers.Authorization = `Bearer ${accessToken}`;
+  }
+
+  const response = await fetch(url, { headers });
+
+  if (!response.ok) {
+    throw new Error("Fail tidak dapat dibuka. Sila cuba lagi.");
+  }
+
+  return response.blob();
+}
+
 export function registerApplicant({ fullName, email, password, password2 }) {
   return authRequest("/auth/register/", {
     full_name: fullName.trim().toUpperCase(),
