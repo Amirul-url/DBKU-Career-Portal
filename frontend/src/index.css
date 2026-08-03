@@ -3601,7 +3601,7 @@ body:has(.applicant-profile-page) {
   display: inline-flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 12px;
+  gap: 10px;
 }
 
 .profile-user-chip,
@@ -3632,13 +3632,87 @@ body:has(.applicant-profile-page) {
   color: #16a34a;
 }
 
-.profile-logout-button {
+.profile-account-menu {
+  position: relative;
+}
+
+.profile-account-trigger {
+  display: inline-flex;
   min-height: 42px;
-  border: 0;
+  align-items: center;
+  gap: 6px;
   border-radius: 999px;
+  cursor: pointer;
+  list-style: none;
+  padding: 0;
+  color: #475569;
+}
+
+.profile-account-trigger::-webkit-details-marker {
+  display: none;
+}
+
+.profile-account-trigger:hover {
+  color: #006c49;
+}
+
+.profile-account-trigger .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.profile-account-menu[open] .profile-account-trigger .material-symbols-outlined {
+  transform: rotate(180deg);
+}
+
+.profile-account-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 60;
+  display: grid;
+  width: 260px;
+  gap: 12px;
+  border: 1px solid #d8e4df;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 18px 42px rgba(17, 24, 39, 0.14);
+  padding: 14px;
+}
+
+.profile-account-dropdown strong,
+.profile-account-dropdown small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-account-dropdown strong {
+  color: #111827;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.profile-account-dropdown small {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.profile-logout-button {
+  display: inline-flex;
+  width: 100%;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 8px;
   background: #111827;
   color: #ffffff;
-  padding: 0 18px;
+  padding: 0 14px;
+  font-size: 13px;
   font-weight: 900;
 }
 

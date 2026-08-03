@@ -49,13 +49,25 @@ function ProfileContentHeader({ user }) {
         <strong>{user?.full_name || user?.first_name || "Pemohon DBKU"}</strong>
       </div>
       <div className="profile-actions">
-          <span className="profile-user-chip">{user?.full_name?.charAt(0) || user?.email?.charAt(0) || "P"}</span>
-          <button type="button" className="profile-icon-button" aria-label="Notifikasi">
-            <Icon>notifications</Icon>
-          </button>
-          <button type="button" className="profile-logout-button" onClick={handleLogout}>
-            Log Keluar
-          </button>
+        <button type="button" className="profile-icon-button" aria-label="Notifikasi">
+          <Icon>notifications</Icon>
+        </button>
+        <details className="profile-account-menu">
+          <summary className="profile-account-trigger" aria-label="Menu profil">
+            <span className="profile-user-chip">{user?.full_name?.charAt(0) || user?.email?.charAt(0) || "P"}</span>
+            <Icon>expand_more</Icon>
+          </summary>
+          <div className="profile-account-dropdown">
+            <div>
+              <strong>{user?.full_name || user?.first_name || "Pemohon DBKU"}</strong>
+              <small>{user?.email || "Akaun pemohon"}</small>
+            </div>
+            <button type="button" className="profile-logout-button" onClick={handleLogout}>
+              <Icon>logout</Icon>
+              Log Keluar
+            </button>
+          </div>
+        </details>
       </div>
     </header>
   );
