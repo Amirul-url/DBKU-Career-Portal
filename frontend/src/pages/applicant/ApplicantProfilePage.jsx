@@ -80,6 +80,8 @@ const stateLabelOverrides = {
 const toSelectOptions = (items) => items.map((item) => ({ value: item, label: stateLabelOverrides[item] || item }));
 
 const stateOptions = toSelectOptions(getStates());
+const profilePhotoDatabaseName = "dbku-applicant-profile-media";
+const profilePhotoStoreName = "profilePhotos";
 
 function formatApplicantName(name) {
   return String(name || "").toUpperCase();
@@ -87,6 +89,87 @@ function formatApplicantName(name) {
 
 function getPersonalProfileStorageKey(user) {
   return `dbku-applicant-personal-profile:${user?.email || user?.full_name || "default"}`;
+}
+
+function getProfilePhotoStorageKey(user) {
+  return `${getPersonalProfileStorageKey(user)}:photo`;
+}
+
+function openProfilePhotoDatabase() {
+  if (typeof window === "undefined" || !window.indexedDB) {
+    return Promise.reject(new Error("IndexedDB tidak tersedia."));
+  }
+
+  return new Promise((resolve, reject) => {
+    const request = window.indexedDB.open(profilePhotoDatabaseName, 1);
+
+    request.onupgradeneeded = () => {
+      const database = request.result;
+
+      if (!database.objectStoreNames.contains(profilePhotoStoreName)) {
+        database.createObjectStore(profilePhotoStoreName);
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function runProfilePhotoTransaction(mode, action) {
+  return openProfilePhotoDatabase().then(
+    (database) =>
+      new Promise((resolve, reject) => {
+        const transaction = database.transaction(profilePhotoStoreName, mode);
+        const store = transaction.objectStore(profilePhotoStoreName);
+
+        action(store);
+        transaction.oncomplete = () => {
+          database.close();
+          resolve();
+        };
+        transaction.onerror = () => {
+          database.close();
+          reject(transaction.error);
+        };
+      }),
+  );
+}
+
+function saveProfilePhotoFile(photoStorageKey, file) {
+  return runProfilePhotoTransaction("readwrite", (store) => {
+    store.put(file, photoStorageKey);
+  });
+}
+
+function deleteProfilePhotoFile(photoStorageKey) {
+  if (!photoStorageKey) {
+    return Promise.resolve();
+  }
+
+  return runProfilePhotoTransaction("readwrite", (store) => {
+    store.delete(photoStorageKey);
+  });
+}
+
+async function getProfilePhotoFile(photoStorageKey) {
+  if (!photoStorageKey) {
+    return null;
+  }
+
+  const database = await openProfilePhotoDatabase();
+
+  return new Promise((resolve, reject) => {
+    const transaction = database.transaction(profilePhotoStoreName, "readonly");
+    const request = transaction.objectStore(profilePhotoStoreName).get(photoStorageKey);
+
+    request.onsuccess = () => resolve(request.result || null);
+    request.onerror = () => reject(request.error);
+    transaction.oncomplete = () => database.close();
+    transaction.onerror = () => {
+      database.close();
+      reject(transaction.error);
+    };
+  });
 }
 
 function getSavedPersonalProfile(user) {
@@ -107,8 +190,10 @@ function getPersonalProfileDefaults(displayName, email) {
     details: defaultPersonalDetails,
     displayName,
     email,
+    profilePhotoFile: null,
     profilePhotoFileName: "",
     profilePhotoPreviewUrl: "",
+    profilePhotoStorageKey: getProfilePhotoStorageKey({ email }),
     references: [],
   };
 }
@@ -144,8 +229,10 @@ function normalizePersonalProfile(profile, displayName, email) {
       ...(profile?.details || {}),
     },
     displayName: formatApplicantName(storedProfile.displayName || defaults.displayName),
+    profilePhotoFile: null,
     profilePhotoFileName: profile?.profilePhotoFileName || "",
     profilePhotoPreviewUrl: profile?.profilePhotoPreviewUrl || "",
+    profilePhotoStorageKey: profile?.profilePhotoStorageKey || defaults.profilePhotoStorageKey,
     references: Array.isArray(profile?.references) ? profile.references.map(normalizeReference) : defaults.references,
   };
 }
@@ -156,24 +243,44 @@ function getComparablePersonalProfile(profile) {
     displayName: profile?.displayName || "",
     email: profile?.email || "",
     profilePhotoFileName: profile?.profilePhotoFileName || "",
+    profilePhotoStorageKey: profile?.profilePhotoStorageKey || "",
     references: profile?.references || [],
   };
 
   return JSON.stringify(comparableProfile);
 }
 
-function savePersonalProfile(user, profile) {
+async function savePersonalProfile(user, profile) {
   if (typeof window === "undefined") {
-    return;
+    return profile;
   }
 
   try {
-    const serializableProfile = { ...profile };
+    const serializableProfile = {
+      ...profile,
+      profilePhotoStorageKey: profile.profilePhotoStorageKey || getProfilePhotoStorageKey(user),
+    };
+
+    if (profile.profilePhotoFile && profile.profilePhotoFileName) {
+      await saveProfilePhotoFile(serializableProfile.profilePhotoStorageKey, profile.profilePhotoFile);
+    } else if (!profile.profilePhotoFileName) {
+      await deleteProfilePhotoFile(serializableProfile.profilePhotoStorageKey);
+      serializableProfile.profilePhotoStorageKey = getProfilePhotoStorageKey(user);
+    }
+
     delete serializableProfile.profilePhoto;
+    delete serializableProfile.profilePhotoFile;
     delete serializableProfile.profilePhotoPreviewUrl;
     window.localStorage.setItem(getPersonalProfileStorageKey(user), JSON.stringify(serializableProfile));
+
+    return {
+      ...serializableProfile,
+      profilePhotoFile: null,
+      profilePhotoPreviewUrl: profile.profilePhotoPreviewUrl,
+    };
   } catch {
     // Keep the in-memory state even if browser storage is full or unavailable.
+    return profile;
   }
 }
 
@@ -449,8 +556,10 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
   const [formValues, setFormValues] = useState(profileData.details);
   const [formDisplayName, setFormDisplayName] = useState(profileData.displayName);
   const [formEmail, setFormEmail] = useState(profileData.email);
+  const [profilePhotoFile, setProfilePhotoFile] = useState(profileData.profilePhotoFile);
   const [profilePhotoFileName, setProfilePhotoFileName] = useState(profileData.profilePhotoFileName);
   const [profilePhotoPreviewUrl, setProfilePhotoPreviewUrl] = useState(profileData.profilePhotoPreviewUrl);
+  const [profilePhotoStorageKey, setProfilePhotoStorageKey] = useState(profileData.profilePhotoStorageKey);
   const [photoError, setPhotoError] = useState("");
   const [resumeError, setResumeError] = useState("");
   const [videoResumeError, setVideoResumeError] = useState("");
@@ -520,6 +629,8 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
     }
 
     setProfilePhotoFileName(file.name);
+    setProfilePhotoFile(file);
+    setProfilePhotoStorageKey((current) => current || profileData.profilePhotoStorageKey);
     setProfilePhotoPreviewUrl(URL.createObjectURL(file));
     setPhotoError("");
   };
@@ -529,6 +640,7 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
       URL.revokeObjectURL(profilePhotoPreviewUrl);
     }
 
+    setProfilePhotoFile(null);
     setProfilePhotoFileName("");
     setProfilePhotoPreviewUrl("");
     setPhotoError("");
@@ -648,11 +760,22 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
       details: formValues,
       displayName: formDisplayName,
       email: formEmail,
+      profilePhotoFile,
       profilePhotoFileName,
       profilePhotoPreviewUrl,
+      profilePhotoStorageKey,
       references,
     }),
-    [formEmail, formDisplayName, formValues, profilePhotoFileName, profilePhotoPreviewUrl, references],
+    [
+      formEmail,
+      formDisplayName,
+      formValues,
+      profilePhotoFile,
+      profilePhotoFileName,
+      profilePhotoPreviewUrl,
+      profilePhotoStorageKey,
+      references,
+    ],
   );
 
   const handleSave = useCallback(() => {
@@ -1054,6 +1177,7 @@ export default function ApplicantProfilePage() {
   const [isPersonalDraftDirty, setIsPersonalDraftDirty] = useState(false);
   const [personalDraft, setPersonalDraft] = useState(null);
   const [personalSaveRequestKey, setPersonalSaveRequestKey] = useState(0);
+  const loadedProfilePhotoUrlRef = useRef("");
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
   const email = user?.email || "Belum dikemaskini";
   const [personalProfile, setPersonalProfile] = useState(() => {
@@ -1064,9 +1188,18 @@ export default function ApplicantProfilePage() {
   const profileDisplayName = personalProfile.displayName || displayName;
   const profileEmail = personalProfile.email || email;
 
-  const handleSavePersonalProfile = (profile) => {
-    setPersonalProfile(profile);
-    savePersonalProfile(user, profile);
+  const handleSavePersonalProfile = async (profile) => {
+    const savedProfile = await savePersonalProfile(user, profile);
+
+    if (
+      loadedProfilePhotoUrlRef.current &&
+      loadedProfilePhotoUrlRef.current !== savedProfile.profilePhotoPreviewUrl
+    ) {
+      URL.revokeObjectURL(loadedProfilePhotoUrlRef.current);
+      loadedProfilePhotoUrlRef.current = "";
+    }
+
+    setPersonalProfile(savedProfile);
     setEditingSection(null);
     setIsPersonalDraftDirty(false);
     setIsPersonalCloseDialogOpen(false);
@@ -1113,6 +1246,67 @@ export default function ApplicantProfilePage() {
       navigate("/login", { replace: true, state: { message: "Sila log masuk untuk melihat profil anda." } });
     }
   }, [navigate, user]);
+
+  useEffect(() => {
+    if (
+      !personalProfile.profilePhotoFileName ||
+      !personalProfile.profilePhotoStorageKey ||
+      personalProfile.profilePhotoPreviewUrl
+    ) {
+      return undefined;
+    }
+
+    let isCancelled = false;
+
+    getProfilePhotoFile(personalProfile.profilePhotoStorageKey)
+      .then((file) => {
+        if (isCancelled || !file) {
+          return;
+        }
+
+        const profilePhotoPreviewUrl = URL.createObjectURL(file);
+
+        setPersonalProfile((current) => {
+          if (
+            current.profilePhotoPreviewUrl ||
+            current.profilePhotoStorageKey !== personalProfile.profilePhotoStorageKey
+          ) {
+            URL.revokeObjectURL(profilePhotoPreviewUrl);
+            return current;
+          }
+
+          if (loadedProfilePhotoUrlRef.current) {
+            URL.revokeObjectURL(loadedProfilePhotoUrlRef.current);
+          }
+
+          loadedProfilePhotoUrlRef.current = profilePhotoPreviewUrl;
+          return {
+            ...current,
+            profilePhotoPreviewUrl,
+          };
+        });
+      })
+      .catch(() => {
+        // If the saved photo blob is unavailable, keep the initial avatar visible.
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [
+    personalProfile.profilePhotoFileName,
+    personalProfile.profilePhotoPreviewUrl,
+    personalProfile.profilePhotoStorageKey,
+  ]);
+
+  useEffect(
+    () => () => {
+      if (loadedProfilePhotoUrlRef.current) {
+        URL.revokeObjectURL(loadedProfilePhotoUrlRef.current);
+      }
+    },
+    [],
+  );
 
   if (!user) {
     return null;
