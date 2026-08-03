@@ -63,6 +63,7 @@ export function PasswordField({
   autoComplete,
   required = false,
   name,
+  fieldName,
   value,
   disabled = false,
   onChange,
@@ -74,6 +75,7 @@ export function PasswordField({
       <input
         type={isVisible ? "text" : "password"}
         name={name}
+        data-field={fieldName}
         value={value}
         placeholder={placeholder}
         autoComplete={autoComplete}

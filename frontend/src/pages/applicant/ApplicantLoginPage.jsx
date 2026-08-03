@@ -11,8 +11,9 @@ function LoginForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (event) => {
-    const { name, value } = event.currentTarget;
-    setFormData((current) => ({ ...current, [name]: value }));
+    const { name, value, dataset } = event.currentTarget;
+    const fieldName = dataset.field || name;
+    setFormData((current) => ({ ...current, [fieldName]: value }));
   };
 
   const handleSubmit = async (event) => {
@@ -38,14 +39,19 @@ function LoginForm() {
       <h1 id="login-title">Log Masuk</h1>
       <p>Masuk menggunakan emel berdaftar untuk menyemak permohonan dan makluman kerjaya DBKU.</p>
 
-      <form className="split-form" onSubmit={handleSubmit}>
+      <form className="split-form" autoComplete="off" onSubmit={handleSubmit}>
         <AuthField icon="mail" label="Emel">
           <input
-            type="email"
-            name="email"
+            type="text"
+            inputMode="email"
+            name="applicantLoginContact"
+            data-field="email"
             value={formData.email}
             placeholder="cth. example@example.com"
-            autoComplete="email"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck="false"
             disabled={isSubmitting}
             onChange={handleChange}
             required
@@ -54,10 +60,11 @@ function LoginForm() {
 
         <PasswordField
           label="Kata Laluan"
-          name="password"
+          name="applicantLoginSecret"
+          fieldName="password"
           value={formData.password}
           placeholder="Masukkan kata laluan"
-          autoComplete="current-password"
+          autoComplete="off"
           disabled={isSubmitting}
           onChange={handleChange}
           required

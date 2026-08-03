@@ -16,10 +16,11 @@ function RegisterForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (event) => {
-    const { name, value } = event.currentTarget;
+    const { name, value, dataset } = event.currentTarget;
+    const fieldName = dataset.field || name;
     setFormData((current) => ({
       ...current,
-      [name]: name === "fullName" ? value.toUpperCase() : value,
+      [fieldName]: fieldName === "fullName" ? value.toUpperCase() : value,
     }));
   };
 
@@ -51,14 +52,17 @@ function RegisterForm() {
       <h1 id="register-title">Daftar Akaun</h1>
       <p>Cipta akaun menggunakan emel aktif supaya notifikasi permohonan mudah diterima.</p>
 
-      <form className="split-form register-split-form" onSubmit={handleSubmit}>
+      <form className="split-form register-split-form" autoComplete="off" onSubmit={handleSubmit}>
         <AuthField icon="person" label="Nama Penuh" required>
           <input
             type="text"
-            name="fullName"
+            name="applicantRegisterFullName"
+            data-field="fullName"
             value={formData.fullName}
             placeholder="Nama seperti dalam MyKad"
-            autoComplete="name"
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck="false"
             disabled={isSubmitting}
             onChange={handleChange}
             required
@@ -67,11 +71,16 @@ function RegisterForm() {
 
         <AuthField icon="mail" label="Emel" required>
           <input
-            type="email"
-            name="email"
+            type="text"
+            inputMode="email"
+            name="applicantRegisterContact"
+            data-field="email"
             value={formData.email}
             placeholder="cth. example@example.com"
-            autoComplete="email"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck="false"
             disabled={isSubmitting}
             onChange={handleChange}
             required
@@ -80,10 +89,11 @@ function RegisterForm() {
 
         <PasswordField
           label="Kata Laluan"
-          name="password"
+          name="applicantRegisterSecret"
+          fieldName="password"
           value={formData.password}
           placeholder="masukkan kata laluan anda"
-          autoComplete="new-password"
+          autoComplete="off"
           disabled={isSubmitting}
           onChange={handleChange}
           required
@@ -92,10 +102,11 @@ function RegisterForm() {
         <PasswordField
           icon="shield"
           label="Sahkan Kata Laluan"
-          name="password2"
+          name="applicantRegisterSecretConfirm"
+          fieldName="password2"
           value={formData.password2}
           placeholder="masukkan semula kata laluan anda"
-          autoComplete="new-password"
+          autoComplete="off"
           disabled={isSubmitting}
           onChange={handleChange}
           required
