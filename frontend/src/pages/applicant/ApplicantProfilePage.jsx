@@ -182,7 +182,6 @@ export default function ApplicantProfilePage() {
                 <div>
                   <h3>{displayName}</h3>
                   <p>{email}</p>
-                  <span className="profile-status-pill">Akaun pemohon aktif</span>
                 </div>
               </div>
             </ProfileCard>

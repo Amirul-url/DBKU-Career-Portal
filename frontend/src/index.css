@@ -3973,17 +3973,6 @@ body:has(.applicant-profile-page) {
   font-weight: 700;
 }
 
-.profile-status-pill {
-  display: inline-flex;
-  margin-top: 12px;
-  border-radius: 999px;
-  background: #d1fae5;
-  color: #006c49;
-  padding: 7px 12px;
-  font-size: 12px;
-  font-weight: 900;
-}
-
 .profile-empty-row {
   display: flex;
   align-items: center;
