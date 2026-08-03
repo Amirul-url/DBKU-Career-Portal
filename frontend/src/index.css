@@ -3707,7 +3707,6 @@ body:has(.applicant-profile-page) {
 }
 
 .profile-account-dropdown strong,
-.profile-account-dropdown small,
 .profile-account-dropdown em {
   display: block;
   overflow: hidden;
@@ -3720,13 +3719,6 @@ body:has(.applicant-profile-page) {
   color: #111827;
   font-size: 13px;
   font-weight: 900;
-}
-
-.profile-account-dropdown small {
-  color: #006c49;
-  font-size: 11px;
-  font-weight: 900;
-  text-transform: uppercase;
 }
 
 .profile-account-dropdown em {
@@ -3745,18 +3737,19 @@ body:has(.applicant-profile-page) {
   align-items: center;
   justify-content: flex-start;
   gap: 8px;
-  border: 0;
+  border: 1px solid #fecaca;
   border-radius: 7px;
-  background: transparent;
-  color: #111827;
+  background: #fef2f2;
+  color: #b91c1c;
   padding: 0 10px;
   font-size: 13px;
   font-weight: 900;
 }
 
 .profile-logout-button:hover {
-  background: #f8fafc;
-  color: #006c49;
+  border-color: #fca5a5;
+  background: #fee2e2;
+  color: #991b1b;
 }
 
 .profile-shell {

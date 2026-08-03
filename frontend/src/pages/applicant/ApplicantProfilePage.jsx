@@ -61,7 +61,6 @@ function ProfileContentHeader({ user }) {
             <div className="profile-account-card-head">
               <span className="profile-user-chip">{user?.full_name?.charAt(0) || user?.email?.charAt(0) || "P"}</span>
               <span>
-                <small>Akaun Pemohon</small>
                 <strong>{user?.full_name || user?.first_name || "Pemohon DBKU"}</strong>
                 <em>{user?.email || "Akaun pemohon"}</em>
               </span>
