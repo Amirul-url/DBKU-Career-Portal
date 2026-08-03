@@ -11,7 +11,7 @@ export function ApplicantAuthNav() {
           <span className="brand-mark">
             <img src="/logo-dbku.png" alt="Logo DBKU" />
           </span>
-          <span translate="no">DBKU Career Portal</span>
+          <span>Portal Kerjaya DBKU</span>
         </Link>
 
         <div className="nav-links">
@@ -102,7 +102,7 @@ function PromoPanel({ mode }) {
 
   return (
     <aside className="split-promo-panel" aria-label="Pertukaran akaun">
-      <span className="split-promo-pill">{isLogin ? "DBKU Career Portal" : "Selamat Kembali"}</span>
+      <span className="split-promo-pill">{isLogin ? "Portal Kerjaya DBKU" : "Selamat Kembali"}</span>
       <h2>{isLogin ? "Baru di portal ini?" : "Sudah mempunyai akaun?"}</h2>
       <p>
         {isLogin

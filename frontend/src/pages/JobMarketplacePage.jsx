@@ -4,134 +4,134 @@ import { Link } from "react-router-dom";
 const opportunities = [
   {
     id: "urban-planner",
-    title: "Senior Urban Planner",
-    department: "Department of Planning",
-    category: "Job",
-    type: "Full-time",
+    title: "Perancang Bandar Kanan",
+    department: "Jabatan Perancangan",
+    category: "Jawatan",
+    type: "Sepenuh Masa",
     salary: "RM 4,500 - 6,200",
-    location: "DBKU Headquarters",
-    closing: "18 Aug 2026",
-    posted: "Posted 2 days ago",
+    location: "Ibu Pejabat DBKU",
+    closing: "18 Ogos 2026",
+    posted: "Disiarkan 2 hari lalu",
     icon: "architecture",
     image: "/senior urban planner.jpg",
     summary:
-      "Lead strategic urban development projects that support a sustainable and livable Kuching North.",
+      "Menerajui projek pembangunan bandar strategik yang menyokong Kuching Utara yang mampan dan selesa didiami.",
     responsibilities: [
-      "Prepare urban planning briefs, reports, and technical recommendations.",
-      "Coordinate development reviews with internal departments and agencies.",
-      "Support city improvement initiatives with planning data and field input.",
+      "Menyediakan ringkasan perancangan bandar, laporan dan cadangan teknikal.",
+      "Menyelaras semakan pembangunan bersama jabatan dalaman dan agensi berkaitan.",
+      "Menyokong inisiatif penambahbaikan bandar melalui data perancangan dan input lapangan.",
     ],
     requirements: [
-      "Degree in Urban Planning, Architecture, Geography, or related field.",
-      "Minimum 5 years of relevant planning or municipal development experience.",
-      "Strong report writing and stakeholder coordination skills.",
+      "Ijazah dalam Perancangan Bandar, Seni Bina, Geografi atau bidang berkaitan.",
+      "Minimum 5 tahun pengalaman berkaitan perancangan atau pembangunan perbandaran.",
+      "Kemahiran penulisan laporan dan penyelarasan pihak berkepentingan yang baik.",
     ],
   },
   {
     id: "it-support-intern",
-    title: "IT Support Intern",
-    department: "Digital Services",
-    category: "Internship",
-    type: "Internship",
-    salary: "Allowance provided",
-    location: "ICT Unit",
-    closing: "25 Aug 2026",
-    posted: "Posted 4 days ago",
+    title: "Pelatih Sokongan IT",
+    department: "Perkhidmatan Digital",
+    category: "Latihan Industri",
+    type: "Latihan Industri",
+    salary: "Elaun disediakan",
+    location: "Unit ICT",
+    closing: "25 Ogos 2026",
+    posted: "Disiarkan 4 hari lalu",
     icon: "computer",
     summary:
-      "Support municipal software, service desk operations, and digital workflow documentation.",
+      "Membantu perisian perbandaran, operasi meja bantuan dan dokumentasi aliran kerja digital.",
     responsibilities: [
-      "Assist first-level support for internal users and devices.",
-      "Document common service desk issues and basic troubleshooting steps.",
-      "Support digital records, inventory updates, and system testing.",
+      "Membantu sokongan tahap pertama untuk pengguna dalaman dan peranti.",
+      "Mendokumentasikan isu meja bantuan lazim dan langkah penyelesaian asas.",
+      "Menyokong rekod digital, kemas kini inventori dan ujian sistem.",
     ],
     requirements: [
-      "Diploma or degree student in IT, Computer Science, or related field.",
-      "Available for a minimum internship period of 3 months.",
-      "Comfortable with basic software, hardware, and user support tasks.",
+      "Pelajar diploma atau ijazah dalam IT, Sains Komputer atau bidang berkaitan.",
+      "Bersedia menjalani latihan industri minimum 3 bulan.",
+      "Selesa dengan tugasan asas perisian, perkakasan dan sokongan pengguna.",
     ],
   },
   {
     id: "environmental-officer",
-    title: "Environmental Officer",
-    department: "Urban Environment",
-    category: "Job",
-    type: "Permanent",
+    title: "Pegawai Alam Sekitar",
+    department: "Alam Sekitar Bandar",
+    category: "Jawatan",
+    type: "Tetap",
     salary: "RM 3,200 - 4,800",
-    location: "Operations Office",
-    closing: "30 Aug 2026",
-    posted: "Posted 1 week ago",
+    location: "Pejabat Operasi",
+    closing: "30 Ogos 2026",
+    posted: "Disiarkan 1 minggu lalu",
     icon: "eco",
     summary:
-      "Coordinate waste management protocols and green space initiatives across DBKU areas.",
+      "Menyelaras protokol pengurusan sisa dan inisiatif kawasan hijau di kawasan DBKU.",
     responsibilities: [
-      "Monitor environmental service activities within assigned city zones.",
-      "Prepare field observations and follow-up action reports.",
-      "Coordinate public cleanliness and green initiative activities.",
+      "Memantau aktiviti perkhidmatan alam sekitar dalam zon bandar yang ditetapkan.",
+      "Menyediakan pemerhatian lapangan dan laporan tindakan susulan.",
+      "Menyelaras aktiviti kebersihan awam dan inisiatif hijau.",
     ],
     requirements: [
-      "Diploma or degree in Environmental Science or related discipline.",
-      "Experience in municipal services is an advantage.",
-      "Able to conduct field checks and communicate with community stakeholders.",
+      "Diploma atau ijazah dalam Sains Alam Sekitar atau disiplin berkaitan.",
+      "Pengalaman dalam perkhidmatan perbandaran adalah satu kelebihan.",
+      "Boleh menjalankan pemeriksaan lapangan dan berkomunikasi dengan komuniti.",
     ],
   },
   {
     id: "accounting-clerk",
-    title: "Accounting Clerk",
-    department: "Treasury",
-    category: "Job",
-    type: "Contract",
+    title: "Pembantu Perakaunan",
+    department: "Perbendaharaan",
+    category: "Jawatan",
+    type: "Kontrak",
     salary: "RM 2,000 - 2,800",
-    location: "Treasury Department",
-    closing: "12 Sep 2026",
-    posted: "Posted 1 week ago",
+    location: "Jabatan Perbendaharaan",
+    closing: "12 September 2026",
+    posted: "Disiarkan 1 minggu lalu",
     icon: "account_balance_wallet",
     summary:
-      "Assist municipal revenue collection, payment records, and finance reporting tasks.",
+      "Membantu kutipan hasil perbandaran, rekod bayaran dan tugasan laporan kewangan.",
     responsibilities: [
-      "Update payment records and assist daily reconciliation work.",
-      "Prepare supporting schedules for finance reports.",
-      "Handle counter-related documentation and filing tasks.",
+      "Mengemas kini rekod bayaran dan membantu kerja penyelarasan harian.",
+      "Menyediakan jadual sokongan untuk laporan kewangan.",
+      "Mengurus dokumentasi kaunter dan tugasan pemfailan.",
     ],
     requirements: [
-      "SPM/STPM, diploma, or equivalent qualification in accounting or finance.",
-      "Careful with numbers, records, and routine administrative work.",
-      "Basic spreadsheet and document handling skills.",
+      "SPM/STPM, diploma atau kelayakan setara dalam perakaunan atau kewangan.",
+      "Teliti dengan nombor, rekod dan kerja pentadbiran rutin.",
+      "Kemahiran asas hamparan kerja dan pengendalian dokumen.",
     ],
   },
   {
     id: "landscape-intern",
-    title: "Landscape Architecture Intern",
-    department: "Landscape Unit",
-    category: "Internship",
-    type: "Internship",
-    salary: "Allowance provided",
-    location: "Landscape Unit",
-    closing: "5 Sep 2026",
-    posted: "Posted 10 days ago",
+    title: "Pelatih Seni Bina Landskap",
+    department: "Unit Landskap",
+    category: "Latihan Industri",
+    type: "Latihan Industri",
+    salary: "Elaun disediakan",
+    location: "Unit Landskap",
+    closing: "5 September 2026",
+    posted: "Disiarkan 10 hari lalu",
     icon: "park",
     summary:
-      "Assist with park improvement concepts, site observations, and landscape documentation.",
+      "Membantu konsep penambahbaikan taman, pemerhatian tapak dan dokumentasi landskap.",
     responsibilities: [
-      "Support site measurement, photo documentation, and concept preparation.",
-      "Assist officers with planting plans and public space improvement notes.",
-      "Prepare simple presentation boards and progress records.",
+      "Menyokong ukuran tapak, dokumentasi foto dan penyediaan konsep.",
+      "Membantu pegawai dengan pelan penanaman dan nota penambahbaikan ruang awam.",
+      "Menyediakan papan pembentangan ringkas dan rekod kemajuan.",
     ],
     requirements: [
-      "Student in Landscape Architecture, Design, Horticulture, or related field.",
-      "Able to work both on-site and in office documentation settings.",
-      "Basic design software or drawing skills are an advantage.",
+      "Pelajar Seni Bina Landskap, Reka Bentuk, Hortikultur atau bidang berkaitan.",
+      "Boleh bekerja di tapak dan mengurus dokumentasi pejabat.",
+      "Kemahiran asas perisian reka bentuk atau lukisan adalah satu kelebihan.",
     ],
   },
 ];
 
 const filters = [
-  ["category", "Opportunity Type", ["All", "Job", "Internship"]],
-  ["type", "Work Type", ["All", "Full-time", "Permanent", "Contract", "Internship"]],
+  ["category", "Jenis Peluang", ["Semua", "Jawatan", "Latihan Industri"]],
+  ["type", "Jenis Kerja", ["Semua", "Sepenuh Masa", "Tetap", "Kontrak", "Latihan Industri"]],
   [
     "department",
-    "Department",
-    ["All", "Department of Planning", "Digital Services", "Urban Environment", "Treasury", "Landscape Unit"],
+    "Jabatan",
+    ["Semua", "Jabatan Perancangan", "Perkhidmatan Digital", "Alam Sekitar Bandar", "Perbendaharaan", "Unit Landskap"],
   ],
 ];
 
@@ -175,7 +175,7 @@ function OpportunityCard({ opportunity, selected, onSelect }) {
           </span>
           <span>
             <Icon>event</Icon>
-            Closes {opportunity.closing}
+            Tutup {opportunity.closing}
           </span>
         </span>
       </span>
@@ -194,12 +194,12 @@ export default function LandingPage() {
   return (
     <div className="market-page">
       <header className="top-app-bar">
-        <nav className="nav-inner" aria-label="Main navigation">
+        <nav className="nav-inner" aria-label="Navigasi utama">
           <Link className="brand" to="/">
             <span className="brand-mark">
               <img src="/logo-dbku.png" alt="Logo DBKU" />
             </span>
-            <span translate="no">DBKU Career Portal</span>
+            <span>Portal Kerjaya DBKU</span>
           </Link>
 
           <div className="nav-links">
@@ -218,49 +218,49 @@ export default function LandingPage() {
       <main className="market-shell">
         <section className="market-intro" aria-labelledby="market-title">
           <div>
-            <span className="market-eyebrow">DBKU Job and Internship Portal</span>
-            <h1 id="market-title">Cari peluang kerjaya dan internship DBKU.</h1>
+            <span className="market-eyebrow">Portal Kerjaya dan Latihan Industri DBKU</span>
+            <h1 id="market-title">Cari peluang kerjaya dan latihan industri DBKU.</h1>
             <p>
               Terokai kekosongan semasa, semak syarat jawatan, dan mulakan permohonan
-              dalam satu portal rasmi Kuching North City Commission.
+              dalam satu portal rasmi Dewan Bandaraya Kuching Utara.
             </p>
           </div>
-          <div className="market-intro-stats" aria-label="Portal summary">
+          <div className="market-intro-stats" aria-label="Ringkasan portal">
             <span>
               <strong>5</strong>
-              Openings
+              Kekosongan
             </span>
             <span>
               <strong>23</strong>
-              Departments
+              Jabatan
             </span>
             <span>
               <strong>2</strong>
-              Internships
+              Latihan Industri
             </span>
           </div>
         </section>
 
-        <section className="market-search-panel" aria-label="Search opportunities">
+        <section className="market-search-panel" aria-label="Cari peluang">
           <label>
             <Icon>search</Icon>
-            <input type="search" placeholder="Search by job title, keyword, or department" />
+            <input type="search" placeholder="Cari mengikut jawatan, kata kunci atau jabatan" />
           </label>
           <label>
             <Icon>location_on</Icon>
-            <input type="search" placeholder="Location or work unit" />
+            <input type="search" placeholder="Lokasi atau unit kerja" />
           </label>
           <button type="button">
             <Icon>manage_search</Icon>
-            Search
+            Cari
           </button>
         </section>
 
         <section className="market-layout" id="jobs">
-          <aside className="market-filters" aria-label="Filters">
+          <aside className="market-filters" aria-label="Tapisan">
             <div className="market-panel-title">
               <Icon>tune</Icon>
-              <strong>Filters</strong>
+              <strong>Tapisan</strong>
             </div>
 
             {filters.map(([key, title, values]) => (
@@ -268,7 +268,7 @@ export default function LandingPage() {
                 <h2>{title}</h2>
                 {values.map((value) => (
                   <label key={value}>
-                    <input type="checkbox" defaultChecked={value === "All"} />
+                    <input type="checkbox" defaultChecked={value === "Semua"} />
                     <span>{value}</span>
                   </label>
                 ))}
@@ -279,13 +279,13 @@ export default function LandingPage() {
           <section className="market-results" aria-labelledby="results-title">
             <div className="market-results-head">
               <div>
-                <h2 id="results-title">Recommended Opportunities</h2>
-                <p>Showing {opportunities.length} openings across DBKU departments</p>
+                <h2 id="results-title">Peluang Disyorkan</h2>
+                <p>Memaparkan {opportunities.length} kekosongan daripada jabatan DBKU</p>
               </div>
-              <select aria-label="Sort results" defaultValue="recent">
-                <option value="recent">Most recent</option>
-                <option value="closing">Closing soon</option>
-                <option value="salary">Salary range</option>
+              <select aria-label="Susun keputusan" defaultValue="recent">
+                <option value="recent">Terkini</option>
+                <option value="closing">Tarikh tutup terdekat</option>
+                <option value="salary">Julat gaji</option>
               </select>
             </div>
 
@@ -301,11 +301,11 @@ export default function LandingPage() {
             </div>
           </section>
 
-          <aside className="market-detail" aria-label="Selected opportunity details">
+          <aside className="market-detail" aria-label="Butiran peluang dipilih">
             {selectedOpportunity.image ? (
               <img
                 src={selectedOpportunity.image}
-                alt="Urban planning work table"
+                alt="Meja kerja perancangan bandar"
                 className="market-detail-image"
               />
             ) : (
@@ -334,12 +334,12 @@ export default function LandingPage() {
                 </span>
                 <span>
                   <Icon>event</Icon>
-                  Closing date: {selectedOpportunity.closing}
+                  Tarikh tutup: {selectedOpportunity.closing}
                 </span>
               </div>
 
               <div className="market-detail-section">
-                <h3>Responsibilities</h3>
+                <h3>Tanggungjawab</h3>
                 <ul>
                   {selectedOpportunity.responsibilities.map((item) => (
                     <li key={item}>{item}</li>
@@ -348,7 +348,7 @@ export default function LandingPage() {
               </div>
 
               <div className="market-detail-section">
-                <h3>Requirements</h3>
+                <h3>Syarat Kelayakan</h3>
                 <ul>
                   {selectedOpportunity.requirements.map((item) => (
                     <li key={item}>{item}</li>
@@ -357,10 +357,10 @@ export default function LandingPage() {
               </div>
 
               <div className="market-detail-actions">
-                <Link to="/login">Apply Now</Link>
+                <Link to="/login">Mohon Sekarang</Link>
                 <button type="button">
                   <Icon>bookmark</Icon>
-                  Save
+                  Simpan
                 </button>
               </div>
             </div>

@@ -3964,7 +3964,7 @@ body:has(.applicant-profile-page) {
 }
 
 .applicant-profile-page {
-  --profile-sidebar-open: 320px;
+  --profile-sidebar-open: 300px;
   --profile-sidebar-closed: 64px;
   min-width: 1180px;
   background: #f8fafc;
@@ -4034,7 +4034,7 @@ body:has(.applicant-profile-page) {
   display: block;
   overflow: hidden;
   color: #111827;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 900;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -4092,11 +4092,11 @@ body:has(.applicant-profile-page) {
 
 .profile-main-nav a {
   flex: 0 0 auto;
-  min-height: 44px;
+  min-height: 42px;
   border-radius: 8px;
   padding: 10px 12px;
   color: #475569;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 850;
 }
 
@@ -4176,13 +4176,13 @@ body:has(.applicant-profile-page) {
   top: 0;
   z-index: 30;
   display: flex;
-  min-height: 76px;
+  min-height: 72px;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
   border-bottom: 1px solid #e2e8f0;
   background: rgba(255, 255, 255, 0.96);
-  padding: 0 40px;
+  padding: 0 36px;
   backdrop-filter: blur(14px);
 }
 
@@ -4197,15 +4197,15 @@ body:has(.applicant-profile-page) {
   display: block;
   margin-top: 3px;
   color: #111827;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 900;
 }
 
 .profile-shell {
   width: auto;
-  max-width: 1280px;
+  max-width: 1120px;
   margin: 0;
-  padding: 42px 48px 72px;
+  padding: 36px 44px 72px;
 }
 
 .profile-layout {
@@ -4214,7 +4214,77 @@ body:has(.applicant-profile-page) {
 }
 
 .profile-content {
-  max-width: 900px;
+  max-width: 860px;
+}
+
+.profile-heading {
+  max-width: 720px;
+}
+
+.profile-heading span {
+  font-size: 12px;
+  letter-spacing: 0;
+}
+
+.profile-heading h1 {
+  margin-top: 8px;
+  font-size: 36px;
+  line-height: 1.15;
+}
+
+.profile-heading p {
+  max-width: 740px;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.profile-content {
+  gap: 18px;
+}
+
+.profile-content-card {
+  border-color: #d8e4df;
+  box-shadow: 0 12px 28px rgba(17, 24, 39, 0.04);
+  padding: 22px;
+}
+
+.profile-content-card > header {
+  padding-bottom: 16px;
+}
+
+.profile-content-card h2 {
+  font-size: 20px;
+  line-height: 1.25;
+}
+
+.profile-edit-button {
+  min-height: 36px;
+  font-size: 14px;
+}
+
+.profile-avatar {
+  width: 76px;
+  height: 76px;
+  font-size: 30px;
+}
+
+.profile-personal-row {
+  gap: 16px;
+  padding-top: 18px;
+}
+
+.profile-personal-row h3 {
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.profile-personal-row p,
+.profile-empty-row p {
+  font-size: 14px;
+}
+
+.profile-empty-row {
+  padding-top: 16px;
 }
 
 @media (max-width: 980px) {

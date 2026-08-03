@@ -32,9 +32,9 @@ const latestRoles = [
 ];
 
 const steps = [
-  ["01", "Cari jawatan", "Gunakan carian dan filter untuk lihat peluang yang sesuai."],
+  ["01", "Cari jawatan", "Gunakan carian dan tapisan untuk lihat peluang yang sesuai."],
   ["02", "Daftar akaun", "Lengkapkan profil pemohon menggunakan maklumat yang tepat."],
-  ["03", "Hantar permohonan", "Semak syarat jawatan dan teruskan permohonan secara online."],
+  ["03", "Hantar permohonan", "Semak syarat jawatan dan teruskan permohonan secara dalam talian."],
   ["04", "Pantau status", "Log masuk untuk melihat kemas kini permohonan daripada DBKU."],
 ];
 
@@ -59,7 +59,7 @@ export default function LandingPage() {
             <span className="brand-mark">
               <img src="/logo-dbku.png" alt="Logo DBKU" />
             </span>
-            <span translate="no">DBKU Career Portal</span>
+            <span>Portal Kerjaya DBKU</span>
           </Link>
 
           <div className="nav-links">
@@ -179,8 +179,8 @@ export default function LandingPage() {
 
       <footer className="corporate-footer">
         <div>
-          <strong translate="no">DBKU Career Portal</strong>
-          <span>© 2026 Dewan Bandaraya Kuching Utara (DBKU). Semua hak cipta terpelihara.</span>
+          <strong>Portal Kerjaya DBKU</strong>
+          <span>Hak cipta 2026 Dewan Bandaraya Kuching Utara (DBKU). Semua hak cipta terpelihara.</span>
         </div>
         <nav aria-label="Pautan footer">
           <a href="#dasar-privasi">Dasar Privasi</a>

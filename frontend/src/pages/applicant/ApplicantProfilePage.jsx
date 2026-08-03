@@ -4,11 +4,11 @@ import { clearAuthSession, getStoredUser } from "../../lib/authApi";
 import { Icon } from "./ApplicantAuthShared";
 
 const sidebarNavItems = [
-  { icon: "stars", label: "Match Jobs", to: "/jobs" },
-  { icon: "search", label: "Search Jobs", to: "/jobs" },
-  { icon: "work_history", label: "My Jobs", href: "#applications" },
-  { icon: "person", label: "Profile", to: "/profile" },
-  { icon: "more_horiz", label: "More", href: "#more" },
+  { icon: "stars", label: "Padanan Kerja", to: "/jobs" },
+  { icon: "search", label: "Cari Kerja", to: "/jobs" },
+  { icon: "work_history", label: "Kerja Saya", href: "#applications" },
+  { icon: "person", label: "Profil", to: "/profile" },
+  { icon: "more_horiz", label: "Lagi", href: "#more" },
 ];
 
 const emptyProfileCards = [
@@ -78,8 +78,8 @@ function ProfileSidebar({ isOpen, onToggle, user }) {
               <img src="/logo-dbku.png" alt="Logo DBKU" />
             </span>
             <span>
-              <strong translate="no">DBKU Career Portal</strong>
-              <small>Applicant Portal</small>
+              <strong>Portal Kerjaya DBKU</strong>
+              <small>Portal Pemohon</small>
             </span>
           </Link>
         ) : null}
@@ -146,7 +146,7 @@ function ProfileCard({ children, id, title }) {
         <h2>{title}</h2>
         <button type="button" className="profile-edit-button">
           <Icon>edit</Icon>
-          Edit
+          Kemaskini
         </button>
       </header>
       {children}
