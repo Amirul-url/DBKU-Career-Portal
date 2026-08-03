@@ -81,6 +81,59 @@ const toSelectOptions = (items) => items.map((item) => ({ value: item, label: st
 
 const stateOptions = toSelectOptions(getStates());
 
+function getPersonalProfileStorageKey(user) {
+  return `dbku-applicant-personal-profile:${user?.email || user?.full_name || "default"}`;
+}
+
+function getSavedPersonalProfile(user) {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const savedProfile = window.localStorage.getItem(getPersonalProfileStorageKey(user));
+    return savedProfile ? JSON.parse(savedProfile) : null;
+  } catch {
+    return null;
+  }
+}
+
+function getPersonalProfileDefaults(displayName, email) {
+  return {
+    details: defaultPersonalDetails,
+    displayName,
+    email,
+    profilePhoto: "",
+    references: [],
+  };
+}
+
+function normalizePersonalProfile(profile, displayName, email) {
+  const defaults = getPersonalProfileDefaults(displayName, email);
+
+  return {
+    ...defaults,
+    ...profile,
+    details: {
+      ...defaults.details,
+      ...(profile?.details || {}),
+    },
+    references: Array.isArray(profile?.references) ? profile.references : defaults.references,
+  };
+}
+
+function savePersonalProfile(user, profile) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(getPersonalProfileStorageKey(user), JSON.stringify(profile));
+  } catch {
+    // Keep the in-memory state even if browser storage is full or unavailable.
+  }
+}
+
 function getBirthDateFromIdentificationNumber(identificationNumber) {
   const digits = identificationNumber.replace(/\D/g, "");
 
@@ -342,18 +395,18 @@ function ProfileCard({ children, id, isEditing = false, onEdit, title }) {
   );
 }
 
-function PersonalInformationForm({ details, displayName, email, onClose }) {
+function PersonalInformationForm({ profileData, onSave }) {
   const photoInputRef = useRef(null);
   const resumeInputRef = useRef(null);
   const videoResumeInputRef = useRef(null);
-  const [formValues, setFormValues] = useState(details);
-  const [formDisplayName, setFormDisplayName] = useState(displayName);
-  const [formEmail, setFormEmail] = useState(email);
-  const [profilePhoto, setProfilePhoto] = useState("");
+  const [formValues, setFormValues] = useState(profileData.details);
+  const [formDisplayName, setFormDisplayName] = useState(profileData.displayName);
+  const [formEmail, setFormEmail] = useState(profileData.email);
+  const [profilePhoto, setProfilePhoto] = useState(profileData.profilePhoto);
   const [photoError, setPhotoError] = useState("");
   const [resumeError, setResumeError] = useState("");
   const [videoResumeError, setVideoResumeError] = useState("");
-  const [references, setReferences] = useState([]);
+  const [references, setReferences] = useState(profileData.references);
 
   const updateField = (field) => (event) => {
     setFormValues((current) => ({
@@ -490,6 +543,16 @@ function PersonalInformationForm({ details, displayName, email, onClose }) {
     setReferences((current) => current.filter((reference) => reference.id !== id));
   };
 
+  const handleSave = () => {
+    onSave({
+      details: formValues,
+      displayName: formDisplayName,
+      email: formEmail,
+      profilePhoto,
+      references,
+    });
+  };
+
   const cityOptions = formValues.state ? toSelectOptions(getCities(formValues.state)) : [];
   const postcodeOptions =
     formValues.state && formValues.city ? toSelectOptions(getPostcodes(formValues.state, formValues.city)) : [];
@@ -500,7 +563,7 @@ function PersonalInformationForm({ details, displayName, email, onClose }) {
         <ProfileFormRow label="Foto Profil">
           <div className="personal-photo-upload">
             <div className="personal-photo-preview" aria-hidden="true">
-              {profilePhoto ? <img src={profilePhoto} alt="" /> : displayName.charAt(0)}
+              {profilePhoto ? <img src={profilePhoto} alt="" /> : formDisplayName.charAt(0)}
             </div>
             <div>
               <strong>
@@ -809,7 +872,7 @@ function PersonalInformationForm({ details, displayName, email, onClose }) {
         </ProfileFormRow>
 
         <div className="personal-submit-row">
-          <button type="button" className="personal-save-button" onClick={onClose}>
+          <button type="button" className="personal-save-button" onClick={handleSave}>
             <Icon>save</Icon>
             Simpan dan Teruskan
           </button>
@@ -821,11 +884,24 @@ function PersonalInformationForm({ details, displayName, email, onClose }) {
 
 export default function ApplicantProfilePage() {
   const navigate = useNavigate();
+  const user = getStoredUser();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [editingSection, setEditingSection] = useState(null);
-  const user = getStoredUser();
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
   const email = user?.email || "Belum dikemaskini";
+  const [personalProfile, setPersonalProfile] = useState(() => {
+    const savedProfile = getSavedPersonalProfile(user);
+
+    return normalizePersonalProfile(savedProfile, displayName, email);
+  });
+  const profileDisplayName = personalProfile.displayName || displayName;
+  const profileEmail = personalProfile.email || email;
+
+  const handleSavePersonalProfile = (profile) => {
+    setPersonalProfile(profile);
+    savePersonalProfile(user, profile);
+    setEditingSection(null);
+  };
 
   useEffect(() => {
     if (!user) {
@@ -858,19 +934,17 @@ export default function ApplicantProfilePage() {
               >
                 {editingSection === "personal" ? (
                   <PersonalInformationForm
-                    details={defaultPersonalDetails}
-                    displayName={displayName}
-                    email={email}
-                    onClose={() => setEditingSection(null)}
+                    profileData={personalProfile}
+                    onSave={handleSavePersonalProfile}
                   />
                 ) : (
                     <div className="profile-personal-row">
                       <div className="profile-avatar" aria-hidden="true">
-                        {displayName.charAt(0)}
+                        {personalProfile.profilePhoto ? <img src={personalProfile.profilePhoto} alt="" /> : profileDisplayName.charAt(0)}
                       </div>
                       <div>
-                        <h3>{displayName}</h3>
-                        <p>{email}</p>
+                        <h3>{profileDisplayName}</h3>
+                        <p>{profileEmail}</p>
                       </div>
                     </div>
                 )}
