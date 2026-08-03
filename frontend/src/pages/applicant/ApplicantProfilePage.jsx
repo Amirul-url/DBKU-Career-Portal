@@ -1152,13 +1152,13 @@ export default function ApplicantProfilePage() {
         <div className="profile-confirm-overlay" role="presentation">
           <section className="profile-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="profile-close-title">
             <h2 id="profile-close-title">Perubahan belum disimpan</h2>
-            <p>Anda ada membuat kemaskini pada Maklumat Peribadi. Pilih `Save` untuk simpan perubahan atau `Discard` untuk buang perubahan.</p>
+            <p>Anda ada membuat kemaskini pada Maklumat Peribadi. Pilih Simpan untuk menyimpan perubahan atau Buang untuk membuang perubahan.</p>
             <div>
               <button type="button" className="profile-confirm-secondary" onClick={discardPersonalDraft}>
-                Discard
+                Buang
               </button>
               <button type="button" className="profile-confirm-primary" onClick={savePersonalDraftFromDialog}>
-                Save
+                Simpan
               </button>
             </div>
           </section>
