@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { clearAuthSession, getStoredUser } from "../../lib/authApi";
 import { Icon } from "./ApplicantAuthShared";
@@ -34,7 +34,7 @@ const emptyProfileCards = [
   },
 ];
 
-function ProfileTopbar({ user }) {
+function ProfileContentHeader({ user }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -43,16 +43,12 @@ function ProfileTopbar({ user }) {
   };
 
   return (
-    <header className="profile-topbar">
-      <nav className="profile-topbar-inner" aria-label="Navigasi pemohon">
-        <Link className="profile-brand" to="/">
-          <span className="brand-mark">
-            <img src="/logo-dbku.png" alt="Logo DBKU" />
-          </span>
-          <span translate="no">DBKU Career Portal</span>
-        </Link>
-
-        <div className="profile-actions">
+    <header className="profile-content-header">
+      <div>
+        <p>Selamat datang</p>
+        <strong>{user?.full_name || user?.first_name || "Pemohon DBKU"}</strong>
+      </div>
+      <div className="profile-actions">
           <span className="profile-user-chip">{user?.full_name?.charAt(0) || user?.email?.charAt(0) || "P"}</span>
           <button type="button" className="profile-icon-button" aria-label="Notifikasi">
             <Icon>notifications</Icon>
@@ -60,47 +56,85 @@ function ProfileTopbar({ user }) {
           <button type="button" className="profile-logout-button" onClick={handleLogout}>
             Log Keluar
           </button>
-        </div>
-      </nav>
+      </div>
     </header>
   );
 }
 
-function ProfileSidebar({ user }) {
+function ProfileSidebar({ isOpen, onToggle, user }) {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    clearAuthSession();
+    navigate("/login");
+  };
+
   return (
-    <aside className="profile-sidebar" aria-label="Navigasi pemohon">
+    <aside className={`profile-sidebar ${isOpen ? "open" : "collapsed"}`} aria-label="Navigasi pemohon">
       <div className="profile-sidebar-head">
-        <span className="profile-user-chip">{user?.full_name?.charAt(0) || user?.email?.charAt(0) || "P"}</span>
-        <span>
-          <strong>{user?.full_name || user?.first_name || "Pemohon DBKU"}</strong>
-          <small>{user?.email || "Akaun pemohon"}</small>
-        </span>
+        {isOpen ? (
+          <Link className="profile-sidebar-brand" to="/">
+            <span className="brand-mark">
+              <img src="/logo-dbku.png" alt="Logo DBKU" />
+            </span>
+            <span>
+              <strong translate="no">DBKU Career Portal</strong>
+              <small>Applicant Portal</small>
+            </span>
+          </Link>
+        ) : null}
+        <button
+          type="button"
+          className="profile-sidebar-toggle"
+          aria-label={isOpen ? "Kecilkan sidebar" : "Buka sidebar"}
+          onClick={onToggle}
+          title={isOpen ? "Kecilkan sidebar" : "Buka sidebar"}
+        >
+          <Icon>menu</Icon>
+        </button>
       </div>
 
       <nav className="profile-main-nav">
         {sidebarNavItems.map((item) => (
           item.to ? (
-            <NavLink to={item.to} className={({ isActive }) => (isActive ? "active" : undefined)} key={item.label}>
+            <NavLink
+              to={item.to}
+              className={({ isActive }) => (isActive ? "active" : undefined)}
+              key={item.label}
+              title={!isOpen ? item.label : undefined}
+            >
               <span className="profile-section-icon">
                 <Icon>{item.icon}</Icon>
               </span>
-              <strong>{item.label}</strong>
+              {isOpen ? <strong>{item.label}</strong> : <span className="sr-only">{item.label}</span>}
             </NavLink>
           ) : (
-            <a href={item.href} key={item.label}>
+            <a href={item.href} key={item.label} title={!isOpen ? item.label : undefined}>
               <span className="profile-section-icon">
                 <Icon>{item.icon}</Icon>
               </span>
-              <strong>{item.label}</strong>
+              {isOpen ? <strong>{item.label}</strong> : <span className="sr-only">{item.label}</span>}
             </a>
           )
         ))}
       </nav>
 
-      <button type="button" className="profile-outline-button">
-        <Icon>download</Icon>
-        Muat Turun Resume
-      </button>
+      <div className="profile-sidebar-footer">
+        {isOpen ? (
+          <div className="profile-sidebar-user">
+            <span className="profile-user-chip">{user?.full_name?.charAt(0) || user?.email?.charAt(0) || "P"}</span>
+            <span>
+              <strong>{user?.full_name || user?.first_name || "Pemohon DBKU"}</strong>
+              <small>{user?.email || "Akaun pemohon"}</small>
+            </span>
+          </div>
+        ) : null}
+
+        <button type="button" className="profile-sidebar-logout" onClick={handleLogout} title="Log Keluar">
+          <Icon>logout</Icon>
+          {isOpen ? "Log Keluar" : <span className="sr-only">Log Keluar</span>}
+        </button>
+      </div>
     </aside>
   );
 }
@@ -122,6 +156,7 @@ function ProfileCard({ children, id, title }) {
 
 export default function ApplicantProfilePage() {
   const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const user = getStoredUser();
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
   const email = user?.email || "Belum dikemaskini";
@@ -137,9 +172,11 @@ export default function ApplicantProfilePage() {
   }
 
   return (
-    <div className="applicant-profile-page">
-      <ProfileTopbar user={user} />
-      <main className="profile-shell">
+    <div className={`applicant-profile-page ${sidebarOpen ? "sidebar-open" : "sidebar-collapsed"}`}>
+      <ProfileSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen((current) => !current)} user={user} />
+      <div className="profile-main-area">
+        <ProfileContentHeader user={user} />
+        <main className="profile-shell">
         <div className="profile-heading">
           <span>Profil Pemohon</span>
           <h1>Profil Saya</h1>
@@ -147,8 +184,6 @@ export default function ApplicantProfilePage() {
         </div>
 
         <div className="profile-layout">
-          <ProfileSidebar user={user} />
-
           <div className="profile-content">
             <ProfileCard id="profile-section-1" title="Maklumat Peribadi">
               <div className="profile-personal-row">
@@ -176,6 +211,7 @@ export default function ApplicantProfilePage() {
           </div>
         </div>
       </main>
+      </div>
     </div>
   );
 }
