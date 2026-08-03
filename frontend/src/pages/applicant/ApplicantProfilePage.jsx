@@ -103,21 +103,27 @@ function getPersonalProfileDefaults(displayName, email) {
     details: defaultPersonalDetails,
     displayName,
     email,
-    profilePhoto: "",
+    profilePhotoFileName: "",
+    profilePhotoPreviewUrl: "",
     references: [],
   };
 }
 
 function normalizePersonalProfile(profile, displayName, email) {
   const defaults = getPersonalProfileDefaults(displayName, email);
+  const storedProfile = { ...(profile || {}) };
+  delete storedProfile.profilePhoto;
+  delete storedProfile.profilePhotoPreviewUrl;
 
   return {
     ...defaults,
-    ...profile,
+    ...storedProfile,
     details: {
       ...defaults.details,
       ...(profile?.details || {}),
     },
+    profilePhotoFileName: profile?.profilePhotoFileName || "",
+    profilePhotoPreviewUrl: profile?.profilePhotoPreviewUrl || "",
     references: Array.isArray(profile?.references) ? profile.references : defaults.references,
   };
 }
@@ -128,7 +134,10 @@ function savePersonalProfile(user, profile) {
   }
 
   try {
-    window.localStorage.setItem(getPersonalProfileStorageKey(user), JSON.stringify(profile));
+    const serializableProfile = { ...profile };
+    delete serializableProfile.profilePhoto;
+    delete serializableProfile.profilePhotoPreviewUrl;
+    window.localStorage.setItem(getPersonalProfileStorageKey(user), JSON.stringify(serializableProfile));
   } catch {
     // Keep the in-memory state even if browser storage is full or unavailable.
   }
@@ -402,7 +411,8 @@ function PersonalInformationForm({ profileData, onSave }) {
   const [formValues, setFormValues] = useState(profileData.details);
   const [formDisplayName, setFormDisplayName] = useState(profileData.displayName);
   const [formEmail, setFormEmail] = useState(profileData.email);
-  const [profilePhoto, setProfilePhoto] = useState(profileData.profilePhoto);
+  const [profilePhotoFileName, setProfilePhotoFileName] = useState(profileData.profilePhotoFileName);
+  const [profilePhotoPreviewUrl, setProfilePhotoPreviewUrl] = useState(profileData.profilePhotoPreviewUrl);
   const [photoError, setPhotoError] = useState("");
   const [resumeError, setResumeError] = useState("");
   const [videoResumeError, setVideoResumeError] = useState("");
@@ -462,16 +472,22 @@ function PersonalInformationForm({ profileData, onSave }) {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      setProfilePhoto(String(reader.result));
-      setPhotoError("");
-    };
-    reader.readAsDataURL(file);
+    if (profilePhotoPreviewUrl) {
+      URL.revokeObjectURL(profilePhotoPreviewUrl);
+    }
+
+    setProfilePhotoFileName(file.name);
+    setProfilePhotoPreviewUrl(URL.createObjectURL(file));
+    setPhotoError("");
   };
 
   const clearProfilePhoto = () => {
-    setProfilePhoto("");
+    if (profilePhotoPreviewUrl) {
+      URL.revokeObjectURL(profilePhotoPreviewUrl);
+    }
+
+    setProfilePhotoFileName("");
+    setProfilePhotoPreviewUrl("");
     setPhotoError("");
     if (photoInputRef.current) {
       photoInputRef.current.value = "";
@@ -548,7 +564,8 @@ function PersonalInformationForm({ profileData, onSave }) {
       details: formValues,
       displayName: formDisplayName,
       email: formEmail,
-      profilePhoto,
+      profilePhotoFileName,
+      profilePhotoPreviewUrl,
       references,
     });
   };
@@ -563,7 +580,7 @@ function PersonalInformationForm({ profileData, onSave }) {
         <ProfileFormRow label="Foto Profil">
           <div className="personal-photo-upload">
             <div className="personal-photo-preview" aria-hidden="true">
-              {profilePhoto ? <img src={profilePhoto} alt="" /> : formDisplayName.charAt(0)}
+              {profilePhotoPreviewUrl ? <img src={profilePhotoPreviewUrl} alt="" /> : formDisplayName.charAt(0)}
             </div>
             <div>
               <strong>
@@ -588,6 +605,7 @@ function PersonalInformationForm({ profileData, onSave }) {
                 </button>
               </div>
               {photoError ? <small className="personal-upload-error">{photoError}</small> : null}
+              {profilePhotoFileName ? <small>{profilePhotoFileName}</small> : null}
             </div>
           </div>
         </ProfileFormRow>
@@ -940,7 +958,11 @@ export default function ApplicantProfilePage() {
                 ) : (
                     <div className="profile-personal-row">
                       <div className="profile-avatar" aria-hidden="true">
-                        {personalProfile.profilePhoto ? <img src={personalProfile.profilePhoto} alt="" /> : profileDisplayName.charAt(0)}
+                        {personalProfile.profilePhotoPreviewUrl ? (
+                          <img src={personalProfile.profilePhotoPreviewUrl} alt="" />
+                        ) : (
+                          profileDisplayName.charAt(0)
+                        )}
                       </div>
                       <div>
                         <h3>{profileDisplayName}</h3>
