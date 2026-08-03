@@ -31,6 +31,10 @@ function getMessageFromPayload(payload) {
   return "Permintaan tidak berjaya. Sila semak maklumat yang dimasukkan.";
 }
 
+function getAccessToken() {
+  return localStorage.getItem(TOKEN_STORAGE_KEYS.access);
+}
+
 async function authRequest(path, payload) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method: "POST",
@@ -49,10 +53,37 @@ async function authRequest(path, payload) {
   return data;
 }
 
+async function apiRequest(path, options = {}) {
+  const accessToken = getAccessToken();
+  const headers = {
+    ...(options.headers || {}),
+  };
+
+  if (accessToken) {
+    headers.Authorization = `Bearer ${accessToken}`;
+  }
+
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    ...options,
+    headers,
+  });
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(getMessageFromPayload(data));
+  }
+
+  return data;
+}
+
 export function saveAuthSession(data) {
   localStorage.setItem(TOKEN_STORAGE_KEYS.access, data.access);
   localStorage.setItem(TOKEN_STORAGE_KEYS.refresh, data.refresh);
   localStorage.setItem(TOKEN_STORAGE_KEYS.user, JSON.stringify(data.user));
+}
+
+export function saveStoredUser(user) {
+  localStorage.setItem(TOKEN_STORAGE_KEYS.user, JSON.stringify(user));
 }
 
 export function getStoredUser() {
@@ -87,5 +118,15 @@ export function loginApplicant({ email, password }) {
   return authRequest("/auth/login/", {
     email: email.trim().toLowerCase(),
     password,
+  });
+}
+
+export function updateCurrentUser(formData) {
+  return apiRequest("/auth/me/", {
+    method: "PATCH",
+    body: formData,
+  }).then((user) => {
+    saveStoredUser(user);
+    return user;
   });
 }

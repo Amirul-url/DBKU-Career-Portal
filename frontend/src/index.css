@@ -5007,8 +5007,17 @@ body:has(.applicant-profile-page) {
 
 .personal-submit-row {
   display: flex;
+  align-items: center;
+  gap: 14px;
   justify-content: flex-end;
   padding-top: 2px;
+}
+
+.personal-save-error {
+  color: var(--profile-ink);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
 }
 
 .personal-save-button {
