@@ -5035,6 +5035,90 @@ body:has(.applicant-profile-page) {
   padding: 24px;
 }
 
+.job-preference-summary {
+  display: grid;
+  gap: 16px;
+  padding-top: 18px;
+}
+
+.job-preference-status {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.job-preference-status > span {
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--profile-pale);
+  color: var(--profile-green);
+}
+
+.job-preference-status strong,
+.job-preference-card strong {
+  display: block;
+  color: var(--profile-ink);
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
+.job-preference-status p,
+.job-preference-objective,
+.job-preference-card span,
+.job-preference-note {
+  margin: 4px 0 0;
+  color: var(--profile-ink);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.job-preference-objective {
+  max-width: 760px;
+  margin: 0;
+  font-size: 13px;
+}
+
+.job-preference-card-list {
+  display: grid;
+  gap: 12px;
+}
+
+.job-preference-card,
+.job-preference-edit-card {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--profile-green);
+  border-radius: 6px;
+  background: var(--profile-surface);
+  padding: 18px 20px;
+}
+
+.job-preference-card span {
+  display: block;
+  margin-top: 2px;
+}
+
+.job-preference-edit-card {
+  gap: 16px;
+  padding: 20px;
+}
+
+.job-preference-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.job-preference-add-button {
+  width: fit-content;
+}
+
 .personal-reference-card > strong {
   color: var(--profile-ink);
   font-size: 15px;

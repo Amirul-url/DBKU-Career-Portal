@@ -14,11 +14,6 @@ const sidebarNavItems = [
 
 const emptyProfileCards = [
   {
-    icon: "tune",
-    title: "Keutamaan Kerja",
-    body: "Tetapkan jawatan, bidang, lokasi dan jenis pekerjaan yang anda minati.",
-  },
-  {
     icon: "history",
     title: "Pengalaman",
     body: "Tambah pengalaman kerja, latihan industri atau projek berkaitan.",
@@ -55,6 +50,27 @@ const defaultPersonalDetails = {
   videoResumeFile: "",
   linkedIn: "",
 };
+
+const defaultJobPreferences = {
+  careerObjective: "",
+  isLookingForJob: "Ya",
+  preferredJobs: [],
+};
+
+const careerLevelOptions = [
+  { value: "Fresh / Entry Level", label: "Fresh / Entry Level" },
+  { value: "Junior Executive", label: "Junior Executive" },
+  { value: "Senior Executive", label: "Senior Executive" },
+  { value: "Manager", label: "Manager" },
+  { value: "Internship", label: "Latihan Industri" },
+];
+
+const employmentTypeOptions = [
+  { value: "Tetap", label: "Tetap" },
+  { value: "Kontrak", label: "Kontrak" },
+  { value: "Sambilan", label: "Sambilan" },
+  { value: "Latihan Industri", label: "Latihan Industri" },
+];
 
 const birthMonths = [
   "Januari",
@@ -112,6 +128,10 @@ function getPersonalProfileStorageKey(user) {
   return `dbku-applicant-personal-profile:${user?.email || user?.full_name || "default"}`;
 }
 
+function getJobPreferencesStorageKey(user) {
+  return `dbku-applicant-job-preferences:${user?.email || user?.full_name || "default"}`;
+}
+
 function getSavedPersonalProfile(user) {
   if (typeof window === "undefined") {
     return null;
@@ -120,6 +140,19 @@ function getSavedPersonalProfile(user) {
   try {
     const savedProfile = window.localStorage.getItem(getPersonalProfileStorageKey(user));
     return savedProfile ? JSON.parse(savedProfile) : null;
+  } catch {
+    return null;
+  }
+}
+
+function getSavedJobPreferences(user) {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const savedPreferences = window.localStorage.getItem(getJobPreferencesStorageKey(user));
+    return savedPreferences ? JSON.parse(savedPreferences) : null;
   } catch {
     return null;
   }
@@ -146,6 +179,15 @@ function createLocalId() {
   return typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
     ? crypto.randomUUID()
     : `local-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function createEmptyPreferredJob() {
+  return {
+    careerLevel: "",
+    employmentType: "",
+    id: createLocalId(),
+    title: "",
+  };
 }
 
 function normalizeReference(reference) {
@@ -193,6 +235,24 @@ function normalizePersonalProfile(profile, displayName, email) {
   };
 }
 
+function normalizePreferredJob(job) {
+  return {
+    ...createEmptyPreferredJob(),
+    ...(job || {}),
+    id: job?.id || createLocalId(),
+  };
+}
+
+function normalizeJobPreferences(preferences) {
+  return {
+    ...defaultJobPreferences,
+    ...(preferences || {}),
+    preferredJobs: Array.isArray(preferences?.preferredJobs)
+      ? preferences.preferredJobs.map(normalizePreferredJob)
+      : defaultJobPreferences.preferredJobs,
+  };
+}
+
 function getComparablePersonalProfile(profile) {
   const comparableProfile = {
     details: profile?.details || defaultPersonalDetails,
@@ -206,6 +266,30 @@ function getComparablePersonalProfile(profile) {
   };
 
   return JSON.stringify(comparableProfile);
+}
+
+function getComparableJobPreferences(preferences) {
+  return JSON.stringify({
+    careerObjective: preferences?.careerObjective || "",
+    isLookingForJob: preferences?.isLookingForJob || "",
+    preferredJobs: preferences?.preferredJobs || [],
+  });
+}
+
+async function saveJobPreferences(user, preferences) {
+  const normalizedPreferences = normalizeJobPreferences(preferences);
+
+  if (typeof window === "undefined") {
+    return normalizedPreferences;
+  }
+
+  try {
+    window.localStorage.setItem(getJobPreferencesStorageKey(user), JSON.stringify(normalizedPreferences));
+  } catch {
+    // Keep the in-memory state even if browser storage is full or unavailable.
+  }
+
+  return normalizedPreferences;
 }
 
 async function savePersonalProfile(user, profile) {
@@ -1249,15 +1333,244 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
   );
 }
 
+function JobPreferencesSummary({ preferences }) {
+  const hasCareerObjective = Boolean(preferences.careerObjective.trim());
+  const hasPreferredJobs = preferences.preferredJobs.length > 0;
+
+  if (!hasCareerObjective && !hasPreferredJobs) {
+    return (
+      <div className="profile-empty-row">
+        <span>
+          <Icon>tune</Icon>
+        </span>
+        <p>Tetapkan matlamat kerjaya, keterlihatan profil dan pilihan pekerjaan yang anda minati.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="job-preference-summary">
+      <div className="job-preference-status">
+        <span>
+          <Icon>{preferences.isLookingForJob === "Ya" ? "visibility" : "visibility_off"}</Icon>
+        </span>
+        <div>
+          <strong>{preferences.isLookingForJob === "Ya" ? "Sedang mencari pekerjaan" : "Tidak mencari pekerjaan"}</strong>
+          <p>
+            {preferences.isLookingForJob === "Ya"
+              ? "Profil anda boleh dipadankan dengan kekosongan yang sesuai."
+              : "Profil anda tidak akan berada dalam senarai padanan kekosongan majikan."}
+          </p>
+        </div>
+      </div>
+      {hasCareerObjective ? <p className="job-preference-objective">{preferences.careerObjective}</p> : null}
+      {hasPreferredJobs ? (
+        <div className="job-preference-card-list">
+          {preferences.preferredJobs.map((job) => (
+            <article className="job-preference-card" key={job.id}>
+              <strong>{job.title}</strong>
+              <span>{job.careerLevel || "Tahap kerjaya belum dipilih"}</span>
+              <span>{job.employmentType || "Jenis pekerjaan belum dipilih"}</span>
+            </article>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function JobPreferencesForm({ onDraftChange, onSave, preferencesData, saveRequestKey }) {
+  const handledSaveRequestRef = useRef(saveRequestKey);
+  const [careerObjective, setCareerObjective] = useState(preferencesData.careerObjective);
+  const [isLookingForJob, setIsLookingForJob] = useState(preferencesData.isLookingForJob);
+  const [preferredJobs, setPreferredJobs] = useState(preferencesData.preferredJobs);
+  const [saveError, setSaveError] = useState("");
+  const [validationErrors, setValidationErrors] = useState({});
+
+  const updatePreferredJob = (id, field) => (event) => {
+    setPreferredJobs((current) =>
+      current.map((job) =>
+        job.id === id
+          ? {
+              ...job,
+              [field]: event.target.value,
+            }
+          : job,
+      ),
+    );
+  };
+
+  const addPreferredJob = () => {
+    setPreferredJobs((current) => [...current, createEmptyPreferredJob()]);
+  };
+
+  const removePreferredJob = (id) => {
+    setPreferredJobs((current) => current.filter((job) => job.id !== id));
+  };
+
+  const validateJobPreferences = useCallback(() => {
+    const errors = {};
+
+    if (!isLookingForJob) {
+      errors.isLookingForJob = "Wajib diisi.";
+    }
+
+    if (!careerObjective.trim()) {
+      errors.careerObjective = "Wajib diisi.";
+    }
+
+    if (preferredJobs.length === 0) {
+      errors.preferredJobs = "Tambah sekurang-kurangnya satu pilihan pekerjaan.";
+    }
+
+    preferredJobs.forEach((job) => {
+      ["title", "careerLevel", "employmentType"].forEach((field) => {
+        if (!String(job[field] || "").trim()) {
+          errors[`preferred-job-${job.id}-${field}`] = "Wajib diisi.";
+        }
+      });
+    });
+
+    return errors;
+  }, [careerObjective, isLookingForJob, preferredJobs]);
+
+  const getCurrentDraft = useCallback(
+    () => ({
+      careerObjective,
+      isLookingForJob,
+      preferredJobs,
+    }),
+    [careerObjective, isLookingForJob, preferredJobs],
+  );
+
+  const handleSave = useCallback(async () => {
+    const errors = validateJobPreferences();
+    setValidationErrors(errors);
+    setSaveError("");
+
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+
+    try {
+      await onSave(getCurrentDraft());
+    } catch (error) {
+      setSaveError(error.message || "Pilihan pekerjaan tidak dapat disimpan. Sila cuba lagi.");
+    }
+  }, [getCurrentDraft, onSave, validateJobPreferences]);
+
+  useEffect(() => {
+    const draft = getCurrentDraft();
+    const isDirty = getComparableJobPreferences(draft) !== getComparableJobPreferences(preferencesData);
+
+    onDraftChange(draft, isDirty);
+  }, [getCurrentDraft, onDraftChange, preferencesData]);
+
+  useEffect(() => {
+    if (saveRequestKey > 0 && saveRequestKey !== handledSaveRequestRef.current) {
+      handledSaveRequestRef.current = saveRequestKey;
+      handleSave();
+    }
+  }, [handleSave, saveRequestKey]);
+
+  return (
+    <div className="personal-edit-panel" aria-label="Kemaskini pilihan pekerjaan">
+      <form className="personal-edit-form">
+        <ProfileFormRow label="Keterlihatan Profil">
+          <PersonalRadioGroup
+            label="Adakah anda sedang mencari pekerjaan?"
+            name="job-search-status"
+            error={validationErrors.isLookingForJob}
+            onChange={(event) => setIsLookingForJob(event.target.value)}
+            options={["Ya", "Tidak"]}
+            value={isLookingForJob}
+          />
+          <p className="job-preference-note">
+            Jika anda memilih 'Tidak', profil anda tidak akan berada dalam senarai padanan kekosongan oleh majikan.
+          </p>
+        </ProfileFormRow>
+
+        <ProfileFormRow label="Matlamat Kerjaya">
+          <PersonalField label="Matlamat kerjaya" error={validationErrors.careerObjective}>
+            <textarea
+              value={careerObjective}
+              rows={8}
+              onChange={(event) => setCareerObjective(event.target.value)}
+            />
+          </PersonalField>
+        </ProfileFormRow>
+
+        <ProfileFormRow label="Pilihan Pekerjaan">
+          <div className="personal-reference-copy">
+            <strong>Tambahkan pilihan pekerjaan anda*</strong>
+            <p>Tambah dalam profesion pilihan anda untuk mendapatkan hasil padanan kerja yang lebih baik.</p>
+          </div>
+          {validationErrors.preferredJobs ? (
+            <small className="personal-field-error">{validationErrors.preferredJobs}</small>
+          ) : null}
+          {preferredJobs.map((job) => (
+            <div className="job-preference-edit-card" key={job.id}>
+              <PersonalField label="Jawatan pilihan" error={validationErrors[`preferred-job-${job.id}-title`]}>
+                <input
+                  type="text"
+                  value={job.title}
+                  placeholder="Contoh. Pembangun laman web"
+                  onChange={updatePreferredJob(job.id, "title")}
+                />
+              </PersonalField>
+              <PersonalField label="Tahap kerjaya" error={validationErrors[`preferred-job-${job.id}-careerLevel`]}>
+                <PersonalSelect
+                  value={job.careerLevel}
+                  placeholder="Pilih tahap kerjaya"
+                  onChange={updatePreferredJob(job.id, "careerLevel")}
+                  options={careerLevelOptions}
+                />
+              </PersonalField>
+              <PersonalField label="Jenis pekerjaan" error={validationErrors[`preferred-job-${job.id}-employmentType`]}>
+                <PersonalSelect
+                  value={job.employmentType}
+                  placeholder="Pilih jenis pekerjaan"
+                  onChange={updatePreferredJob(job.id, "employmentType")}
+                  options={employmentTypeOptions}
+                />
+              </PersonalField>
+              <div className="job-preference-edit-actions">
+                <button type="button" className="personal-outline-button" onClick={() => removePreferredJob(job.id)}>
+                  Padam
+                </button>
+              </div>
+            </div>
+          ))}
+          <button type="button" className="personal-add-reference job-preference-add-button" onClick={addPreferredJob}>
+            <Icon>add_circle</Icon>
+            Tambah Pilihan Pekerjaan Lain
+          </button>
+        </ProfileFormRow>
+
+        <div className="personal-submit-row">
+          {saveError ? <small className="personal-save-error">{saveError}</small> : null}
+          <button type="button" className="personal-save-button" onClick={handleSave}>
+            <Icon>save</Icon>
+            Simpan dan Teruskan
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
 export default function ApplicantProfilePage() {
   const navigate = useNavigate();
   const user = getStoredUser();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [editingSection, setEditingSection] = useState(null);
   const [isPersonalCloseDialogOpen, setIsPersonalCloseDialogOpen] = useState(false);
+  const [isJobPreferencesCloseDialogOpen, setIsJobPreferencesCloseDialogOpen] = useState(false);
   const [isPersonalDraftDirty, setIsPersonalDraftDirty] = useState(false);
+  const [isJobPreferencesDraftDirty, setIsJobPreferencesDraftDirty] = useState(false);
   const [personalDraft, setPersonalDraft] = useState(null);
   const [personalSaveRequestKey, setPersonalSaveRequestKey] = useState(0);
+  const [jobPreferencesSaveRequestKey, setJobPreferencesSaveRequestKey] = useState(0);
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
   const email = user?.email || "Belum dikemaskini";
   const [personalProfile, setPersonalProfile] = useState(() => {
@@ -1283,6 +1596,7 @@ export default function ApplicantProfilePage() {
       email,
     );
   });
+  const [jobPreferences, setJobPreferences] = useState(() => normalizeJobPreferences(getSavedJobPreferences(user)));
   const profileDisplayName = personalProfile.displayName || displayName;
   const profileEmail = personalProfile.email || email;
 
@@ -1305,14 +1619,51 @@ export default function ApplicantProfilePage() {
     setIsPersonalDraftDirty(isDirty);
   }, []);
 
+  const handleSaveJobPreferences = async (preferences) => {
+    const savedPreferences = await saveJobPreferences(user, preferences);
+
+    setJobPreferences(savedPreferences);
+    setEditingSection(null);
+    setIsJobPreferencesDraftDirty(false);
+    setIsJobPreferencesCloseDialogOpen(false);
+  };
+
+  const handleJobPreferencesDraftChange = useCallback((draft, isDirty) => {
+    setIsJobPreferencesDraftDirty(isDirty);
+  }, []);
+
   const handlePersonalEditToggle = () => {
     if (editingSection !== "personal") {
+      if (editingSection === "jobPreferences" && isJobPreferencesDraftDirty) {
+        setIsJobPreferencesCloseDialogOpen(true);
+        return;
+      }
+
       setEditingSection("personal");
       return;
     }
 
     if (isPersonalDraftDirty) {
       setIsPersonalCloseDialogOpen(true);
+      return;
+    }
+
+    setEditingSection(null);
+  };
+
+  const handleJobPreferencesEditToggle = () => {
+    if (editingSection !== "jobPreferences") {
+      if (editingSection === "personal" && isPersonalDraftDirty) {
+        setIsPersonalCloseDialogOpen(true);
+        return;
+      }
+
+      setEditingSection("jobPreferences");
+      return;
+    }
+
+    if (isJobPreferencesDraftDirty) {
+      setIsJobPreferencesCloseDialogOpen(true);
       return;
     }
 
@@ -1333,6 +1684,17 @@ export default function ApplicantProfilePage() {
   const savePersonalDraftFromDialog = () => {
     setIsPersonalCloseDialogOpen(false);
     setPersonalSaveRequestKey((current) => current + 1);
+  };
+
+  const discardJobPreferencesDraft = () => {
+    setIsJobPreferencesCloseDialogOpen(false);
+    setIsJobPreferencesDraftDirty(false);
+    setEditingSection(null);
+  };
+
+  const saveJobPreferencesDraftFromDialog = () => {
+    setIsJobPreferencesCloseDialogOpen(false);
+    setJobPreferencesSaveRequestKey((current) => current + 1);
   };
 
   useEffect(() => {
@@ -1396,8 +1758,26 @@ export default function ApplicantProfilePage() {
                 )}
               </ProfileCard>
 
+              <ProfileCard
+                id="profile-section-2"
+                isEditing={editingSection === "jobPreferences"}
+                title="Pilihan Pekerjaan"
+                onEdit={handleJobPreferencesEditToggle}
+              >
+                {editingSection === "jobPreferences" ? (
+                  <JobPreferencesForm
+                    onDraftChange={handleJobPreferencesDraftChange}
+                    preferencesData={jobPreferences}
+                    onSave={handleSaveJobPreferences}
+                    saveRequestKey={jobPreferencesSaveRequestKey}
+                  />
+                ) : (
+                  <JobPreferencesSummary preferences={jobPreferences} />
+                )}
+              </ProfileCard>
+
               {emptyProfileCards.map((card, index) => (
-                <ProfileCard id={`profile-section-${index + 2}`} title={card.title} key={card.title}>
+                <ProfileCard id={`profile-section-${index + 3}`} title={card.title} key={card.title}>
                   <div className="profile-empty-row">
                     <span>
                       <Icon>{card.icon}</Icon>
@@ -1420,6 +1800,25 @@ export default function ApplicantProfilePage() {
                 Buang
               </button>
               <button type="button" className="profile-confirm-primary" onClick={savePersonalDraftFromDialog}>
+                Simpan
+              </button>
+            </div>
+          </section>
+        </div>
+      ) : null}
+      {isJobPreferencesCloseDialogOpen ? (
+        <div className="profile-confirm-overlay" role="presentation">
+          <section className="profile-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="job-preferences-close-title">
+            <h2 id="job-preferences-close-title">Perubahan belum disimpan</h2>
+            <p>
+              Anda ada membuat kemaskini pada Pilihan Pekerjaan. Pilih Simpan untuk menyimpan perubahan atau Buang untuk
+              membuang perubahan.
+            </p>
+            <div>
+              <button type="button" className="profile-confirm-secondary" onClick={discardJobPreferencesDraft}>
+                Buang
+              </button>
+              <button type="button" className="profile-confirm-primary" onClick={saveJobPreferencesDraftFromDialog}>
                 Simpan
               </button>
             </div>
