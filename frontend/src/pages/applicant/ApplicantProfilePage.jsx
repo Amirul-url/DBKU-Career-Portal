@@ -109,6 +109,23 @@ function getPersonalProfileDefaults(displayName, email) {
   };
 }
 
+function createLocalId() {
+  return typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+    ? crypto.randomUUID()
+    : `local-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function normalizeReference(reference) {
+  return {
+    employerName: reference?.employerName || reference?.organisation || "",
+    email: reference?.email || "",
+    id: reference?.id || createLocalId(),
+    name: reference?.name || "",
+    phone: reference?.phone || "",
+    position: reference?.position || reference?.relationship || "",
+  };
+}
+
 function normalizePersonalProfile(profile, displayName, email) {
   const defaults = getPersonalProfileDefaults(displayName, email);
   const storedProfile = { ...(profile || {}) };
@@ -124,7 +141,7 @@ function normalizePersonalProfile(profile, displayName, email) {
     },
     profilePhotoFileName: profile?.profilePhotoFileName || "",
     profilePhotoPreviewUrl: profile?.profilePhotoPreviewUrl || "",
-    references: Array.isArray(profile?.references) ? profile.references : defaults.references,
+    references: Array.isArray(profile?.references) ? profile.references.map(normalizeReference) : defaults.references,
   };
 }
 
@@ -550,7 +567,7 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
       {
         employerName: "",
         email: "",
-        id: crypto.randomUUID(),
+        id: createLocalId(),
         name: "",
         phone: "",
         position: "",
