@@ -180,6 +180,44 @@ const defaultSkillSuggestions = [
   "Web programming",
 ];
 
+const recommendedJobTitles = [
+  "Pembangun laman web",
+  "Pembangun perisian",
+  "Jurutera perisian",
+  "Pembangun aplikasi mudah alih",
+  "Penganalisis sistem",
+  "Penganalisis data",
+  "Saintis data",
+  "Pereka UI/UX",
+  "Pereka laman web",
+  "Pentadbir pangkalan data",
+  "Juruteknik komputer",
+  "Pegawai teknologi maklumat",
+  "Pentadbir rangkaian",
+  "Jurutera rangkaian",
+  "Pakar keselamatan siber",
+  "Penguji perisian",
+  "Pegawai sokongan teknikal",
+  "Pengurus projek IT",
+  "Eksekutif pemasaran digital",
+  "Eksekutif pentadbiran",
+  "Pembantu tadbir",
+  "Pegawai khidmat pelanggan",
+  "Eksekutif sumber manusia",
+  "Akauntan",
+  "Pembantu akaun",
+  "Jurutera awam",
+  "Jurutera mekanikal",
+  "Jurutera elektrik",
+  "Pegawai perancang bandar",
+  "Pembantu perancang bandar",
+  "Pegawai landskap",
+  "Pembantu penguat kuasa",
+  "Pegawai kesihatan persekitaran",
+  "Penolong pegawai tadbir",
+  "Kerani operasi",
+].map((title) => ({ value: title, label: title }));
+
 const employmentStatusOptions = ["Tetap", "Sementara", "Sambilan", "Kontrak", "Perantisan", "Latihan Industri", "Bekerja sendiri"];
 const workTimeOptions = ["Waktu Biasa", "Syif 3 Masa", "Syif 2 Masa", "Waktu Fleksibel", "Syif Malam", "HIBRID"];
 const salaryRangeOptions = [
@@ -733,6 +771,62 @@ function PersonalMultiSelect({ error, onChange, options, placeholder, selectedLa
           </div>
         </div>
       ) : null}
+    </div>
+  );
+}
+
+function JobTitleAutocomplete({ error, onChange, value }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const query = value.trim().toLowerCase();
+  const visibleSuggestions = recommendedJobTitles
+    .filter((option) => !query || option.label.toLowerCase().includes(query))
+    .slice(0, 8);
+
+  const selectSuggestion = (selectedValue) => {
+    onChange(selectedValue);
+    setIsOpen(false);
+  };
+
+  return (
+    <div
+      className={`job-title-autocomplete ${error ? "has-error" : ""}`}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+          setIsOpen(false);
+        }
+      }}
+    >
+      <div className="job-search-input">
+        <Icon>search</Icon>
+        <input
+          type="text"
+          value={value}
+          placeholder="Contoh. Pembangun laman web"
+          onChange={(event) => {
+            onChange(event.target.value);
+            setIsOpen(true);
+          }}
+          onFocus={() => setIsOpen(true)}
+        />
+      </div>
+      {isOpen ? (
+        <div className="job-title-suggestions">
+          <strong>Cadangan pekerjaan</strong>
+          {visibleSuggestions.length ? (
+            <div>
+              {visibleSuggestions.map((option) => (
+                <button type="button" key={option.value} onMouseDown={(event) => event.preventDefault()} onClick={() => selectSuggestion(option.value)}>
+                  <Icon>work</Icon>
+                  <span>{option.label}</span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p>Tiada cadangan dijumpai. Anda boleh terus gunakan tajuk yang ditaip.</p>
+          )}
+        </div>
+      ) : null}
+      <small>Sila masukkan dan pilih pekerjaan yang paling hampir yang anda cari.</small>
     </div>
   );
 }
@@ -1880,16 +1974,11 @@ function JobPreferencesForm({ onDraftChange, onSave, preferencesData, saveReques
             ) : (
             <div className="job-preference-edit-card" key={job.id}>
               <PersonalField label="Pilihan Pekerjaan" error={validationErrors[`preferred-job-${job.id}-title`]}>
-                <div className="job-search-input">
-                  <Icon>search</Icon>
-                  <input
-                    type="text"
-                    value={job.title}
-                    placeholder="Contoh. Pembangun laman web"
-                    onChange={updatePreferredJob(job.id, "title")}
-                  />
-                </div>
-                <small>Sila masukkan dan pilih pekerjaan yang paling hampir yang anda cari.</small>
+                <JobTitleAutocomplete
+                  value={job.title}
+                  error={validationErrors[`preferred-job-${job.id}-title`]}
+                  onChange={(value) => updatePreferredJobValue(job.id, "title", value)}
+                />
               </PersonalField>
 
               <label className="job-checkbox-row">
