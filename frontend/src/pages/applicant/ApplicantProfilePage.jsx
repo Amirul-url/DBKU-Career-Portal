@@ -3,12 +3,12 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { clearAuthSession, getStoredUser } from "../../lib/authApi";
 import { Icon } from "./ApplicantAuthShared";
 
-const profileSections = [
-  { icon: "person", label: "Maklumat Peribadi", status: "Perlu dilengkapkan" },
-  { icon: "work", label: "Keutamaan Kerja", status: "Belum diisi" },
-  { icon: "history", label: "Pengalaman", status: "Belum diisi" },
-  { icon: "school", label: "Pendidikan", status: "Belum diisi" },
-  { icon: "psychology", label: "Kemahiran", status: "Belum diisi" },
+const sidebarNavItems = [
+  { icon: "stars", label: "Match Jobs", to: "/jobs" },
+  { icon: "search", label: "Search Jobs", to: "/jobs" },
+  { icon: "work_history", label: "My Jobs", href: "#applications" },
+  { icon: "person", label: "Profile", to: "/profile" },
+  { icon: "more_horiz", label: "More", href: "#more" },
 ];
 
 const emptyProfileCards = [
@@ -52,12 +52,6 @@ function ProfileTopbar({ user }) {
           <span translate="no">DBKU Career Portal</span>
         </Link>
 
-        <div className="profile-nav-links">
-          <NavLink to="/jobs">Cari Kerja</NavLink>
-          <a href="#applications">Permohonan Saya</a>
-          <NavLink to="/profile" className="active">Profil</NavLink>
-        </div>
-
         <div className="profile-actions">
           <span className="profile-user-chip">{user?.full_name?.charAt(0) || user?.email?.charAt(0) || "P"}</span>
           <button type="button" className="profile-icon-button" aria-label="Notifikasi">
@@ -72,28 +66,34 @@ function ProfileTopbar({ user }) {
   );
 }
 
-function ProfileSidebar() {
+function ProfileSidebar({ user }) {
   return (
-    <aside className="profile-sidebar" aria-label="Bahagian profil">
-      <div className="profile-progress">
-        <span className="profile-progress-value">20%</span>
+    <aside className="profile-sidebar" aria-label="Navigasi pemohon">
+      <div className="profile-sidebar-head">
+        <span className="profile-user-chip">{user?.full_name?.charAt(0) || user?.email?.charAt(0) || "P"}</span>
         <span>
-          <strong>Profil Pemohon</strong>
-          <small>Lengkapkan maklumat untuk memudahkan semakan permohonan.</small>
+          <strong>{user?.full_name || user?.first_name || "Pemohon DBKU"}</strong>
+          <small>{user?.email || "Akaun pemohon"}</small>
         </span>
       </div>
 
-      <nav className="profile-section-nav">
-        {profileSections.map((section, index) => (
-          <a className={index === 0 ? "active" : ""} href={`#profile-section-${index + 1}`} key={section.label}>
-            <span className="profile-section-icon">
-              <Icon>{section.icon}</Icon>
-            </span>
-            <span>
-              <strong>{section.label}</strong>
-              <small>{section.status}</small>
-            </span>
-          </a>
+      <nav className="profile-main-nav">
+        {sidebarNavItems.map((item) => (
+          item.to ? (
+            <NavLink to={item.to} className={({ isActive }) => (isActive ? "active" : undefined)} key={item.label}>
+              <span className="profile-section-icon">
+                <Icon>{item.icon}</Icon>
+              </span>
+              <strong>{item.label}</strong>
+            </NavLink>
+          ) : (
+            <a href={item.href} key={item.label}>
+              <span className="profile-section-icon">
+                <Icon>{item.icon}</Icon>
+              </span>
+              <strong>{item.label}</strong>
+            </a>
+          )
         ))}
       </nav>
 
@@ -147,7 +147,7 @@ export default function ApplicantProfilePage() {
         </div>
 
         <div className="profile-layout">
-          <ProfileSidebar />
+          <ProfileSidebar user={user} />
 
           <div className="profile-content">
             <ProfileCard id="profile-section-1" title="Maklumat Peribadi">

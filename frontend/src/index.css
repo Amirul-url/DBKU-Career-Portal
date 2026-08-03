@@ -3554,7 +3554,7 @@ body:has(.applicant-profile-page) {
   min-height: 76px;
   align-items: center;
   gap: 24px;
-  grid-template-columns: minmax(250px, 1fr) auto minmax(250px, 1fr);
+  grid-template-columns: minmax(250px, 1fr) auto;
   padding: 0 56px;
 }
 
@@ -3683,7 +3683,7 @@ body:has(.applicant-profile-page) {
   display: grid;
   align-items: start;
   gap: 36px;
-  grid-template-columns: 320px minmax(0, 1fr);
+  grid-template-columns: 280px minmax(0, 1fr);
   margin-top: 34px;
 }
 
@@ -3694,8 +3694,8 @@ body:has(.applicant-profile-page) {
   gap: 18px;
 }
 
-.profile-progress,
-.profile-section-nav,
+.profile-sidebar-head,
+.profile-main-nav,
 .profile-outline-button,
 .profile-content-card {
   border: 1px solid #dbe4df;
@@ -3703,36 +3703,22 @@ body:has(.applicant-profile-page) {
   background: #ffffff;
 }
 
-.profile-progress {
+.profile-sidebar-head {
   display: flex;
   align-items: center;
   gap: 14px;
   padding: 18px;
 }
 
-.profile-progress-value {
-  display: inline-flex;
-  width: 54px;
-  height: 54px;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: #16a34a;
-  color: #ffffff;
-  font-weight: 900;
-}
-
-.profile-progress strong,
-.profile-section-nav strong {
+.profile-sidebar-head strong,
+.profile-main-nav strong {
   display: block;
   color: #111827;
   font-size: 14px;
   font-weight: 900;
 }
 
-.profile-progress small,
-.profile-section-nav small {
+.profile-sidebar-head small {
   display: block;
   margin-top: 4px;
   color: #52615a;
@@ -3741,23 +3727,32 @@ body:has(.applicant-profile-page) {
   line-height: 1.35;
 }
 
-.profile-section-nav {
+.profile-main-nav {
   display: grid;
   overflow: hidden;
   padding: 8px;
 }
 
-.profile-section-nav a {
+.profile-main-nav a {
   display: flex;
   align-items: center;
   gap: 12px;
   border-radius: 7px;
-  padding: 13px 12px;
+  padding: 15px 12px;
 }
 
-.profile-section-nav a.active,
-.profile-section-nav a:hover {
+.profile-main-nav a.active,
+.profile-main-nav a:hover {
   background: #ecfdf5;
+}
+
+.profile-main-nav a.active {
+  box-shadow: inset 3px 0 0 #16a34a;
+}
+
+.profile-main-nav a.active strong,
+.profile-main-nav a:hover strong {
+  color: #006c49;
 }
 
 .profile-section-icon {
@@ -3768,8 +3763,13 @@ body:has(.applicant-profile-page) {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: #d1fae5;
+  background: #f8fafc;
   color: #16a34a;
+}
+
+.profile-main-nav a.active .profile-section-icon,
+.profile-main-nav a:hover .profile-section-icon {
+  background: #d1fae5;
 }
 
 .profile-section-icon .material-symbols-outlined {
@@ -3938,7 +3938,7 @@ body:has(.applicant-profile-page) {
   }
 
   .profile-content-card,
-  .profile-progress {
+  .profile-sidebar-head {
     padding: 18px;
   }
 
