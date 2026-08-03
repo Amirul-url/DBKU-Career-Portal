@@ -58,19 +58,147 @@ const defaultJobPreferences = {
 };
 
 const careerLevelOptions = [
+  { value: "Bukan Eksekutif", label: "Bukan Eksekutif" },
   { value: "Fresh / Entry Level", label: "Fresh / Entry Level" },
-  { value: "Junior Executive", label: "Junior Executive" },
-  { value: "Senior Executive", label: "Senior Executive" },
-  { value: "Manager", label: "Manager" },
-  { value: "Internship", label: "Latihan Industri" },
+  { value: "Eksekutif Biasa", label: "Eksekutif Biasa" },
+  { value: "Eksekutif Kanan", label: "Eksekutif Kanan" },
+  { value: "Pengurus", label: "Pengurus" },
+  { value: "Pengurus Kanan", label: "Pengurus Kanan" },
+  { value: "Pengurusan Tertinggi", label: "Pengurusan Tertinggi" },
 ];
 
-const employmentTypeOptions = [
-  { value: "Tetap", label: "Tetap" },
-  { value: "Kontrak", label: "Kontrak" },
-  { value: "Sambilan", label: "Sambilan" },
-  { value: "Latihan Industri", label: "Latihan Industri" },
+const sectorOptions = [
+  "Agensi pekerjaan",
+  "Agensi perjalanan, pengendali pelancongan, perkhidmatan tempahan dan aktiviti yang berkaitan",
+  "Aktiviti arkitek dan kejuruteraan; ujian teknikal dan analisis",
+  "Aktiviti badan dan pertubuhan luar wilayah",
+  "Aktiviti guaman dan perakaunan",
+  "Aktiviti hartanah",
+  "Aktiviti hiburan, kesenian dan rekreasi",
+  "Aktiviti ibu pejabat; aktiviti perundingan pengurusan",
+  "Aktiviti keahlian organisasi",
+  "Aktiviti keselamatan dan penyiasatan",
+  "Aktiviti kesihatan manusia",
+  "Aktiviti kreatif, seni dan hiburan",
+  "Aktiviti kurier dan pos",
+  "Aktiviti penerbitan",
+  "Aktiviti penyediaan makanan dan minuman",
+  "Aktiviti penjagaan kediaman",
+  "Aktiviti perkhidmatan bangunan dan landskap",
+  "Aktiviti perkhidmatan kewangan, kecuali insurans dan tabung pencen",
+  "Aktiviti perkhidmatan maklumat",
+  "Aktiviti perkhidmatan sokongan pejabat dan perniagaan",
+  "Aktiviti profesional, saintifik dan teknikal lain",
+  "Aktiviti program dan penyiaran",
+  "Aktiviti sewaan dan pajakan",
+  "Aktiviti sukan, hiburan dan rekreasi",
+  "Aktiviti veterinar",
+  "Bekalan elektrik, gas, wap dan pendingin udara",
+  "Bekalan air; pembetungan, pengurusan sisa dan aktiviti pemulihan",
+  "Insurans, takaful, reinsurans dan tabung pencen",
+  "Jualan borong dan runcit; pembaikan kenderaan bermotor dan motosikal",
+  "Kehutanan dan pembalakan",
+  "Kerja kejuruteraan awam",
+  "Kewangan dan insurans/takaful",
+  "Kutipan, rawatan dan pelupusan sisa; pemulihan bahan",
+  "Pembuatan bahan kimia dan produk kimia",
+  "Pembuatan farmaseutikal, produk kimia perubatan dan botani",
+  "Pembuatan jentera dan kelengkapan",
+  "Pembuatan kelengkapan elektrik",
+  "Pembuatan kenderaan bermotor, treler dan semi treler",
+  "Pembuatan komputer, produk elektronik dan optik",
+  "Pembuatan makanan",
+  "Pembuatan minuman",
+  "Pembuatan pakaian",
+  "Pembuatan perabot",
+  "Pembuatan produk getah dan plastik",
+  "Pembuatan produk logam, kecuali mesin dan kelengkapan",
+  "Pembuatan produk mineral bukan logam",
+  "Pembuatan produk petroleum bertapis",
+  "Pembuatan produk tekstil",
+  "Pembuatan produk tembakau",
+  "Pembuatan produk kayu, gabus, jerami dan bahan anyaman",
+  "Pembuatan kertas dan produk kertas",
+  "Pembaikan dan pemasangan mesin dan kelengkapan",
+  "Pembinaan bangunan",
+  "Pendidikan",
+  "Pengangkutan darat dan pengangkutan melalui saluran paip",
+  "Pengangkutan udara",
+  "Pengangkutan air",
+  "Pengaturcaraan komputer, perundingan dan aktiviti yang berkaitan",
+  "Pengiklanan dan penyelidikan pasaran",
+  "Penginapan",
+  "Pentadbiran awam dan pertahanan; keselamatan sosial wajib",
+  "Perdagangan borong, kecuali kenderaan bermotor dan motosikal",
+  "Perdagangan runcit, kecuali kenderaan bermotor dan motosikal",
+  "Perikanan dan akuakultur",
+  "Perlombongan arang batu dan lignit",
+  "Perlombongan bijih logam",
+  "Perlombongan dan pengkuarian lain",
+  "Perpustakaan, arkib, muzium dan aktiviti kebudayaan lain",
+  "Pertanian tanaman dan pengeluaran haiwan, pemburuan dan aktiviti perkhidmatan berkaitan",
+  "Perkhidmatan telekomunikasi",
+  "Perkhidmatan penjagaan sosial tanpa penginapan",
+  "Pergudangan dan aktiviti sokongan untuk pengangkutan",
+  "Penyelidikan saintifik dan pembangunan",
+  "Percetakan dan pengeluaran semula media rakaman",
+  "Penerbitan gambar bergerak, video dan program televisyen; rakaman bunyi dan penerbitan muzik",
+  "Pembaikan komputer dan barangan persendirian dan isi rumah",
+  "Aktiviti perkhidmatan peribadi lain",
+].map((sector) => ({ value: sector, label: sector }));
+
+const defaultSkillSuggestions = [
+  "ABAP",
+  "AJAX",
+  "APL",
+  "ASP.NET",
+  "Adapt to changes in technological development plans",
+  "Analyse software specifications",
+  "Ansible",
+  "Apache Maven",
+  "Assembly (computer programming)",
+  "COBOL",
+  "CSS",
+  "C#",
+  "C++",
+  "Computer programming",
+  "Design user interface",
+  "Develop software prototype",
+  "Implement front-end website design",
+  "Java (computer programming)",
+  "JavaScript",
+  "JSSS",
+  "MATLAB",
+  "ML (computer programming)",
+  "Microsoft Visual C++",
+  "Object-oriented modelling",
+  "PHP",
+  "Python (computer programming)",
+  "R",
+  "Use object-oriented programming",
+  "Visual Studio .NET",
+  "Web programming",
 ];
+
+const employmentStatusOptions = ["Tetap", "Sementara", "Sambilan", "Kontrak", "Perantisan", "Latihan Industri", "Bekerja sendiri"];
+const workTimeOptions = ["Waktu Biasa", "Syif 3 Masa", "Syif 2 Masa", "Waktu Fleksibel", "Syif Malam", "HIBRID"];
+const salaryRangeOptions = [
+  "< 1,200",
+  "1,200 - 1,499",
+  "1,500 - 1,999",
+  "2,000 - 2,499",
+  "2,500 - 2,999",
+  "3,000 - 3,499",
+  "3,500 - 3,999",
+  "4,000 - 4,999",
+  "5,000 - 5,999",
+  "6,000 - 7,999",
+  "8,000 - 9,999",
+  "10,000 - 12,999",
+  "13,000 - 15,999",
+  "> 16,000",
+];
+const distanceOptions = ["+ 0 km", "+ 1 km", "+ 5 km", "+ 10 km", "+ 20 km", "+ 30 km", "+ 50 km", "+ 80 km", "+ 200 km"];
 
 const birthMonths = [
   "Januari",
@@ -184,9 +312,17 @@ function createLocalId() {
 function createEmptyPreferredJob() {
   return {
     careerLevel: "",
-    employmentType: "",
+    city: "",
+    distance: "+ 200 km",
+    employmentStatuses: [],
+    expectedSalary: "",
+    hasRelatedExperience: false,
     id: createLocalId(),
+    sectors: [],
+    skills: [],
+    state: "",
     title: "",
+    workTimes: [],
   };
 }
 
@@ -236,10 +372,20 @@ function normalizePersonalProfile(profile, displayName, email) {
 }
 
 function normalizePreferredJob(job) {
+  const employmentStatuses = Array.isArray(job?.employmentStatuses)
+    ? job.employmentStatuses
+    : job?.employmentType
+      ? [job.employmentType]
+      : [];
+
   return {
     ...createEmptyPreferredJob(),
     ...(job || {}),
+    employmentStatuses,
     id: job?.id || createLocalId(),
+    sectors: Array.isArray(job?.sectors) ? job.sectors : [],
+    skills: Array.isArray(job?.skills) ? job.skills : [],
+    workTimes: Array.isArray(job?.workTimes) ? job.workTimes : [],
   };
 }
 
@@ -491,6 +637,106 @@ function PersonalSelect({ onChange, options, placeholder, searchable = false, se
   );
 }
 
+function PersonalMultiSelect({ error, onChange, options, placeholder, selectedLabel, value }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const visibleOptions = options.filter((option) => option.label.toLowerCase().includes(searchTerm.trim().toLowerCase()));
+  const selectedValues = Array.isArray(value) ? value : [];
+
+  const toggleOption = (selectedValue) => {
+    const nextValues = selectedValues.includes(selectedValue)
+      ? selectedValues.filter((item) => item !== selectedValue)
+      : [...selectedValues, selectedValue];
+
+    onChange(nextValues);
+  };
+
+  const removeOption = (selectedValue) => {
+    onChange(selectedValues.filter((item) => item !== selectedValue));
+  };
+
+  return (
+    <div className={`job-multi-select ${error ? "has-error" : ""}`}>
+      <div
+        className={`personal-select-wrap ${isOpen ? "open" : ""}`}
+        onBlur={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget)) {
+            setIsOpen(false);
+            setSearchTerm("");
+          }
+        }}
+      >
+        <button
+          type="button"
+          className={`personal-select-button ${selectedValues.length ? "" : "placeholder"}`}
+          aria-expanded={isOpen}
+          onClick={() => setIsOpen((current) => !current)}
+        >
+          <span>{selectedValues.length ? `${selectedValues.length} sektor dipilih` : placeholder}</span>
+          <Icon>{isOpen ? "expand_less" : "expand_more"}</Icon>
+        </button>
+        {isOpen ? (
+          <div className="personal-select-menu job-multi-select-menu" role="listbox" aria-multiselectable="true">
+            <label className="personal-select-search">
+              <Icon>search</Icon>
+              <input
+                type="text"
+                value={searchTerm}
+                placeholder="Carian"
+                onChange={(event) => setSearchTerm(event.target.value)}
+              />
+            </label>
+            <div className="job-multi-select-options">
+              {visibleOptions.length > 0 ? (
+                visibleOptions.map((option) => (
+                  <label key={option.value}>
+                    <input
+                      type="checkbox"
+                      checked={selectedValues.includes(option.value)}
+                      onChange={() => toggleOption(option.value)}
+                    />
+                    <span>{option.label}</span>
+                  </label>
+                ))
+              ) : (
+                <div className="personal-select-empty">Tiada pilihan dijumpai</div>
+              )}
+            </div>
+            <div className="job-multi-select-footer">
+              <button
+                type="button"
+                className="personal-primary-button"
+                onClick={() => {
+                  setIsOpen(false);
+                  setSearchTerm("");
+                }}
+              >
+                Selesai
+              </button>
+            </div>
+          </div>
+        ) : null}
+      </div>
+      {error ? <small className="personal-field-error">{error}</small> : null}
+      {selectedValues.length ? (
+        <div className="job-selected-list">
+          <strong>
+            {selectedLabel} ({selectedValues.length})
+          </strong>
+          <div>
+            {selectedValues.map((selectedValue) => (
+              <button type="button" key={selectedValue} onClick={() => removeOption(selectedValue)}>
+                <span>{selectedValue}</span>
+                <Icon>cancel</Icon>
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function PersonalRadioGroup({ error, label, name, onChange, options, value }) {
   return (
     <fieldset className={`personal-radio-group ${error ? "has-error" : ""}`}>
@@ -501,6 +747,46 @@ function PersonalRadioGroup({ error, label, name, onChange, options, value }) {
             <input type="radio" name={name} value={option} checked={value === option} onChange={onChange} />
             <span>{option}</span>
           </label>
+        ))}
+      </div>
+      {error ? <small className="personal-field-error">{error}</small> : null}
+    </fieldset>
+  );
+}
+
+function ChoicePillGroup({ error, label, multiple = false, onChange, options, optional = false, value }) {
+  const selectedValues = multiple ? (Array.isArray(value) ? value : []) : [value].filter(Boolean);
+
+  const toggleOption = (option) => {
+    if (multiple) {
+      onChange(
+        selectedValues.includes(option)
+          ? selectedValues.filter((item) => item !== option)
+          : [...selectedValues, option],
+      );
+      return;
+    }
+
+    onChange(option);
+  };
+
+  return (
+    <fieldset className={`job-choice-group ${error ? "has-error" : ""}`}>
+      <legend>
+        {label}
+        {optional ? <em> (tidak wajib)</em> : "*"}
+      </legend>
+      <div>
+        {options.map((option) => (
+          <button
+            type="button"
+            className={selectedValues.includes(option) ? "selected" : ""}
+            key={option}
+            onClick={() => toggleOption(option)}
+          >
+            {selectedValues.includes(option) ? <Icon>check</Icon> : null}
+            {option}
+          </button>
         ))}
       </div>
       {error ? <small className="personal-field-error">{error}</small> : null}
@@ -1370,7 +1656,12 @@ function JobPreferencesSummary({ preferences }) {
             <article className="job-preference-card" key={job.id}>
               <strong>{job.title}</strong>
               <span>{job.careerLevel || "Tahap kerjaya belum dipilih"}</span>
-              <span>{job.employmentType || "Jenis pekerjaan belum dipilih"}</span>
+              <span>
+                {job.employmentStatuses?.length
+                  ? job.employmentStatuses.join(", ")
+                  : "Status pekerjaan belum dipilih"}
+              </span>
+              {job.expectedSalary ? <span>Gaji dijangka: RM {job.expectedSalary}</span> : null}
             </article>
           ))}
         </div>
@@ -1382,18 +1673,56 @@ function JobPreferencesSummary({ preferences }) {
 function JobPreferencesForm({ onDraftChange, onSave, preferencesData, saveRequestKey }) {
   const handledSaveRequestRef = useRef(saveRequestKey);
   const [careerObjective, setCareerObjective] = useState(preferencesData.careerObjective);
+  const [expandedPreferredJobId, setExpandedPreferredJobId] = useState(preferencesData.preferredJobs[0]?.id || null);
   const [isLookingForJob, setIsLookingForJob] = useState(preferencesData.isLookingForJob);
   const [preferredJobs, setPreferredJobs] = useState(preferencesData.preferredJobs);
   const [saveError, setSaveError] = useState("");
   const [validationErrors, setValidationErrors] = useState({});
 
   const updatePreferredJob = (id, field) => (event) => {
+    updatePreferredJobValue(id, field, event.target.value);
+  };
+
+  const updatePreferredJobValue = (id, field, value) => {
     setPreferredJobs((current) =>
       current.map((job) =>
         job.id === id
           ? {
               ...job,
-              [field]: event.target.value,
+              [field]: value,
+              ...(field === "state" ? { city: "" } : {}),
+            }
+          : job,
+      ),
+    );
+  };
+
+  const addSkillToJob = (id, skill) => {
+    const normalizedSkill = skill.trim();
+
+    if (!normalizedSkill) {
+      return;
+    }
+
+    setPreferredJobs((current) =>
+      current.map((job) =>
+        job.id === id && !job.skills.includes(normalizedSkill)
+          ? {
+              ...job,
+              skills: [...job.skills, normalizedSkill],
+            }
+          : job,
+      ),
+    );
+  };
+
+  const removeSkillFromJob = (id, skill) => {
+    setPreferredJobs((current) =>
+      current.map((job) =>
+        job.id === id
+          ? {
+              ...job,
+              skills: job.skills.filter((item) => item !== skill),
             }
           : job,
       ),
@@ -1401,11 +1730,15 @@ function JobPreferencesForm({ onDraftChange, onSave, preferencesData, saveReques
   };
 
   const addPreferredJob = () => {
-    setPreferredJobs((current) => [...current, createEmptyPreferredJob()]);
+    const newJob = createEmptyPreferredJob();
+
+    setPreferredJobs((current) => [...current, newJob]);
+    setExpandedPreferredJobId(newJob.id);
   };
 
   const removePreferredJob = (id) => {
     setPreferredJobs((current) => current.filter((job) => job.id !== id));
+    setExpandedPreferredJobId((current) => (current === id ? null : current));
   };
 
   const validateJobPreferences = useCallback(() => {
@@ -1424,8 +1757,19 @@ function JobPreferencesForm({ onDraftChange, onSave, preferencesData, saveReques
     }
 
     preferredJobs.forEach((job) => {
-      ["title", "careerLevel", "employmentType"].forEach((field) => {
+      ["title", "careerLevel", "expectedSalary"].forEach((field) => {
         if (!String(job[field] || "").trim()) {
+          errors[`preferred-job-${job.id}-${field}`] = "Wajib diisi.";
+        }
+      });
+
+      [
+        ["sectors", job.sectors],
+        ["skills", job.skills],
+        ["employmentStatuses", job.employmentStatuses],
+        ["workTimes", job.workTimes],
+      ].forEach(([field, values]) => {
+        if (!Array.isArray(values) || values.length === 0) {
           errors[`preferred-job-${job.id}-${field}`] = "Wajib diisi.";
         }
       });
@@ -1449,6 +1793,14 @@ function JobPreferencesForm({ onDraftChange, onSave, preferencesData, saveReques
     setSaveError("");
 
     if (Object.keys(errors).length > 0) {
+      const invalidJob = preferredJobs.find((job) =>
+        Object.keys(errors).some((field) => field.startsWith(`preferred-job-${job.id}-`)),
+      );
+
+      if (invalidJob) {
+        setExpandedPreferredJobId(invalidJob.id);
+      }
+
       return;
     }
 
@@ -1457,7 +1809,7 @@ function JobPreferencesForm({ onDraftChange, onSave, preferencesData, saveReques
     } catch (error) {
       setSaveError(error.message || "Pilihan pekerjaan tidak dapat disimpan. Sila cuba lagi.");
     }
-  }, [getCurrentDraft, onSave, validateJobPreferences]);
+  }, [getCurrentDraft, onSave, preferredJobs, validateJobPreferences]);
 
   useEffect(() => {
     const draft = getCurrentDraft();
@@ -1509,16 +1861,69 @@ function JobPreferencesForm({ onDraftChange, onSave, preferencesData, saveReques
             <small className="personal-field-error">{validationErrors.preferredJobs}</small>
           ) : null}
           {preferredJobs.map((job) => (
+            expandedPreferredJobId !== job.id ? (
+              <article className="job-preference-card" key={job.id}>
+                <strong>{job.title || "Pilihan pekerjaan belum lengkap"}</strong>
+                <span>{job.careerLevel || "Tahap kerjaya belum dipilih"}</span>
+                <span>
+                  {job.employmentStatuses.length ? job.employmentStatuses.join(", ") : "Status pekerjaan belum dipilih"}
+                </span>
+                <div className="job-preference-card-actions">
+                  <button type="button" className="personal-primary-button" onClick={() => setExpandedPreferredJobId(job.id)}>
+                    Kemaskini
+                  </button>
+                  <button type="button" className="personal-outline-button" onClick={() => removePreferredJob(job.id)}>
+                    Padam
+                  </button>
+                </div>
+              </article>
+            ) : (
             <div className="job-preference-edit-card" key={job.id}>
-              <PersonalField label="Jawatan pilihan" error={validationErrors[`preferred-job-${job.id}-title`]}>
-                <input
-                  type="text"
-                  value={job.title}
-                  placeholder="Contoh. Pembangun laman web"
-                  onChange={updatePreferredJob(job.id, "title")}
-                />
+              <PersonalField label="Pilihan Pekerjaan" error={validationErrors[`preferred-job-${job.id}-title`]}>
+                <div className="job-search-input">
+                  <Icon>search</Icon>
+                  <input
+                    type="text"
+                    value={job.title}
+                    placeholder="Contoh. Pembangun laman web"
+                    onChange={updatePreferredJob(job.id, "title")}
+                  />
+                </div>
+                <small>Sila masukkan dan pilih pekerjaan yang paling hampir yang anda cari.</small>
               </PersonalField>
-              <PersonalField label="Tahap kerjaya" error={validationErrors[`preferred-job-${job.id}-careerLevel`]}>
+
+              <label className="job-checkbox-row">
+                <input
+                  type="checkbox"
+                  checked={job.hasRelatedExperience}
+                  onChange={(event) => updatePreferredJobValue(job.id, "hasRelatedExperience", event.target.checked)}
+                />
+                <span>Saya mempunyai pengalaman berkaitan kerja ini</span>
+              </label>
+
+              <div className="job-preference-tip">
+                <header>
+                  <span>
+                    <Icon>emoji_objects</Icon>
+                  </span>
+                  <strong>Apa yang anda perlu memiliki untuk pekerjaan tersebut</strong>
+                  <button type="button" aria-label="Tutup tip">
+                    <Icon>remove</Icon>
+                  </button>
+                </header>
+                <p>
+                  Nampaknya ada kekurangan dari profil anda untuk menjadi {job.title || "pekerjaan pilihan ini"}.
+                </p>
+                <p>
+                  Sekiranya anda perlu mengetahui apakah persiapan yang perlu dibuat untuk pekerjaan ini, sila layari
+                  laluan "Hala Tuju Kerjaya Saya".
+                </p>
+                <button type="button" className="personal-primary-button">
+                  Hala Tuju Kerjaya Saya
+                </button>
+              </div>
+
+              <PersonalField label="Taraf Jawatan Pilihan" error={validationErrors[`preferred-job-${job.id}-careerLevel`]}>
                 <PersonalSelect
                   value={job.careerLevel}
                   placeholder="Pilih tahap kerjaya"
@@ -1526,20 +1931,130 @@ function JobPreferencesForm({ onDraftChange, onSave, preferencesData, saveReques
                   options={careerLevelOptions}
                 />
               </PersonalField>
-              <PersonalField label="Jenis pekerjaan" error={validationErrors[`preferred-job-${job.id}-employmentType`]}>
+
+              <div className="personal-field">
+                <span>Sektor Pilihan*</span>
+                <PersonalMultiSelect
+                  value={job.sectors}
+                  placeholder="Pilih satu atau lebih"
+                  selectedLabel="Sektor Pilihan Ditambah"
+                  error={validationErrors[`preferred-job-${job.id}-sectors`]}
+                  options={sectorOptions}
+                  onChange={(values) => updatePreferredJobValue(job.id, "sectors", values)}
+                />
+              </div>
+
+              <PersonalField label="Kemahiran Berkaitan" error={validationErrors[`preferred-job-${job.id}-skills`]}>
+                <div className="job-search-input">
+                  <Icon>search</Icon>
+                  <input
+                    type="text"
+                    placeholder="Contoh. Perform market research"
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        addSkillToJob(job.id, event.currentTarget.value);
+                        event.currentTarget.value = "";
+                      }
+                    }}
+                  />
+                </div>
+                <small>Anda boleh membuat penambahan kemahiran yang anda miliki secara manual.</small>
+              </PersonalField>
+
+              {job.skills.length ? (
+                <div className="job-selected-list">
+                  <strong>Kemahiran Anda ({job.skills.length})</strong>
+                  <div>
+                    {job.skills.map((skill) => (
+                      <button type="button" key={skill} onClick={() => removeSkillFromJob(job.id, skill)}>
+                        <span>{skill}</span>
+                        <Icon>cancel</Icon>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              <div className="job-suggested-skills">
+                <strong>Berikut adalah kemahiran yang dicadangkan berdasarkan pilihan pekerjaan anda.</strong>
+                <div>
+                  {defaultSkillSuggestions
+                    .filter((skill) => !job.skills.includes(skill))
+                    .map((skill) => (
+                      <button type="button" key={skill} onClick={() => addSkillToJob(job.id, skill)}>
+                        <Icon>add</Icon>
+                        {skill}
+                      </button>
+                    ))}
+                </div>
+              </div>
+
+              <ChoicePillGroup
+                label="Status Pilihan Pekerjaan"
+                multiple
+                error={validationErrors[`preferred-job-${job.id}-employmentStatuses`]}
+                value={job.employmentStatuses}
+                options={employmentStatusOptions}
+                onChange={(values) => updatePreferredJobValue(job.id, "employmentStatuses", values)}
+              />
+
+              <ChoicePillGroup
+                label="Pilihan Waktu Bekerja"
+                multiple
+                error={validationErrors[`preferred-job-${job.id}-workTimes`]}
+                value={job.workTimes}
+                options={workTimeOptions}
+                onChange={(values) => updatePreferredJobValue(job.id, "workTimes", values)}
+              />
+
+              <ChoicePillGroup
+                label="Gaji Yang Dijangkakan (MYR)"
+                error={validationErrors[`preferred-job-${job.id}-expectedSalary`]}
+                value={job.expectedSalary}
+                options={salaryRangeOptions}
+                onChange={(value) => updatePreferredJobValue(job.id, "expectedSalary", value)}
+              />
+
+              <PersonalField label="Negeri" optional>
                 <PersonalSelect
-                  value={job.employmentType}
-                  placeholder="Pilih jenis pekerjaan"
-                  onChange={updatePreferredJob(job.id, "employmentType")}
-                  options={employmentTypeOptions}
+                  value={job.state}
+                  placeholder="Pilih negeri"
+                  searchable
+                  onChange={updatePreferredJob(job.id, "state")}
+                  options={stateOptions}
                 />
               </PersonalField>
+
+              <PersonalField label="Bandar" optional>
+                <PersonalSelect
+                  value={job.city}
+                  placeholder={job.state ? "Pilih bandar" : "Pilih negeri dahulu"}
+                  searchable
+                  onChange={updatePreferredJob(job.id, "city")}
+                  options={job.state ? toSelectOptions(getCities(job.state)) : []}
+                />
+              </PersonalField>
+
+              <PersonalField label="Jarak" optional>
+                <PersonalSelect
+                  value={job.distance}
+                  placeholder="Pilih jarak"
+                  onChange={updatePreferredJob(job.id, "distance")}
+                  options={toSelectOptions(distanceOptions)}
+                />
+              </PersonalField>
+
               <div className="job-preference-edit-actions">
+                <button type="button" className="personal-primary-button" onClick={() => setExpandedPreferredJobId(null)}>
+                  Selesai
+                </button>
                 <button type="button" className="personal-outline-button" onClick={() => removePreferredJob(job.id)}>
                   Padam
                 </button>
               </div>
             </div>
+            )
           ))}
           <button type="button" className="personal-add-reference job-preference-add-button" onClick={addPreferredJob}>
             <Icon>add_circle</Icon>

@@ -5105,14 +5105,242 @@ body:has(.applicant-profile-page) {
   margin-top: 2px;
 }
 
+.job-preference-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
+
 .job-preference-edit-card {
-  gap: 16px;
-  padding: 20px;
+  gap: 18px;
+  padding: 22px;
+}
+
+.job-search-input {
+  display: flex;
+  min-height: 50px;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--profile-pale);
+  border-radius: 6px;
+  background: var(--profile-surface);
+  color: var(--profile-ink);
+  padding: 0 14px;
+}
+
+.job-search-input:focus-within {
+  border-color: var(--profile-green);
+  box-shadow: 0 0 0 3px var(--profile-mint);
+}
+
+.job-search-input .material-symbols-outlined {
+  color: var(--profile-green);
+  font-size: 20px;
+}
+
+.personal-field .job-search-input input {
+  min-height: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+.job-checkbox-row {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 9px;
+  color: var(--profile-ink);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.job-checkbox-row input,
+.job-multi-select-options input {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  accent-color: var(--profile-green);
+}
+
+.job-preference-tip,
+.job-suggested-skills {
+  display: grid;
+  gap: 14px;
+  border: 1px solid var(--profile-pale);
+  border-radius: 6px;
+  background: var(--profile-surface);
+  padding: 16px;
+}
+
+.job-preference-tip header {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) 24px;
+  gap: 9px;
+  align-items: start;
+}
+
+.job-preference-tip header > span {
+  color: var(--profile-green);
+}
+
+.job-preference-tip strong,
+.job-suggested-skills strong,
+.job-selected-list strong {
+  color: var(--profile-ink);
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.4;
+}
+
+.job-preference-tip p {
+  margin: 0;
+  color: var(--profile-ink);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.job-preference-tip > .personal-primary-button {
+  width: fit-content;
+  min-height: 34px;
+}
+
+.job-preference-tip header button {
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: var(--profile-green);
+}
+
+.job-multi-select {
+  display: grid;
+  gap: 12px;
+}
+
+.job-multi-select.has-error .personal-select-button {
+  border-color: var(--profile-green);
+  box-shadow: 0 0 0 3px var(--profile-pale);
+}
+
+.job-multi-select-menu {
+  box-shadow: 0 18px 34px rgba(17, 24, 39, 0.12);
+}
+
+.job-multi-select-options {
+  display: grid;
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.job-multi-select-options label {
+  display: grid;
+  min-height: 52px;
+  align-items: start;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 8px;
+  border-bottom: 1px solid rgba(209, 250, 229, 0.72);
+  color: var(--profile-ink);
+  font-size: 13px;
+  font-weight: 850;
+  line-height: 1.35;
+  padding: 12px 16px;
+}
+
+.job-multi-select-options label:hover {
+  background: var(--profile-pale);
+}
+
+.job-multi-select-footer {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid var(--profile-pale);
+  padding: 10px 16px;
+}
+
+.job-selected-list {
+  display: grid;
+  gap: 8px;
+}
+
+.job-selected-list > div,
+.job-suggested-skills > div,
+.job-choice-group > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.job-selected-list button,
+.job-suggested-skills button,
+.job-choice-group button {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid var(--profile-pale);
+  border-radius: 6px;
+  background: var(--profile-surface);
+  color: var(--profile-ink);
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.job-selected-list button {
+  border-color: var(--profile-green);
+  background: var(--profile-pale);
+}
+
+.job-selected-list .material-symbols-outlined,
+.job-suggested-skills .material-symbols-outlined,
+.job-choice-group .material-symbols-outlined {
+  font-size: 17px;
+}
+
+.job-suggested-skills {
+  background: #ffffff;
+}
+
+.job-choice-group {
+  display: grid;
+  gap: 9px;
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+.job-choice-group legend {
+  color: var(--profile-ink);
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
+.job-choice-group legend em {
+  color: var(--profile-green);
+  font-style: normal;
+  font-weight: 850;
+}
+
+.job-choice-group button.selected {
+  border-color: var(--profile-green);
+  background: var(--profile-pale);
+  color: var(--profile-green);
 }
 
 .job-preference-edit-actions {
   display: flex;
   justify-content: flex-end;
+  gap: 10px;
 }
 
 .job-preference-add-button {
