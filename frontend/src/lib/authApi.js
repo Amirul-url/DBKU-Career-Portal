@@ -55,6 +55,25 @@ export function saveAuthSession(data) {
   localStorage.setItem(TOKEN_STORAGE_KEYS.user, JSON.stringify(data.user));
 }
 
+export function getStoredUser() {
+  const storedUser = localStorage.getItem(TOKEN_STORAGE_KEYS.user);
+  if (!storedUser) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(storedUser);
+  } catch {
+    return null;
+  }
+}
+
+export function clearAuthSession() {
+  localStorage.removeItem(TOKEN_STORAGE_KEYS.access);
+  localStorage.removeItem(TOKEN_STORAGE_KEYS.refresh);
+  localStorage.removeItem(TOKEN_STORAGE_KEYS.user);
+}
+
 export function registerApplicant({ fullName, email, password, password2 }) {
   return authRequest("/auth/register/", {
     full_name: fullName.trim().toUpperCase(),

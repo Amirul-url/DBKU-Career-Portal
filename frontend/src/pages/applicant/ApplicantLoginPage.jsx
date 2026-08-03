@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { loginApplicant, saveAuthSession } from "../../lib/authApi";
 import { ApplicantAuthLayout, AuthField, PasswordField } from "./ApplicantAuthShared";
 
 function LoginForm() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [status, setStatus] = useState(
     location.state?.message ? { type: "success", message: location.state.message } : { type: "", message: "" }
@@ -26,10 +28,7 @@ function LoginForm() {
     try {
       const data = await loginApplicant(formData);
       saveAuthSession(data);
-      setStatus({
-        type: "success",
-        message: "Log masuk berjaya. Dashboard pemohon akan disediakan selepas ini.",
-      });
+      navigate("/profile");
     } catch (error) {
       setStatus({ type: "error", message: error.message });
     } finally {

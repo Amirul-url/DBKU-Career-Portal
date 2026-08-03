@@ -2,6 +2,7 @@ import { Route, Routes } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import JobMarketplacePage from "./pages/JobMarketplacePage";
 import ApplicantLoginPage from "./pages/applicant/ApplicantLoginPage";
+import ApplicantProfilePage from "./pages/applicant/ApplicantProfilePage";
 import ApplicantRegisterPage from "./pages/applicant/ApplicantRegisterPage";
 
 export default function App() {
@@ -11,6 +12,7 @@ export default function App() {
       <Route path="/landing" element={<LandingPage />} />
       <Route path="/jobs" element={<JobMarketplacePage />} />
       <Route path="/login" element={<ApplicantLoginPage />} />
+      <Route path="/profile" element={<ApplicantProfilePage />} />
       <Route path="/register" element={<ApplicantRegisterPage />} />
     </Routes>
   );
