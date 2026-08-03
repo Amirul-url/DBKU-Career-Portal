@@ -58,9 +58,13 @@ function ProfileContentHeader({ user }) {
             <Icon>expand_more</Icon>
           </summary>
           <div className="profile-account-dropdown">
-            <div>
-              <strong>{user?.full_name || user?.first_name || "Pemohon DBKU"}</strong>
-              <small>{user?.email || "Akaun pemohon"}</small>
+            <div className="profile-account-card-head">
+              <span className="profile-user-chip">{user?.full_name?.charAt(0) || user?.email?.charAt(0) || "P"}</span>
+              <span>
+                <small>Akaun Pemohon</small>
+                <strong>{user?.full_name || user?.first_name || "Pemohon DBKU"}</strong>
+                <em>{user?.email || "Akaun pemohon"}</em>
+              </span>
             </div>
             <button type="button" className="profile-logout-button" onClick={handleLogout}>
               <Icon>logout</Icon>

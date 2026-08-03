@@ -3666,21 +3666,49 @@ body:has(.applicant-profile-page) {
 
 .profile-account-dropdown {
   position: absolute;
-  top: calc(100% + 10px);
+  top: calc(100% + 12px);
   right: 0;
   z-index: 60;
   display: grid;
-  width: 260px;
-  gap: 12px;
-  border: 1px solid #d8e4df;
-  border-radius: 10px;
+  width: min(340px, calc(100vw - 32px));
+  box-sizing: border-box;
+  gap: 10px;
+  border: 1px solid #dbe4df;
+  border-radius: 8px;
   background: #ffffff;
-  box-shadow: 0 18px 42px rgba(17, 24, 39, 0.14);
-  padding: 14px;
+  box-shadow: 0 18px 48px rgba(17, 24, 39, 0.16);
+  padding: 10px;
+}
+
+.profile-account-dropdown::before {
+  position: absolute;
+  top: -7px;
+  right: 22px;
+  width: 12px;
+  height: 12px;
+  border-top: 1px solid #dbe4df;
+  border-left: 1px solid #dbe4df;
+  background: #ffffff;
+  content: "";
+  transform: rotate(45deg);
+}
+
+.profile-account-card-head {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #edf2ef;
+  padding: 8px 8px 12px;
+}
+
+.profile-account-card-head > span:last-child {
+  min-width: 0;
 }
 
 .profile-account-dropdown strong,
-.profile-account-dropdown small {
+.profile-account-dropdown small,
+.profile-account-dropdown em {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -3688,36 +3716,47 @@ body:has(.applicant-profile-page) {
 }
 
 .profile-account-dropdown strong {
+  margin-top: 3px;
   color: #111827;
   font-size: 13px;
   font-weight: 900;
 }
 
 .profile-account-dropdown small {
+  color: #006c49;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.profile-account-dropdown em {
   margin-top: 4px;
   color: #64748b;
   font-size: 12px;
-  font-weight: 750;
+  font-style: normal;
+  font-weight: 700;
 }
 
 .profile-logout-button {
   display: inline-flex;
   width: 100%;
-  min-height: 40px;
+  min-height: 42px;
+  box-sizing: border-box;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 8px;
   border: 0;
-  border-radius: 8px;
-  background: #111827;
-  color: #ffffff;
-  padding: 0 14px;
+  border-radius: 7px;
+  background: transparent;
+  color: #111827;
+  padding: 0 10px;
   font-size: 13px;
   font-weight: 900;
 }
 
 .profile-logout-button:hover {
-  background: #006c49;
+  background: #f8fafc;
+  color: #006c49;
 }
 
 .profile-shell {
