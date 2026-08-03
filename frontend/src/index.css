@@ -4029,8 +4029,7 @@ body:has(.applicant-profile-page) {
   height: 42px;
 }
 
-.profile-sidebar-brand strong,
-.profile-sidebar-user strong {
+.profile-sidebar-brand strong {
   display: block;
   overflow: hidden;
   color: #111827;
@@ -4040,8 +4039,7 @@ body:has(.applicant-profile-page) {
   white-space: nowrap;
 }
 
-.profile-sidebar-brand small,
-.profile-sidebar-user small {
+.profile-sidebar-brand small {
   display: block;
   overflow: hidden;
   margin-top: 3px;
@@ -4126,51 +4124,6 @@ body:has(.applicant-profile-page) {
   background: transparent;
 }
 
-.profile-sidebar-footer {
-  display: grid;
-  gap: 12px;
-  border-top: 1px solid #e2e8f0;
-  padding: 14px;
-}
-
-.profile-sidebar-user {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 10px;
-}
-
-.profile-sidebar-user > span:last-child {
-  min-width: 0;
-}
-
-.profile-sidebar-logout {
-  display: inline-flex;
-  min-height: 42px;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border: 0;
-  border-radius: 8px;
-  background: #111827;
-  color: #ffffff;
-  font-size: 13px;
-  font-weight: 900;
-}
-
-.profile-sidebar-logout:hover {
-  background: #006c49;
-}
-
-.profile-sidebar.collapsed .profile-sidebar-footer {
-  padding: 10px;
-}
-
-.profile-sidebar.collapsed .profile-sidebar-logout {
-  width: 44px;
-  min-height: 44px;
-}
-
 .profile-content-header {
   position: sticky;
   top: 0;
@@ -4221,14 +4174,9 @@ body:has(.applicant-profile-page) {
   max-width: 720px;
 }
 
-.profile-heading span {
-  font-size: 12px;
-  letter-spacing: 0;
-}
-
 .profile-heading h1 {
-  margin-top: 8px;
-  font-size: 36px;
+  margin: 0;
+  font-size: 32px;
   line-height: 1.15;
 }
 

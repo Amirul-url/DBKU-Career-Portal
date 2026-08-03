@@ -61,14 +61,7 @@ function ProfileContentHeader({ user }) {
   );
 }
 
-function ProfileSidebar({ isOpen, onToggle, user }) {
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    clearAuthSession();
-    navigate("/login");
-  };
-
+function ProfileSidebar({ isOpen, onToggle }) {
   return (
     <aside className={`profile-sidebar ${isOpen ? "open" : "collapsed"}`} aria-label="Navigasi pemohon">
       <div className="profile-sidebar-head">
@@ -118,23 +111,6 @@ function ProfileSidebar({ isOpen, onToggle, user }) {
           )
         ))}
       </nav>
-
-      <div className="profile-sidebar-footer">
-        {isOpen ? (
-          <div className="profile-sidebar-user">
-            <span className="profile-user-chip">{user?.full_name?.charAt(0) || user?.email?.charAt(0) || "P"}</span>
-            <span>
-              <strong>{user?.full_name || user?.first_name || "Pemohon DBKU"}</strong>
-              <small>{user?.email || "Akaun pemohon"}</small>
-            </span>
-          </div>
-        ) : null}
-
-        <button type="button" className="profile-sidebar-logout" onClick={handleLogout} title="Log Keluar">
-          <Icon>logout</Icon>
-          {isOpen ? "Log Keluar" : <span className="sr-only">Log Keluar</span>}
-        </button>
-      </div>
     </aside>
   );
 }
@@ -173,12 +149,11 @@ export default function ApplicantProfilePage() {
 
   return (
     <div className={`applicant-profile-page ${sidebarOpen ? "sidebar-open" : "sidebar-collapsed"}`}>
-      <ProfileSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen((current) => !current)} user={user} />
+      <ProfileSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen((current) => !current)} />
       <div className="profile-main-area">
         <ProfileContentHeader user={user} />
         <main className="profile-shell">
         <div className="profile-heading">
-          <span>Profil Pemohon</span>
           <h1>Profil Saya</h1>
           <p>Lengkapkan profil sebelum menghantar permohonan kerja kosong atau latihan industri DBKU.</p>
         </div>
