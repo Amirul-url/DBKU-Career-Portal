@@ -2006,32 +2006,37 @@ a {
 .market-nav-actions {
   display: inline-flex;
   align-items: center;
-  gap: 14px;
+  gap: 18px;
 }
 
 .market-nav-actions a {
   display: inline-flex;
-  min-height: 40px;
+  min-width: 126px;
+  min-height: 42px;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  padding: 0 18px;
-  color: var(--primary-strong);
+  border-radius: 999px;
+  background: #21185f;
+  padding: 0 24px;
+  color: #ffffff;
   font-size: 14px;
   font-weight: 800;
+  box-shadow: 0 10px 20px rgba(33, 24, 95, 0.12);
 }
 
 .market-nav-actions a:hover {
-  background: #ecfdf5;
+  background: #2d2376;
 }
 
 .market-nav-actions .market-register-link {
-  background: var(--primary-strong);
+  min-width: 188px;
+  background: #ff6b21;
   color: #ffffff;
+  box-shadow: 0 10px 20px rgba(255, 107, 33, 0.16);
 }
 
 .market-nav-actions .market-register-link:hover {
-  background: var(--secondary);
+  background: #e95b14;
 }
 
 .market-shell {
