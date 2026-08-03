@@ -87,7 +87,6 @@ function ProfileSidebar({ isOpen, onToggle }) {
             </span>
             <span>
               <strong>Portal Kerjaya DBKU</strong>
-              <small>Portal Pemohon</small>
             </span>
           </Link>
         ) : null}
