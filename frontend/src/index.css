@@ -3249,8 +3249,40 @@ body:has(.auth-page) {
   background: linear-gradient(135deg, #15803d, var(--split-green));
 }
 
+.split-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.68;
+}
+
 .register-split-form .split-submit {
   margin-top: 10px;
+}
+
+.split-alert {
+  margin: -2px 0 0;
+  border: 1px solid rgba(209, 250, 229, 0.16);
+  border-radius: 10px;
+  padding: 11px 13px;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.split-alert.error {
+  border-color: rgba(248, 113, 113, 0.34);
+  background: rgba(127, 29, 29, 0.26);
+  color: #fecaca;
+}
+
+.split-alert.success {
+  border-color: rgba(134, 239, 172, 0.36);
+  background: rgba(20, 83, 45, 0.26);
+  color: #bbf7d0;
+}
+
+.split-input:has(input:disabled),
+.split-password-toggle:disabled {
+  opacity: 0.72;
 }
 
 .split-mobile-switch {

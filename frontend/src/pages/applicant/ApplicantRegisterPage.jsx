@@ -1,9 +1,48 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { registerApplicant, saveAuthSession } from "../../lib/authApi";
 import { ApplicantAuthLayout, AuthField, PasswordField } from "./ApplicantAuthShared";
 
 function RegisterForm() {
-  const handleUppercaseInput = (event) => {
-    event.currentTarget.value = event.currentTarget.value.toUpperCase();
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    password: "",
+    password2: "",
+  });
+  const [status, setStatus] = useState({ type: "", message: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleChange = (event) => {
+    const { name, value } = event.currentTarget;
+    setFormData((current) => ({
+      ...current,
+      [name]: name === "fullName" ? value.toUpperCase() : value,
+    }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setStatus({ type: "", message: "" });
+
+    if (formData.password !== formData.password2) {
+      setStatus({ type: "error", message: "Kata laluan dan sahkan kata laluan mesti sama." });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const data = await registerApplicant(formData);
+      saveAuthSession(data);
+      setStatus({ type: "success", message: "Akaun berjaya didaftarkan. Anda telah log masuk." });
+      navigate("/jobs");
+    } catch (error) {
+      setStatus({ type: "error", message: error.message });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -12,37 +51,65 @@ function RegisterForm() {
       <h1 id="register-title">Daftar Akaun</h1>
       <p>Cipta akaun menggunakan emel aktif supaya notifikasi permohonan mudah diterima.</p>
 
-      <form className="split-form register-split-form">
+      <form className="split-form register-split-form" onSubmit={handleSubmit}>
         <AuthField icon="person" label="Nama Penuh" required>
           <input
             type="text"
+            name="fullName"
+            value={formData.fullName}
             placeholder="Nama seperti dalam MyKad"
             autoComplete="name"
-            onInput={handleUppercaseInput}
+            disabled={isSubmitting}
+            onChange={handleChange}
             required
           />
         </AuthField>
 
         <AuthField icon="mail" label="Emel" required>
-          <input type="email" placeholder="cth. example@example.com" autoComplete="email" required />
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            placeholder="cth. example@example.com"
+            autoComplete="email"
+            disabled={isSubmitting}
+            onChange={handleChange}
+            required
+          />
         </AuthField>
 
         <PasswordField
           label="Kata Laluan"
+          name="password"
+          value={formData.password}
           placeholder="masukkan kata laluan anda"
           autoComplete="new-password"
+          disabled={isSubmitting}
+          onChange={handleChange}
           required
         />
 
         <PasswordField
           icon="shield"
           label="Sahkan Kata Laluan"
+          name="password2"
+          value={formData.password2}
           placeholder="masukkan semula kata laluan anda"
           autoComplete="new-password"
+          disabled={isSubmitting}
+          onChange={handleChange}
           required
         />
 
-        <button type="button" className="split-submit">Daftar Akaun</button>
+        {status.message ? (
+          <p className={`split-alert ${status.type}`} role={status.type === "error" ? "alert" : "status"}>
+            {status.message}
+          </p>
+        ) : null}
+
+        <button type="submit" className="split-submit" disabled={isSubmitting}>
+          {isSubmitting ? "Mendaftar..." : "Daftar Akaun"}
+        </button>
       </form>
 
       <p className="split-mobile-switch">

@@ -62,6 +62,10 @@ export function PasswordField({
   placeholder,
   autoComplete,
   required = false,
+  name,
+  value,
+  disabled = false,
+  onChange,
 }) {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -69,8 +73,12 @@ export function PasswordField({
     <AuthField icon={icon} label={label} required={required}>
       <input
         type={isVisible ? "text" : "password"}
+        name={name}
+        value={value}
         placeholder={placeholder}
         autoComplete={autoComplete}
+        disabled={disabled}
+        onChange={onChange}
         required={required}
       />
       <button
@@ -78,6 +86,7 @@ export function PasswordField({
         type="button"
         aria-label={isVisible ? "Sembunyikan kata laluan" : "Tunjuk kata laluan"}
         aria-pressed={isVisible}
+        disabled={disabled}
         onClick={() => setIsVisible((current) => !current)}
       >
         <Icon>{isVisible ? "visibility" : "visibility_off"}</Icon>
