@@ -4594,6 +4594,15 @@ body:has(.applicant-profile-page) {
   box-shadow: 0 0 0 3px var(--profile-mint);
 }
 
+.personal-field.has-error input,
+.personal-field.has-error textarea,
+.personal-field.has-error .personal-select-button,
+.personal-radio-group.has-error,
+.personal-date-group.has-error input {
+  border-color: var(--profile-green);
+  box-shadow: 0 0 0 3px var(--profile-pale);
+}
+
 .personal-field input:disabled {
   background: var(--profile-pale);
   color: var(--profile-ink);
@@ -4609,6 +4618,12 @@ body:has(.applicant-profile-page) {
   font-size: 12px;
   font-weight: 650;
   line-height: 1.35;
+}
+
+.personal-field-error {
+  color: var(--profile-green);
+  font-size: 12px;
+  font-weight: 900;
 }
 
 .personal-info-helper {

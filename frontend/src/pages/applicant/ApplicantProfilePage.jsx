@@ -194,15 +194,16 @@ function InfoHelper({ body, title }) {
   );
 }
 
-function PersonalField({ children, hint, info, label, optional = false }) {
+function PersonalField({ children, error, hint, info, label, optional = false }) {
   return (
-    <label className="personal-field">
+    <label className={`personal-field ${error ? "has-error" : ""}`}>
       <span>
         {label}
         {optional ? <em> (tidak wajib)</em> : "*"}
         {info ? <InfoHelper title={label} body={info} /> : null}
       </span>
       {children}
+      {error ? <small className="personal-field-error">{error}</small> : null}
       {hint ? <small>{hint}</small> : null}
     </label>
   );
@@ -278,9 +279,9 @@ function PersonalSelect({ onChange, options, placeholder, searchable = false, se
   );
 }
 
-function PersonalRadioGroup({ label, name, onChange, options, value }) {
+function PersonalRadioGroup({ error, label, name, onChange, options, value }) {
   return (
-    <fieldset className="personal-radio-group">
+    <fieldset className={`personal-radio-group ${error ? "has-error" : ""}`}>
       <legend>{label}*</legend>
       <div>
         {options.map((option) => (
@@ -290,6 +291,7 @@ function PersonalRadioGroup({ label, name, onChange, options, value }) {
           </label>
         ))}
       </div>
+      {error ? <small className="personal-field-error">{error}</small> : null}
     </fieldset>
   );
 }
@@ -417,6 +419,7 @@ function PersonalInformationForm({ profileData, onSave }) {
   const [resumeError, setResumeError] = useState("");
   const [videoResumeError, setVideoResumeError] = useState("");
   const [references, setReferences] = useState(profileData.references);
+  const [validationErrors, setValidationErrors] = useState({});
 
   const updateField = (field) => (event) => {
     setFormValues((current) => ({
@@ -559,7 +562,55 @@ function PersonalInformationForm({ profileData, onSave }) {
     setReferences((current) => current.filter((reference) => reference.id !== id));
   };
 
+  const validatePersonalProfile = () => {
+    const errors = {};
+    const requiredFields = [
+      ["displayName", formDisplayName],
+      ["identificationNumber", formValues.identificationNumber],
+      ["birthDay", formValues.birthDay],
+      ["birthMonth", formValues.birthMonth],
+      ["birthYear", formValues.birthYear],
+      ["citizenship", formValues.citizenship],
+      ["gender", formValues.gender],
+      ["hasHealthIssue", formValues.hasHealthIssue],
+      ["hasDisability", formValues.hasDisability],
+      ["state", formValues.state],
+      ["city", formValues.city],
+      ["postcode", formValues.postcode],
+      ["address", formValues.address],
+      ["email", formEmail],
+      ["primaryPhone", formValues.primaryPhone],
+    ];
+
+    requiredFields.forEach(([field, value]) => {
+      if (!String(value || "").trim()) {
+        errors[field] = "Wajib diisi.";
+      }
+    });
+
+    if (formValues.identificationNumber && formValues.identificationNumber.length !== 12) {
+      errors.identificationNumber = "Masukkan 12 digit nombor kad pengenalan.";
+    }
+
+    references.forEach((reference) => {
+      ["name", "relationship", "organisation", "phone"].forEach((field) => {
+        if (!String(reference[field] || "").trim()) {
+          errors[`reference-${reference.id}-${field}`] = "Wajib diisi.";
+        }
+      });
+    });
+
+    return errors;
+  };
+
   const handleSave = () => {
+    const errors = validatePersonalProfile();
+    setValidationErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+
     onSave({
       details: formValues,
       displayName: formDisplayName,
@@ -611,10 +662,10 @@ function PersonalInformationForm({ profileData, onSave }) {
         </ProfileFormRow>
 
         <ProfileFormRow label="Maklumat Peribadi">
-          <PersonalField label="Nama Penuh">
+          <PersonalField label="Nama Penuh" error={validationErrors.displayName}>
             <input type="text" value={formDisplayName} onChange={(event) => setFormDisplayName(event.target.value)} />
           </PersonalField>
-          <PersonalField label="Nombor Kad Pengenalan">
+          <PersonalField label="Nombor Kad Pengenalan" error={validationErrors.identificationNumber}>
             <input
               type="text"
               value={formValues.identificationNumber}
@@ -624,7 +675,11 @@ function PersonalInformationForm({ profileData, onSave }) {
               onChange={handleIdentificationNumberChange}
             />
           </PersonalField>
-          <div className="personal-date-group">
+          <div
+            className={`personal-date-group ${
+              validationErrors.birthDay || validationErrors.birthMonth || validationErrors.birthYear ? "has-error" : ""
+            }`}
+          >
             <span>
               Tarikh Lahir*
               <InfoHelper
@@ -646,6 +701,9 @@ function PersonalInformationForm({ profileData, onSave }) {
                 <input type="text" value={formValues.birthYear} readOnly />
               </label>
             </div>
+            {validationErrors.birthDay || validationErrors.birthMonth || validationErrors.birthYear ? (
+              <small className="personal-field-error">Wajib diisi melalui nombor kad pengenalan yang sah.</small>
+            ) : null}
           </div>
           <PersonalField label="Bangsa" optional>
             <PersonalSelect
@@ -665,6 +723,7 @@ function PersonalInformationForm({ profileData, onSave }) {
           <PersonalRadioGroup
             label="Kewarganegaraan"
             name="citizenship"
+            error={validationErrors.citizenship}
             onChange={updateField("citizenship")}
             options={["Malaysia", "Penduduk tetap"]}
             value={formValues.citizenship}
@@ -672,6 +731,7 @@ function PersonalInformationForm({ profileData, onSave }) {
           <PersonalRadioGroup
             label="Jantina"
             name="gender"
+            error={validationErrors.gender}
             onChange={updateField("gender")}
             options={["Perempuan", "Lelaki"]}
             value={formValues.gender}
@@ -686,6 +746,7 @@ function PersonalInformationForm({ profileData, onSave }) {
           <PersonalRadioGroup
             label="Adakah anda mempunyai sebarang masalah kesihatan?"
             name="health"
+            error={validationErrors.hasHealthIssue}
             onChange={updateField("hasHealthIssue")}
             options={["Ya", "Tidak"]}
             value={formValues.hasHealthIssue}
@@ -693,6 +754,7 @@ function PersonalInformationForm({ profileData, onSave }) {
           <PersonalRadioGroup
             label="Adakah anda mempunyai sebarang ketidakupayaan?"
             name="disability"
+            error={validationErrors.hasDisability}
             onChange={updateField("hasDisability")}
             options={["Ya", "Tidak"]}
             value={formValues.hasDisability}
@@ -700,7 +762,7 @@ function PersonalInformationForm({ profileData, onSave }) {
         </ProfileFormRow>
 
         <ProfileFormRow label="Alamat">
-          <PersonalField label="Negeri">
+          <PersonalField label="Negeri" error={validationErrors.state}>
             <PersonalSelect
               value={formValues.state}
               placeholder="Pilih negeri"
@@ -709,7 +771,7 @@ function PersonalInformationForm({ profileData, onSave }) {
               options={stateOptions}
             />
           </PersonalField>
-          <PersonalField label="Bandar">
+          <PersonalField label="Bandar" error={validationErrors.city}>
             <PersonalSelect
               value={formValues.city}
               placeholder={formValues.state ? "Pilih bandar" : "Pilih negeri dahulu"}
@@ -718,7 +780,7 @@ function PersonalInformationForm({ profileData, onSave }) {
               options={cityOptions}
             />
           </PersonalField>
-          <PersonalField label="Poskod">
+          <PersonalField label="Poskod" error={validationErrors.postcode}>
             <PersonalSelect
               value={formValues.postcode}
               placeholder={formValues.city ? "Pilih poskod" : "Pilih bandar dahulu"}
@@ -727,16 +789,20 @@ function PersonalInformationForm({ profileData, onSave }) {
               options={postcodeOptions}
             />
           </PersonalField>
-          <PersonalField label="Alamat">
+          <PersonalField label="Alamat" error={validationErrors.address}>
             <textarea value={formValues.address} rows={4} onChange={updateField("address")} />
           </PersonalField>
         </ProfileFormRow>
 
         <ProfileFormRow label="Butiran Hubungan">
-          <PersonalField label="Alamat E-mel" info="Alamat e-mel ini digunakan untuk log masuk dan makluman permohonan anda.">
+          <PersonalField
+            label="Alamat E-mel"
+            error={validationErrors.email}
+            info="Alamat e-mel ini digunakan untuk log masuk dan makluman permohonan anda."
+          >
             <input type="email" value={formEmail} onChange={(event) => setFormEmail(event.target.value)} />
           </PersonalField>
-          <PersonalField label="Nombor Telefon Bimbit Utama">
+          <PersonalField label="Nombor Telefon Bimbit Utama" error={validationErrors.primaryPhone}>
             <input type="tel" value={formValues.primaryPhone} onChange={updateField("primaryPhone")} />
           </PersonalField>
           <PersonalField label="Nombor Telefon Bimbit Lain" optional>
@@ -864,10 +930,10 @@ function PersonalInformationForm({ profileData, onSave }) {
                 </button>
               </header>
               <div className="personal-reference-grid">
-                <PersonalField label="Nama Rujukan">
+                <PersonalField label="Nama Rujukan" error={validationErrors[`reference-${reference.id}-name`]}>
                   <input type="text" value={reference.name} onChange={updateReference(reference.id, "name")} />
                 </PersonalField>
-                <PersonalField label="Hubungan">
+                <PersonalField label="Hubungan" error={validationErrors[`reference-${reference.id}-relationship`]}>
                   <input
                     type="text"
                     value={reference.relationship}
@@ -875,10 +941,10 @@ function PersonalInformationForm({ profileData, onSave }) {
                     onChange={updateReference(reference.id, "relationship")}
                   />
                 </PersonalField>
-                <PersonalField label="Organisasi">
+                <PersonalField label="Organisasi" error={validationErrors[`reference-${reference.id}-organisation`]}>
                   <input type="text" value={reference.organisation} onChange={updateReference(reference.id, "organisation")} />
                 </PersonalField>
-                <PersonalField label="Nombor Telefon">
+                <PersonalField label="Nombor Telefon" error={validationErrors[`reference-${reference.id}-phone`]}>
                   <input type="tel" value={reference.phone} onChange={updateReference(reference.id, "phone")} />
                 </PersonalField>
                 <PersonalField label="Alamat E-mel" optional>
