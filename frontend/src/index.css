@@ -1,19 +1,19 @@
 @import "tailwindcss";
 
 :root {
-  --primary: #10b981;
-  --primary-strong: #006c49;
-  --secondary: #064e3b;
-  --secondary-soft: #0b513d;
-  --tertiary: #fde047;
+  --primary: #16a34a;
+  --primary-strong: #16a34a;
+  --secondary: #111827;
+  --secondary-soft: #111827;
+  --tertiary: #86efac;
   --neutral: #f8fafc;
-  --surface: #ffffff;
-  --surface-low: #f2f4f6;
-  --surface-mid: #e6e8ea;
-  --text: #191c1e;
-  --muted: #64736b;
-  --outline: #bbcabf;
-  --shadow: 0 18px 50px rgba(6, 78, 59, 0.14);
+  --surface: #f8fafc;
+  --surface-low: #d1fae5;
+  --surface-mid: #86efac;
+  --text: #111827;
+  --muted: #111827;
+  --outline: #d1fae5;
+  --shadow: 0 18px 50px rgba(17, 24, 39, 0.12);
   --desktop-gutter: 48px;
   --desktop-width: calc(100vw - (var(--desktop-gutter) * 2));
 }
@@ -2016,27 +2016,27 @@ a {
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  background: #21185f;
+  background: #111827;
   padding: 0 24px;
-  color: #ffffff;
+  color: #f8fafc;
   font-size: 14px;
   font-weight: 800;
-  box-shadow: 0 10px 20px rgba(33, 24, 95, 0.12);
+  box-shadow: 0 10px 20px rgba(17, 24, 39, 0.12);
 }
 
 .market-nav-actions a:hover {
-  background: #2d2376;
+  background: #16a34a;
 }
 
 .market-nav-actions .market-register-link {
   min-width: 188px;
-  background: #ff6b21;
-  color: #ffffff;
-  box-shadow: 0 10px 20px rgba(255, 107, 33, 0.16);
+  background: #22c55e;
+  color: #111827;
+  box-shadow: 0 10px 20px rgba(17, 24, 39, 0.12);
 }
 
 .market-nav-actions .market-register-link:hover {
-  background: #e95b14;
+  background: #86efac;
 }
 
 .market-shell {
