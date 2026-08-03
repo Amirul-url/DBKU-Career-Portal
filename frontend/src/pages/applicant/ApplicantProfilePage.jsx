@@ -438,7 +438,7 @@ function ProfileCard({ children, id, isEditing = false, onEdit, title }) {
 function PersonalInformationForm({ onDraftChange, onSave, profileData, saveRequestKey }) {
   const photoInputRef = useRef(null);
   const resumeInputRef = useRef(null);
-  const handledSaveRequestRef = useRef(0);
+  const handledSaveRequestRef = useRef(saveRequestKey);
   const videoResumeInputRef = useRef(null);
   const [formValues, setFormValues] = useState(profileData.details);
   const [formDisplayName, setFormDisplayName] = useState(profileData.displayName);
