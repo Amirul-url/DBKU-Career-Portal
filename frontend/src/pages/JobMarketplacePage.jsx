@@ -210,7 +210,7 @@ export default function LandingPage() {
 
           <div className="market-nav-actions">
             <Link to="/login">Log Masuk</Link>
-            <Link to="/register" className="market-register-link">Untuk Pencari Kerja</Link>
+            <Link to="/register" className="market-register-link">Daftar Akaun</Link>
           </div>
         </nav>
       </header>
