@@ -344,11 +344,16 @@ function ProfileCard({ children, id, isEditing = false, onEdit, title }) {
 
 function PersonalInformationForm({ details, displayName, email, onClose }) {
   const photoInputRef = useRef(null);
+  const resumeInputRef = useRef(null);
+  const videoResumeInputRef = useRef(null);
   const [formValues, setFormValues] = useState(details);
   const [formDisplayName, setFormDisplayName] = useState(displayName);
   const [formEmail, setFormEmail] = useState(email);
   const [profilePhoto, setProfilePhoto] = useState("");
   const [photoError, setPhotoError] = useState("");
+  const [resumeError, setResumeError] = useState("");
+  const [videoResumeError, setVideoResumeError] = useState("");
+  const [references, setReferences] = useState([]);
 
   const updateField = (field) => (event) => {
     setFormValues((current) => ({
@@ -418,6 +423,71 @@ function PersonalInformationForm({ details, displayName, email, onClose }) {
     if (photoInputRef.current) {
       photoInputRef.current.value = "";
     }
+  };
+
+  const handleDocumentUpload = ({ allowedTypes, errorMessage, field, setError }) => (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    if (!allowedTypes.includes(file.type)) {
+      setError(errorMessage);
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Saiz fail maksimum ialah 5MB.");
+      event.target.value = "";
+      return;
+    }
+
+    setFormValues((current) => ({
+      ...current,
+      [field]: file.name,
+    }));
+    setError("");
+    event.target.value = "";
+  };
+
+  const clearDocumentUpload = (field) => {
+    setFormValues((current) => ({
+      ...current,
+      [field]: "",
+    }));
+  };
+
+  const addReference = () => {
+    setReferences((current) => [
+      ...current,
+      {
+        email: "",
+        id: crypto.randomUUID(),
+        name: "",
+        organisation: "",
+        phone: "",
+        relationship: "",
+      },
+    ]);
+  };
+
+  const updateReference = (id, field) => (event) => {
+    setReferences((current) =>
+      current.map((reference) =>
+        reference.id === id
+          ? {
+              ...reference,
+              [field]: event.target.value,
+            }
+          : reference,
+      ),
+    );
+  };
+
+  const removeReference = (id) => {
+    setReferences((current) => current.filter((reference) => reference.id !== id));
   };
 
   const cityOptions = formValues.state ? toSelectOptions(getCities(formValues.state)) : [];
@@ -615,9 +685,30 @@ function PersonalInformationForm({ details, displayName, email, onClose }) {
             </p>
           </div>
           <PersonalField label="Muat naik resume anda" optional hint="Word atau PDF sahaja (maksimum 5MB)">
-            <button type="button" className="personal-primary-button personal-upload-button">
+            <input
+              ref={resumeInputRef}
+              type="file"
+              accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              className="sr-only"
+              onChange={handleDocumentUpload({
+                allowedTypes: [
+                  "application/pdf",
+                  "application/msword",
+                  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                ],
+                errorMessage: "Sila pilih fail Word atau PDF sahaja.",
+                field: "resumeFile",
+                setError: setResumeError,
+              })}
+            />
+            <button
+              type="button"
+              className="personal-primary-button personal-upload-button"
+              onClick={() => resumeInputRef.current?.click()}
+            >
               Muat Naik
             </button>
+            {resumeError ? <small className="personal-upload-error">{resumeError}</small> : null}
           </PersonalField>
           {formValues.resumeFile ? (
             <div className="personal-file-card">
@@ -625,16 +716,48 @@ function PersonalInformationForm({ details, displayName, email, onClose }) {
                 <Icon>description</Icon>
               </span>
               <strong>{formValues.resumeFile}</strong>
-              <button type="button" className="personal-outline-button">
+              <button type="button" className="personal-outline-button" onClick={() => clearDocumentUpload("resumeFile")}>
                 Padam Fail
               </button>
             </div>
           ) : null}
           <PersonalField label="Muat naik resume video anda" optional hint=".mp4 sahaja (maksimum 5MB)">
-            <button type="button" className="personal-primary-button personal-upload-button">
+            <input
+              ref={videoResumeInputRef}
+              type="file"
+              accept=".mp4,video/mp4"
+              className="sr-only"
+              onChange={handleDocumentUpload({
+                allowedTypes: ["video/mp4"],
+                errorMessage: "Sila pilih fail .mp4 sahaja.",
+                field: "videoResumeFile",
+                setError: setVideoResumeError,
+              })}
+            />
+            <button
+              type="button"
+              className="personal-primary-button personal-upload-button"
+              onClick={() => videoResumeInputRef.current?.click()}
+            >
               Muat Naik
             </button>
+            {videoResumeError ? <small className="personal-upload-error">{videoResumeError}</small> : null}
           </PersonalField>
+          {formValues.videoResumeFile ? (
+            <div className="personal-file-card">
+              <span>
+                <Icon>movie</Icon>
+              </span>
+              <strong>{formValues.videoResumeFile}</strong>
+              <button
+                type="button"
+                className="personal-outline-button"
+                onClick={() => clearDocumentUpload("videoResumeFile")}
+              >
+                Padam Fail
+              </button>
+            </div>
+          ) : null}
           <PersonalField label="LinkedIn" optional hint="Isikan pautan URL ke profil LinkedIn anda.">
             <input type="url" value={formValues.linkedIn} onChange={updateField("linkedIn")} />
           </PersonalField>
@@ -646,11 +769,43 @@ function PersonalInformationForm({ details, displayName, email, onClose }) {
               Tambah rujukan anda <em>(tidak wajib)</em>
             </strong>
             <p>Kukuhkan permohonan kerja anda dengan sertakan sokongan daripada majikan atau mentor anda yang terdahulu.</p>
-            <button type="button" className="personal-add-reference">
+            <button type="button" className="personal-add-reference" onClick={addReference}>
               <Icon>add_circle</Icon>
               Tambah Rujukan
             </button>
           </div>
+          {references.map((reference, index) => (
+            <div className="personal-reference-card" key={reference.id}>
+              <header>
+                <strong>Rujukan {index + 1}</strong>
+                <button type="button" className="personal-outline-button" onClick={() => removeReference(reference.id)}>
+                  Padam
+                </button>
+              </header>
+              <div className="personal-reference-grid">
+                <PersonalField label="Nama Rujukan">
+                  <input type="text" value={reference.name} onChange={updateReference(reference.id, "name")} />
+                </PersonalField>
+                <PersonalField label="Hubungan">
+                  <input
+                    type="text"
+                    value={reference.relationship}
+                    placeholder="Contoh. Penyelia"
+                    onChange={updateReference(reference.id, "relationship")}
+                  />
+                </PersonalField>
+                <PersonalField label="Organisasi">
+                  <input type="text" value={reference.organisation} onChange={updateReference(reference.id, "organisation")} />
+                </PersonalField>
+                <PersonalField label="Nombor Telefon">
+                  <input type="tel" value={reference.phone} onChange={updateReference(reference.id, "phone")} />
+                </PersonalField>
+                <PersonalField label="Alamat E-mel" optional>
+                  <input type="email" value={reference.email} onChange={updateReference(reference.id, "email")} />
+                </PersonalField>
+              </div>
+            </div>
+          ))}
         </ProfileFormRow>
 
         <div className="personal-submit-row">
