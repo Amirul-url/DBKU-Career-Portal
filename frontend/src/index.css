@@ -3969,8 +3969,8 @@ body:has(.applicant-profile-page) {
   align-items: center;
   justify-content: center;
   border: 1px solid #86efac;
-  border-radius: 999px;
   background: #d1fae5;
+  clip-path: circle(50% at 50% 50%);
   color: #16a34a;
   font-size: 34px;
   font-weight: 900;
@@ -4355,8 +4355,8 @@ body:has(.applicant-profile-page) {
   flex: 0 0 76px;
   overflow: hidden;
   border-color: var(--profile-mint);
-  border-radius: 999px;
   background: var(--profile-pale);
+  clip-path: circle(50% at 50% 50%);
   color: var(--profile-green);
   font-size: 30px;
 }
@@ -4365,7 +4365,7 @@ body:has(.applicant-profile-page) {
   display: block;
   width: 100%;
   height: 100%;
-  border-radius: inherit;
+  clip-path: circle(50% at 50% 50%);
   object-fit: cover;
 }
 
