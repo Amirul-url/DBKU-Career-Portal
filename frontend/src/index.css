@@ -5012,6 +5012,83 @@ body:has(.applicant-profile-page) {
   background: var(--profile-green-bright);
 }
 
+.profile-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(17, 24, 39, 0.42);
+  padding: 24px;
+}
+
+.profile-confirm-dialog {
+  display: grid;
+  width: min(460px, 100%);
+  gap: 16px;
+  border: 1px solid var(--profile-green);
+  border-radius: 8px;
+  background: var(--profile-surface);
+  color: var(--profile-ink);
+  padding: 24px;
+}
+
+.profile-confirm-dialog h2 {
+  margin: 0;
+  color: var(--profile-ink);
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.profile-confirm-dialog p {
+  margin: 0;
+  color: var(--profile-ink);
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.55;
+}
+
+.profile-confirm-dialog div {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 8px;
+}
+
+.profile-confirm-primary,
+.profile-confirm-secondary {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0 22px;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.profile-confirm-primary {
+  border: 1px solid var(--profile-green);
+  background: var(--profile-green);
+  color: var(--profile-surface);
+}
+
+.profile-confirm-secondary {
+  border: 1px solid var(--profile-green);
+  background: var(--profile-surface);
+  color: var(--profile-green);
+}
+
+.profile-confirm-primary:hover {
+  border-color: var(--profile-green-bright);
+  background: var(--profile-green-bright);
+}
+
+.profile-confirm-secondary:hover {
+  background: var(--profile-pale);
+}
+
 @media (max-width: 980px) {
   .applicant-profile-page {
     min-width: 0;

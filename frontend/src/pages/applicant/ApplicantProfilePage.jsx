@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getCities, getPostcodes, getStates } from "malaysia-postcodes";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { clearAuthSession, getStoredUser } from "../../lib/authApi";
@@ -126,6 +126,18 @@ function normalizePersonalProfile(profile, displayName, email) {
     profilePhotoPreviewUrl: profile?.profilePhotoPreviewUrl || "",
     references: Array.isArray(profile?.references) ? profile.references : defaults.references,
   };
+}
+
+function getComparablePersonalProfile(profile) {
+  const comparableProfile = {
+    details: profile?.details || defaultPersonalDetails,
+    displayName: profile?.displayName || "",
+    email: profile?.email || "",
+    profilePhotoFileName: profile?.profilePhotoFileName || "",
+    references: profile?.references || [],
+  };
+
+  return JSON.stringify(comparableProfile);
 }
 
 function savePersonalProfile(user, profile) {
@@ -406,9 +418,10 @@ function ProfileCard({ children, id, isEditing = false, onEdit, title }) {
   );
 }
 
-function PersonalInformationForm({ profileData, onSave }) {
+function PersonalInformationForm({ onDraftChange, onSave, profileData, saveRequestKey }) {
   const photoInputRef = useRef(null);
   const resumeInputRef = useRef(null);
+  const handledSaveRequestRef = useRef(0);
   const videoResumeInputRef = useRef(null);
   const [formValues, setFormValues] = useState(profileData.details);
   const [formDisplayName, setFormDisplayName] = useState(profileData.displayName);
@@ -562,7 +575,7 @@ function PersonalInformationForm({ profileData, onSave }) {
     setReferences((current) => current.filter((reference) => reference.id !== id));
   };
 
-  const validatePersonalProfile = () => {
+  const validatePersonalProfile = useCallback(() => {
     const errors = {};
     const requiredFields = [
       ["displayName", formDisplayName],
@@ -601,9 +614,21 @@ function PersonalInformationForm({ profileData, onSave }) {
     });
 
     return errors;
-  };
+  }, [formDisplayName, formEmail, formValues, references]);
 
-  const handleSave = () => {
+  const getCurrentDraft = useCallback(
+    () => ({
+      details: formValues,
+      displayName: formDisplayName,
+      email: formEmail,
+      profilePhotoFileName,
+      profilePhotoPreviewUrl,
+      references,
+    }),
+    [formEmail, formDisplayName, formValues, profilePhotoFileName, profilePhotoPreviewUrl, references],
+  );
+
+  const handleSave = useCallback(() => {
     const errors = validatePersonalProfile();
     setValidationErrors(errors);
 
@@ -611,15 +636,22 @@ function PersonalInformationForm({ profileData, onSave }) {
       return;
     }
 
-    onSave({
-      details: formValues,
-      displayName: formDisplayName,
-      email: formEmail,
-      profilePhotoFileName,
-      profilePhotoPreviewUrl,
-      references,
-    });
-  };
+    onSave(getCurrentDraft());
+  }, [getCurrentDraft, onSave, validatePersonalProfile]);
+
+  useEffect(() => {
+    const draft = getCurrentDraft();
+    const isDirty = getComparablePersonalProfile(draft) !== getComparablePersonalProfile(profileData);
+
+    onDraftChange(draft, isDirty);
+  }, [getCurrentDraft, onDraftChange, profileData]);
+
+  useEffect(() => {
+    if (saveRequestKey > 0 && saveRequestKey !== handledSaveRequestRef.current) {
+      handledSaveRequestRef.current = saveRequestKey;
+      handleSave();
+    }
+  }, [handleSave, saveRequestKey]);
 
   const cityOptions = formValues.state ? toSelectOptions(getCities(formValues.state)) : [];
   const postcodeOptions =
@@ -991,6 +1023,10 @@ export default function ApplicantProfilePage() {
   const user = getStoredUser();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [editingSection, setEditingSection] = useState(null);
+  const [isPersonalCloseDialogOpen, setIsPersonalCloseDialogOpen] = useState(false);
+  const [isPersonalDraftDirty, setIsPersonalDraftDirty] = useState(false);
+  const [personalDraft, setPersonalDraft] = useState(null);
+  const [personalSaveRequestKey, setPersonalSaveRequestKey] = useState(0);
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
   const email = user?.email || "Belum dikemaskini";
   const [personalProfile, setPersonalProfile] = useState(() => {
@@ -1005,6 +1041,44 @@ export default function ApplicantProfilePage() {
     setPersonalProfile(profile);
     savePersonalProfile(user, profile);
     setEditingSection(null);
+    setIsPersonalDraftDirty(false);
+    setIsPersonalCloseDialogOpen(false);
+    setPersonalDraft(null);
+  };
+
+  const handlePersonalDraftChange = useCallback((draft, isDirty) => {
+    setPersonalDraft(draft);
+    setIsPersonalDraftDirty(isDirty);
+  }, []);
+
+  const handlePersonalEditToggle = () => {
+    if (editingSection !== "personal") {
+      setEditingSection("personal");
+      return;
+    }
+
+    if (isPersonalDraftDirty) {
+      setIsPersonalCloseDialogOpen(true);
+      return;
+    }
+
+    setEditingSection(null);
+  };
+
+  const discardPersonalDraft = () => {
+    if (personalDraft?.profilePhotoPreviewUrl && personalDraft.profilePhotoPreviewUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(personalDraft.profilePhotoPreviewUrl);
+    }
+
+    setIsPersonalCloseDialogOpen(false);
+    setIsPersonalDraftDirty(false);
+    setPersonalDraft(null);
+    setEditingSection(null);
+  };
+
+  const savePersonalDraftFromDialog = () => {
+    setIsPersonalCloseDialogOpen(false);
+    setPersonalSaveRequestKey((current) => current + 1);
   };
 
   useEffect(() => {
@@ -1034,12 +1108,14 @@ export default function ApplicantProfilePage() {
                 id="profile-section-1"
                 isEditing={editingSection === "personal"}
                 title="Maklumat Peribadi"
-                onEdit={() => setEditingSection((current) => (current === "personal" ? null : "personal"))}
+                onEdit={handlePersonalEditToggle}
               >
                 {editingSection === "personal" ? (
                   <PersonalInformationForm
+                    onDraftChange={handlePersonalDraftChange}
                     profileData={personalProfile}
                     onSave={handleSavePersonalProfile}
+                    saveRequestKey={personalSaveRequestKey}
                   />
                 ) : (
                     <div className="profile-personal-row">
@@ -1072,6 +1148,22 @@ export default function ApplicantProfilePage() {
           </div>
         </main>
       </div>
+      {isPersonalCloseDialogOpen ? (
+        <div className="profile-confirm-overlay" role="presentation">
+          <section className="profile-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="profile-close-title">
+            <h2 id="profile-close-title">Perubahan belum disimpan</h2>
+            <p>Anda ada membuat kemaskini pada Maklumat Peribadi. Pilih `Save` untuk simpan perubahan atau `Discard` untuk buang perubahan.</p>
+            <div>
+              <button type="button" className="profile-confirm-secondary" onClick={discardPersonalDraft}>
+                Discard
+              </button>
+              <button type="button" className="profile-confirm-primary" onClick={savePersonalDraftFromDialog}>
+                Save
+              </button>
+            </div>
+          </section>
+        </div>
+      ) : null}
     </div>
   );
 }
