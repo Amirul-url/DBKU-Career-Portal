@@ -4088,10 +4088,12 @@ body:has(.applicant-profile-page) {
 .applicant-profile-page {
   --profile-sidebar-open: 300px;
   --profile-sidebar-closed: 64px;
+  --profile-header-height: 76px;
   --profile-green: #16a34a;
   --profile-green-bright: #22c55e;
   --profile-mint: #86efac;
   --profile-pale: #d1fae5;
+  --profile-header-surface: #ffffff;
   --profile-surface: #f8fafc;
   --profile-ink: #111827;
   min-width: 1180px;
@@ -4118,7 +4120,7 @@ body:has(.applicant-profile-page) {
   flex-direction: column;
   gap: 0;
   border-right: 1px solid var(--profile-pale);
-  background: var(--profile-surface);
+  background: var(--profile-header-surface);
   box-shadow: none;
   transition: width 0.2s ease;
 }
@@ -4129,7 +4131,7 @@ body:has(.applicant-profile-page) {
 
 .profile-sidebar-head {
   display: grid;
-  min-height: 76px;
+  min-height: var(--profile-header-height);
   align-items: center;
   gap: 10px;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -4188,7 +4190,7 @@ body:has(.applicant-profile-page) {
   justify-content: center;
   border: 1px solid var(--profile-pale);
   border-radius: 8px;
-  background: var(--profile-surface);
+  background: var(--profile-header-surface);
   color: var(--profile-ink);
 }
 
@@ -4258,12 +4260,12 @@ body:has(.applicant-profile-page) {
   top: 0;
   z-index: 30;
   display: flex;
-  min-height: 72px;
+  min-height: var(--profile-header-height);
   align-items: center;
   justify-content: space-between;
   gap: 20px;
   border-bottom: 1px solid var(--profile-pale);
-  background: var(--profile-surface);
+  background: var(--profile-header-surface);
   padding: 0 36px;
   backdrop-filter: blur(14px);
 }
