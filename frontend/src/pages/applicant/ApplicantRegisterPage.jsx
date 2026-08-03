@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { registerApplicant, saveAuthSession } from "../../lib/authApi";
+import { registerApplicant } from "../../lib/authApi";
 import { ApplicantAuthLayout, AuthField, PasswordField } from "./ApplicantAuthShared";
 
 function RegisterForm() {
@@ -35,10 +35,10 @@ function RegisterForm() {
 
     setIsSubmitting(true);
     try {
-      const data = await registerApplicant(formData);
-      saveAuthSession(data);
-      setStatus({ type: "success", message: "Akaun berjaya didaftarkan. Anda telah log masuk." });
-      navigate("/jobs");
+      await registerApplicant(formData);
+      navigate("/login", {
+        state: { message: "Akaun berjaya didaftarkan. Sila log masuk menggunakan emel dan kata laluan anda." },
+      });
     } catch (error) {
       setStatus({ type: "error", message: error.message });
     } finally {

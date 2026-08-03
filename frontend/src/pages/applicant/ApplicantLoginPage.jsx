@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { loginApplicant, saveAuthSession } from "../../lib/authApi";
 import { ApplicantAuthLayout, AuthField, PasswordField } from "./ApplicantAuthShared";
 
 function LoginForm() {
-  const navigate = useNavigate();
+  const location = useLocation();
   const [formData, setFormData] = useState({ email: "", password: "" });
-  const [status, setStatus] = useState({ type: "", message: "" });
+  const [status, setStatus] = useState(
+    location.state?.message ? { type: "success", message: location.state.message } : { type: "", message: "" }
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (event) => {
@@ -24,8 +26,10 @@ function LoginForm() {
     try {
       const data = await loginApplicant(formData);
       saveAuthSession(data);
-      setStatus({ type: "success", message: "Log masuk berjaya." });
-      navigate("/jobs");
+      setStatus({
+        type: "success",
+        message: "Log masuk berjaya. Dashboard pemohon akan disediakan selepas ini.",
+      });
     } catch (error) {
       setStatus({ type: "error", message: error.message });
     } finally {
