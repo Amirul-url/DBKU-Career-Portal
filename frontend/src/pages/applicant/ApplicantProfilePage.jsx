@@ -535,12 +535,12 @@ function PersonalInformationForm({ profileData, onSave }) {
     setReferences((current) => [
       ...current,
       {
+        employerName: "",
         email: "",
         id: crypto.randomUUID(),
         name: "",
-        organisation: "",
         phone: "",
-        relationship: "",
+        position: "",
       },
     ]);
   };
@@ -593,7 +593,7 @@ function PersonalInformationForm({ profileData, onSave }) {
     }
 
     references.forEach((reference) => {
-      ["name", "relationship", "organisation", "phone"].forEach((field) => {
+      ["name", "employerName", "position", "phone", "email"].forEach((field) => {
         if (!String(reference[field] || "").trim()) {
           errors[`reference-${reference.id}-${field}`] = "Wajib diisi.";
         }
@@ -923,33 +923,53 @@ function PersonalInformationForm({ profileData, onSave }) {
           </div>
           {references.map((reference, index) => (
             <div className="personal-reference-card" key={reference.id}>
-              <header>
-                <strong>Rujukan {index + 1}</strong>
-                <button type="button" className="personal-outline-button" onClick={() => removeReference(reference.id)}>
-                  Padam
-                </button>
-              </header>
-              <div className="personal-reference-grid">
+              <strong>Rujukan{references.length > 1 ? ` ${index + 1}` : ""}</strong>
+              <div className="personal-reference-fields">
                 <PersonalField label="Nama Rujukan" error={validationErrors[`reference-${reference.id}-name`]}>
-                  <input type="text" value={reference.name} onChange={updateReference(reference.id, "name")} />
-                </PersonalField>
-                <PersonalField label="Hubungan" error={validationErrors[`reference-${reference.id}-relationship`]}>
                   <input
                     type="text"
-                    value={reference.relationship}
-                    placeholder="Contoh. Penyelia"
-                    onChange={updateReference(reference.id, "relationship")}
+                    value={reference.name}
+                    placeholder="Contoh. Ali bin Abdullah"
+                    onChange={updateReference(reference.id, "name")}
                   />
                 </PersonalField>
-                <PersonalField label="Organisasi" error={validationErrors[`reference-${reference.id}-organisation`]}>
-                  <input type="text" value={reference.organisation} onChange={updateReference(reference.id, "organisation")} />
+                <PersonalField label="Nama Majikan Rujukan" error={validationErrors[`reference-${reference.id}-employerName`]}>
+                  <input
+                    type="text"
+                    value={reference.employerName}
+                    placeholder="Contoh. Syarikat ABC Sdn. Bhd."
+                    onChange={updateReference(reference.id, "employerName")}
+                  />
                 </PersonalField>
-                <PersonalField label="Nombor Telefon" error={validationErrors[`reference-${reference.id}-phone`]}>
-                  <input type="tel" value={reference.phone} onChange={updateReference(reference.id, "phone")} />
+                <PersonalField label="Jawatan Rujukan" error={validationErrors[`reference-${reference.id}-position`]}>
+                  <input
+                    type="text"
+                    value={reference.position}
+                    placeholder="Contoh. Ketua Jabatan Kejuruteraan"
+                    onChange={updateReference(reference.id, "position")}
+                  />
                 </PersonalField>
-                <PersonalField label="Alamat E-mel" optional>
-                  <input type="email" value={reference.email} onChange={updateReference(reference.id, "email")} />
+                <PersonalField label="Nombor Hubungan Rujukan" error={validationErrors[`reference-${reference.id}-phone`]}>
+                  <input
+                    type="tel"
+                    value={reference.phone}
+                    placeholder="Contoh. 0123456789"
+                    onChange={updateReference(reference.id, "phone")}
+                  />
                 </PersonalField>
+                <PersonalField label="Alamat E-mel Rujukan" error={validationErrors[`reference-${reference.id}-email`]}>
+                  <input
+                    type="email"
+                    value={reference.email}
+                    placeholder="Contoh. example@example.com"
+                    onChange={updateReference(reference.id, "email")}
+                  />
+                </PersonalField>
+                <div className="personal-reference-actions">
+                  <button type="button" className="personal-outline-button" onClick={() => removeReference(reference.id)}>
+                    Padam
+                  </button>
+                </div>
               </div>
             </div>
           ))}

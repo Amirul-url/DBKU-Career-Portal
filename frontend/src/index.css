@@ -4959,32 +4959,27 @@ body:has(.applicant-profile-page) {
 
 .personal-reference-card {
   display: grid;
-  gap: 16px;
-  border: 1px solid var(--profile-pale);
+  gap: 24px;
+  border: 1px solid var(--profile-green);
   border-radius: 6px;
   background: var(--profile-surface);
-  padding: 16px;
+  padding: 24px;
 }
 
-.personal-reference-card header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  border-bottom: 1px solid var(--profile-pale);
-  padding-bottom: 12px;
-}
-
-.personal-reference-card header strong {
+.personal-reference-card > strong {
   color: var(--profile-ink);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 900;
 }
 
-.personal-reference-grid {
+.personal-reference-fields {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
+}
+
+.personal-reference-actions {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .personal-add-reference {
@@ -5052,7 +5047,7 @@ body:has(.applicant-profile-page) {
     font-size: 38px;
   }
 
-  .personal-reference-grid {
+  .personal-reference-fields {
     grid-template-columns: 1fr;
   }
 }
