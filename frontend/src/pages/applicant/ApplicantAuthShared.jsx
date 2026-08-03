@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 export function ApplicantAuthNav() {
@@ -38,14 +39,6 @@ export function Icon({ children }) {
   );
 }
 
-export function PasswordToggle() {
-  return (
-    <button className="split-password-toggle" type="button" aria-label="Tunjuk kata laluan">
-      <Icon>visibility_off</Icon>
-    </button>
-  );
-}
-
 export function AuthField({ icon, label, required = false, children }) {
   return (
     <label className="split-field">
@@ -58,6 +51,36 @@ export function AuthField({ icon, label, required = false, children }) {
         {children}
       </div>
     </label>
+  );
+}
+
+export function PasswordField({
+  icon = "lock",
+  label,
+  placeholder,
+  autoComplete,
+  required = false,
+}) {
+  const [isVisible, setIsVisible] = useState(false);
+
+  return (
+    <AuthField icon={icon} label={label} required={required}>
+      <input
+        type={isVisible ? "text" : "password"}
+        placeholder={placeholder}
+        autoComplete={autoComplete}
+        required={required}
+      />
+      <button
+        className="split-password-toggle"
+        type="button"
+        aria-label={isVisible ? "Sembunyikan kata laluan" : "Tunjuk kata laluan"}
+        aria-pressed={isVisible}
+        onClick={() => setIsVisible((current) => !current)}
+      >
+        <Icon>{isVisible ? "visibility" : "visibility_off"}</Icon>
+      </button>
+    </AuthField>
   );
 }
 

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ApplicantAuthLayout, AuthField, PasswordToggle } from "./ApplicantAuthShared";
+import { ApplicantAuthLayout, AuthField, PasswordField } from "./ApplicantAuthShared";
 
 function RegisterForm() {
   const handleUppercaseInput = (event) => {
@@ -27,25 +27,20 @@ function RegisterForm() {
           <input type="email" placeholder="cth. example@example.com" autoComplete="email" required />
         </AuthField>
 
-        <AuthField icon="lock" label="Kata Laluan" required>
-          <input
-            type="password"
-            placeholder="masukkan kata laluan anda"
-            autoComplete="new-password"
-            required
-          />
-          <PasswordToggle />
-        </AuthField>
+        <PasswordField
+          label="Kata Laluan"
+          placeholder="masukkan kata laluan anda"
+          autoComplete="new-password"
+          required
+        />
 
-        <AuthField icon="shield" label="Sahkan Kata Laluan" required>
-          <input
-            type="password"
-            placeholder="masukkan semula kata laluan anda"
-            autoComplete="new-password"
-            required
-          />
-          <PasswordToggle />
-        </AuthField>
+        <PasswordField
+          icon="shield"
+          label="Sahkan Kata Laluan"
+          placeholder="masukkan semula kata laluan anda"
+          autoComplete="new-password"
+          required
+        />
 
         <button type="button" className="split-submit">Daftar Akaun</button>
       </form>

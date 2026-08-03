@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ApplicantAuthLayout, AuthField, PasswordToggle } from "./ApplicantAuthShared";
+import { ApplicantAuthLayout, AuthField, PasswordField } from "./ApplicantAuthShared";
 
 function LoginForm() {
   return (
@@ -13,10 +13,11 @@ function LoginForm() {
           <input type="email" placeholder="cth. example@example.com" autoComplete="email" />
         </AuthField>
 
-        <AuthField icon="lock" label="Kata Laluan">
-          <input type="password" placeholder="Masukkan kata laluan" autoComplete="current-password" />
-          <PasswordToggle />
-        </AuthField>
+        <PasswordField
+          label="Kata Laluan"
+          placeholder="Masukkan kata laluan"
+          autoComplete="current-password"
+        />
 
         <div className="split-options">
           <a href="#forgot-password">Lupa kata laluan?</a>
