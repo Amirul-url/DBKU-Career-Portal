@@ -3631,10 +3631,19 @@ body:has(.applicant-profile-page) {
 .profile-user-chip {
   border: 1px solid #86efac;
   background: #d1fae5;
+  overflow: hidden;
   color: #16a34a;
   font-weight: 900;
   line-height: 1;
   text-transform: uppercase;
+}
+
+.profile-user-chip img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  clip-path: circle(50% at 50% 50%);
+  object-fit: cover;
 }
 
 .profile-icon-button {

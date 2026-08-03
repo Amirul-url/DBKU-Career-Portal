@@ -424,9 +424,10 @@ function PersonalRadioGroup({ error, label, name, onChange, options, value }) {
   );
 }
 
-function ProfileContentHeader({ displayName, email }) {
+function ProfileContentHeader({ displayName, email, photoUrl }) {
   const navigate = useNavigate();
   const profileInitial = displayName?.charAt(0) || email?.charAt(0) || "P";
+  const profileChip = photoUrl ? <img src={photoUrl} alt="" /> : profileInitial;
 
   const handleLogout = () => {
     clearAuthSession();
@@ -445,12 +446,12 @@ function ProfileContentHeader({ displayName, email }) {
         </button>
         <details className="profile-account-menu">
           <summary className="profile-account-trigger" aria-label="Menu profil">
-            <span className="profile-user-chip">{profileInitial}</span>
+            <span className="profile-user-chip">{profileChip}</span>
             <Icon>expand_more</Icon>
           </summary>
           <div className="profile-account-dropdown">
             <div className="profile-account-card-head">
-              <span className="profile-user-chip">{profileInitial}</span>
+              <span className="profile-user-chip">{profileChip}</span>
               <span>
                 <strong>{displayName}</strong>
                 <em>{email || "Akaun pemohon"}</em>
@@ -1296,7 +1297,11 @@ export default function ApplicantProfilePage() {
     <div className={`applicant-profile-page ${sidebarOpen ? "sidebar-open" : "sidebar-collapsed"}`}>
       <ProfileSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen((current) => !current)} />
       <div className="profile-main-area">
-        <ProfileContentHeader displayName={profileDisplayName} email={profileEmail} />
+        <ProfileContentHeader
+          displayName={profileDisplayName}
+          email={profileEmail}
+          photoUrl={personalProfile.profilePhotoPreviewUrl}
+        />
         <main className="profile-shell">
           <div className="profile-heading">
             <h1>Profil Saya</h1>
