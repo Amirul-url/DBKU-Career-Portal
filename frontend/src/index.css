@@ -4381,6 +4381,10 @@ body:has(.applicant-profile-page) {
   padding-top: 18px;
 }
 
+.profile-personal-copy {
+  min-width: 0;
+}
+
 .profile-personal-row h3 {
   font-size: 16px;
   line-height: 1.35;
@@ -4393,6 +4397,37 @@ body:has(.applicant-profile-page) {
 
 .profile-empty-row {
   padding-top: 16px;
+}
+
+.profile-download-links {
+  display: grid;
+  min-width: 260px;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.profile-download-links a {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--profile-pale);
+  background: var(--profile-surface);
+  color: var(--profile-green);
+  font-size: 13px;
+  font-weight: 900;
+  padding: 0 16px;
+  text-decoration: none;
+}
+
+.profile-download-links a:hover {
+  border-color: var(--profile-green);
+  background: var(--profile-pale);
+}
+
+.profile-download-links .material-symbols-outlined {
+  font-size: 17px;
 }
 
 .personal-edit-panel {
@@ -5152,6 +5187,17 @@ body:has(.applicant-profile-page) {
     width: 88px;
     height: 88px;
     font-size: 38px;
+  }
+
+  .profile-personal-row {
+    flex-wrap: wrap;
+  }
+
+  .profile-download-links {
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    margin-left: 0;
   }
 
   .personal-reference-fields {

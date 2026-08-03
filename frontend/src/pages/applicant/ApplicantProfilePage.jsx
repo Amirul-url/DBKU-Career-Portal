@@ -536,6 +536,29 @@ function ProfileCard({ children, id, isEditing = false, onEdit, title }) {
   );
 }
 
+function ProfileDownloadLinks({ resumeUrl, videoUrl }) {
+  if (!resumeUrl && !videoUrl) {
+    return null;
+  }
+
+  return (
+    <div className="profile-download-links" aria-label="Fail profil">
+      {resumeUrl ? (
+        <a href={resumeUrl} download>
+          <Icon>description</Icon>
+          <span>Muat Turun Resume (PDF)</span>
+        </a>
+      ) : null}
+      {videoUrl ? (
+        <a href={videoUrl} download>
+          <Icon>movie</Icon>
+          <span>Muat Turun Video (MP4)</span>
+        </a>
+      ) : null}
+    </div>
+  );
+}
+
 function PersonalInformationForm({ onDraftChange, onSave, profileData, saveRequestKey }) {
   const photoInputRef = useRef(null);
   const resumeInputRef = useRef(null);
@@ -1324,19 +1347,23 @@ export default function ApplicantProfilePage() {
                     saveRequestKey={personalSaveRequestKey}
                   />
                 ) : (
-                    <div className="profile-personal-row">
-                      <div className="profile-avatar" aria-hidden="true">
-                        {personalProfile.profilePhotoPreviewUrl ? (
-                          <img src={personalProfile.profilePhotoPreviewUrl} alt="" />
-                        ) : (
-                          profileDisplayName.charAt(0)
-                        )}
-                      </div>
-                      <div>
-                        <h3>{profileDisplayName}</h3>
-                        <p>{profileEmail}</p>
-                      </div>
+                  <div className="profile-personal-row">
+                    <div className="profile-avatar" aria-hidden="true">
+                      {personalProfile.profilePhotoPreviewUrl ? (
+                        <img src={personalProfile.profilePhotoPreviewUrl} alt="" />
+                      ) : (
+                        profileDisplayName.charAt(0)
+                      )}
                     </div>
+                    <div className="profile-personal-copy">
+                      <h3>{profileDisplayName}</h3>
+                      <p>{profileEmail}</p>
+                    </div>
+                    <ProfileDownloadLinks
+                      resumeUrl={personalProfile.resumeFileUrl}
+                      videoUrl={personalProfile.videoResumeFileUrl}
+                    />
+                  </div>
                 )}
               </ProfileCard>
 
