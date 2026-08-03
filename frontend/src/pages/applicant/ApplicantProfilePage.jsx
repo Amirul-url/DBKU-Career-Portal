@@ -81,6 +81,10 @@ const toSelectOptions = (items) => items.map((item) => ({ value: item, label: st
 
 const stateOptions = toSelectOptions(getStates());
 
+function formatApplicantName(name) {
+  return String(name || "").toUpperCase();
+}
+
 function getPersonalProfileStorageKey(user) {
   return `dbku-applicant-personal-profile:${user?.email || user?.full_name || "default"}`;
 }
@@ -139,6 +143,7 @@ function normalizePersonalProfile(profile, displayName, email) {
       ...defaults.details,
       ...(profile?.details || {}),
     },
+    displayName: formatApplicantName(storedProfile.displayName || defaults.displayName),
     profilePhotoFileName: profile?.profilePhotoFileName || "",
     profilePhotoPreviewUrl: profile?.profilePhotoPreviewUrl || "",
     references: Array.isArray(profile?.references) ? profile.references.map(normalizeReference) : defaults.references,
@@ -325,8 +330,9 @@ function PersonalRadioGroup({ error, label, name, onChange, options, value }) {
   );
 }
 
-function ProfileContentHeader({ user }) {
+function ProfileContentHeader({ displayName, email }) {
   const navigate = useNavigate();
+  const profileInitial = displayName?.charAt(0) || email?.charAt(0) || "P";
 
   const handleLogout = () => {
     clearAuthSession();
@@ -337,7 +343,7 @@ function ProfileContentHeader({ user }) {
     <header className="profile-content-header">
       <div>
         <p>Selamat datang</p>
-        <strong>{user?.full_name || user?.first_name || "Pemohon DBKU"}</strong>
+        <strong>{displayName}</strong>
       </div>
       <div className="profile-actions">
         <button type="button" className="profile-icon-button" aria-label="Notifikasi">
@@ -345,15 +351,15 @@ function ProfileContentHeader({ user }) {
         </button>
         <details className="profile-account-menu">
           <summary className="profile-account-trigger" aria-label="Menu profil">
-            <span className="profile-user-chip">{user?.full_name?.charAt(0) || user?.email?.charAt(0) || "P"}</span>
+            <span className="profile-user-chip">{profileInitial}</span>
             <Icon>expand_more</Icon>
           </summary>
           <div className="profile-account-dropdown">
             <div className="profile-account-card-head">
-              <span className="profile-user-chip">{user?.full_name?.charAt(0) || user?.email?.charAt(0) || "P"}</span>
+              <span className="profile-user-chip">{profileInitial}</span>
               <span>
-                <strong>{user?.full_name || user?.first_name || "Pemohon DBKU"}</strong>
-                <em>{user?.email || "Akaun pemohon"}</em>
+                <strong>{displayName}</strong>
+                <em>{email || "Akaun pemohon"}</em>
               </span>
             </div>
             <button type="button" className="profile-logout-button" onClick={handleLogout}>
@@ -450,6 +456,10 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
   const [videoResumeError, setVideoResumeError] = useState("");
   const [references, setReferences] = useState(profileData.references);
   const [validationErrors, setValidationErrors] = useState({});
+
+  const updateDisplayName = (event) => {
+    setFormDisplayName(formatApplicantName(event.target.value));
+  };
 
   const updateField = (field) => (event) => {
     setFormValues((current) => ({
@@ -712,7 +722,7 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
 
         <ProfileFormRow label="Maklumat Peribadi">
           <PersonalField label="Nama Penuh" error={validationErrors.displayName}>
-            <input type="text" value={formDisplayName} onChange={(event) => setFormDisplayName(event.target.value)} />
+            <input type="text" value={formDisplayName} onChange={updateDisplayName} />
           </PersonalField>
           <PersonalField label="Nombor Kad Pengenalan" error={validationErrors.identificationNumber}>
             <input
@@ -1112,7 +1122,7 @@ export default function ApplicantProfilePage() {
     <div className={`applicant-profile-page ${sidebarOpen ? "sidebar-open" : "sidebar-collapsed"}`}>
       <ProfileSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen((current) => !current)} />
       <div className="profile-main-area">
-        <ProfileContentHeader user={user} />
+        <ProfileContentHeader displayName={profileDisplayName} email={profileEmail} />
         <main className="profile-shell">
           <div className="profile-heading">
             <h1>Profil Saya</h1>
