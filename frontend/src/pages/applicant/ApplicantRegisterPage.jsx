@@ -2,6 +2,10 @@ import { Link } from "react-router-dom";
 import { ApplicantAuthLayout, AuthField, PasswordToggle } from "./ApplicantAuthShared";
 
 function RegisterForm() {
+  const handleUppercaseInput = (event) => {
+    event.currentTarget.value = event.currentTarget.value.toUpperCase();
+  };
+
   return (
     <section className="split-form-panel" aria-labelledby="register-title">
       <span className="split-eyebrow">Pendaftaran Calon</span>
@@ -9,21 +13,37 @@ function RegisterForm() {
       <p>Cipta akaun menggunakan emel aktif supaya notifikasi permohonan mudah diterima.</p>
 
       <form className="split-form register-split-form">
-        <AuthField icon="person" label="Nama Penuh">
-          <input type="text" placeholder="Nama seperti dalam MyKad" autoComplete="name" />
+        <AuthField icon="person" label="Nama Penuh" required>
+          <input
+            type="text"
+            placeholder="Nama seperti dalam MyKad"
+            autoComplete="name"
+            onInput={handleUppercaseInput}
+            required
+          />
         </AuthField>
 
-        <AuthField icon="mail" label="Emel">
-          <input type="email" placeholder="cth. example@example.com" autoComplete="email" />
+        <AuthField icon="mail" label="Emel" required>
+          <input type="email" placeholder="cth. example@example.com" autoComplete="email" required />
         </AuthField>
 
-        <AuthField icon="lock" label="Kata Laluan">
-          <input type="password" placeholder="Minimum 8 aksara" autoComplete="new-password" />
+        <AuthField icon="lock" label="Kata Laluan" required>
+          <input
+            type="password"
+            placeholder="masukkan kata laluan anda"
+            autoComplete="new-password"
+            required
+          />
           <PasswordToggle />
         </AuthField>
 
-        <AuthField icon="shield" label="Sahkan Kata Laluan">
-          <input type="password" placeholder="Ulang kata laluan" autoComplete="new-password" />
+        <AuthField icon="shield" label="Sahkan Kata Laluan" required>
+          <input
+            type="password"
+            placeholder="masukkan semula kata laluan anda"
+            autoComplete="new-password"
+            required
+          />
           <PasswordToggle />
         </AuthField>
 

@@ -3144,6 +3144,11 @@ body:has(.auth-page) {
   font-weight: 850;
 }
 
+.split-field > span strong {
+  color: var(--tertiary);
+  font-weight: 900;
+}
+
 .split-input {
   display: flex;
   min-height: 58px;
@@ -3237,6 +3242,10 @@ body:has(.auth-page) {
 
 .split-submit:hover {
   background: linear-gradient(135deg, #15803d, var(--split-green));
+}
+
+.register-split-form .split-submit {
+  margin-top: 10px;
 }
 
 .split-mobile-switch {

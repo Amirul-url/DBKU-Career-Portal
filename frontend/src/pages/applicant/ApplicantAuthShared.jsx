@@ -46,10 +46,13 @@ export function PasswordToggle() {
   );
 }
 
-export function AuthField({ icon, label, children }) {
+export function AuthField({ icon, label, required = false, children }) {
   return (
     <label className="split-field">
-      <span>{label}</span>
+      <span>
+        {label}
+        {required ? <strong aria-hidden="true"> *</strong> : null}
+      </span>
       <div className="split-input">
         <Icon>{icon}</Icon>
         {children}
