@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
+
+const getActiveClass = ({ isActive }) => (isActive ? "active" : undefined);
 
 export function ApplicantAuthNav() {
   return (
@@ -13,9 +15,9 @@ export function ApplicantAuthNav() {
         </Link>
 
         <div className="nav-links">
-          <Link className="active" to="/">Laman Utama</Link>
-          <Link to="/jobs">Kerja Kosong</Link>
-          <Link to="/jobs">Latihan Industri</Link>
+          <NavLink to="/" end className={getActiveClass}>Laman Utama</NavLink>
+          <NavLink to="/jobs" className={getActiveClass}>Kerja Kosong</NavLink>
+          <NavLink to="/jobs" className={getActiveClass}>Latihan Industri</NavLink>
         </div>
 
         <div className="market-nav-actions">
