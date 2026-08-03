@@ -67,6 +67,18 @@ a {
   font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
 }
 
+.app-svg-icon {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+}
+
+.app-svg-icon svg {
+  display: block;
+  width: 1em;
+  height: 1em;
+}
+
 .landing-page {
   min-height: 100vh;
   background: var(--neutral);

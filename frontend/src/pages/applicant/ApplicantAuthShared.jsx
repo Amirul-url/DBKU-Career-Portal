@@ -1,7 +1,64 @@
 import { useState } from "react";
+import {
+  Bell,
+  Brain,
+  BriefcaseBusiness,
+  ChevronDown,
+  ChevronUp,
+  CirclePlus,
+  Eye,
+  EyeOff,
+  FileText,
+  Film,
+  GraduationCap,
+  History,
+  Lightbulb,
+  LockKeyhole,
+  LogOut,
+  Mail,
+  Menu,
+  Minus,
+  MoreHorizontal,
+  Pencil,
+  Save,
+  Search,
+  ShieldCheck,
+  SlidersHorizontal,
+  Sparkles,
+  UserRound,
+} from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
 
 const getActiveClass = ({ isActive }) => (isActive ? "active" : undefined);
+
+const iconMap = {
+  add_circle: CirclePlus,
+  description: FileText,
+  edit: Pencil,
+  emoji_objects: Lightbulb,
+  expand_less: ChevronUp,
+  expand_more: ChevronDown,
+  history: History,
+  lock: LockKeyhole,
+  logout: LogOut,
+  mail: Mail,
+  menu: Menu,
+  more_horiz: MoreHorizontal,
+  movie: Film,
+  notifications: Bell,
+  person: UserRound,
+  psychology: Brain,
+  remove: Minus,
+  save: Save,
+  school: GraduationCap,
+  search: Search,
+  shield: ShieldCheck,
+  stars: Sparkles,
+  tune: SlidersHorizontal,
+  visibility: Eye,
+  visibility_off: EyeOff,
+  work_history: BriefcaseBusiness,
+};
 
 export function ApplicantAuthNav() {
   return (
@@ -30,13 +87,15 @@ export function ApplicantAuthNav() {
 }
 
 export function Icon({ children }) {
+  const IconComponent = iconMap[children] || CirclePlus;
+
   return (
     <span
-      className="material-symbols-outlined notranslate"
+      className="app-svg-icon material-symbols-outlined notranslate"
       aria-hidden="true"
       translate="no"
     >
-      {children}
+      <IconComponent strokeWidth={2.4} />
     </span>
   );
 }
