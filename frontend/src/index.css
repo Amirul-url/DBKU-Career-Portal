@@ -4353,6 +4353,7 @@ body:has(.applicant-profile-page) {
   width: 76px;
   height: 76px;
   flex: 0 0 76px;
+  overflow: hidden;
   border-color: var(--profile-mint);
   border-radius: 999px;
   background: var(--profile-pale);
@@ -4364,6 +4365,7 @@ body:has(.applicant-profile-page) {
   display: block;
   width: 100%;
   height: 100%;
+  border-radius: inherit;
   object-fit: cover;
 }
 
