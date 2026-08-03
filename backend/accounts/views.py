@@ -1,18 +1,9 @@
 from rest_framework import permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
 
 from .serializers import LoginSerializer, RegisterSerializer, UserSerializer
-
-
-def build_auth_response(user):
-    refresh = RefreshToken.for_user(user)
-    return {
-        "refresh": str(refresh),
-        "access": str(refresh.access_token),
-        "user": UserSerializer(user).data,
-    }
+from .services import build_auth_response
 
 
 @api_view(["POST"])
@@ -40,4 +31,3 @@ def me_view(request):
         serializer.save()
         return Response(serializer.data)
     return Response(UserSerializer(request.user).data)
-

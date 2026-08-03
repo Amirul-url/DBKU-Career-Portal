@@ -1,18 +1,8 @@
-from rest_framework import permissions, viewsets
+from rest_framework import viewsets
 
 from .models import Vacancy
+from .permissions import IsStaffOrReadOnly
 from .serializers import VacancySerializer
-
-
-class IsStaffOrReadOnly(permissions.BasePermission):
-    def has_permission(self, request, view):
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        return request.user.is_authenticated and request.user.role in {
-            "admin",
-            "hr",
-            "superadmin",
-        }
 
 
 class VacancyViewSet(viewsets.ModelViewSet):
@@ -41,4 +31,3 @@ class VacancyViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
-
