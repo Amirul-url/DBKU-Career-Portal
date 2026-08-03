@@ -17,6 +17,8 @@ class PortalUserAdmin(UserAdmin):
                     "mobile_number",
                     "address",
                     "profile_photo",
+                    "resume_file",
+                    "video_resume_file",
                 )
             },
         ),

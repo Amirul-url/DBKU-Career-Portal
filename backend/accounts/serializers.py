@@ -9,7 +9,11 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     profile_photo_url = serializers.SerializerMethodField()
+    resume_file_url = serializers.SerializerMethodField()
+    video_resume_file_url = serializers.SerializerMethodField()
     remove_profile_photo = serializers.BooleanField(write_only=True, required=False)
+    remove_resume_file = serializers.BooleanField(write_only=True, required=False)
+    remove_video_resume_file = serializers.BooleanField(write_only=True, required=False)
 
     class Meta:
         model = User
@@ -27,53 +31,109 @@ class UserSerializer(serializers.ModelSerializer):
             "address",
             "profile_photo",
             "profile_photo_url",
+            "resume_file",
+            "resume_file_url",
+            "video_resume_file",
+            "video_resume_file_url",
             "remove_profile_photo",
+            "remove_resume_file",
+            "remove_video_resume_file",
             "is_staff",
             "is_superuser",
         )
-        read_only_fields = ("id", "profile_photo_url", "is_staff", "is_superuser")
+        read_only_fields = (
+            "id",
+            "profile_photo_url",
+            "resume_file_url",
+            "video_resume_file_url",
+            "is_staff",
+            "is_superuser",
+        )
 
     def get_full_name(self, obj):
         return obj.get_full_name() or obj.username
 
-    def get_profile_photo_url(self, obj):
-        if not obj.profile_photo:
+    def get_file_url(self, file_field):
+        if not file_field:
             return ""
 
         request = self.context.get("request")
-        url = obj.profile_photo.url
+        url = file_field.url
         return request.build_absolute_uri(url) if request else url
 
-    def validate_profile_photo(self, value):
+    def get_profile_photo_url(self, obj):
+        return self.get_file_url(obj.profile_photo)
+
+    def get_resume_file_url(self, obj):
+        return self.get_file_url(obj.resume_file)
+
+    def get_video_resume_file_url(self, obj):
+        return self.get_file_url(obj.video_resume_file)
+
+    def validate_upload(self, value, valid_content_types, valid_extensions, error_message):
         if not value:
             return value
 
-        valid_content_types = {"image/jpeg", "image/png"}
-        valid_extensions = (".jpg", ".jpeg", ".png")
         content_type = getattr(value, "content_type", "")
         file_name = value.name.lower()
 
         if content_type not in valid_content_types or not file_name.endswith(valid_extensions):
-            raise serializers.ValidationError("Sila pilih fail .jpg atau .png sahaja.")
+            raise serializers.ValidationError(error_message)
 
         if value.size > 5 * 1024 * 1024:
             raise serializers.ValidationError("Saiz fail maksimum ialah 5MB.")
 
         return value
 
-    def update(self, instance, validated_data):
-        remove_profile_photo = validated_data.pop("remove_profile_photo", False)
-        new_profile_photo = validated_data.get("profile_photo")
-        old_profile_photo = instance.profile_photo
+    def validate_profile_photo(self, value):
+        return self.validate_upload(
+            value,
+            {"image/jpeg", "image/png"},
+            (".jpg", ".jpeg", ".png"),
+            "Sila pilih fail .jpg atau .png sahaja.",
+        )
 
-        if remove_profile_photo and old_profile_photo:
-            old_profile_photo.delete(save=False)
-            instance.profile_photo = ""
+    def validate_resume_file(self, value):
+        return self.validate_upload(
+            value,
+            {
+                "application/pdf",
+                "application/msword",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            },
+            (".pdf", ".doc", ".docx"),
+            "Sila pilih fail Word atau PDF sahaja.",
+        )
+
+    def validate_video_resume_file(self, value):
+        return self.validate_upload(
+            value,
+            {"video/mp4"},
+            (".mp4",),
+            "Sila pilih fail .mp4 sahaja.",
+        )
+
+    def update(self, instance, validated_data):
+        file_fields = (
+            ("profile_photo", "remove_profile_photo"),
+            ("resume_file", "remove_resume_file"),
+            ("video_resume_file", "remove_video_resume_file"),
+        )
+        old_files = {field: getattr(instance, field) for field, _remove_field in file_fields}
+
+        for field, remove_field in file_fields:
+            if validated_data.pop(remove_field, False) and old_files[field]:
+                old_files[field].delete(save=False)
+                setattr(instance, field, "")
 
         instance = super().update(instance, validated_data)
 
-        if new_profile_photo and old_profile_photo and old_profile_photo.name != instance.profile_photo.name:
-            old_profile_photo.delete(save=False)
+        for field, _remove_field in file_fields:
+            new_file = validated_data.get(field)
+            old_file = old_files[field]
+
+            if new_file and old_file and old_file.name != getattr(instance, field).name:
+                old_file.delete(save=False)
 
         return instance
 

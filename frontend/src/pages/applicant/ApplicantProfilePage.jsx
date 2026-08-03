@@ -104,6 +104,10 @@ function getPersistentProfilePhotoUrl(profile) {
   return profilePhotoUrl && !profilePhotoUrl.startsWith("blob:") ? profilePhotoUrl : "";
 }
 
+function getPersistentDocumentUrl(url) {
+  return url && !url.startsWith("blob:") ? url : "";
+}
+
 function getPersonalProfileStorageKey(user) {
   return `dbku-applicant-personal-profile:${user?.email || user?.full_name || "default"}`;
 }
@@ -130,6 +134,10 @@ function getPersonalProfileDefaults(displayName, email) {
     profilePhotoFileName: "",
     profilePhotoPreviewUrl: "",
     profilePhotoUrl: "",
+    resumeUploadFile: null,
+    resumeFileUrl: "",
+    videoResumeUploadFile: null,
+    videoResumeFileUrl: "",
     references: [],
   };
 }
@@ -158,6 +166,8 @@ function normalizePersonalProfile(profile, displayName, email) {
   delete storedProfile.profilePhoto;
   delete storedProfile.profilePhotoPreviewUrl;
   delete storedProfile.profilePhotoStorageKey;
+  const resumeFileUrl = getPersistentDocumentUrl(profile?.resumeFileUrl);
+  const videoResumeFileUrl = getPersistentDocumentUrl(profile?.videoResumeFileUrl);
 
   return {
     ...defaults,
@@ -165,6 +175,8 @@ function normalizePersonalProfile(profile, displayName, email) {
     details: {
       ...defaults.details,
       ...(profile?.details || {}),
+      resumeFile: resumeFileUrl ? profile?.details?.resumeFile || getFileNameFromUrl(resumeFileUrl) : "",
+      videoResumeFile: videoResumeFileUrl ? profile?.details?.videoResumeFile || getFileNameFromUrl(videoResumeFileUrl) : "",
     },
     displayName: formatApplicantName(storedProfile.displayName || defaults.displayName),
     profilePhotoFile: null,
@@ -173,6 +185,10 @@ function normalizePersonalProfile(profile, displayName, email) {
       : "",
     profilePhotoPreviewUrl: persistentProfilePhotoUrl,
     profilePhotoUrl: persistentProfilePhotoUrl,
+    resumeUploadFile: null,
+    resumeFileUrl,
+    videoResumeUploadFile: null,
+    videoResumeFileUrl,
     references: Array.isArray(profile?.references) ? profile.references.map(normalizeReference) : defaults.references,
   };
 }
@@ -184,6 +200,8 @@ function getComparablePersonalProfile(profile) {
     email: profile?.email || "",
     profilePhotoFileName: profile?.profilePhotoFileName || "",
     profilePhotoUrl: profile?.profilePhotoUrl || "",
+    resumeFileUrl: profile?.resumeFileUrl || "",
+    videoResumeFileUrl: profile?.videoResumeFileUrl || "",
     references: profile?.references || [],
   };
 
@@ -209,13 +227,34 @@ async function savePersonalProfile(user, profile) {
     formData.append("remove_profile_photo", "true");
   }
 
+  if (profile.resumeUploadFile && profile.details.resumeFile) {
+    formData.append("resume_file", profile.resumeUploadFile);
+  } else if (!profile.details.resumeFile) {
+    formData.append("remove_resume_file", "true");
+  }
+
+  if (profile.videoResumeUploadFile && profile.details.videoResumeFile) {
+    formData.append("video_resume_file", profile.videoResumeUploadFile);
+  } else if (!profile.details.videoResumeFile) {
+    formData.append("remove_video_resume_file", "true");
+  }
+
   const updatedUser = await updateCurrentUser(formData);
   const profilePhotoUrl = updatedUser.profile_photo_url || "";
-  const serializableProfile = { ...profile, profilePhotoUrl };
+  const resumeFileUrl = updatedUser.resume_file_url || "";
+  const videoResumeFileUrl = updatedUser.video_resume_file_url || "";
+  const serializableProfile = {
+    ...profile,
+    profilePhotoUrl,
+    resumeFileUrl,
+    videoResumeFileUrl,
+  };
 
   delete serializableProfile.profilePhoto;
   delete serializableProfile.profilePhotoFile;
   delete serializableProfile.profilePhotoPreviewUrl;
+  delete serializableProfile.resumeUploadFile;
+  delete serializableProfile.videoResumeUploadFile;
 
   try {
     window.localStorage.setItem(getPersonalProfileStorageKey(user), JSON.stringify(serializableProfile));
@@ -227,6 +266,8 @@ async function savePersonalProfile(user, profile) {
     ...serializableProfile,
     profilePhotoFile: null,
     profilePhotoPreviewUrl: profilePhotoUrl,
+    resumeUploadFile: null,
+    videoResumeUploadFile: null,
   };
 }
 
@@ -508,8 +549,12 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
   const [profilePhotoUrl, setProfilePhotoUrl] = useState(profileData.profilePhotoUrl);
   const [photoError, setPhotoError] = useState("");
   const [resumeError, setResumeError] = useState("");
+  const [resumeFileUrl, setResumeFileUrl] = useState(profileData.resumeFileUrl);
+  const [resumeUploadFile, setResumeUploadFile] = useState(profileData.resumeUploadFile);
   const [saveError, setSaveError] = useState("");
   const [videoResumeError, setVideoResumeError] = useState("");
+  const [videoResumeFileUrl, setVideoResumeFileUrl] = useState(profileData.videoResumeFileUrl);
+  const [videoResumeUploadFile, setVideoResumeUploadFile] = useState(profileData.videoResumeUploadFile);
   const [references, setReferences] = useState(profileData.references);
   const [validationErrors, setValidationErrors] = useState({});
 
@@ -620,6 +665,17 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
       ...current,
       [field]: file.name,
     }));
+
+    if (field === "resumeFile") {
+      setResumeUploadFile(file);
+      setResumeFileUrl("");
+    }
+
+    if (field === "videoResumeFile") {
+      setVideoResumeUploadFile(file);
+      setVideoResumeFileUrl("");
+    }
+
     setError("");
     event.target.value = "";
   };
@@ -629,6 +685,16 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
       ...current,
       [field]: "",
     }));
+
+    if (field === "resumeFile") {
+      setResumeUploadFile(null);
+      setResumeFileUrl("");
+    }
+
+    if (field === "videoResumeFile") {
+      setVideoResumeUploadFile(null);
+      setVideoResumeFileUrl("");
+    }
   };
 
   const addReference = () => {
@@ -712,7 +778,11 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
       profilePhotoFileName,
       profilePhotoPreviewUrl,
       profilePhotoUrl,
+      resumeFileUrl,
+      resumeUploadFile,
       references,
+      videoResumeFileUrl,
+      videoResumeUploadFile,
     }),
     [
       formEmail,
@@ -722,7 +792,11 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
       profilePhotoFileName,
       profilePhotoPreviewUrl,
       profilePhotoUrl,
+      resumeFileUrl,
+      resumeUploadFile,
       references,
+      videoResumeFileUrl,
+      videoResumeUploadFile,
     ],
   );
 
@@ -1136,12 +1210,21 @@ export default function ApplicantProfilePage() {
   const [personalProfile, setPersonalProfile] = useState(() => {
     const savedProfile = getSavedPersonalProfile(user);
     const profilePhotoUrl = savedProfile?.profilePhotoUrl || user?.profile_photo_url || "";
+    const resumeFileUrl = savedProfile?.resumeFileUrl || user?.resume_file_url || "";
+    const videoResumeFileUrl = savedProfile?.videoResumeFileUrl || user?.video_resume_file_url || "";
 
     return normalizePersonalProfile(
       {
         ...savedProfile,
+        details: {
+          ...(savedProfile?.details || {}),
+          resumeFile: savedProfile?.details?.resumeFile || getFileNameFromUrl(resumeFileUrl),
+          videoResumeFile: savedProfile?.details?.videoResumeFile || getFileNameFromUrl(videoResumeFileUrl),
+        },
         profilePhotoFileName: savedProfile?.profilePhotoFileName || getFileNameFromUrl(profilePhotoUrl),
         profilePhotoUrl,
+        resumeFileUrl,
+        videoResumeFileUrl,
       },
       displayName,
       email,
