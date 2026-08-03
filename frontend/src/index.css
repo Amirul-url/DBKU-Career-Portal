@@ -3609,15 +3609,19 @@ body:has(.applicant-profile-page) {
   display: inline-flex;
   width: 42px;
   height: 42px;
+  aspect-ratio: 1;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  flex: 0 0 42px;
+  border-radius: 999px;
 }
 
 .profile-user-chip {
+  border: 1px solid #86efac;
   background: #d1fae5;
-  color: #006c49;
+  color: #16a34a;
   font-weight: 900;
+  line-height: 1;
   text-transform: uppercase;
 }
 
@@ -3948,14 +3952,17 @@ body:has(.applicant-profile-page) {
   display: inline-flex;
   width: 90px;
   height: 90px;
+  aspect-ratio: 1;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #16a34a, #86efac);
-  color: #ffffff;
+  border: 1px solid #86efac;
+  border-radius: 999px;
+  background: #d1fae5;
+  color: #16a34a;
   font-size: 34px;
   font-weight: 900;
+  line-height: 1;
   text-transform: uppercase;
 }
 
@@ -4308,6 +4315,11 @@ body:has(.applicant-profile-page) {
 .profile-avatar {
   width: 76px;
   height: 76px;
+  flex: 0 0 76px;
+  border-color: #86efac;
+  border-radius: 999px;
+  background: #d1fae5;
+  color: #16a34a;
   font-size: 30px;
 }
 
