@@ -5197,15 +5197,13 @@ body:has(.applicant-profile-page) {
 }
 
 .job-title-suggestions button {
-  display: grid;
+  display: block;
   min-height: 44px;
-  align-items: center;
-  grid-template-columns: 22px minmax(0, 1fr);
-  gap: 10px;
   border: 0;
   border-bottom: 1px solid rgba(209, 250, 229, 0.72);
   background: #ffffff;
   color: var(--profile-ink);
+  text-align: left;
   padding: 0 14px;
   font-size: 13px;
   font-weight: 850;

@@ -809,7 +809,6 @@ function JobTitleAutocomplete({ error, onChange, value }) {
       }}
     >
       <div className="job-search-input">
-        <Icon>search</Icon>
         <input
           type="text"
           value={value}
@@ -828,7 +827,6 @@ function JobTitleAutocomplete({ error, onChange, value }) {
             <div>
               {visibleSuggestions.map((option) => (
                 <button type="button" key={option.value} onMouseDown={(event) => event.preventDefault()} onClick={() => selectSuggestion(option.value)}>
-                  <Icon>work</Icon>
                   <span>{option.label}</span>
                 </button>
               ))}
