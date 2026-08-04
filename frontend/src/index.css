@@ -5317,7 +5317,7 @@ body:has(.applicant-profile-page) {
 .job-multi-select-options label {
   display: grid;
   min-height: 52px;
-  align-items: start;
+  align-items: center;
   grid-template-columns: 20px minmax(0, 1fr);
   gap: 8px;
   border-bottom: 1px solid rgba(209, 250, 229, 0.72);
@@ -5329,8 +5329,8 @@ body:has(.applicant-profile-page) {
 }
 
 .job-multi-select-options input {
-  align-self: start;
-  margin: 1px 0 0;
+  align-self: center;
+  margin: 0;
 }
 
 .job-multi-select-options label:hover {
