@@ -4864,8 +4864,10 @@ body:has(.applicant-profile-page) {
 
 .personal-select-options button {
   display: flex;
+  width: 100%;
   min-height: 50px;
   align-items: center;
+  justify-content: flex-start;
   border: 0;
   background: #ffffff;
   color: var(--profile-ink);
