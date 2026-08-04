@@ -5208,6 +5208,14 @@ body:has(.applicant-profile-page) {
   margin-top: 2px;
 }
 
+.job-preference-card .experience-summary-index {
+  margin: 0;
+  color: var(--profile-green);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
 .job-preference-card-actions {
   display: flex;
   justify-content: flex-end;

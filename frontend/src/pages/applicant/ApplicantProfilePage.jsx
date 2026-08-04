@@ -2309,7 +2309,7 @@ function ExperienceSummary({ data }) {
 
   return (
     <div className="job-preference-card-list experience-summary-list">
-      {data.records.map((record) => {
+      {data.records.map((record, index) => {
         const startDate = formatExperienceMonthYear(record.startMonth, record.startYear);
         const endDate = record.isCurrent ? "Kini" : formatExperienceMonthYear(record.endMonth, record.endYear);
         const duration = formatExperienceDuration(record);
@@ -2317,6 +2317,7 @@ function ExperienceSummary({ data }) {
 
         return (
           <article className="job-preference-card experience-summary-card" key={record.id}>
+            <span className="experience-summary-index">Pengalaman {index + 1}</span>
             <strong>{record.title || "Pekerjaan belum diisi"}</strong>
             {record.careerLevel ? <span>{record.careerLevel}</span> : null}
             {record.organisation ? <span>{record.organisation}</span> : null}
