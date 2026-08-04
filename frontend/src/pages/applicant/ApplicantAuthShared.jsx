@@ -26,6 +26,7 @@ import {
   SlidersHorizontal,
   Sparkles,
   UserRound,
+  X,
 } from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
 
@@ -33,6 +34,7 @@ const getActiveClass = ({ isActive }) => (isActive ? "active" : undefined);
 
 const iconMap = {
   add_circle: CirclePlus,
+  cancel: X,
   description: FileText,
   edit: Pencil,
   emoji_objects: Lightbulb,
