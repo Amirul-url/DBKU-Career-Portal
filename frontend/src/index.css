@@ -5442,6 +5442,10 @@ body:has(.applicant-profile-page) {
   font-weight: 850;
 }
 
+.job-choice-group button {
+  background: #ffffff;
+}
+
 .job-choice-group button.selected {
   border-color: var(--profile-green);
   background: var(--profile-pale);
