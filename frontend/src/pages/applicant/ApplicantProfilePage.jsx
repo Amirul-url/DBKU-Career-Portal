@@ -607,8 +607,23 @@ function PersonalSelect({ onChange, options, placeholder, searchable = false, se
 function PersonalMultiSelect({ error, onChange, options, placeholder, selectedLabel, value }) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const selectRef = useRef(null);
   const visibleOptions = options.filter((option) => option.label.toLowerCase().includes(searchTerm.trim().toLowerCase()));
   const selectedValues = Array.isArray(value) ? value : [];
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    const handleOutsidePointerDown = (event) => {
+      if (!selectRef.current?.contains(event.target)) {
+        setIsOpen(false);
+        setSearchTerm("");
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsidePointerDown);
+    return () => document.removeEventListener("mousedown", handleOutsidePointerDown);
+  }, [isOpen]);
 
   const toggleOption = (selectedValue) => {
     const nextValues = selectedValues.includes(selectedValue)
@@ -625,16 +640,8 @@ function PersonalMultiSelect({ error, onChange, options, placeholder, selectedLa
   return (
     <div className={`job-multi-select ${error ? "has-error" : ""}`}>
       <div
+        ref={selectRef}
         className={`personal-select-wrap ${isOpen ? "open" : ""}`}
-        onBlur={(event) => {
-          const selectWrap = event.currentTarget;
-          window.setTimeout(() => {
-            if (!selectWrap.contains(document.activeElement)) {
-              setIsOpen(false);
-              setSearchTerm("");
-            }
-          }, 0);
-        }}
       >
         <button
           type="button"
