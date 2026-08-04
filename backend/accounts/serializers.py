@@ -184,6 +184,26 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 
+class InternalHrmAccountSerializer(serializers.Serializer):
+    full_name = serializers.CharField(max_length=150)
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True, min_length=8)
+
+    def validate_email(self, value):
+        email = value.strip().lower()
+        if User.objects.filter(email__iexact=email).exists():
+            raise serializers.ValidationError("Emel ini sudah digunakan.")
+        return email
+
+    def create(self, validated_data):
+        full_name = validated_data["full_name"].strip()
+        email = validated_data["email"]
+        user = User(username=email, email=email, first_name=full_name, role="hr", department="HRM", is_staff=True)
+        user.set_password(validated_data["password"])
+        user.save()
+        return user
+
+
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField(required=False)
     username = serializers.CharField(required=False)

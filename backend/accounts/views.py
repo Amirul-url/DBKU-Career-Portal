@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, parser_classes, permission_class
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 
-from .serializers import LoginSerializer, RegisterSerializer, UserSerializer
+from .serializers import InternalHrmAccountSerializer, LoginSerializer, RegisterSerializer, UserSerializer
 from .services import build_auth_response
 
 
@@ -33,3 +33,14 @@ def me_view(request):
         serializer.save()
         return Response(serializer.data)
     return Response(UserSerializer(request.user, context={"request": request}).data)
+
+
+@api_view(["POST"])
+def internal_hrm_account_view(request):
+    if request.user.role != "superadmin":
+        return Response({"detail": "Akses Super Admin diperlukan."}, status=status.HTTP_403_FORBIDDEN)
+
+    serializer = InternalHrmAccountSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    user = serializer.save()
+    return Response(UserSerializer(user, context={"request": request}).data, status=status.HTTP_201_CREATED)

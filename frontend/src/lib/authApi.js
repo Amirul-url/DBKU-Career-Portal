@@ -53,7 +53,7 @@ async function authRequest(path, payload) {
   return data;
 }
 
-async function apiRequest(path, options = {}) {
+export async function apiRequest(path, options = {}) {
   const accessToken = getAccessToken();
   const headers = {
     ...(options.headers || {}),
