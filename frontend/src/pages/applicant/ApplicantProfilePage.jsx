@@ -249,7 +249,7 @@ function createEmptyPreferredJob() {
     city: "",
     distance: "+ 200 km",
     employmentStatuses: [],
-    expectedSalary: "",
+    expectedSalary: [],
     hasRelatedExperience: false,
     id: createLocalId(),
     sectors: [],
@@ -311,11 +311,17 @@ function normalizePreferredJob(job) {
     : job?.employmentType
       ? [job.employmentType]
       : [];
+  const expectedSalary = Array.isArray(job?.expectedSalary)
+    ? job.expectedSalary
+    : job?.expectedSalary
+      ? [job.expectedSalary]
+      : [];
 
   return {
     ...createEmptyPreferredJob(),
     ...(job || {}),
     employmentStatuses,
+    expectedSalary,
     id: job?.id || createLocalId(),
     sectors: Array.isArray(job?.sectors) ? job.sectors : [],
     skills: Array.isArray(job?.skills) ? job.skills : [],
@@ -1765,7 +1771,7 @@ function JobPreferencesSummary({ preferences }) {
                   ? job.employmentStatuses.join(", ")
                   : "Status pekerjaan belum dipilih"}
               </span>
-              {job.expectedSalary ? <span>Gaji dijangka: RM {job.expectedSalary}</span> : null}
+              {job.expectedSalary.length ? <span>Gaji dijangka: RM {job.expectedSalary.join(", ")}</span> : null}
             </article>
           ))}
         </div>
@@ -1861,11 +1867,15 @@ function JobPreferencesForm({ onDraftChange, onSave, preferencesData, saveReques
     }
 
     preferredJobs.forEach((job) => {
-      ["title", "careerLevel", "expectedSalary"].forEach((field) => {
+      ["title", "careerLevel"].forEach((field) => {
         if (!String(job[field] || "").trim()) {
           errors[`preferred-job-${job.id}-${field}`] = "Wajib diisi.";
         }
       });
+
+      if (!Array.isArray(job.expectedSalary) || job.expectedSalary.length === 0) {
+        errors[`preferred-job-${job.id}-expectedSalary`] = "Wajib diisi.";
+      }
 
       [
         ["sectors", job.sectors],
@@ -2065,6 +2075,7 @@ function JobPreferencesForm({ onDraftChange, onSave, preferencesData, saveReques
 
               <ChoicePillGroup
                 label="Gaji Yang Dijangkakan (MYR)"
+                multiple
                 error={validationErrors[`preferred-job-${job.id}-expectedSalary`]}
                 value={job.expectedSalary}
                 options={salaryRangeOptions}

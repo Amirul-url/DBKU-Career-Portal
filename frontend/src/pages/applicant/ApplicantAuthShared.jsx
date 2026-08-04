@@ -3,6 +3,7 @@ import {
   Bell,
   Brain,
   BriefcaseBusiness,
+  Check,
   ChevronDown,
   ChevronUp,
   CirclePlus,
@@ -35,6 +36,7 @@ const getActiveClass = ({ isActive }) => (isActive ? "active" : undefined);
 const iconMap = {
   add_circle: CirclePlus,
   cancel: X,
+  check: Check,
   description: FileText,
   edit: Pencil,
   emoji_objects: Lightbulb,
