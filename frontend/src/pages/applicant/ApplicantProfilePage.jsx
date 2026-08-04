@@ -2236,6 +2236,14 @@ function ExperienceForm({ data, onDraftChange, onSave }) {
   const [form, setForm] = useState(data);
   const update = (field) => (event) => setForm((current) => ({ ...current, [field]: event.target.value }));
   const addRecord = () => setForm((current) => ({ ...current, records: [...current.records, { id: createLocalId(), title: "", careerLevel: "", organisation: "", country: "Malaysia", sectors: [], startMonth: "", startYear: "", endMonth: "", endYear: "", isCurrent: false, description: "", skills: [], salary: "" }] }));
+  const toggleRecordSkill = (recordId, skill) => setForm((current) => ({
+    ...current,
+    records: current.records.map((record) => {
+      if (record.id !== recordId) return record;
+      const skills = Array.isArray(record.skills) ? record.skills : [];
+      return { ...record, skills: skills.includes(skill) ? skills.filter((item) => item !== skill) : [...skills, skill] };
+    }),
+  }));
   useEffect(() => { onDraftChange(form); }, [form, onDraftChange]);
 
   return (
@@ -2261,6 +2269,8 @@ function ExperienceForm({ data, onDraftChange, onSave }) {
             <div className="experience-date-grid"><PersonalField label="Tarikh Mula - Bulan"><PersonalSelect value={record.startMonth} placeholder="Pilih" options={toSelectOptions(monthOptions)} onChange={(event) => setForm((current) => ({ ...current, records: current.records.map((item) => item.id === record.id ? { ...item, startMonth: event.target.value } : item) }))} /></PersonalField><PersonalField label="Tarikh Mula - Tahun"><PersonalSelect value={record.startYear} placeholder="Pilih" options={toSelectOptions(yearOptions)} onChange={(event) => setForm((current) => ({ ...current, records: current.records.map((item) => item.id === record.id ? { ...item, startYear: event.target.value } : item) }))} /></PersonalField><PersonalField label="Tarikh Akhir - Bulan"><PersonalSelect disabled={record.isCurrent} value={record.endMonth} placeholder="Pilih" options={toSelectOptions(monthOptions)} onChange={(event) => setForm((current) => ({ ...current, records: current.records.map((item) => item.id === record.id ? { ...item, endMonth: event.target.value } : item) }))} /></PersonalField><PersonalField label="Tarikh Akhir - Tahun"><PersonalSelect disabled={record.isCurrent} value={record.endYear} placeholder="Pilih" options={toSelectOptions(yearOptions)} onChange={(event) => setForm((current) => ({ ...current, records: current.records.map((item) => item.id === record.id ? { ...item, endYear: event.target.value } : item) }))} /></PersonalField></div>
             <label className="job-checkbox-row"><input type="checkbox" checked={record.isCurrent} onChange={(event) => setForm((current) => ({ ...current, records: current.records.map((item) => item.id === record.id ? { ...item, isCurrent: event.target.checked } : item) }))} /><span>Saya masih bekerja di sini</span></label>
             <PersonalField label="Deskripsi Jawatan" optional><textarea value={record.description} placeholder="Masukkan deskripsi tugas" onChange={(event) => setForm((current) => ({ ...current, records: current.records.map((item) => item.id === record.id ? { ...item, description: event.target.value } : item) }))} /></PersonalField>
+            <PersonalField label="Kemahiran Berkaitan"><SkillAutocomplete selectedSkills={record.skills || []} onToggle={(skill) => toggleRecordSkill(record.id, skill)} /><small>Anda boleh membuat penambahan kemahiran yang anda miliki secara manual.</small></PersonalField>
+            {(record.skills || []).length ? <div className="job-selected-list"><strong>Kemahiran Anda ({record.skills.length})</strong><div>{record.skills.map((skill) => <button type="button" key={skill} onClick={() => toggleRecordSkill(record.id, skill)}><span>{skill}</span><Icon>cancel</Icon></button>)}</div></div> : null}
             <PersonalField label="Purata Gaji (MYR)"><PersonalSelect value={record.salary} placeholder="Pilih purata gaji" options={toSelectOptions(salaryRangeOptions)} onChange={(event) => setForm((current) => ({ ...current, records: current.records.map((item) => item.id === record.id ? { ...item, salary: event.target.value } : item) }))} /></PersonalField>
             <button type="button" className="personal-outline-button" onClick={() => setForm((current) => ({ ...current, records: current.records.filter((item) => item.id !== record.id) }))}>Padam</button>
           </div>)}
