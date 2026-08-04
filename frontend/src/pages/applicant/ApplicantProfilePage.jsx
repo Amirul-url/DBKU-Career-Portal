@@ -61,6 +61,26 @@ const defaultExperienceProfile = { employmentStatus: "", hasExperience: "", star
 const monthOptions = ["Januari", "Februari", "Mac", "April", "Mei", "Jun", "Julai", "Ogos", "September", "Oktober", "November", "Disember"];
 const yearOptions = Array.from({ length: 50 }, (_, index) => String(new Date().getFullYear() - index));
 
+function formatExperienceMonthYear(month, year) {
+  return month && year ? `${month} ${year}` : "";
+}
+
+function formatExperienceDuration(record) {
+  const startMonthIndex = monthOptions.indexOf(record.startMonth);
+  const startYear = Number(record.startYear);
+  const endMonthIndex = record.isCurrent ? new Date().getMonth() : monthOptions.indexOf(record.endMonth);
+  const endYear = record.isCurrent ? new Date().getFullYear() : Number(record.endYear);
+
+  if (startMonthIndex < 0 || !startYear || endMonthIndex < 0 || !endYear) return "";
+
+  const totalMonths = (endYear - startYear) * 12 + endMonthIndex - startMonthIndex + 1;
+  if (totalMonths <= 0) return "";
+
+  const years = Math.floor(totalMonths / 12);
+  const months = totalMonths % 12;
+  return [years ? `${years} tahun` : "", months ? `${months} bulan` : ""].filter(Boolean).join(" ");
+}
+
 const careerLevelOptions = [
   { value: "Bukan Eksekutif", label: "Bukan Eksekutif" },
   { value: "Fresh / Entry Level", label: "Fresh / Entry Level" },
@@ -2283,7 +2303,29 @@ function ExperienceForm({ data, onDraftChange, onSave }) {
 }
 
 function ExperienceSummary({ data }) {
-  return data.records.length ? <div className="profile-empty-row"><span><Icon>history</Icon></span><p>{data.records.length} pengalaman kerja direkodkan.</p></div> : <div className="profile-empty-row"><span><Icon>history</Icon></span><p>Tambah pengalaman kerja, latihan industri atau projek berkaitan.</p></div>;
+  if (!data.records.length) {
+    return <div className="profile-empty-row"><span><Icon>history</Icon></span><p>Tambah pengalaman kerja, latihan industri atau projek berkaitan.</p></div>;
+  }
+
+  return (
+    <div className="job-preference-card-list experience-summary-list">
+      {data.records.map((record) => {
+        const startDate = formatExperienceMonthYear(record.startMonth, record.startYear);
+        const endDate = record.isCurrent ? "Kini" : formatExperienceMonthYear(record.endMonth, record.endYear);
+        const duration = formatExperienceDuration(record);
+        const period = [startDate, endDate].filter(Boolean).join(" - ");
+
+        return (
+          <article className="job-preference-card experience-summary-card" key={record.id}>
+            <strong>{record.title || "Pekerjaan belum diisi"}</strong>
+            {record.careerLevel ? <span>{record.careerLevel}</span> : null}
+            {record.organisation ? <span>{record.organisation}</span> : null}
+            {period ? <span>{period}{duration ? ` | ${duration}` : ""}</span> : null}
+          </article>
+        );
+      })}
+    </div>
+  );
 }
 
 export default function ApplicantProfilePage() {
