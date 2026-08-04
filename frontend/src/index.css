@@ -5110,7 +5110,35 @@ body:has(.applicant-profile-page) {
 }
 
 .academic-summary-card {
+  gap: 12px;
   background: #f8fbff;
+  padding: 24px;
+}
+
+.academic-summary-card strong {
+  font-size: 16px;
+}
+
+.academic-summary-card > span:not(.experience-summary-index) {
+  margin: 0;
+  color: var(--profile-ink);
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.skills-summary {
+  gap: 14px;
+  padding-top: 2px;
+}
+
+.skills-summary > div {
+  gap: 12px;
+}
+
+.skills-summary > div span {
+  color: var(--profile-ink);
+  font-size: 15px;
+  font-weight: 650;
 }
 
 .personal-helper-copy {
