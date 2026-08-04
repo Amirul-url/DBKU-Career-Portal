@@ -296,6 +296,18 @@ function saveAcademicProfile(user, academic) {
   return normalized;
 }
 
+function isEmptyAcademicRecord(record) {
+  return !record?.level && !record?.fieldOfStudy && !record?.specialization && !record?.institution && !record?.result
+    && !record?.startMonth && !record?.startYear && !record?.endMonth && !record?.endYear && !record?.isStudying
+    && !Object.values(record?.spmGrades || {}).some(Boolean);
+}
+
+function getComparableAcademicProfile(profile) {
+  return JSON.stringify((profile?.records || []).filter((record) => !isEmptyAcademicRecord(record)).map((record) => ({
+    level: record.level || "", fieldOfStudy: record.fieldOfStudy || "", specialization: record.specialization || "", institution: record.institution || "", country: record.country || "", result: record.result || "", spmGrades: record.spmGrades || {}, startMonth: record.startMonth || "", startYear: record.startYear || "", endMonth: record.endMonth || "", endYear: record.endYear || "", isStudying: Boolean(record.isStudying),
+  })));
+}
+
 function getSavedPersonalProfile(user) {
   if (typeof window === "undefined") {
     return null;
@@ -2416,6 +2428,7 @@ export default function ApplicantProfilePage() {
   const [isAcademicCloseDialogOpen, setIsAcademicCloseDialogOpen] = useState(false);
   const [isPersonalDraftDirty, setIsPersonalDraftDirty] = useState(false);
   const [isJobPreferencesDraftDirty, setIsJobPreferencesDraftDirty] = useState(false);
+  const [isAcademicDraftDirty, setIsAcademicDraftDirty] = useState(false);
   const [personalDraft, setPersonalDraft] = useState(null);
   const [academicDraft, setAcademicDraft] = useState(null);
   const [personalSaveRequestKey, setPersonalSaveRequestKey] = useState(0);
@@ -2537,13 +2550,15 @@ export default function ApplicantProfilePage() {
     clearDraft(user, "academic");
     setEditingSection(null);
     setAcademicDraft(null);
+    setIsAcademicDraftDirty(false);
     setIsAcademicCloseDialogOpen(false);
   };
 
   const handleAcademicDraftChange = useCallback((draft) => {
     saveDraft(user, "academic", draft);
     setAcademicDraft(draft);
-  }, [user]);
+    setIsAcademicDraftDirty(getComparableAcademicProfile(draft) !== getComparableAcademicProfile(academicProfile));
+  }, [academicProfile, user]);
 
   const handleAcademicEditToggle = () => {
     if (editingSection !== "academic") {
@@ -2551,12 +2566,18 @@ export default function ApplicantProfilePage() {
       return;
     }
 
-    setIsAcademicCloseDialogOpen(true);
+    if (isAcademicDraftDirty) {
+      setIsAcademicCloseDialogOpen(true);
+      return;
+    }
+
+    discardAcademicDraft();
   };
 
   const discardAcademicDraft = () => {
     clearDraft(user, "academic");
     setAcademicDraft(null);
+    setIsAcademicDraftDirty(false);
     setIsAcademicCloseDialogOpen(false);
     setEditingSection(null);
   };
