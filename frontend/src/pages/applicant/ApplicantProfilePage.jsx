@@ -2459,8 +2459,11 @@ function SkillsForm({ data, onDraftChange, onSave }) {
 
 function SkillsSummary({ data }) {
   const profile = normalizeSkillsProfile(data);
+  const [showAll, setShowAll] = useState(false);
   if (!profile.skills.length) return <div className="profile-empty-row"><span><Icon>psychology</Icon></span><p>Senaraikan kemahiran teknikal, bahasa dan sijil profesional anda.</p></div>;
-  return <div className="job-selected-list skills-summary"><strong>Kemahiran Anda ({profile.skills.length})</strong><div>{profile.skills.map((skill) => <span className="skills-summary-tag" key={skill}>{skill}</span>)}</div></div>;
+  const skillList = showAll ? profile.skills : profile.skills.slice(0, 10);
+  const sections = [["Kemahiran", skillList], ["Kemahiran MS Office", profile.microsoftOffice], ["Bahasa", profile.languages.map((language) => language.name).filter(Boolean)], ["Lesen memandu", profile.licences]].filter(([, values]) => values.length);
+  return <div className="skills-summary">{sections.map(([title, values]) => <section key={title}><strong>{title}</strong><div>{values.map((value) => <span className="skills-summary-tag" key={value}>{value}</span>)}</div></section>)}{profile.skills.length > 10 ? <button type="button" className="skills-toggle-button" onClick={() => setShowAll((current) => !current)}>Tunjukkan {showAll ? "Kurang" : "Lagi"}</button> : null}</div>;
 }
 
 export default function ApplicantProfilePage() {

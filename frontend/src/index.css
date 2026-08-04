@@ -5129,11 +5129,25 @@ body:has(.applicant-profile-page) {
 }
 
 .skills-summary {
+  display: grid;
   gap: 14px;
   padding-top: 2px;
 }
 
-.skills-summary > div {
+.skills-summary section {
+  display: grid;
+  gap: 8px;
+}
+
+.skills-summary section > strong {
+  color: var(--profile-ink);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.skills-summary section > div {
+  display: flex;
+  flex-wrap: wrap;
   gap: 12px;
 }
 
@@ -5148,6 +5162,17 @@ body:has(.applicant-profile-page) {
   color: var(--profile-ink);
   font-size: 14px;
   font-weight: 850;
+}
+
+.skills-toggle-button {
+  justify-self: center;
+  border: 1px solid var(--profile-green);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--profile-green);
+  padding: 5px 16px;
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .skills-layout {
