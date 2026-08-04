@@ -2413,9 +2413,11 @@ export default function ApplicantProfilePage() {
   const [editingSection, setEditingSection] = useState(null);
   const [isPersonalCloseDialogOpen, setIsPersonalCloseDialogOpen] = useState(false);
   const [isJobPreferencesCloseDialogOpen, setIsJobPreferencesCloseDialogOpen] = useState(false);
+  const [isAcademicCloseDialogOpen, setIsAcademicCloseDialogOpen] = useState(false);
   const [isPersonalDraftDirty, setIsPersonalDraftDirty] = useState(false);
   const [isJobPreferencesDraftDirty, setIsJobPreferencesDraftDirty] = useState(false);
   const [personalDraft, setPersonalDraft] = useState(null);
+  const [academicDraft, setAcademicDraft] = useState(null);
   const [personalSaveRequestKey, setPersonalSaveRequestKey] = useState(0);
   const [jobPreferencesSaveRequestKey, setJobPreferencesSaveRequestKey] = useState(0);
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
@@ -2534,6 +2536,29 @@ export default function ApplicantProfilePage() {
     setAcademicProfile(saveAcademicProfile(user, academic));
     clearDraft(user, "academic");
     setEditingSection(null);
+    setAcademicDraft(null);
+    setIsAcademicCloseDialogOpen(false);
+  };
+
+  const handleAcademicDraftChange = useCallback((draft) => {
+    saveDraft(user, "academic", draft);
+    setAcademicDraft(draft);
+  }, [user]);
+
+  const handleAcademicEditToggle = () => {
+    if (editingSection !== "academic") {
+      setEditingSection("academic");
+      return;
+    }
+
+    setIsAcademicCloseDialogOpen(true);
+  };
+
+  const discardAcademicDraft = () => {
+    clearDraft(user, "academic");
+    setAcademicDraft(null);
+    setIsAcademicCloseDialogOpen(false);
+    setEditingSection(null);
   };
 
   const discardPersonalDraft = () => {
@@ -2646,8 +2671,8 @@ export default function ApplicantProfilePage() {
                 {editingSection === "experience" ? <ExperienceForm data={getSavedDraft(user, "experience") || experienceProfile} onDraftChange={(draft) => saveDraft(user, "experience", draft)} onSave={handleExperienceSave} /> : <ExperienceSummary data={experienceProfile} />}
               </ProfileCard>
 
-              <ProfileCard id="profile-section-4" isEditing={editingSection === "academic"} title="Akademik" onEdit={() => setEditingSection((current) => current === "academic" ? null : "academic")}>
-                {editingSection === "academic" ? <AcademicForm data={getSavedDraft(user, "academic") || academicProfile} onDraftChange={(draft) => saveDraft(user, "academic", draft)} onSave={handleAcademicSave} /> : <AcademicSummary data={academicProfile} />}
+              <ProfileCard id="profile-section-4" isEditing={editingSection === "academic"} title="Akademik" onEdit={handleAcademicEditToggle}>
+                {editingSection === "academic" ? <AcademicForm data={getSavedDraft(user, "academic") || academicProfile} onDraftChange={handleAcademicDraftChange} onSave={handleAcademicSave} /> : <AcademicSummary data={academicProfile} />}
               </ProfileCard>
 
               {emptyProfileCards.filter((card) => !["Pengalaman", "Akademik"].includes(card.title)).map((card, index) => (
@@ -2695,6 +2720,18 @@ export default function ApplicantProfilePage() {
               <button type="button" className="profile-confirm-primary" onClick={saveJobPreferencesDraftFromDialog}>
                 Simpan
               </button>
+            </div>
+          </section>
+        </div>
+      ) : null}
+      {isAcademicCloseDialogOpen ? (
+        <div className="profile-confirm-overlay" role="presentation">
+          <section className="profile-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="academic-close-title">
+            <h2 id="academic-close-title">Perubahan belum disimpan</h2>
+            <p>Anda ada membuat kemaskini pada Akademik. Pilih Simpan untuk menyimpan perubahan atau Buang untuk membuang perubahan.</p>
+            <div>
+              <button type="button" className="profile-confirm-secondary" onClick={discardAcademicDraft}>Buang</button>
+              <button type="button" className="profile-confirm-primary" onClick={() => handleAcademicSave(academicDraft || academicProfile)}>Simpan</button>
             </div>
           </section>
         </div>
