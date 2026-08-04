@@ -57,6 +57,10 @@ const defaultJobPreferences = {
   preferredJobs: [],
 };
 
+const defaultExperienceProfile = { employmentStatus: "", hasExperience: "", startMonth: "", startYear: "", records: [] };
+const monthOptions = ["Januari", "Februari", "Mac", "April", "Mei", "Jun", "Julai", "Ogos", "September", "Oktober", "November", "Disember"];
+const yearOptions = Array.from({ length: 50 }, (_, index) => String(new Date().getFullYear() - index));
+
 const careerLevelOptions = [
   { value: "Bukan Eksekutif", label: "Bukan Eksekutif" },
   { value: "Fresh / Entry Level", label: "Fresh / Entry Level" },
@@ -192,6 +196,23 @@ function getPersonalProfileStorageKey(user) {
 
 function getJobPreferencesStorageKey(user) {
   return `dbku-applicant-job-preferences:${user?.email || user?.full_name || "default"}`;
+}
+
+function getExperienceStorageKey(user) {
+  return `dbku-applicant-experience:${user?.email || user?.full_name || "default"}`;
+}
+
+function getSavedExperienceProfile(user) {
+  try {
+    const saved = window.localStorage.getItem(getExperienceStorageKey(user));
+    return saved ? { ...defaultExperienceProfile, ...JSON.parse(saved), records: Array.isArray(JSON.parse(saved).records) ? JSON.parse(saved).records : [] } : defaultExperienceProfile;
+  } catch { return defaultExperienceProfile; }
+}
+
+function saveExperienceProfile(user, experience) {
+  const normalized = { ...defaultExperienceProfile, ...experience };
+  try { window.localStorage.setItem(getExperienceStorageKey(user), JSON.stringify(normalized)); } catch { /* retain local state */ }
+  return normalized;
 }
 
 function getSavedPersonalProfile(user) {
@@ -2140,6 +2161,37 @@ function JobPreferencesForm({ onDraftChange, onSave, preferencesData, saveReques
   );
 }
 
+function ExperienceForm({ data, onSave }) {
+  const [form, setForm] = useState(data);
+  const update = (field) => (event) => setForm((current) => ({ ...current, [field]: event.target.value }));
+  const addRecord = () => setForm((current) => ({ ...current, records: [...current.records, { id: createLocalId(), title: "", organisation: "" }] }));
+
+  return (
+    <div className="personal-edit-panel experience-form">
+      <ProfileFormRow label="Status Bekerja">
+        <PersonalField label="Status pekerjaan semasa">
+          <PersonalSelect value={form.employmentStatus} placeholder="Pilih status pekerjaan" options={toSelectOptions(["Bekerja", "Bekerja Sendiri", "Tidak Bekerja"])} onChange={update("employmentStatus")} />
+        </PersonalField>
+      </ProfileFormRow>
+      <ProfileFormRow label="Pengalaman Kerja">
+        <PersonalRadioGroup label="Adakah anda mempunyai pengalaman bekerja?" name="experience-status" value={form.hasExperience} options={["Ya, saya mula bekerja sejak:", "Tidak"]} onChange={update("hasExperience")} />
+        {form.hasExperience.startsWith("Ya") ? <div className="experience-details">
+          <strong>Tarikh mula <em>(tidak wajib)</em></strong>
+          <div className="personal-date-group"><PersonalField label="Bulan"><PersonalSelect value={form.startMonth} placeholder="Pilih" options={toSelectOptions(monthOptions)} onChange={update("startMonth")} /></PersonalField><PersonalField label="Tahun"><PersonalSelect value={form.startYear} placeholder="Pilih" options={toSelectOptions(yearOptions)} onChange={update("startYear")} /></PersonalField></div>
+          <strong>Tambah pengalaman kerja anda*</strong><p>Tingkatkan peluang anda dengan memaparkan pengalaman kerja terdahulu.</p>
+          {form.records.map((record, index) => <div className="experience-record" key={record.id}><PersonalField label={`Jawatan ${index + 1}`}><input value={record.title} placeholder="Contoh. Pembangun perisian" onChange={(event) => setForm((current) => ({ ...current, records: current.records.map((item) => item.id === record.id ? { ...item, title: event.target.value } : item) }))} /></PersonalField><PersonalField label="Organisasi"><input value={record.organisation} placeholder="Nama organisasi" onChange={(event) => setForm((current) => ({ ...current, records: current.records.map((item) => item.id === record.id ? { ...item, organisation: event.target.value } : item) }))} /></PersonalField></div>)}
+          <button type="button" className="personal-add-reference" onClick={addRecord}><Icon>add_circle</Icon> Tambah Pengalaman</button>
+        </div> : null}
+      </ProfileFormRow>
+      <div className="personal-submit-row"><button type="button" className="personal-save-button" onClick={() => onSave(form)}><Icon>save</Icon>Simpan dan Teruskan</button></div>
+    </div>
+  );
+}
+
+function ExperienceSummary({ data }) {
+  return data.records.length ? <div className="profile-empty-row"><span><Icon>history</Icon></span><p>{data.records.length} pengalaman kerja direkodkan.</p></div> : <div className="profile-empty-row"><span><Icon>history</Icon></span><p>Tambah pengalaman kerja, latihan industri atau projek berkaitan.</p></div>;
+}
+
 export default function ApplicantProfilePage() {
   const navigate = useNavigate();
   const user = getStoredUser();
@@ -2178,6 +2230,7 @@ export default function ApplicantProfilePage() {
     );
   });
   const [jobPreferences, setJobPreferences] = useState(() => normalizeJobPreferences(getSavedJobPreferences(user)));
+  const [experienceProfile, setExperienceProfile] = useState(() => getSavedExperienceProfile(user));
   const profileDisplayName = personalProfile.displayName || displayName;
   const profileEmail = personalProfile.email || email;
 
@@ -2248,6 +2301,11 @@ export default function ApplicantProfilePage() {
       return;
     }
 
+    setEditingSection(null);
+  };
+
+  const handleExperienceSave = (experience) => {
+    setExperienceProfile(saveExperienceProfile(user, experience));
     setEditingSection(null);
   };
 
@@ -2357,7 +2415,11 @@ export default function ApplicantProfilePage() {
                 )}
               </ProfileCard>
 
-              {emptyProfileCards.map((card, index) => (
+              <ProfileCard id="profile-section-3" isEditing={editingSection === "experience"} title="Pengalaman" onEdit={() => setEditingSection((current) => current === "experience" ? null : "experience")}>
+                {editingSection === "experience" ? <ExperienceForm data={experienceProfile} onSave={handleExperienceSave} /> : <ExperienceSummary data={experienceProfile} />}
+              </ProfileCard>
+
+              {emptyProfileCards.filter((card) => card.title !== "Pengalaman").map((card, index) => (
                 <ProfileCard id={`profile-section-${index + 3}`} title={card.title} key={card.title}>
                   <div className="profile-empty-row">
                     <span>
