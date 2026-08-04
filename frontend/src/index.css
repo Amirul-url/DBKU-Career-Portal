@@ -4932,6 +4932,43 @@ body:has(.applicant-profile-page) {
   accent-color: var(--profile-green);
 }
 
+.experience-form .personal-form-row {
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 44px;
+}
+
+.experience-form .personal-radio-group div {
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.experience-form .personal-submit-row {
+  margin-top: 18px;
+}
+
+.experience-details {
+  display: grid;
+  gap: 14px;
+  padding-top: 4px;
+}
+
+.experience-details > strong {
+  color: var(--profile-ink);
+  font-size: 13px;
+}
+
+.experience-details > strong em {
+  color: #9ca3af;
+  font-style: normal;
+}
+
+.experience-details > p {
+  margin: -8px 0 0;
+  color: var(--profile-ink);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
 .personal-helper-copy {
   max-width: 720px;
   color: var(--profile-ink);
