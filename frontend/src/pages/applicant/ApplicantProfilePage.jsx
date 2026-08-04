@@ -2362,7 +2362,7 @@ function ExperienceSummary({ data }) {
 }
 
 function createEmptyAcademicRecord() {
-  return { id: createLocalId(), level: "", fieldOfStudy: "", institution: "", country: "Malaysia", result: "", spmGrades: {}, startMonth: "", startYear: "", endMonth: "", endYear: "", isStudying: false };
+  return { id: createLocalId(), level: "", fieldOfStudy: "", specialization: "", institution: "", country: "Malaysia", result: "", spmGrades: {}, startMonth: "", startYear: "", endMonth: "", endYear: "", isStudying: false };
 }
 
 function AcademicForm({ data, onDraftChange, onSave }) {
@@ -2383,7 +2383,7 @@ function AcademicForm({ data, onDraftChange, onSave }) {
             <strong>Akademik {index + 1}</strong>
             <PersonalField label="Tahap Akademik"><PersonalSelect value={record.level} placeholder="Pilih tahap akademik" options={academicLevelOptions} onChange={(event) => updateRecord(record.id, { level: event.target.value })} /></PersonalField>
             {record.level === spmAcademicLevel ? <div className="spm-grades"><strong>Sila isikan gred untuk mata pelajaran SPM di bawah <em>(tidak wajib)</em></strong><div>{spmSubjectOptions.map((subject) => <PersonalField key={subject} label={subject} noIndicator><input value={record.spmGrades?.[subject] || ""} placeholder="Contoh. A+, A1" onChange={(event) => updateRecord(record.id, { spmGrades: { ...(record.spmGrades || {}), [subject]: event.target.value } })} /></PersonalField>)}</div></div> : null}
-            {higherAcademicLevels.has(record.level) ? <PersonalField label="Bidang Akademik"><PersonalSelect value={record.fieldOfStudy || ""} placeholder="Pilih bidang akademik" options={academicFieldOptions} searchable searchPlaceholder="Cari bidang akademik" onChange={(event) => updateRecord(record.id, { fieldOfStudy: event.target.value })} /></PersonalField> : null}
+            {higherAcademicLevels.has(record.level) ? <><PersonalField label="Bidang Akademik"><PersonalSelect value={record.fieldOfStudy || ""} placeholder="Pilih bidang akademik" options={academicFieldOptions} searchable searchPlaceholder="Cari bidang akademik" onChange={(event) => updateRecord(record.id, { fieldOfStudy: event.target.value })} /></PersonalField><PersonalField label="Pengkhususan" optional hint={`Maksimum ${10000 - (record.specialization || "").length} huruf`}><input maxLength="10000" value={record.specialization || ""} placeholder="Contoh. Software Engineering" onChange={(event) => updateRecord(record.id, { specialization: event.target.value })} /></PersonalField></> : null}
             <PersonalField label="Nama Institusi Akademik" hint={`Maksimum ${10000 - (record.institution || "").length} huruf`}><input maxLength="10000" value={record.institution || ""} placeholder="Contoh. Universiti Sains Malaysia" onChange={(event) => updateRecord(record.id, { institution: event.target.value })} /></PersonalField>
             <PersonalField label="Negara"><PersonalSelect value={record.country} placeholder="Pilih negara" options={countryOptions} searchable searchPlaceholder="Cari negara" onChange={(event) => updateRecord(record.id, { country: event.target.value })} /></PersonalField>
             <PersonalField label="Keputusan" optional hint={`Maksimum ${10000 - (record.result || "").length} huruf`}><input maxLength="10000" value={record.result || ""} placeholder="Contoh. 12A 3B+, CGPA 4.0, Cemerlang" onChange={(event) => updateRecord(record.id, { result: event.target.value })} /></PersonalField>
@@ -2403,7 +2403,7 @@ function AcademicForm({ data, onDraftChange, onSave }) {
 
 function AcademicSummary({ data }) {
   if (!data.records.length) return <div className="profile-empty-row"><span><Icon>school</Icon></span><p>Masukkan kelayakan akademik supaya permohonan lebih lengkap.</p></div>;
-  return <div className="job-preference-card-list academic-summary-list">{data.records.map((record, index) => <article className="job-preference-card academic-summary-card" key={record.id}><span className="experience-summary-index">Akademik {index + 1}</span><strong>{record.institution || "Institusi belum diisi"}</strong>{record.level ? <span>{record.level}</span> : null}{record.fieldOfStudy ? <span>{record.fieldOfStudy}</span> : null}{record.result ? <span>{record.result}</span> : null}</article>)}</div>;
+  return <div className="job-preference-card-list academic-summary-list">{data.records.map((record, index) => <article className="job-preference-card academic-summary-card" key={record.id}><span className="experience-summary-index">Akademik {index + 1}</span><strong>{record.institution || "Institusi belum diisi"}</strong>{record.level ? <span>{record.level}</span> : null}{record.fieldOfStudy ? <span>{record.fieldOfStudy}</span> : null}{record.specialization ? <span>{record.specialization}</span> : null}{record.result ? <span>{record.result}</span> : null}</article>)}</div>;
 }
 
 export default function ApplicantProfilePage() {
