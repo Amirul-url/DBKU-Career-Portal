@@ -5328,6 +5328,11 @@ body:has(.applicant-profile-page) {
   padding: 12px 16px;
 }
 
+.job-multi-select-options input {
+  align-self: start;
+  margin: 1px 0 0;
+}
+
 .job-multi-select-options label:hover {
   background: var(--profile-pale);
 }
