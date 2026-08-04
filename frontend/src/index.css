@@ -5013,7 +5013,7 @@ body:has(.applicant-profile-page) {
 
 .academic-layout {
   display: grid;
-  grid-template-columns: 220px minmax(0, 760px);
+  grid-template-columns: 220px minmax(0, 1fr);
   gap: 44px;
   align-items: start;
   padding-top: 18px;
@@ -5028,7 +5028,6 @@ body:has(.applicant-profile-page) {
 .academic-form {
   display: grid;
   gap: 18px;
-  max-width: 760px;
 }
 
 .academic-intro {
