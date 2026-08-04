@@ -2363,9 +2363,11 @@ function AcademicForm({ data, onDraftChange, onSave }) {
   useEffect(() => { onDraftChange(form); }, [form, onDraftChange]);
 
   return (
-    <div className="academic-form">
-      <p className="academic-intro">Tambah latar belakang akademik anda<span>*</span></p>
-      <div className="academic-record-list">
+    <div className="academic-layout">
+      <strong className="academic-layout-label">Akademik</strong>
+      <div className="academic-form">
+        <p className="academic-intro">Tambah latar belakang akademik anda<span>*</span></p>
+        <div className="academic-record-list">
         {form.records.map((record, index) => (
           <section className="academic-record" key={record.id}>
             <strong>Akademik {index + 1}</strong>
@@ -2379,9 +2381,10 @@ function AcademicForm({ data, onDraftChange, onSave }) {
             {form.records.length > 1 ? <button type="button" className="personal-outline-button academic-delete-button" onClick={() => removeRecord(record.id)}>Padam</button> : null}
           </section>
         ))}
+        </div>
+        <button type="button" className="personal-add-reference" onClick={addRecord}><Icon>add_circle</Icon> Tambah Akademik Lain</button>
+        <div className="personal-submit-row"><button type="button" className="personal-save-button" onClick={() => onSave(form)}><Icon>save</Icon>Simpan dan Teruskan</button></div>
       </div>
-      <button type="button" className="personal-add-reference" onClick={addRecord}><Icon>add_circle</Icon> Tambah Akademik Lain</button>
-      <div className="personal-submit-row"><button type="button" className="personal-save-button" onClick={() => onSave(form)}><Icon>save</Icon>Simpan dan Teruskan</button></div>
     </div>
   );
 }
