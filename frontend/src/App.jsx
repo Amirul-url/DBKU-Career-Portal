@@ -4,6 +4,7 @@ import JobMarketplacePage from "./pages/JobMarketplacePage";
 import ApplicantLoginPage from "./pages/applicant/ApplicantLoginPage";
 import ApplicantProfilePage from "./pages/applicant/ApplicantProfilePage";
 import ApplicantRegisterPage from "./pages/applicant/ApplicantRegisterPage";
+import SuperAdminDashboardPage from "./pages/admin/SuperAdminDashboardPage";
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
       <Route path="/login" element={<ApplicantLoginPage />} />
       <Route path="/profile" element={<ApplicantProfilePage />} />
       <Route path="/register" element={<ApplicantRegisterPage />} />
+      <Route path="/superadmin" element={<SuperAdminDashboardPage />} />
     </Routes>
   );
 }

@@ -28,7 +28,7 @@ function LoginForm() {
     try {
       const data = await loginApplicant(formData);
       saveAuthSession(data);
-      navigate("/profile");
+      navigate(data.user?.role === "superadmin" ? "/superadmin" : "/profile");
     } catch (error) {
       setStatus({ type: "error", message: error.message });
     } finally {
