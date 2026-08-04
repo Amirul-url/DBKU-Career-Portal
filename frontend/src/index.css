@@ -5128,9 +5128,9 @@ body:has(.applicant-profile-page) {
   min-height: 50px;
   align-items: center;
   gap: 10px;
-  border: 1px solid var(--profile-pale);
+  border: 1px solid #111827;
   border-radius: 6px;
-  background: var(--profile-surface);
+  background: #ffffff;
   color: var(--profile-ink);
   padding: 0 14px;
 }
