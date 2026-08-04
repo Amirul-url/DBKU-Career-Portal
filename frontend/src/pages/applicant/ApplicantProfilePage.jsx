@@ -2719,10 +2719,12 @@ export default function ApplicantProfilePage() {
   useEffect(() => {
     if (!user) {
       navigate("/login", { replace: true, state: { message: "Sila log masuk untuk melihat profil anda." } });
+    } else if (user.role !== "applicant") {
+      navigate("/", { replace: true });
     }
   }, [navigate, user]);
 
-  if (!user) {
+  if (!user || user.role !== "applicant") {
     return null;
   }
 
