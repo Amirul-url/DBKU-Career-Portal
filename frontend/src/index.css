@@ -5398,6 +5398,8 @@ body:has(.applicant-profile-page) {
 .job-selected-list button {
   border-color: var(--profile-green);
   background: var(--profile-pale);
+  justify-content: flex-start;
+  text-align: left;
 }
 
 .job-selected-list .material-symbols-outlined,
