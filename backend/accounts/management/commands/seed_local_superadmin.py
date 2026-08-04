@@ -13,7 +13,7 @@ class Command(BaseCommand):
         if not settings.DEBUG:
             raise CommandError("Seed Super Admin hanya dibenarkan apabila DEBUG=True.")
 
-        email = os.getenv("LOCAL_SUPERADMIN_EMAIL", "superadmin@localhost").strip().lower()
+        email = os.getenv("LOCAL_SUPERADMIN_EMAIL", "muhdamirulaqmal@gmail.com").strip().lower()
         password = os.getenv("LOCAL_SUPERADMIN_PASSWORD", "TempSuperAdmin123!")
 
         user, created = User.objects.get_or_create(
