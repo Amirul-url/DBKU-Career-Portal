@@ -80,7 +80,7 @@ const sectorOptions = [
   ["84", "Pentadbiran awam dan pertahanan; keselamatan sosial wajib"], ["85", "Pendidikan"], ["86", "Aktiviti kesihatan kemanusiaan"], ["87", "Aktiviti rumah penjagaan"], ["88", "Aktiviti kerja sosial tanpa penginapan"], ["90", "Aktiviti kesenian, hiburan dan kreatif"], ["91", "Aktiviti perpustakaan, arkib, muzium dan kebudayaan lain"], ["92", "Aktiviti perjudian dan pertaruhan"], ["93", "Aktiviti sukan dan aktiviti hiburan dan rekreasi"], ["94", "Aktiviti keahlian organisasi"], ["95", "Pembaikan komputer dan barangan persendirian dan isi rumah"], ["96", "Aktiviti perkhidmatan persendirian lain"], ["97", "Aktiviti isi rumah sebagai majikan bagi personel domestik"], ["98", "Aktiviti mengeluarkan barangan dan perkhidmatan yang tidak dapat dibezakan oleh isi rumah persendirian untuk kegunaan sendiri"], ["99", "Aktiviti badan dan pertubuhan luar wilayah"],
 ].map(([, sector]) => ({ value: sector, label: sector }));
 
-const recommendedJobTitles = [
+const fallbackJobTitles = [
   "Pembangun laman web",
   "Pembangun perisian",
   "Jurutera perisian",
@@ -835,10 +835,46 @@ function SkillAutocomplete({ onToggle, selectedSkills }) {
 
 function JobTitleAutocomplete({ error, onChange, value }) {
   const [isOpen, setIsOpen] = useState(false);
-  const query = value.trim().toLowerCase();
-  const visibleSuggestions = recommendedJobTitles
-    .filter((option) => !query || option.label.toLowerCase().includes(query))
+  const [mascoSuggestions, setMascoSuggestions] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const query = value.trim();
+  const fallbackSuggestions = fallbackJobTitles
+    .filter((option) => !query || option.label.toLowerCase().includes(query.toLowerCase()))
     .slice(0, 8);
+
+  useEffect(() => {
+    if (query.length < 2) {
+      return undefined;
+    }
+
+    const controller = new AbortController();
+    const timer = window.setTimeout(async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch(
+          `https://prod-emasco.mohr.gov.my/portal/api/content/lookup?lang=MY&search=${encodeURIComponent(query)}&limit=15`,
+          { signal: controller.signal },
+        );
+        if (!response.ok) throw new Error("MASCO lookup failed");
+        const results = await response.json();
+        setMascoSuggestions(results.map((job) => ({
+          value: job.name.replace(/^\s*[\d-]+\s+/, "").trim(),
+          label: job.name.replace(/^\s*[\d-]+\s+/, "").trim(),
+        })));
+      } catch (fetchError) {
+        if (fetchError.name !== "AbortError") setMascoSuggestions([]);
+      } finally {
+        if (!controller.signal.aborted) setIsLoading(false);
+      }
+    }, 250);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+    };
+  }, [query]);
+
+  const visibleSuggestions = query.length >= 2 ? mascoSuggestions : fallbackSuggestions;
 
   const selectSuggestion = (selectedValue) => {
     onChange(selectedValue);
@@ -868,8 +904,8 @@ function JobTitleAutocomplete({ error, onChange, value }) {
       </div>
       {isOpen ? (
         <div className="job-title-suggestions">
-          <strong>Cadangan pekerjaan</strong>
-          {visibleSuggestions.length ? (
+          <strong>Cadangan pekerjaan Malaysia (MASCO)</strong>
+          {isLoading ? <p>Mencari pekerjaan dalam senarai MASCO...</p> : visibleSuggestions.length ? (
             <div>
               {visibleSuggestions.map((option) => (
                 <button type="button" key={option.value} onMouseDown={(event) => event.preventDefault()} onClick={() => selectSuggestion(option.value)}>
