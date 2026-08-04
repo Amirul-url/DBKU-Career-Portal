@@ -296,6 +296,23 @@ function saveAcademicProfile(user, academic) {
   return normalized;
 }
 
+function getSkillsStorageKey(user) {
+  return `dbku-applicant-skills:${user?.email || user?.full_name || "default"}`;
+}
+
+function getSavedSkills(user) {
+  try {
+    const saved = JSON.parse(window.localStorage.getItem(getSkillsStorageKey(user)) || "[]");
+    return Array.isArray(saved) ? saved : [];
+  } catch { return []; }
+}
+
+function saveSkills(user, skills) {
+  const normalized = Array.isArray(skills) ? skills : [];
+  try { window.localStorage.setItem(getSkillsStorageKey(user), JSON.stringify(normalized)); } catch { /* retain local state */ }
+  return normalized;
+}
+
 function isEmptyAcademicRecord(record) {
   return !record?.level && !record?.fieldOfStudy && !record?.specialization && !record?.institution && !record?.result
     && !record?.startMonth && !record?.startYear && !record?.endMonth && !record?.endYear && !record?.isStudying
@@ -2418,6 +2435,19 @@ function AcademicSummary({ data }) {
   return <div className="job-preference-card-list academic-summary-list">{data.records.map((record, index) => <article className="job-preference-card academic-summary-card" key={record.id}><span className="experience-summary-index">Akademik {index + 1}</span><strong>{record.institution || "Institusi belum diisi"}</strong>{record.level ? <span>{record.level}</span> : null}{record.fieldOfStudy ? <span>{record.fieldOfStudy}</span> : null}{record.specialization ? <span>{record.specialization}</span> : null}{record.result ? <span>{record.result}</span> : null}</article>)}</div>;
 }
 
+function SkillsForm({ data, onDraftChange, onSave }) {
+  const [skills, setSkills] = useState(data);
+  const toggleSkill = (skill) => setSkills((current) => current.includes(skill) ? current.filter((item) => item !== skill) : [...current, skill]);
+  useEffect(() => { onDraftChange(skills); }, [onDraftChange, skills]);
+
+  return <div className="personal-edit-panel skills-form"><PersonalField label="Kemahiran"><SkillAutocomplete selectedSkills={skills} onToggle={toggleSkill} /><small>Anda boleh mencari atau menambah kemahiran secara manual.</small></PersonalField>{skills.length ? <div className="job-selected-list"><strong>Kemahiran Anda ({skills.length})</strong><div>{skills.map((skill) => <button type="button" key={skill} onClick={() => toggleSkill(skill)}><span>{skill}</span><Icon>cancel</Icon></button>)}</div></div> : null}<div className="personal-submit-row"><button type="button" className="personal-save-button" onClick={() => onSave(skills)}><Icon>save</Icon>Simpan dan Teruskan</button></div></div>;
+}
+
+function SkillsSummary({ data }) {
+  if (!data.length) return <div className="profile-empty-row"><span><Icon>psychology</Icon></span><p>Senaraikan kemahiran teknikal, bahasa dan sijil profesional anda.</p></div>;
+  return <div className="job-selected-list skills-summary"><strong>Kemahiran Anda ({data.length})</strong><div>{data.map((skill) => <span key={skill}>{skill}</span>)}</div></div>;
+}
+
 export default function ApplicantProfilePage() {
   const navigate = useNavigate();
   const user = getStoredUser();
@@ -2426,11 +2456,17 @@ export default function ApplicantProfilePage() {
   const [isPersonalCloseDialogOpen, setIsPersonalCloseDialogOpen] = useState(false);
   const [isJobPreferencesCloseDialogOpen, setIsJobPreferencesCloseDialogOpen] = useState(false);
   const [isAcademicCloseDialogOpen, setIsAcademicCloseDialogOpen] = useState(false);
+  const [isExperienceCloseDialogOpen, setIsExperienceCloseDialogOpen] = useState(false);
+  const [isSkillsCloseDialogOpen, setIsSkillsCloseDialogOpen] = useState(false);
   const [isPersonalDraftDirty, setIsPersonalDraftDirty] = useState(false);
   const [isJobPreferencesDraftDirty, setIsJobPreferencesDraftDirty] = useState(false);
   const [isAcademicDraftDirty, setIsAcademicDraftDirty] = useState(false);
+  const [isExperienceDraftDirty, setIsExperienceDraftDirty] = useState(false);
+  const [isSkillsDraftDirty, setIsSkillsDraftDirty] = useState(false);
   const [personalDraft, setPersonalDraft] = useState(null);
   const [academicDraft, setAcademicDraft] = useState(null);
+  const [experienceDraft, setExperienceDraft] = useState(null);
+  const [skillsDraft, setSkillsDraft] = useState(null);
   const [personalSaveRequestKey, setPersonalSaveRequestKey] = useState(0);
   const [jobPreferencesSaveRequestKey, setJobPreferencesSaveRequestKey] = useState(0);
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
@@ -2461,6 +2497,7 @@ export default function ApplicantProfilePage() {
   const [jobPreferences, setJobPreferences] = useState(() => normalizeJobPreferences(getSavedDraft(user, "job-preferences") || getSavedJobPreferences(user)));
   const [experienceProfile, setExperienceProfile] = useState(() => getSavedExperienceProfile(user));
   const [academicProfile, setAcademicProfile] = useState(() => getSavedAcademicProfile(user));
+  const [skillsProfile, setSkillsProfile] = useState(() => getSavedSkills(user));
   const profileDisplayName = personalProfile.displayName || displayName;
   const profileEmail = personalProfile.email || email;
 
@@ -2543,6 +2580,58 @@ export default function ApplicantProfilePage() {
     setExperienceProfile(saveExperienceProfile(user, experience));
     clearDraft(user, "experience");
     setEditingSection(null);
+    setExperienceDraft(null);
+    setIsExperienceDraftDirty(false);
+    setIsExperienceCloseDialogOpen(false);
+  };
+
+  const handleExperienceDraftChange = useCallback((draft) => {
+    saveDraft(user, "experience", draft);
+    setExperienceDraft(draft);
+    setIsExperienceDraftDirty(JSON.stringify(draft) !== JSON.stringify(experienceProfile));
+  }, [experienceProfile, user]);
+
+  const discardExperienceDraft = () => {
+    clearDraft(user, "experience");
+    setExperienceDraft(null);
+    setIsExperienceDraftDirty(false);
+    setIsExperienceCloseDialogOpen(false);
+    setEditingSection(null);
+  };
+
+  const handleExperienceEditToggle = () => {
+    if (editingSection !== "experience") { setEditingSection("experience"); return; }
+    if (isExperienceDraftDirty) { setIsExperienceCloseDialogOpen(true); return; }
+    discardExperienceDraft();
+  };
+
+  const handleSkillsSave = (skills) => {
+    setSkillsProfile(saveSkills(user, skills));
+    clearDraft(user, "skills");
+    setSkillsDraft(null);
+    setIsSkillsDraftDirty(false);
+    setIsSkillsCloseDialogOpen(false);
+    setEditingSection(null);
+  };
+
+  const handleSkillsDraftChange = useCallback((draft) => {
+    saveDraft(user, "skills", draft);
+    setSkillsDraft(draft);
+    setIsSkillsDraftDirty(JSON.stringify(draft) !== JSON.stringify(skillsProfile));
+  }, [skillsProfile, user]);
+
+  const discardSkillsDraft = () => {
+    clearDraft(user, "skills");
+    setSkillsDraft(null);
+    setIsSkillsDraftDirty(false);
+    setIsSkillsCloseDialogOpen(false);
+    setEditingSection(null);
+  };
+
+  const handleSkillsEditToggle = () => {
+    if (editingSection !== "skills") { setEditingSection("skills"); return; }
+    if (isSkillsDraftDirty) { setIsSkillsCloseDialogOpen(true); return; }
+    discardSkillsDraft();
   };
 
   const handleAcademicSave = (academic) => {
@@ -2688,15 +2777,19 @@ export default function ApplicantProfilePage() {
                 )}
               </ProfileCard>
 
-              <ProfileCard id="profile-section-3" isEditing={editingSection === "experience"} title="Pengalaman" onEdit={() => setEditingSection((current) => current === "experience" ? null : "experience")}>
-                {editingSection === "experience" ? <ExperienceForm data={getSavedDraft(user, "experience") || experienceProfile} onDraftChange={(draft) => saveDraft(user, "experience", draft)} onSave={handleExperienceSave} /> : <ExperienceSummary data={experienceProfile} />}
+              <ProfileCard id="profile-section-3" isEditing={editingSection === "experience"} title="Pengalaman" onEdit={handleExperienceEditToggle}>
+                {editingSection === "experience" ? <ExperienceForm data={getSavedDraft(user, "experience") || experienceProfile} onDraftChange={handleExperienceDraftChange} onSave={handleExperienceSave} /> : <ExperienceSummary data={experienceProfile} />}
               </ProfileCard>
 
               <ProfileCard id="profile-section-4" isEditing={editingSection === "academic"} title="Akademik" onEdit={handleAcademicEditToggle}>
                 {editingSection === "academic" ? <AcademicForm data={getSavedDraft(user, "academic") || academicProfile} onDraftChange={handleAcademicDraftChange} onSave={handleAcademicSave} /> : <AcademicSummary data={academicProfile} />}
               </ProfileCard>
 
-              {emptyProfileCards.filter((card) => !["Pengalaman", "Akademik"].includes(card.title)).map((card, index) => (
+              <ProfileCard id="profile-section-5" isEditing={editingSection === "skills"} title="Kemahiran" onEdit={handleSkillsEditToggle}>
+                {editingSection === "skills" ? <SkillsForm data={getSavedDraft(user, "skills") || skillsProfile} onDraftChange={handleSkillsDraftChange} onSave={handleSkillsSave} /> : <SkillsSummary data={skillsProfile} />}
+              </ProfileCard>
+
+              {emptyProfileCards.filter((card) => !["Pengalaman", "Akademik", "Kemahiran"].includes(card.title)).map((card, index) => (
                 <ProfileCard id={`profile-section-${index + 5}`} title={card.title} key={card.title}>
                   <div className="profile-empty-row">
                     <span>
@@ -2756,6 +2849,12 @@ export default function ApplicantProfilePage() {
             </div>
           </section>
         </div>
+      ) : null}
+      {isExperienceCloseDialogOpen ? (
+        <div className="profile-confirm-overlay" role="presentation"><section className="profile-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="experience-close-title"><h2 id="experience-close-title">Perubahan belum disimpan</h2><p>Anda ada membuat kemaskini pada Pengalaman. Pilih Simpan untuk menyimpan perubahan atau Buang untuk membuang perubahan.</p><div><button type="button" className="profile-confirm-secondary" onClick={discardExperienceDraft}>Buang</button><button type="button" className="profile-confirm-primary" onClick={() => handleExperienceSave(experienceDraft || experienceProfile)}>Simpan</button></div></section></div>
+      ) : null}
+      {isSkillsCloseDialogOpen ? (
+        <div className="profile-confirm-overlay" role="presentation"><section className="profile-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="skills-close-title"><h2 id="skills-close-title">Perubahan belum disimpan</h2><p>Anda ada membuat kemaskini pada Kemahiran. Pilih Simpan untuk menyimpan perubahan atau Buang untuk membuang perubahan.</p><div><button type="button" className="profile-confirm-secondary" onClick={discardSkillsDraft}>Buang</button><button type="button" className="profile-confirm-primary" onClick={() => handleSkillsSave(skillsDraft || skillsProfile)}>Simpan</button></div></section></div>
       ) : null}
     </div>
   );
