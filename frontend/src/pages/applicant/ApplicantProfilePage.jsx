@@ -1478,8 +1478,8 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
 
         <ProfileFormRow label="Aksesibiliti dan Kesihatan">
           <div className="personal-helper-copy">
-            Maklumat kesihatan anda adalah sulit dan tidak akan dikongsikan dengan majikan. Pencari kerja bertanggungjawab
-            untuk memaklumkan maklumat kesihatan anda kepada majikan.
+            Maklumat kesihatan anda adalah sulit dan tidak akan dikongsikan dengan DBKU. Pencari kerja bertanggungjawab
+            untuk memaklumkan maklumat kesihatan anda kepada DBKU.
           </div>
           <PersonalRadioGroup
             label="Adakah anda mempunyai sebarang masalah kesihatan?"
@@ -1566,7 +1566,7 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
             </header>
             <p>
               Ketengahkan bakat anda dan tingkatkan profil anda - muat naik resume dan video resume anda untuk menarik
-              perhatian majikan.
+              perhatian DBKU.
             </p>
           </div>
           <PersonalField label="Muat naik resume anda" optional hint="Word atau PDF sahaja (maksimum 5MB)">
@@ -1653,7 +1653,7 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
             <strong>
               Tambah rujukan anda <em>(tidak wajib)</em>
             </strong>
-            <p>Kukuhkan permohonan kerja anda dengan sertakan sokongan daripada majikan atau mentor anda yang terdahulu.</p>
+            <p>Kukuhkan permohonan kerja anda dengan sertakan sokongan daripada DBKU atau mentor anda yang terdahulu.</p>
             <button type="button" className="personal-add-reference" onClick={addReference}>
               <Icon>add_circle</Icon>
               Tambah Rujukan
@@ -1671,7 +1671,7 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
                     onChange={updateReference(reference.id, "name")}
                   />
                 </PersonalField>
-                <PersonalField label="Nama Majikan Rujukan" error={validationErrors[`reference-${reference.id}-employerName`]}>
+                <PersonalField label="Nama DBKU Rujukan" error={validationErrors[`reference-${reference.id}-employerName`]}>
                   <input
                     type="text"
                     value={reference.employerName}
@@ -1751,7 +1751,7 @@ function JobPreferencesSummary({ preferences }) {
           <p>
             {preferences.isLookingForJob === "Ya"
               ? "Profil anda boleh dipadankan dengan kekosongan yang sesuai."
-              : "Profil anda tidak akan berada dalam senarai padanan kekosongan majikan."}
+              : "Profil anda tidak akan berada dalam senarai padanan kekosongan DBKU."}
           </p>
         </div>
       </div>
@@ -1944,7 +1944,7 @@ function JobPreferencesForm({ onDraftChange, onSave, preferencesData, saveReques
             value={isLookingForJob}
           />
           <p className="job-preference-note">
-            Jika anda memilih 'Tidak', profil anda tidak akan berada dalam senarai padanan kekosongan oleh majikan.
+            Jika anda memilih 'Tidak', profil anda tidak akan berada dalam senarai padanan kekosongan oleh DBKU.
           </p>
         </ProfileFormRow>
 
