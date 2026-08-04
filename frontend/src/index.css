@@ -5205,6 +5205,7 @@ body:has(.applicant-profile-page) {
 
 .skills-language-section article button {
   justify-self: end;
+  margin-top: 10px;
 }
 
 .personal-helper-copy {
