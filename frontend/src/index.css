@@ -4937,6 +4937,12 @@ body:has(.applicant-profile-page) {
   gap: 44px;
 }
 
+.experience-form {
+  display: grid;
+  gap: 28px;
+  padding-top: 14px;
+}
+
 .experience-form .personal-radio-group div {
   grid-template-columns: 1fr;
   gap: 12px;
