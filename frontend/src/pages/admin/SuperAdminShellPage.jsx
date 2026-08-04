@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getStoredUser } from "../../lib/authApi";
 import { Icon } from "../applicant/ApplicantAuthShared";
 
-const items = [["dashboard", "Dashboard"], ["section", "USER"], ["group", "User"], ["section", "DBKU"], ["admin_panel_settings", "Admin"], ["supervisor_account", "Supervisor"], ["section", "MPHLG"], ["admin_panel_settings", "Admin"], ["section", "SYSTEM"], ["shield_person", "SuperAdmin"]];
+const items = [["dashboard", "Dashboard"], ["section", "USER"], ["group", "User"], ["section", "DBKU"], ["admin_panel_settings", "Admin"], ["section", "SYSTEM"], ["shield_person", "SuperAdmin"]];
 
 export default function SuperAdminShellPage() {
   const navigate = useNavigate(); const user = getStoredUser();
