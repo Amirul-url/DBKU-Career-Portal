@@ -1990,28 +1990,6 @@ function JobPreferencesForm({ onDraftChange, onSave, preferencesData, saveReques
                 <span>Saya mempunyai pengalaman berkaitan kerja ini</span>
               </label>
 
-              <div className="job-preference-tip">
-                <header>
-                  <span>
-                    <Icon>emoji_objects</Icon>
-                  </span>
-                  <strong>Apa yang anda perlu memiliki untuk pekerjaan tersebut</strong>
-                  <button type="button" aria-label="Tutup tip">
-                    <Icon>remove</Icon>
-                  </button>
-                </header>
-                <p>
-                  Nampaknya ada kekurangan dari profil anda untuk menjadi {job.title || "pekerjaan pilihan ini"}.
-                </p>
-                <p>
-                  Sekiranya anda perlu mengetahui apakah persiapan yang perlu dibuat untuk pekerjaan ini, sila layari
-                  laluan "Hala Tuju Kerjaya Saya".
-                </p>
-                <button type="button" className="personal-primary-button">
-                  Hala Tuju Kerjaya Saya
-                </button>
-              </div>
-
               <PersonalField label="Taraf Jawatan Pilihan" error={validationErrors[`preferred-job-${job.id}-careerLevel`]}>
                 <PersonalSelect
                   value={job.careerLevel}
