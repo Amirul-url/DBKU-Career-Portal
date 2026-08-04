@@ -198,6 +198,25 @@ function getJobPreferencesStorageKey(user) {
   return `dbku-applicant-job-preferences:${user?.email || user?.full_name || "default"}`;
 }
 
+function getProfileDraftStorageKey(user, section) {
+  return `dbku-applicant-${section}-draft:${user?.email || user?.full_name || "default"}`;
+}
+
+function getSavedDraft(user, section) {
+  try {
+    const saved = window.localStorage.getItem(getProfileDraftStorageKey(user, section));
+    return saved ? JSON.parse(saved) : null;
+  } catch { return null; }
+}
+
+function saveDraft(user, section, draft) {
+  try { window.localStorage.setItem(getProfileDraftStorageKey(user, section), JSON.stringify(draft)); } catch { /* retain in memory */ }
+}
+
+function clearDraft(user, section) {
+  try { window.localStorage.removeItem(getProfileDraftStorageKey(user, section)); } catch { /* storage unavailable */ }
+}
+
 function getExperienceStorageKey(user) {
   return `dbku-applicant-experience:${user?.email || user?.full_name || "default"}`;
 }
@@ -2161,10 +2180,11 @@ function JobPreferencesForm({ onDraftChange, onSave, preferencesData, saveReques
   );
 }
 
-function ExperienceForm({ data, onSave }) {
+function ExperienceForm({ data, onDraftChange, onSave }) {
   const [form, setForm] = useState(data);
   const update = (field) => (event) => setForm((current) => ({ ...current, [field]: event.target.value }));
   const addRecord = () => setForm((current) => ({ ...current, records: [...current.records, { id: createLocalId(), title: "", organisation: "" }] }));
+  useEffect(() => { onDraftChange(form); }, [form, onDraftChange]);
 
   return (
     <div className="personal-edit-panel experience-form">
@@ -2207,7 +2227,7 @@ export default function ApplicantProfilePage() {
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
   const email = user?.email || "Belum dikemaskini";
   const [personalProfile, setPersonalProfile] = useState(() => {
-    const savedProfile = getSavedPersonalProfile(user);
+    const savedProfile = getSavedDraft(user, "personal") || getSavedPersonalProfile(user);
     const profilePhotoUrl = savedProfile?.profilePhotoUrl || user?.profile_photo_url || "";
     const resumeFileUrl = savedProfile?.resumeFileUrl || user?.resume_file_url || "";
     const videoResumeFileUrl = savedProfile?.videoResumeFileUrl || user?.video_resume_file_url || "";
@@ -2229,7 +2249,7 @@ export default function ApplicantProfilePage() {
       email,
     );
   });
-  const [jobPreferences, setJobPreferences] = useState(() => normalizeJobPreferences(getSavedJobPreferences(user)));
+  const [jobPreferences, setJobPreferences] = useState(() => normalizeJobPreferences(getSavedDraft(user, "job-preferences") || getSavedJobPreferences(user)));
   const [experienceProfile, setExperienceProfile] = useState(() => getSavedExperienceProfile(user));
   const profileDisplayName = personalProfile.displayName || displayName;
   const profileEmail = personalProfile.email || email;
@@ -2242,6 +2262,7 @@ export default function ApplicantProfilePage() {
     }
 
     setPersonalProfile(savedProfile);
+    clearDraft(user, "personal");
     setEditingSection(null);
     setIsPersonalDraftDirty(false);
     setIsPersonalCloseDialogOpen(false);
@@ -2249,22 +2270,26 @@ export default function ApplicantProfilePage() {
   };
 
   const handlePersonalDraftChange = useCallback((draft, isDirty) => {
+    const persistentDraft = { ...draft, profilePhotoFile: null, resumeUploadFile: null, videoResumeUploadFile: null, profilePhotoPreviewUrl: draft.profilePhotoPreviewUrl?.startsWith("blob:") ? "" : draft.profilePhotoPreviewUrl };
+    saveDraft(user, "personal", persistentDraft);
     setPersonalDraft(draft);
     setIsPersonalDraftDirty(isDirty);
-  }, []);
+  }, [user]);
 
   const handleSaveJobPreferences = async (preferences) => {
     const savedPreferences = await saveJobPreferences(user, preferences);
 
     setJobPreferences(savedPreferences);
+    clearDraft(user, "job-preferences");
     setEditingSection(null);
     setIsJobPreferencesDraftDirty(false);
     setIsJobPreferencesCloseDialogOpen(false);
   };
 
   const handleJobPreferencesDraftChange = useCallback((draft, isDirty) => {
+    saveDraft(user, "job-preferences", draft);
     setIsJobPreferencesDraftDirty(isDirty);
-  }, []);
+  }, [user]);
 
   const handlePersonalEditToggle = () => {
     if (editingSection !== "personal") {
@@ -2306,6 +2331,7 @@ export default function ApplicantProfilePage() {
 
   const handleExperienceSave = (experience) => {
     setExperienceProfile(saveExperienceProfile(user, experience));
+    clearDraft(user, "experience");
     setEditingSection(null);
   };
 
@@ -2416,7 +2442,7 @@ export default function ApplicantProfilePage() {
               </ProfileCard>
 
               <ProfileCard id="profile-section-3" isEditing={editingSection === "experience"} title="Pengalaman" onEdit={() => setEditingSection((current) => current === "experience" ? null : "experience")}>
-                {editingSection === "experience" ? <ExperienceForm data={experienceProfile} onSave={handleExperienceSave} /> : <ExperienceSummary data={experienceProfile} />}
+                {editingSection === "experience" ? <ExperienceForm data={getSavedDraft(user, "experience") || experienceProfile} onDraftChange={(draft) => saveDraft(user, "experience", draft)} onSave={handleExperienceSave} /> : <ExperienceSummary data={experienceProfile} />}
               </ProfileCard>
 
               {emptyProfileCards.filter((card) => card.title !== "Pengalaman").map((card, index) => (
