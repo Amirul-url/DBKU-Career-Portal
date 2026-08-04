@@ -4815,7 +4815,7 @@ body:has(.applicant-profile-page) {
   overflow: hidden;
   border: 1px solid var(--profile-pale);
   border-radius: 6px;
-  background: var(--profile-surface);
+  background: #ffffff;
 }
 
 .personal-select-search {
@@ -4824,7 +4824,7 @@ body:has(.applicant-profile-page) {
   align-items: center;
   gap: 12px;
   border-bottom: 1px solid var(--profile-pale);
-  background: var(--profile-surface);
+  background: #ffffff;
   padding: 0 18px;
 }
 
@@ -4860,7 +4860,7 @@ body:has(.applicant-profile-page) {
   min-height: 50px;
   align-items: center;
   border: 0;
-  background: var(--profile-surface);
+  background: #ffffff;
   color: var(--profile-ink);
   padding: 0 18px;
   font-size: 14px;
