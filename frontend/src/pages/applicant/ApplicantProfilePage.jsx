@@ -302,7 +302,9 @@ function getSkillsStorageKey(user) {
 
 const defaultSkillsProfile = { skills: [], microsoftOffice: [], licences: [], languages: [], documents: [] };
 const microsoftOfficeOptions = ["Microsoft Word", "Microsoft Excel", "Microsoft PowerPoint", "Microsoft Access", "Microsoft Outlook", "Microsoft Teams"].map((value) => ({ value, label: value }));
-const drivingLicenceOptions = ["B2 — Motosikal <250 cc", "B — Motosikal >500 cc", "D — Kereta", "DA — Kereta Transmisi Automatik", "E — Kenderaan Berat"].map((value) => ({ value, label: value }));
+const drivingLicenceOptions = [
+  "A — Kenderaan OKU (≤ 3,500 kg)", "A1 — Kenderaan OKU (≤ 3,500 kg, transmisi automatik)", "B1 — Motosikal ≤ 500 cc", "B2 — Motosikal ≤ 250 cc", "B — Motosikal melebihi 500 cc", "C — Motosikal roda tiga", "D — Motokar ≤ 3,500 kg", "DA — Motokar transmisi automatik ≤ 3,500 kg", "E — Kenderaan berat", "E1 — Kenderaan berat ≤ 7,500 kg", "E2 — Kenderaan berat ≤ 5,000 kg", "F — Traktor / jentera ringan", "G — Traktor / jentera berat", "H — Jentera bergerak berat", "I — Jentera bergerak ringan", "PSV — Kenderaan perkhidmatan awam", "GDL — Kenderaan barangan", "CON — Konduktor", "IDP — Permit Memandu Antarabangsa",
+].map((value) => ({ value, label: value }));
 
 function normalizeSkillsProfile(profile) {
   if (Array.isArray(profile)) return { ...defaultSkillsProfile, skills: profile };
