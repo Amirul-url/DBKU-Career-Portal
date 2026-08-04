@@ -76,39 +76,6 @@ const sectorOptions = [
   ["84", "Pentadbiran awam dan pertahanan; keselamatan sosial wajib"], ["85", "Pendidikan"], ["86", "Aktiviti kesihatan kemanusiaan"], ["87", "Aktiviti rumah penjagaan"], ["88", "Aktiviti kerja sosial tanpa penginapan"], ["90", "Aktiviti kesenian, hiburan dan kreatif"], ["91", "Aktiviti perpustakaan, arkib, muzium dan kebudayaan lain"], ["92", "Aktiviti perjudian dan pertaruhan"], ["93", "Aktiviti sukan dan aktiviti hiburan dan rekreasi"], ["94", "Aktiviti keahlian organisasi"], ["95", "Pembaikan komputer dan barangan persendirian dan isi rumah"], ["96", "Aktiviti perkhidmatan persendirian lain"], ["97", "Aktiviti isi rumah sebagai majikan bagi personel domestik"], ["98", "Aktiviti mengeluarkan barangan dan perkhidmatan yang tidak dapat dibezakan oleh isi rumah persendirian untuk kegunaan sendiri"], ["99", "Aktiviti badan dan pertubuhan luar wilayah"],
 ].map(([, sector]) => ({ value: sector, label: sector }));
 
-const defaultSkillSuggestions = [
-  "ABAP",
-  "AJAX",
-  "APL",
-  "ASP.NET",
-  "Adapt to changes in technological development plans",
-  "Analyse software specifications",
-  "Ansible",
-  "Apache Maven",
-  "Assembly (computer programming)",
-  "COBOL",
-  "CSS",
-  "C#",
-  "C++",
-  "Computer programming",
-  "Design user interface",
-  "Develop software prototype",
-  "Implement front-end website design",
-  "Java (computer programming)",
-  "JavaScript",
-  "JSSS",
-  "MATLAB",
-  "ML (computer programming)",
-  "Microsoft Visual C++",
-  "Object-oriented modelling",
-  "PHP",
-  "Python (computer programming)",
-  "R",
-  "Use object-oriented programming",
-  "Visual Studio .NET",
-  "Web programming",
-];
-
 const recommendedJobTitles = [
   "Pembangun laman web",
   "Pembangun perisian",
@@ -2079,20 +2046,6 @@ function JobPreferencesForm({ onDraftChange, onSave, preferencesData, saveReques
                   </div>
                 </div>
               ) : null}
-
-              <div className="job-suggested-skills">
-                <strong>Berikut adalah kemahiran yang dicadangkan berdasarkan pilihan pekerjaan anda.</strong>
-                <div>
-                  {defaultSkillSuggestions
-                    .filter((skill) => !job.skills.includes(skill))
-                    .map((skill) => (
-                      <button type="button" key={skill} onClick={() => addSkillToJob(job.id, skill)}>
-                        <Icon>add</Icon>
-                        {skill}
-                      </button>
-                    ))}
-                </div>
-              </div>
 
               <ChoicePillGroup
                 label="Status Pilihan Pekerjaan"
