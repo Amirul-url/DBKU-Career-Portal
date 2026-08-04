@@ -714,6 +714,100 @@ function PersonalMultiSelect({ error, onChange, options, placeholder, selectedLa
   );
 }
 
+function SkillAutocomplete({ onAdd }) {
+  const [query, setQuery] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
+
+  useEffect(() => {
+    const searchTerm = query.trim();
+    if (searchTerm.length < 2) {
+      return undefined;
+    }
+
+    const controller = new AbortController();
+    const searchTimer = window.setTimeout(async () => {
+      try {
+        const response = await fetch(
+          `https://ec.europa.eu/esco/api/search?text=${encodeURIComponent(searchTerm)}&type=skill&language=en&selectedVersion=v1.2.0&limit=12`,
+          { signal: controller.signal },
+        );
+        if (!response.ok) throw new Error("ESCO search failed");
+        const data = await response.json();
+        const uniqueSkills = [...new Set((data._embedded?.results || []).map((result) => result.title).filter(Boolean))];
+        setSuggestions(uniqueSkills);
+      } catch (fetchError) {
+        if (fetchError.name !== "AbortError") setSuggestions([]);
+      }
+    }, 250);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(searchTimer);
+    };
+  }, [query]);
+
+  const addTypedSkill = () => {
+    const skill = query.trim();
+    if (!skill) return;
+    onAdd(skill);
+    setQuery("");
+    setIsOpen(false);
+  };
+
+  const selectSkill = (skill) => {
+    onAdd(skill);
+    setQuery("");
+    setIsOpen(false);
+  };
+
+  return (
+    <div
+      className="job-title-autocomplete"
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setIsOpen(false);
+      }}
+    >
+      <div className="job-search-input">
+        <Icon>search</Icon>
+        <input
+          type="text"
+          value={query}
+          placeholder="Contoh. Perform market research"
+          onChange={(event) => {
+            setQuery(event.target.value);
+            setIsOpen(true);
+          }}
+          onFocus={() => setIsOpen(true)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              addTypedSkill();
+            }
+          }}
+        />
+      </div>
+      {isOpen && query.trim().length >= 2 ? (
+        <div className="job-title-suggestions">
+          <strong>Cadangan kemahiran global</strong>
+          {suggestions.length ? (
+            <div>
+              {suggestions.map((skill) => (
+                <button type="button" key={skill} onMouseDown={(event) => event.preventDefault()} onClick={() => selectSkill(skill)}>
+                  <Icon>add</Icon>
+                  <span>{skill}</span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p>Tiada cadangan dijumpai. Tekan Enter untuk tambah kemahiran secara manual.</p>
+          )}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function JobTitleAutocomplete({ error, onChange, value }) {
   const [isOpen, setIsOpen] = useState(false);
   const query = value.trim().toLowerCase();
@@ -1951,20 +2045,7 @@ function JobPreferencesForm({ onDraftChange, onSave, preferencesData, saveReques
               </div>
 
               <PersonalField label="Kemahiran Berkaitan" error={validationErrors[`preferred-job-${job.id}-skills`]}>
-                <div className="job-search-input">
-                  <Icon>search</Icon>
-                  <input
-                    type="text"
-                    placeholder="Contoh. Perform market research"
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") {
-                        event.preventDefault();
-                        addSkillToJob(job.id, event.currentTarget.value);
-                        event.currentTarget.value = "";
-                      }
-                    }}
-                  />
-                </div>
+                <SkillAutocomplete onAdd={(skill) => addSkillToJob(job.id, skill)} />
                 <small>Anda boleh membuat penambahan kemahiran yang anda miliki secara manual.</small>
               </PersonalField>
 
