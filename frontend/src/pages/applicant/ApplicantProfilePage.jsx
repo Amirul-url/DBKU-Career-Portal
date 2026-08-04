@@ -627,10 +627,13 @@ function PersonalMultiSelect({ error, onChange, options, placeholder, selectedLa
       <div
         className={`personal-select-wrap ${isOpen ? "open" : ""}`}
         onBlur={(event) => {
-          if (!event.currentTarget.contains(event.relatedTarget)) {
-            setIsOpen(false);
-            setSearchTerm("");
-          }
+          const selectWrap = event.currentTarget;
+          window.setTimeout(() => {
+            if (!selectWrap.contains(document.activeElement)) {
+              setIsOpen(false);
+              setSearchTerm("");
+            }
+          }, 0);
         }}
       >
         <button
