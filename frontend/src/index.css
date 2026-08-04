@@ -5011,6 +5011,73 @@ body:has(.applicant-profile-page) {
   gap: 12px;
 }
 
+.academic-form {
+  display: grid;
+  gap: 18px;
+  max-width: 760px;
+  padding-top: 18px;
+}
+
+.academic-intro {
+  margin: 0;
+  color: var(--profile-ink);
+  font-size: 15px;
+  font-weight: 850;
+}
+
+.academic-intro span {
+  color: var(--profile-ink);
+}
+
+.academic-record-list {
+  display: grid;
+  gap: 16px;
+}
+
+.academic-record {
+  display: grid;
+  gap: 16px;
+  border: 1px solid var(--profile-green);
+  border-radius: 8px;
+  background: var(--profile-surface);
+  padding: 20px;
+}
+
+.academic-record > strong,
+.academic-date-section > strong {
+  color: var(--profile-ink);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.academic-date-section {
+  display: grid;
+  gap: 8px;
+}
+
+.academic-date-section > strong em {
+  color: #9ca3af;
+  font-style: normal;
+}
+
+.academic-date-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.academic-delete-button {
+  justify-self: end;
+}
+
+.academic-summary-list {
+  padding-top: 18px;
+}
+
+.academic-summary-card {
+  background: #f8fbff;
+}
+
 .personal-helper-copy {
   max-width: 720px;
   color: var(--profile-ink);
@@ -5746,6 +5813,10 @@ body:has(.applicant-profile-page) {
   }
 
   .personal-reference-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .academic-date-grid {
     grid-template-columns: 1fr;
   }
 }

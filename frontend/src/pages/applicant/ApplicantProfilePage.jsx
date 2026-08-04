@@ -20,7 +20,7 @@ const emptyProfileCards = [
   },
   {
     icon: "school",
-    title: "Pendidikan",
+    title: "Akademik",
     body: "Masukkan kelayakan akademik supaya permohonan lebih lengkap.",
   },
   {
@@ -58,8 +58,12 @@ const defaultJobPreferences = {
 };
 
 const defaultExperienceProfile = { employmentStatus: "", hasExperience: "", startMonth: "", startYear: "", records: [] };
+const defaultAcademicProfile = { records: [] };
 const monthOptions = ["Januari", "Februari", "Mac", "April", "Mei", "Jun", "Julai", "Ogos", "September", "Oktober", "November", "Disember"];
 const yearOptions = Array.from({ length: 50 }, (_, index) => String(new Date().getFullYear() - index));
+const academicLevelOptions = [
+  "Sekolah Rendah atau Ke Bawah", "PMR / PT3 atau Yang Setaraf", "SPM / O Level / SKM Tahap 1 / SKM Tahap 2 / SKM Tahap 3 atau Yang Setaraf", "STPM / A Level atau Yang Setaraf", "Diploma / Diploma Lanjutan / Diploma Graduan Atasan / DVM / DKM Tahap 4 / DLKM Tahap 5", "Sarjana Muda atau Yang Setaraf", "Sarjana atau Yang Setaraf", "Doktor Falsafah (PhD) atau Yang Setaraf",
+].map((level) => ({ value: level, label: level }));
 
 function formatExperienceMonthYear(month, year) {
   return month && year ? `${month} ${year}` : "";
@@ -261,6 +265,24 @@ function getSavedExperienceProfile(user) {
 function saveExperienceProfile(user, experience) {
   const normalized = { ...defaultExperienceProfile, ...experience };
   try { window.localStorage.setItem(getExperienceStorageKey(user), JSON.stringify(normalized)); } catch { /* retain local state */ }
+  return normalized;
+}
+
+function getAcademicStorageKey(user) {
+  return `dbku-applicant-academic:${user?.email || user?.full_name || "default"}`;
+}
+
+function getSavedAcademicProfile(user) {
+  try {
+    const saved = window.localStorage.getItem(getAcademicStorageKey(user));
+    const profile = saved ? JSON.parse(saved) : defaultAcademicProfile;
+    return { ...defaultAcademicProfile, ...profile, records: Array.isArray(profile.records) ? profile.records : [] };
+  } catch { return defaultAcademicProfile; }
+}
+
+function saveAcademicProfile(user, academic) {
+  const normalized = { ...defaultAcademicProfile, ...academic, records: Array.isArray(academic.records) ? academic.records : [] };
+  try { window.localStorage.setItem(getAcademicStorageKey(user), JSON.stringify(normalized)); } catch { /* retain local state */ }
   return normalized;
 }
 
@@ -562,12 +584,12 @@ function InfoHelper({ body, title }) {
   );
 }
 
-function PersonalField({ children, error, hint, info, label, optional = false }) {
+function PersonalField({ children, error, hint, info, label, noIndicator = false, optional = false }) {
   return (
     <label className={`personal-field ${error ? "has-error" : ""}`}>
       <span>
         {label}
-        {optional ? <em> (tidak wajib)</em> : "*"}
+        {noIndicator ? null : optional ? <em> (tidak wajib)</em> : "*"}
         {info ? <InfoHelper title={label} body={info} /> : null}
       </span>
       {children}
@@ -2329,6 +2351,46 @@ function ExperienceSummary({ data }) {
   );
 }
 
+function createEmptyAcademicRecord() {
+  return { id: createLocalId(), level: "", institution: "", country: "Malaysia", result: "", startMonth: "", startYear: "", endMonth: "", endYear: "", isStudying: false };
+}
+
+function AcademicForm({ data, onDraftChange, onSave }) {
+  const [form, setForm] = useState(() => ({ ...defaultAcademicProfile, ...data, records: data.records.length ? data.records : [createEmptyAcademicRecord()] }));
+  const updateRecord = (id, changes) => setForm((current) => ({ ...current, records: current.records.map((record) => record.id === id ? { ...record, ...changes } : record) }));
+  const addRecord = () => setForm((current) => ({ ...current, records: [...current.records, createEmptyAcademicRecord()] }));
+  const removeRecord = (id) => setForm((current) => ({ ...current, records: current.records.filter((record) => record.id !== id) }));
+  useEffect(() => { onDraftChange(form); }, [form, onDraftChange]);
+
+  return (
+    <div className="academic-form">
+      <p className="academic-intro">Tambah latar belakang akademik anda<span>*</span></p>
+      <div className="academic-record-list">
+        {form.records.map((record, index) => (
+          <section className="academic-record" key={record.id}>
+            <strong>Akademik {index + 1}</strong>
+            <PersonalField label="Tahap Akademik"><PersonalSelect value={record.level} placeholder="Pilih tahap akademik" options={academicLevelOptions} onChange={(event) => updateRecord(record.id, { level: event.target.value })} /></PersonalField>
+            <PersonalField label="Nama Institusi Akademik" hint="Maksimum 10000 huruf"><input maxLength="10000" value={record.institution} placeholder="Contoh. Universiti Sains Malaysia" onChange={(event) => updateRecord(record.id, { institution: event.target.value })} /></PersonalField>
+            <PersonalField label="Negara"><PersonalSelect value={record.country} placeholder="Pilih negara" options={countryOptions} searchable searchPlaceholder="Cari negara" onChange={(event) => updateRecord(record.id, { country: event.target.value })} /></PersonalField>
+            <PersonalField label="Keputusan" optional hint="Maksimum 10000 huruf"><input maxLength="10000" value={record.result} placeholder="Contoh. 12A 3B+, CGPA 4.0, Cemerlang" onChange={(event) => updateRecord(record.id, { result: event.target.value })} /></PersonalField>
+            <div className="academic-date-section"><strong>Tarikh Mula <em>(tidak wajib)</em></strong><div className="academic-date-grid"><PersonalField label="Bulan" noIndicator><PersonalSelect value={record.startMonth} placeholder="Pilih" options={toSelectOptions(monthOptions)} onChange={(event) => updateRecord(record.id, { startMonth: event.target.value })} /></PersonalField><PersonalField label="Tahun" noIndicator><PersonalSelect value={record.startYear} placeholder="Pilih" options={toSelectOptions(yearOptions)} onChange={(event) => updateRecord(record.id, { startYear: event.target.value })} /></PersonalField></div></div>
+            <div className="academic-date-section"><strong>Tarikh Akhir <em>(tidak wajib)</em></strong><div className="academic-date-grid"><PersonalField label="Bulan" noIndicator><PersonalSelect disabled={record.isStudying} value={record.endMonth} placeholder="Pilih" options={toSelectOptions(monthOptions)} onChange={(event) => updateRecord(record.id, { endMonth: event.target.value })} /></PersonalField><PersonalField label="Tahun" noIndicator><PersonalSelect disabled={record.isStudying} value={record.endYear} placeholder="Pilih" options={toSelectOptions(yearOptions)} onChange={(event) => updateRecord(record.id, { endYear: event.target.value })} /></PersonalField></div></div>
+            <label className="job-checkbox-row"><input type="checkbox" checked={record.isStudying} onChange={(event) => updateRecord(record.id, { isStudying: event.target.checked, endMonth: event.target.checked ? "" : record.endMonth, endYear: event.target.checked ? "" : record.endYear })} /><span>Saya sedang belajar di sini</span></label>
+            {form.records.length > 1 ? <button type="button" className="personal-outline-button academic-delete-button" onClick={() => removeRecord(record.id)}>Padam</button> : null}
+          </section>
+        ))}
+      </div>
+      <button type="button" className="personal-add-reference" onClick={addRecord}><Icon>add_circle</Icon> Tambah Akademik Lain</button>
+      <div className="personal-submit-row"><button type="button" className="personal-save-button" onClick={() => onSave(form)}><Icon>save</Icon>Simpan dan Teruskan</button></div>
+    </div>
+  );
+}
+
+function AcademicSummary({ data }) {
+  if (!data.records.length) return <div className="profile-empty-row"><span><Icon>school</Icon></span><p>Masukkan kelayakan akademik supaya permohonan lebih lengkap.</p></div>;
+  return <div className="job-preference-card-list academic-summary-list">{data.records.map((record, index) => <article className="job-preference-card academic-summary-card" key={record.id}><span className="experience-summary-index">Akademik {index + 1}</span><strong>{record.institution || "Institusi belum diisi"}</strong>{record.level ? <span>{record.level}</span> : null}{record.result ? <span>{record.result}</span> : null}</article>)}</div>;
+}
+
 export default function ApplicantProfilePage() {
   const navigate = useNavigate();
   const user = getStoredUser();
@@ -2368,6 +2430,7 @@ export default function ApplicantProfilePage() {
   });
   const [jobPreferences, setJobPreferences] = useState(() => normalizeJobPreferences(getSavedDraft(user, "job-preferences") || getSavedJobPreferences(user)));
   const [experienceProfile, setExperienceProfile] = useState(() => getSavedExperienceProfile(user));
+  const [academicProfile, setAcademicProfile] = useState(() => getSavedAcademicProfile(user));
   const profileDisplayName = personalProfile.displayName || displayName;
   const profileEmail = personalProfile.email || email;
 
@@ -2449,6 +2512,12 @@ export default function ApplicantProfilePage() {
   const handleExperienceSave = (experience) => {
     setExperienceProfile(saveExperienceProfile(user, experience));
     clearDraft(user, "experience");
+    setEditingSection(null);
+  };
+
+  const handleAcademicSave = (academic) => {
+    setAcademicProfile(saveAcademicProfile(user, academic));
+    clearDraft(user, "academic");
     setEditingSection(null);
   };
 
@@ -2562,8 +2631,12 @@ export default function ApplicantProfilePage() {
                 {editingSection === "experience" ? <ExperienceForm data={getSavedDraft(user, "experience") || experienceProfile} onDraftChange={(draft) => saveDraft(user, "experience", draft)} onSave={handleExperienceSave} /> : <ExperienceSummary data={experienceProfile} />}
               </ProfileCard>
 
-              {emptyProfileCards.filter((card) => card.title !== "Pengalaman").map((card, index) => (
-                <ProfileCard id={`profile-section-${index + 3}`} title={card.title} key={card.title}>
+              <ProfileCard id="profile-section-4" isEditing={editingSection === "academic"} title="Akademik" onEdit={() => setEditingSection((current) => current === "academic" ? null : "academic")}>
+                {editingSection === "academic" ? <AcademicForm data={getSavedDraft(user, "academic") || academicProfile} onDraftChange={(draft) => saveDraft(user, "academic", draft)} onSave={handleAcademicSave} /> : <AcademicSummary data={academicProfile} />}
+              </ProfileCard>
+
+              {emptyProfileCards.filter((card) => !["Pengalaman", "Akademik"].includes(card.title)).map((card, index) => (
+                <ProfileCard id={`profile-section-${index + 5}`} title={card.title} key={card.title}>
                   <div className="profile-empty-row">
                     <span>
                       <Icon>{card.icon}</Icon>
