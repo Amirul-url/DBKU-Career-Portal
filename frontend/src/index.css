@@ -5148,6 +5148,63 @@ body:has(.applicant-profile-page) {
   font-weight: 850;
 }
 
+.skills-layout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 44px;
+  padding-top: 18px;
+}
+
+.skills-layout-label,
+.skills-form > strong,
+.skills-language-section > strong,
+.skills-document-section > strong {
+  color: var(--profile-ink);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.skills-form,
+.skills-language-section,
+.skills-document-section {
+  display: grid;
+  gap: 14px;
+  max-width: 760px;
+}
+
+.skills-form > p {
+  max-width: 560px;
+  margin: -8px 0 4px;
+  color: var(--profile-ink);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.skills-form > strong span,
+.skills-language-section > strong span {
+  color: var(--profile-ink);
+}
+
+.skills-language-section article {
+  display: grid;
+  gap: 5px;
+  border: 1px solid var(--profile-green);
+  border-radius: 7px;
+  background: #f8fbff;
+  padding: 18px;
+}
+
+.skills-language-section article span {
+  color: var(--profile-ink);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.skills-language-section article button {
+  justify-self: end;
+}
+
 .personal-helper-copy {
   max-width: 720px;
   color: var(--profile-ink);
@@ -5895,6 +5952,11 @@ body:has(.applicant-profile-page) {
   }
 
   .academic-layout {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .skills-layout {
     grid-template-columns: 1fr;
     gap: 12px;
   }

@@ -300,15 +300,24 @@ function getSkillsStorageKey(user) {
   return `dbku-applicant-skills:${user?.email || user?.full_name || "default"}`;
 }
 
+const defaultSkillsProfile = { skills: [], microsoftOffice: [], licences: [], languages: [], documents: [] };
+const microsoftOfficeOptions = ["Microsoft Word", "Microsoft Excel", "Microsoft PowerPoint", "Microsoft Access", "Microsoft Outlook", "Microsoft Teams"].map((value) => ({ value, label: value }));
+const drivingLicenceOptions = ["B2 — Motosikal <250 cc", "B — Motosikal >500 cc", "D — Kereta", "DA — Kereta Transmisi Automatik", "E — Kenderaan Berat"].map((value) => ({ value, label: value }));
+
+function normalizeSkillsProfile(profile) {
+  if (Array.isArray(profile)) return { ...defaultSkillsProfile, skills: profile };
+  return { ...defaultSkillsProfile, ...(profile || {}), skills: Array.isArray(profile?.skills) ? profile.skills : [], microsoftOffice: Array.isArray(profile?.microsoftOffice) ? profile.microsoftOffice : [], licences: Array.isArray(profile?.licences) ? profile.licences : [], languages: Array.isArray(profile?.languages) ? profile.languages : [], documents: Array.isArray(profile?.documents) ? profile.documents : [] };
+}
+
 function getSavedSkills(user) {
   try {
     const saved = JSON.parse(window.localStorage.getItem(getSkillsStorageKey(user)) || "[]");
-    return Array.isArray(saved) ? saved : [];
-  } catch { return []; }
+    return normalizeSkillsProfile(saved);
+  } catch { return defaultSkillsProfile; }
 }
 
 function saveSkills(user, skills) {
-  const normalized = Array.isArray(skills) ? skills : [];
+  const normalized = normalizeSkillsProfile(skills);
   try { window.localStorage.setItem(getSkillsStorageKey(user), JSON.stringify(normalized)); } catch { /* retain local state */ }
   return normalized;
 }
@@ -2436,16 +2445,18 @@ function AcademicSummary({ data }) {
 }
 
 function SkillsForm({ data, onDraftChange, onSave }) {
-  const [skills, setSkills] = useState(data);
-  const toggleSkill = (skill) => setSkills((current) => current.includes(skill) ? current.filter((item) => item !== skill) : [...current, skill]);
-  useEffect(() => { onDraftChange(skills); }, [onDraftChange, skills]);
+  const [profile, setProfile] = useState(() => normalizeSkillsProfile(data));
+  const toggle = (field, value) => setProfile((current) => ({ ...current, [field]: current[field].includes(value) ? current[field].filter((item) => item !== value) : [...current[field], value] }));
+  const addLanguage = () => setProfile((current) => ({ ...current, languages: [...current.languages, { id: createLocalId(), name: "Bahasa baharu", reading: "Sederhana", speaking: "Sederhana", writing: "Sederhana" }] }));
+  useEffect(() => { onDraftChange(profile); }, [onDraftChange, profile]);
 
-  return <div className="personal-edit-panel skills-form"><PersonalField label="Kemahiran"><SkillAutocomplete selectedSkills={skills} onToggle={toggleSkill} /><small>Anda boleh mencari atau menambah kemahiran secara manual.</small></PersonalField>{skills.length ? <div className="job-selected-list"><strong>Kemahiran Anda ({skills.length})</strong><div>{skills.map((skill) => <button type="button" key={skill} onClick={() => toggleSkill(skill)}><span>{skill}</span><Icon>cancel</Icon></button>)}</div></div> : null}<div className="personal-submit-row"><button type="button" className="personal-save-button" onClick={() => onSave(skills)}><Icon>save</Icon>Simpan dan Teruskan</button></div></div>;
+  return <div className="skills-layout"><strong className="skills-layout-label">Set Kemahiran</strong><div className="skills-form"><strong>Set kemahiran yang dipilih<span>*</span></strong><p>Anda boleh menambah lebih banyak kemahiran melalui pilihan pekerjaan, pengalaman kerja, atau dengan menambahkan kemahiran berkaitan di bawah.</p><PersonalField label="Kemahiran Berkaitan"><SkillAutocomplete selectedSkills={profile.skills} onToggle={(skill) => toggle("skills", skill)} /><small>Anda boleh membuat penambahan kemahiran yang anda miliki secara manual.</small></PersonalField>{profile.skills.length ? <div className="job-selected-list"><strong>Kemahiran Anda ({profile.skills.length})</strong><div>{profile.skills.map((skill) => <button type="button" key={skill} onClick={() => toggle("skills", skill)}><span>{skill}</span><Icon>cancel</Icon></button>)}</div></div> : null}<PersonalField label="Kemahiran MS Office" optional><PersonalMultiSelect value={profile.microsoftOffice} placeholder="Pilih satu atau lebih" selectedLabel="Kemahiran MS Office Ditambah" options={microsoftOfficeOptions} onChange={(values) => setProfile((current) => ({ ...current, microsoftOffice: values }))} /></PersonalField><PersonalField label="Lesen Memandu" optional><PersonalMultiSelect value={profile.licences} placeholder="Pilih satu atau lebih" selectedLabel="Lesen Memandu Ditambah" options={drivingLicenceOptions} onChange={(values) => setProfile((current) => ({ ...current, licences: values }))} /></PersonalField><div className="skills-language-section"><strong>Sila tambah bahasa<span>*</span></strong>{profile.languages.map((language) => <article key={language.id}><strong>{language.name}</strong><span>Tahap Pembacaan : {language.reading}</span><span>Tahap Percakapan : {language.speaking}</span><span>Tahap Penulisan : {language.writing}</span><button type="button" className="personal-outline-button" onClick={() => setProfile((current) => ({ ...current, languages: current.languages.filter((item) => item.id !== language.id) }))}>Padam</button></article>)}<button type="button" className="personal-add-reference" onClick={addLanguage}><Icon>add_circle</Icon> Tambah Bahasa Lain</button></div><div className="skills-document-section"><strong>Tambah sijil dan dokumen anda</strong><button type="button" className="personal-add-reference"><Icon>add_circle</Icon> Tambah Dokumen</button></div><div className="personal-submit-row"><button type="button" className="personal-save-button" onClick={() => onSave(profile)}><Icon>save</Icon>Simpan Profil Saya</button></div></div></div>;
 }
 
 function SkillsSummary({ data }) {
-  if (!data.length) return <div className="profile-empty-row"><span><Icon>psychology</Icon></span><p>Senaraikan kemahiran teknikal, bahasa dan sijil profesional anda.</p></div>;
-  return <div className="job-selected-list skills-summary"><strong>Kemahiran Anda ({data.length})</strong><div>{data.map((skill) => <span className="skills-summary-tag" key={skill}>{skill}</span>)}</div></div>;
+  const profile = normalizeSkillsProfile(data);
+  if (!profile.skills.length) return <div className="profile-empty-row"><span><Icon>psychology</Icon></span><p>Senaraikan kemahiran teknikal, bahasa dan sijil profesional anda.</p></div>;
+  return <div className="job-selected-list skills-summary"><strong>Kemahiran Anda ({profile.skills.length})</strong><div>{profile.skills.map((skill) => <span className="skills-summary-tag" key={skill}>{skill}</span>)}</div></div>;
 }
 
 export default function ApplicantProfilePage() {
