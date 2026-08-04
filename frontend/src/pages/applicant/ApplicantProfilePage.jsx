@@ -66,6 +66,14 @@ const academicLevelOptions = [
 ].map((level) => ({ value: level, label: level }));
 const spmAcademicLevel = "SPM / O Level / SKM Tahap 1 / SKM Tahap 2 / SKM Tahap 3 atau Yang Setaraf";
 const spmSubjectOptions = ["Bahasa Malaysia", "Bahasa Inggeris", "Matematik"];
+const higherAcademicLevels = new Set([
+  "Diploma / Diploma Lanjutan / Diploma Graduan Atasan / DVM / DKM Tahap 4 / DLKM Tahap 5",
+  "Sarjana Muda atau Yang Setaraf", "Sarjana atau Yang Setaraf", "Doktor Falsafah (PhD) atau Yang Setaraf",
+]);
+// Berdasarkan kategori bidang pengajian dan pengkhususan Kod Pendidikan Nasional 2020 (NEC-2020), MQA.
+const academicFieldOptions = [
+  "Pendidikan", "Sains Pendidikan", "Pendidikan Awal Kanak-kanak", "Latihan Perguruan", "Seni", "Reka Bentuk", "Muzik dan Seni Persembahan", "Sastera", "Bahasa", "Sejarah dan Arkeologi", "Falsafah dan Etika", "Teologi dan Agama", "Sains Sosial dan Tingkah Laku", "Ekonomi", "Sains Politik dan Sivik", "Psikologi", "Sosiologi dan Pengajian Budaya", "Kewartawanan dan Pelaporan", "Perpustakaan, Maklumat dan Arkib", "Perniagaan dan Pentadbiran", "Perakaunan dan Percukaian", "Kewangan, Perbankan dan Insurans", "Pengurusan dan Pentadbiran", "Pemasaran dan Pengiklanan", "Kesetiausahaan dan Kerja Pejabat", "Perdagangan Borong dan Runcit", "Undang-undang", "Biologi dan Biokimia", "Alam Sekitar", "Sains Fizikal", "Kimia", "Sains Bumi", "Fizik", "Matematik", "Statistik", "Teknologi Maklumat dan Komunikasi", "Sains Komputer", "Pembangunan Perisian dan Aplikasi", "Pangkalan Data dan Rangkaian", "Kejuruteraan dan Teknologi Kejuruteraan", "Kejuruteraan Kimia dan Proses", "Teknologi Perlindungan Alam Sekitar", "Elektrik dan Tenaga", "Elektronik dan Automasi", "Mekanik dan Perdagangan Logam", "Kenderaan Bermotor, Kapal dan Pesawat Udara", "Pembuatan dan Pemprosesan", "Pemprosesan Makanan", "Tekstil, Pakaian, Kasut dan Kulit", "Bahan", "Seni Bina dan Perancangan Bandar", "Bangunan dan Kejuruteraan Awam", "Pertanian", "Pengeluaran Tanaman dan Ternakan", "Hortikultur", "Perhutanan", "Perikanan", "Veterinar", "Perubatan", "Pergigian", "Kejururawatan dan Penjagaan", "Diagnostik dan Teknologi Rawatan Perubatan", "Terapi dan Pemulihan", "Farmasi", "Kesihatan dan Keselamatan Pekerjaan", "Kerja Sosial dan Kaunseling", "Penjagaan Warga Emas dan Orang Kurang Upaya", "Penjagaan Kanak-kanak dan Belia", "Perkhidmatan Peribadi", "Hospitaliti dan Katering", "Pelancongan, Rekreasi dan Riadah", "Sukan", "Perkhidmatan Kebersihan", "Keselamatan dan Kesihatan", "Keselamatan Awam dan Ketenteraan", "Pengangkutan", "Logistik", "Program Antara Disiplin", "Bidang Tidak Diketahui",
+].map((field) => ({ value: field, label: field }));
 
 function formatExperienceMonthYear(month, year) {
   return month && year ? `${month} ${year}` : "";
@@ -2354,7 +2362,7 @@ function ExperienceSummary({ data }) {
 }
 
 function createEmptyAcademicRecord() {
-  return { id: createLocalId(), level: "", institution: "", country: "Malaysia", result: "", spmGrades: {}, startMonth: "", startYear: "", endMonth: "", endYear: "", isStudying: false };
+  return { id: createLocalId(), level: "", fieldOfStudy: "", institution: "", country: "Malaysia", result: "", spmGrades: {}, startMonth: "", startYear: "", endMonth: "", endYear: "", isStudying: false };
 }
 
 function AcademicForm({ data, onDraftChange, onSave }) {
@@ -2375,6 +2383,7 @@ function AcademicForm({ data, onDraftChange, onSave }) {
             <strong>Akademik {index + 1}</strong>
             <PersonalField label="Tahap Akademik"><PersonalSelect value={record.level} placeholder="Pilih tahap akademik" options={academicLevelOptions} onChange={(event) => updateRecord(record.id, { level: event.target.value })} /></PersonalField>
             {record.level === spmAcademicLevel ? <div className="spm-grades"><strong>Sila isikan gred untuk mata pelajaran SPM di bawah <em>(tidak wajib)</em></strong><div>{spmSubjectOptions.map((subject) => <PersonalField key={subject} label={subject} noIndicator><input value={record.spmGrades?.[subject] || ""} placeholder="Contoh. A+, A1" onChange={(event) => updateRecord(record.id, { spmGrades: { ...(record.spmGrades || {}), [subject]: event.target.value } })} /></PersonalField>)}</div></div> : null}
+            {higherAcademicLevels.has(record.level) ? <PersonalField label="Bidang Akademik"><PersonalSelect value={record.fieldOfStudy || ""} placeholder="Pilih bidang akademik" options={academicFieldOptions} searchable searchPlaceholder="Cari bidang akademik" onChange={(event) => updateRecord(record.id, { fieldOfStudy: event.target.value })} /></PersonalField> : null}
             <PersonalField label="Nama Institusi Akademik" hint={`Maksimum ${10000 - (record.institution || "").length} huruf`}><input maxLength="10000" value={record.institution || ""} placeholder="Contoh. Universiti Sains Malaysia" onChange={(event) => updateRecord(record.id, { institution: event.target.value })} /></PersonalField>
             <PersonalField label="Negara"><PersonalSelect value={record.country} placeholder="Pilih negara" options={countryOptions} searchable searchPlaceholder="Cari negara" onChange={(event) => updateRecord(record.id, { country: event.target.value })} /></PersonalField>
             <PersonalField label="Keputusan" optional hint={`Maksimum ${10000 - (record.result || "").length} huruf`}><input maxLength="10000" value={record.result || ""} placeholder="Contoh. 12A 3B+, CGPA 4.0, Cemerlang" onChange={(event) => updateRecord(record.id, { result: event.target.value })} /></PersonalField>
@@ -2394,7 +2403,7 @@ function AcademicForm({ data, onDraftChange, onSave }) {
 
 function AcademicSummary({ data }) {
   if (!data.records.length) return <div className="profile-empty-row"><span><Icon>school</Icon></span><p>Masukkan kelayakan akademik supaya permohonan lebih lengkap.</p></div>;
-  return <div className="job-preference-card-list academic-summary-list">{data.records.map((record, index) => <article className="job-preference-card academic-summary-card" key={record.id}><span className="experience-summary-index">Akademik {index + 1}</span><strong>{record.institution || "Institusi belum diisi"}</strong>{record.level ? <span>{record.level}</span> : null}{record.result ? <span>{record.result}</span> : null}</article>)}</div>;
+  return <div className="job-preference-card-list academic-summary-list">{data.records.map((record, index) => <article className="job-preference-card academic-summary-card" key={record.id}><span className="experience-summary-index">Akademik {index + 1}</span><strong>{record.institution || "Institusi belum diisi"}</strong>{record.level ? <span>{record.level}</span> : null}{record.fieldOfStudy ? <span>{record.fieldOfStudy}</span> : null}{record.result ? <span>{record.result}</span> : null}</article>)}</div>;
 }
 
 export default function ApplicantProfilePage() {
