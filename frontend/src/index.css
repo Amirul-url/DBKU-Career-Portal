@@ -5234,37 +5234,26 @@ body:has(.applicant-profile-page) {
 
 .job-checkbox-row input,
 .job-multi-select-options input {
-  appearance: none;
-  display: grid;
-  width: 18px;
-  height: 18px;
+  appearance: auto;
+  display: block;
+  width: 18px !important;
+  min-width: 18px;
+  max-width: 18px;
+  height: 18px !important;
+  min-height: 18px;
+  max-height: 18px;
   flex: 0 0 18px;
-  place-content: center;
-  border: 1px solid #94a3b8;
-  border-radius: 2px;
-  background: #ffffff;
+  align-self: center;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--profile-green);
   cursor: pointer;
-}
-
-.job-checkbox-row input:checked,
-.job-multi-select-options input:checked {
-  border-color: var(--profile-green);
-  background: var(--profile-green);
-}
-
-.job-checkbox-row input:checked::after,
-.job-multi-select-options input:checked::after {
-  width: 5px;
-  height: 9px;
-  border: solid #ffffff;
-  border-width: 0 2px 2px 0;
-  content: "";
-  transform: translateY(-1px) rotate(45deg);
 }
 
 .job-checkbox-row input:focus-visible,
 .job-multi-select-options input:focus-visible {
-  outline: 2px solid var(--profile-green);
+  outline: 0;
+  box-shadow: 0 0 0 2px var(--profile-green);
   outline-offset: 2px;
 }
 
