@@ -5186,6 +5186,10 @@ body:has(.applicant-profile-page) {
   overflow-y: auto;
 }
 
+.job-title-suggestions .job-multi-select-options {
+  gap: 0;
+}
+
 .job-title-suggestions button {
   display: grid;
   min-height: 44px;

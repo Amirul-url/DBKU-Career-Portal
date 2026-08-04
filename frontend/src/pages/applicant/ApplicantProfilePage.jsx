@@ -714,10 +714,22 @@ function PersonalMultiSelect({ error, onChange, options, placeholder, selectedLa
   );
 }
 
-function SkillAutocomplete({ onAdd }) {
+function SkillAutocomplete({ onToggle, selectedSkills }) {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
+  const autocompleteRef = useRef(null);
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    const handleOutsidePointerDown = (event) => {
+      if (!autocompleteRef.current?.contains(event.target)) setIsOpen(false);
+    };
+
+    document.addEventListener("mousedown", handleOutsidePointerDown);
+    return () => document.removeEventListener("mousedown", handleOutsidePointerDown);
+  }, [isOpen]);
 
   useEffect(() => {
     const searchTerm = query.trim();
@@ -750,23 +762,19 @@ function SkillAutocomplete({ onAdd }) {
   const addTypedSkill = () => {
     const skill = query.trim();
     if (!skill) return;
-    onAdd(skill);
+    onToggle(skill);
     setQuery("");
     setIsOpen(false);
   };
 
   const selectSkill = (skill) => {
-    onAdd(skill);
-    setQuery("");
-    setIsOpen(false);
+    onToggle(skill);
   };
 
   return (
     <div
       className="job-title-autocomplete"
-      onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) setIsOpen(false);
-      }}
+      ref={autocompleteRef}
     >
       <div className="job-search-input">
         <Icon>search</Icon>
@@ -791,12 +799,16 @@ function SkillAutocomplete({ onAdd }) {
         <div className="job-title-suggestions">
           <strong>Cadangan kemahiran global</strong>
           {suggestions.length ? (
-            <div>
+            <div className="job-multi-select-options">
               {suggestions.map((skill) => (
-                <button type="button" key={skill} onMouseDown={(event) => event.preventDefault()} onClick={() => selectSkill(skill)}>
-                  <Icon>add</Icon>
+                <label key={skill}>
+                  <input
+                    type="checkbox"
+                    checked={selectedSkills.includes(skill)}
+                    onChange={() => selectSkill(skill)}
+                  />
                   <span>{skill}</span>
-                </button>
+                </label>
               ))}
             </div>
           ) : (
@@ -2045,7 +2057,12 @@ function JobPreferencesForm({ onDraftChange, onSave, preferencesData, saveReques
               </div>
 
               <PersonalField label="Kemahiran Berkaitan" error={validationErrors[`preferred-job-${job.id}-skills`]}>
-                <SkillAutocomplete onAdd={(skill) => addSkillToJob(job.id, skill)} />
+                <SkillAutocomplete
+                  selectedSkills={job.skills}
+                  onToggle={(skill) => (
+                    job.skills.includes(skill) ? removeSkillFromJob(job.id, skill) : addSkillToJob(job.id, skill)
+                  )}
+                />
                 <small>Anda boleh membuat penambahan kemahiran yang anda miliki secara manual.</small>
               </PersonalField>
 
