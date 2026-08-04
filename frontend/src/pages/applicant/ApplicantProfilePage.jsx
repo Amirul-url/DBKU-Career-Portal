@@ -1846,7 +1846,12 @@ function JobPreferencesSummary({ preferences }) {
           </p>
         </div>
       </div>
-      {hasCareerObjective ? <p className="job-preference-objective">{preferences.careerObjective}</p> : null}
+      {hasCareerObjective ? (
+        <section className="job-preference-objective">
+          <strong>Matlamat Kerjaya</strong>
+          <p>{preferences.careerObjective}</p>
+        </section>
+      ) : null}
       {hasPreferredJobs ? (
         <div className="job-preference-card-list">
           {preferences.preferredJobs.map((job) => (

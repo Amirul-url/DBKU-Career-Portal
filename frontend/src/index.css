@@ -5154,7 +5154,6 @@ body:has(.applicant-profile-page) {
 }
 
 .job-preference-status p,
-.job-preference-objective,
 .job-preference-card span,
 .job-preference-note {
   margin: 4px 0 0;
@@ -5165,9 +5164,27 @@ body:has(.applicant-profile-page) {
 }
 
 .job-preference-objective {
-  max-width: 760px;
+  display: grid;
+  gap: 6px;
+  max-width: 900px;
   margin: 0;
+  border-left: 3px solid var(--profile-green);
+  background: var(--profile-pale);
+  padding: 14px 16px;
+}
+
+.job-preference-objective strong {
+  color: var(--profile-ink);
   font-size: 13px;
+  font-weight: 900;
+}
+
+.job-preference-objective p {
+  margin: 0;
+  color: var(--profile-ink);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.55;
 }
 
 .job-preference-card-list {
