@@ -53,7 +53,7 @@ const defaultPersonalDetails = {
 
 const defaultJobPreferences = {
   careerObjective: "",
-  isLookingForJob: "Ya",
+  isLookingForJob: "",
   preferredJobs: [],
 };
 
