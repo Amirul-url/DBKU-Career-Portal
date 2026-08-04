@@ -64,6 +64,8 @@ const yearOptions = Array.from({ length: 50 }, (_, index) => String(new Date().g
 const academicLevelOptions = [
   "Sekolah Rendah atau Ke Bawah", "PMR / PT3 atau Yang Setaraf", "SPM / O Level / SKM Tahap 1 / SKM Tahap 2 / SKM Tahap 3 atau Yang Setaraf", "STPM / A Level atau Yang Setaraf", "Diploma / Diploma Lanjutan / Diploma Graduan Atasan / DVM / DKM Tahap 4 / DLKM Tahap 5", "Sarjana Muda atau Yang Setaraf", "Sarjana atau Yang Setaraf", "Doktor Falsafah (PhD) atau Yang Setaraf",
 ].map((level) => ({ value: level, label: level }));
+const spmAcademicLevel = "SPM / O Level / SKM Tahap 1 / SKM Tahap 2 / SKM Tahap 3 atau Yang Setaraf";
+const spmSubjectOptions = ["Bahasa Malaysia", "Bahasa Inggeris", "Matematik"];
 
 function formatExperienceMonthYear(month, year) {
   return month && year ? `${month} ${year}` : "";
@@ -2352,7 +2354,7 @@ function ExperienceSummary({ data }) {
 }
 
 function createEmptyAcademicRecord() {
-  return { id: createLocalId(), level: "", institution: "", country: "Malaysia", result: "", startMonth: "", startYear: "", endMonth: "", endYear: "", isStudying: false };
+  return { id: createLocalId(), level: "", institution: "", country: "Malaysia", result: "", spmGrades: {}, startMonth: "", startYear: "", endMonth: "", endYear: "", isStudying: false };
 }
 
 function AcademicForm({ data, onDraftChange, onSave }) {
@@ -2372,6 +2374,7 @@ function AcademicForm({ data, onDraftChange, onSave }) {
           <section className="academic-record" key={record.id}>
             <strong>Akademik {index + 1}</strong>
             <PersonalField label="Tahap Akademik"><PersonalSelect value={record.level} placeholder="Pilih tahap akademik" options={academicLevelOptions} onChange={(event) => updateRecord(record.id, { level: event.target.value })} /></PersonalField>
+            {record.level === spmAcademicLevel ? <div className="spm-grades"><strong>Sila isikan gred untuk mata pelajaran SPM di bawah <em>(tidak wajib)</em></strong><div>{spmSubjectOptions.map((subject) => <PersonalField key={subject} label={subject} noIndicator><input value={record.spmGrades?.[subject] || ""} placeholder="Contoh. A+, A1" onChange={(event) => updateRecord(record.id, { spmGrades: { ...(record.spmGrades || {}), [subject]: event.target.value } })} /></PersonalField>)}</div></div> : null}
             <PersonalField label="Nama Institusi Akademik" hint={`Maksimum ${10000 - (record.institution || "").length} huruf`}><input maxLength="10000" value={record.institution || ""} placeholder="Contoh. Universiti Sains Malaysia" onChange={(event) => updateRecord(record.id, { institution: event.target.value })} /></PersonalField>
             <PersonalField label="Negara"><PersonalSelect value={record.country} placeholder="Pilih negara" options={countryOptions} searchable searchPlaceholder="Cari negara" onChange={(event) => updateRecord(record.id, { country: event.target.value })} /></PersonalField>
             <PersonalField label="Keputusan" optional hint={`Maksimum ${10000 - (record.result || "").length} huruf`}><input maxLength="10000" value={record.result || ""} placeholder="Contoh. 12A 3B+, CGPA 4.0, Cemerlang" onChange={(event) => updateRecord(record.id, { result: event.target.value })} /></PersonalField>

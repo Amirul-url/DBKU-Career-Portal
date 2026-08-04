@@ -5078,6 +5078,29 @@ body:has(.applicant-profile-page) {
   gap: 12px;
 }
 
+.spm-grades {
+  display: grid;
+  gap: 12px;
+}
+
+.spm-grades > strong {
+  color: var(--profile-ink);
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1.45;
+}
+
+.spm-grades > strong em {
+  color: #9ca3af;
+  font-style: normal;
+}
+
+.spm-grades > div {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
 .academic-delete-button {
   justify-self: end;
 }
@@ -5829,6 +5852,10 @@ body:has(.applicant-profile-page) {
   }
 
   .academic-date-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .spm-grades > div {
     grid-template-columns: 1fr;
   }
 
