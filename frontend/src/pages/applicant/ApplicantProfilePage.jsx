@@ -2445,7 +2445,7 @@ function SkillsForm({ data, onDraftChange, onSave }) {
 
 function SkillsSummary({ data }) {
   if (!data.length) return <div className="profile-empty-row"><span><Icon>psychology</Icon></span><p>Senaraikan kemahiran teknikal, bahasa dan sijil profesional anda.</p></div>;
-  return <div className="job-selected-list skills-summary"><strong>Kemahiran Anda ({data.length})</strong><div>{data.map((skill) => <span key={skill}>{skill}</span>)}</div></div>;
+  return <div className="job-selected-list skills-summary"><strong>Kemahiran Anda ({data.length})</strong><div>{data.map((skill) => <span className="skills-summary-tag" key={skill}>{skill}</span>)}</div></div>;
 }
 
 export default function ApplicantProfilePage() {
