@@ -25,6 +25,7 @@ class Vacancy(models.Model):
     summary = models.TextField()
     responsibilities = models.TextField(blank=True)
     requirements = models.TextField(blank=True)
+    official_document = models.FileField(upload_to="vacancy_documents/", blank=True)
     closing_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="draft")
     created_by = models.ForeignKey(
@@ -53,4 +54,3 @@ class Vacancy(models.Model):
 
     def __str__(self):
         return self.title
-

@@ -19,6 +19,7 @@ class VacancySerializer(serializers.ModelSerializer):
             "summary",
             "responsibilities",
             "requirements",
+            "official_document",
             "closing_date",
             "status",
             "is_open",
@@ -26,4 +27,3 @@ class VacancySerializer(serializers.ModelSerializer):
             "updated_at",
         )
         read_only_fields = ("id", "created_at", "updated_at")
-
