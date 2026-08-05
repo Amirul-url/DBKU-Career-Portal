@@ -12,6 +12,34 @@ const dateLabel = (value) =>
     : "Tidak dinyatakan";
 const listItems = (value) =>
   value ? value.split("\n").filter(Boolean) : ["Rujuk dokumen rasmi untuk butiran lanjut."];
+const dbkuDivisionCodes = {
+  "Bahagian Audit Dalaman": "AUD",
+  "Bahagian Projek Khas & Fasiliti Awam": "SPF",
+  "Bahagian Hal Ehwal Undang-Undang": "LAW",
+  "Bahagian Penguatkuasaan dan Keselamatan": "ENS",
+  "Bahagian Pelesenan": "LES",
+  "Bahagian Pengurusan Sumber Manusia": "HRM",
+  "Bahagian Pentadbiran": "ADM",
+  "Bahagian Transformasi dan Inovasi": "CTS",
+  "Bahagian Kewangan": "FIN",
+  "Bahagian Penilaian dan Pencukaian": "VAL",
+  "Bahagian Teknologi Maklumat": "ICT",
+  "Bahagian Kesihatan Persekitaran": "ENV",
+  "Bahagian Perhubungan Awam": "PRD",
+  "Bahagian Pembangunan & Perkhidmatan": "CDS",
+  "Bahagian Pembangunan Sumber": "IRD",
+  "Bahagian Landskap": "LNP",
+  "Bahagian Kontrak dan Perolehan": "COP",
+  "Bahagian Geoinformasi dan Pengurusan Hartanah": "GPM",
+  "Bahagian Penyelenggaraan Infrastruktur": "IMT",
+  "Bahagian Bangunan": "BLG",
+  "Bahagian Projek Kejuruteraan": "ENG",
+  "Bahagian Mekanikal dan Elektrikal": "MNE",
+};
+const divisionLabel = (division) => {
+  const code = dbkuDivisionCodes[division];
+  return code ? `${division} (${code})` : division;
+};
 const salaryLabel = (job) =>
   job.minimum_salary || job.maximum_salary
     ? `RM ${job.minimum_salary || "—"} - ${job.maximum_salary || "—"}`
@@ -19,7 +47,7 @@ const salaryLabel = (job) =>
 const toOpportunity = (job) => ({
   ...job,
   organization: job.department,
-  department: job.division || job.department,
+  department: divisionLabel(job.division) || job.department,
   category: job.vacancy_type === "internship" ? "Latihan Industri" : "Jawatan",
   type: job.employment_type || (job.vacancy_type === "internship" ? "Latihan Industri" : "Jawatan"),
   salary: salaryLabel(job),
