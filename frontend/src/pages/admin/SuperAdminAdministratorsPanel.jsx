@@ -9,7 +9,6 @@ const blankForm = {
   email: "",
   mobile_number: "",
   department: "",
-  is_active: true,
   password: "",
   confirm_password: "",
   notify_whatsapp: true,
@@ -73,9 +72,8 @@ function AdminAccountModal({ account, error, form, mode, onChange, onClose, onSa
                 Sahkan Kata Laluan
                 <input className={inputClass} value={form.confirm_password} onChange={(event) => onChange("confirm_password", event.target.value)} placeholder="Sahkan kata laluan" type="password" required={!isEdit || Boolean(form.password)} />
               </label>
+              {isEdit ? <p className="md:col-span-2 text-sm text-slate-700"><strong>Biarkan medan kata laluan kosong untuk mengekalkan kata laluan semasa.</strong></p> : null}
             </div>
-
-            {account ? <label className="inline-flex items-center gap-2 text-sm font-bold text-slate-700"><input type="checkbox" checked={form.is_active} onChange={(event) => onChange("is_active", event.target.checked)} />Akaun aktif</label> : null}
           </div>
 
           <footer className="flex justify-end gap-3 border-t border-slate-200 bg-slate-50 px-7 py-4">
@@ -134,7 +132,7 @@ export default function SuperAdminAdministratorsPanel() {
 
   const openEditModal = (account) => {
     setEditingAccount(account);
-    setForm({ ...blankForm, full_name: account.first_name || "", email: account.email || "", mobile_number: account.mobile_number || "", department: account.department === "HRM" ? departmentOptions[0] : account.department || departmentOptions[0], is_active: account.is_active ?? true, password: "", confirm_password: "" });
+    setForm({ ...blankForm, full_name: account.first_name || "", email: account.email || "", mobile_number: account.mobile_number || "", department: account.department === "HRM" ? departmentOptions[0] : account.department || departmentOptions[0], password: "", confirm_password: "" });
     setFormError("");
     setModalMode("edit");
   };
@@ -156,7 +154,7 @@ export default function SuperAdminAdministratorsPanel() {
     }
     setSaving(true);
     try {
-      const payload = { full_name: form.full_name, email: form.email, mobile_number: form.mobile_number, department: form.department, role: "admin", is_active: form.is_active };
+      const payload = { full_name: form.full_name, email: form.email, mobile_number: form.mobile_number, department: form.department };
       if (form.password) payload.password = form.password;
       await apiRequest(editingAccount ? `/auth/admin-accounts/${editingAccount.id}/` : "/auth/admin-accounts/", { method: editingAccount ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
       closeModal();

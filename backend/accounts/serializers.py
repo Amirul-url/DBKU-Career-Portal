@@ -222,7 +222,7 @@ class SuperAdminAccountSerializer(serializers.ModelSerializer):
             "last_login",
             "password",
         )
-        read_only_fields = ("id", "last_login", "role")
+        read_only_fields = ("id", "last_login", "role", "is_active")
 
     def validate_email(self, value):
         email = value.strip().lower()
@@ -242,7 +242,7 @@ class SuperAdminAccountSerializer(serializers.ModelSerializer):
         password = validated_data.pop("password", "")
         full_name = validated_data.pop("full_name", "").strip()
         email = validated_data["email"]
-        user = User(username=email, is_staff=True, role="admin", **validated_data)
+        user = User(username=email, is_staff=True, is_active=True, role="admin", **validated_data)
         if full_name:
             user.first_name = full_name
         user.set_password(password)
