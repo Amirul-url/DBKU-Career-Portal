@@ -196,10 +196,6 @@ export default function LandingPage() {
                   {selectedOpportunity.location}
                 </span>
                 <span>
-                  <Icon>payments</Icon>
-                  {selectedOpportunity.salary}
-                </span>
-                <span>
                   <Icon>event</Icon>
                   Tarikh tutup: {selectedOpportunity.closing}
                 </span>
