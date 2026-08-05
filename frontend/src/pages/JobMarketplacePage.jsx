@@ -70,7 +70,6 @@ export default function LandingPage() {
   const [opportunities, setOpportunities] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [search, setSearch] = useState("");
-  const [locationSearch, setLocationSearch] = useState("");
   const [extraFilter, setExtraFilter] = useState("all");
   const employmentFilter = isInternshipPage
     ? extraFilter === "Latihan Industri" ? extraFilter : "all"
@@ -89,13 +88,11 @@ export default function LandingPage() {
   }, [vacancyType]);
   const filteredOpportunities = useMemo(() => {
     const keyword = search.trim().toLowerCase();
-    const locationKeyword = locationSearch.trim().toLowerCase();
     return opportunities.filter((job) =>
       (!keyword || `${job.title} ${job.department} ${job.division} ${job.summary}`.toLowerCase().includes(keyword)) &&
-      (!locationKeyword || (job.location || "").toLowerCase().includes(locationKeyword)) &&
       (employmentFilter === "all" || job.employment_type === employmentFilter),
     ).map(toOpportunity);
-  }, [employmentFilter, locationSearch, opportunities, search]);
+  }, [employmentFilter, opportunities, search]);
   const selectedOpportunity = useMemo(
     () => filteredOpportunities.find((item) => item.id === selectedId) ?? filteredOpportunities[0] ?? null,
     [filteredOpportunities, selectedId],
@@ -131,10 +128,6 @@ export default function LandingPage() {
           <label>
             <Icon>search</Icon>
             <input value={search} onChange={(event) => setSearch(event.target.value)} type="search" placeholder="Cari mengikut jawatan, kata kunci atau jabatan" />
-          </label>
-          <label>
-            <Icon>location_on</Icon>
-            <input value={locationSearch} onChange={(event) => setLocationSearch(event.target.value)} type="search" placeholder="Lokasi atau unit kerja" />
           </label>
           <button type="button" onClick={() => setSelectedId(filteredOpportunities[0]?.id ?? null)}>
             Cari

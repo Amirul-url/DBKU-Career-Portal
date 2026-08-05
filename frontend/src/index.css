@@ -2584,7 +2584,7 @@ a {
 
 /* Applicant vacancy browser: compact two-pane layout. */
 .market-reference-shell { max-width: 1420px; padding-top: 26px; }
-.market-reference-shell .market-search-panel { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .78fr) 94px 270px; grid-template-rows: auto auto; gap: 10px 12px; border-radius: 0; box-shadow: none; padding: 18px; }
+.market-reference-shell .market-search-panel { display: grid; grid-template-columns: minmax(0, 1fr) 94px 270px; grid-template-rows: auto auto; gap: 10px 12px; border-radius: 0; box-shadow: none; padding: 18px; }
 .market-search-label { grid-column: 1 / -1; color: #173b2b; font-size: 15px; font-weight: 850; }
 .market-reference-shell .market-search-panel label { height: 48px; border-color: #cfd8d3; border-radius: 7px; background: #fff; }
 .market-reference-shell .market-search-panel button { height: 48px; border-radius: 999px; padding: 0 16px; }
