@@ -211,6 +211,7 @@ export default function AdminHrmPage() {
         requirements: "",
         status: "open",
       });
+      setActiveMenu("Urus Jawatan");
       setPanel("Urus Jawatan");
       loadData();
     } catch (error) {
@@ -696,6 +697,36 @@ export default function AdminHrmPage() {
               </div>
             </>
           )}
+          {panel === "Urus Jawatan" && (
+            <>
+              <div className="hrm-heading">
+                <div>
+                  <span className="hrm-eyebrow">URUS JAWATAN</span>
+                  <h1>Senarai jawatan</h1>
+                  <p>Semak semua iklan jawatan yang telah disiarkan.</p>
+                </div>
+                <button
+                  className="hrm-primary"
+                  type="button"
+                  onClick={() => {
+                    setActiveMenu("Tambah Jawatan");
+                    setPanel("Tambah Jawatan");
+                  }}
+                >
+                  <Icon>add_circle</Icon>Tambah jawatan
+                </button>
+              </div>
+              <section className="hrm-card hrm-table-card">
+                <header>
+                  <div>
+                    <h2>Jawatan disiarkan</h2>
+                    <p>{jobs.length} rekod jawatan</p>
+                  </div>
+                </header>
+                <JobManagementTable jobs={jobs} applications={applications} />
+              </section>
+            </>
+          )}
           {panel === "Permohonan" && (
             <>
               <div className="hrm-heading">
@@ -737,6 +768,54 @@ function Stat({ icon, label, value, tone }) {
         <strong>{value}</strong>
       </div>
     </article>
+  );
+}
+function JobManagementTable({ jobs, applications }) {
+  if (!jobs.length)
+    return <p className="hrm-empty">Belum ada jawatan disiarkan.</p>;
+
+  return (
+    <div className="hrm-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Bil.</th>
+            <th>Jawatan</th>
+            <th>Bahagian</th>
+            <th>Tarikh siar</th>
+            <th>Tarikh tutup</th>
+            <th>Pemohon</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {jobs.map((job, index) => {
+            const applicantCount = applications.filter(
+              (application) => application.vacancy === job.id,
+            ).length;
+            const isOpen = job.status === "open";
+            return (
+              <tr key={job.id}>
+                <td>{index + 1}</td>
+                <td>
+                  <strong>{job.title}</strong>
+                  <small>{job.location}</small>
+                </td>
+                <td>{job.division || "—"}</td>
+                <td>{dateValue(job.created_at)}</td>
+                <td>{dateValue(job.closing_date)}</td>
+                <td>{applicantCount}</td>
+                <td>
+                  <span className={`hrm-badge ${isOpen ? "green" : "slate"}`}>
+                    {isOpen ? "Aktif" : "Ditutup"}
+                  </span>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
   );
 }
 function ApplicationTable({ applications, onReview, compact }) {
