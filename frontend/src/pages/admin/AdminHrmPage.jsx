@@ -67,7 +67,7 @@ const dateValue = (value) =>
   value
     ? new Date(value).toLocaleDateString("ms-MY", {
         day: "2-digit",
-        month: "short",
+        month: "long",
         year: "numeric",
       })
     : "—";
