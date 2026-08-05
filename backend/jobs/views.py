@@ -1,3 +1,5 @@
+from django.db.models import Q
+from django.utils import timezone
 from rest_framework import viewsets
 
 from .models import Vacancy
@@ -14,7 +16,9 @@ class VacancyViewSet(viewsets.ModelViewSet):
         queryset = super().get_queryset()
         user = self.request.user
         if not user.is_authenticated or user.role == "applicant":
-            queryset = queryset.filter(status="open")
+            queryset = queryset.filter(status="open").filter(
+                Q(closing_date__isnull=True) | Q(closing_date__gte=timezone.localdate())
+            )
 
         vacancy_type = self.request.query_params.get("type")
         search = self.request.query_params.get("search")

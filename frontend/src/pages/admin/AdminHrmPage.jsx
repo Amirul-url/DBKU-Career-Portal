@@ -797,7 +797,12 @@ function JobManagementTable({ jobs, applications }) {
             const applicantCount = applications.filter(
               (application) => application.vacancy === job.id,
             ).length;
-            const isOpen = job.status === "open";
+            const isOpen = job.is_open ?? job.status === "open";
+            const statusText = isOpen
+              ? "Aktif"
+              : job.status === "open"
+                ? "Tamat tempoh"
+                : "Ditutup";
             return (
               <tr key={job.id}>
                 <td>{index + 1}</td>
@@ -807,7 +812,7 @@ function JobManagementTable({ jobs, applications }) {
                 <td>{applicantCount}</td>
                 <td>
                   <span className={`hrm-badge ${isOpen ? "green" : "slate"}`}>
-                    {isOpen ? "Aktif" : "Ditutup"}
+                    {statusText}
                   </span>
                 </td>
               </tr>
