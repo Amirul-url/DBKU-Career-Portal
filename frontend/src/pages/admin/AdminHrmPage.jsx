@@ -322,11 +322,6 @@ export default function AdminHrmPage() {
           )}
           {panel === "Tambah Jawatan" && (
             <form className="vacancy-notice-form" onSubmit={submitJob}>
-              <header className="vacancy-notice-head">
-                <h1>DEWAN BANDARAYA KUCHING UTARA</h1>
-                <h2>Jawatan Kosong</h2>
-              </header>
-              <p className="vacancy-notice-intro">Permohonan dipelawa daripada Warganegara Malaysia yang bermastautin di Sarawak dan mempunyai kelayakan untuk mengisi jawatan berikut:</p>
               <label className="vacancy-notice-number">Bil. Iklan<input value={jobForm.advertisement_no || ""} onChange={(event) => setJobForm({ ...jobForm, advertisement_no: event.target.value })} /></label>
               <div className="vacancy-notice-grid">
                 <section className="vacancy-notice-section"><h3>1. Butiran Jawatan</h3><label>a) Jawatan<input required value={jobForm.title} onChange={(event) => setJobForm({ ...jobForm, title: event.target.value })} /></label><label>b) Jabatan<input required value={jobForm.department} onChange={(event) => setJobForm({ ...jobForm, department: event.target.value })} /></label><label>c) Kumpulan Perkhidmatan<input value={jobForm.service_group || ""} onChange={(event) => setJobForm({ ...jobForm, service_group: event.target.value })} /></label><label>d) Klasifikasi Perkhidmatan<input value={jobForm.service_classification || ""} onChange={(event) => setJobForm({ ...jobForm, service_classification: event.target.value })} /></label><label>e) Taraf Jawatan<input value={jobForm.employment_type} onChange={(event) => setJobForm({ ...jobForm, employment_type: event.target.value })} /></label><h3>2. Jadual Gaji</h3><div className="vacancy-notice-two"><label>Gaji Minimum (RM)<input type="number" min="0" step="0.01" value={jobForm.minimum_salary || ""} onChange={(event) => setJobForm({ ...jobForm, minimum_salary: event.target.value })} /></label><label>Gaji Maksimum (RM)<input type="number" min="0" step="0.01" value={jobForm.maximum_salary || ""} onChange={(event) => setJobForm({ ...jobForm, maximum_salary: event.target.value })} /></label></div><h3>3. Antara Skop Tugas Utama</h3><textarea value={jobForm.responsibilities || ""} onChange={(event) => setJobForm({ ...jobForm, responsibilities: event.target.value })} /></section>
