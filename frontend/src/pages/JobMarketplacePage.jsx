@@ -192,6 +192,14 @@ export default function LandingPage() {
 
               <div className="market-detail-meta">
                 <span>
+                  <Icon>work</Icon>
+                  Taraf jawatan: {selectedOpportunity.type}
+                </span>
+                <span>
+                  <Icon>apartment</Icon>
+                  Bahagian: {selectedOpportunity.department}
+                </span>
+                <span>
                   <Icon>location_on</Icon>
                   {selectedOpportunity.location}
                 </span>
