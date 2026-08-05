@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { apiRequest, fetchAuthenticatedBlob } from "../lib/authApi";
+import { apiRequest } from "../lib/authApi";
 
 const dateLabel = (value) =>
   value
@@ -12,25 +12,6 @@ const dateLabel = (value) =>
     : "Tidak dinyatakan";
 const listItems = (value) =>
   value ? value.split("\n").filter(Boolean) : ["Rujuk dokumen rasmi untuk butiran lanjut."];
-const fileNameFromUrl = (url, fallback = "Dokumen Rasmi DBKU.pdf") => {
-  if (!url) return fallback;
-  try {
-    const pathname = new URL(url, window.location.origin).pathname;
-    const name = pathname.split("/").filter(Boolean).pop();
-    return name ? decodeURIComponent(name) : fallback;
-  } catch {
-    return fallback;
-  }
-};
-const readableDocumentName = (name) => {
-  const fallback = "Dokumen Rasmi DBKU.pdf";
-  if (!name) return fallback;
-  const decodedName = decodeURIComponent(name).split("/").pop() || fallback;
-  const extensionIndex = decodedName.lastIndexOf(".");
-  const baseName = extensionIndex >= 0 ? decodedName.slice(0, extensionIndex) : decodedName;
-  const extension = extensionIndex >= 0 ? decodedName.slice(extensionIndex) : "";
-  return `${baseName.replace(/_[A-Za-z0-9]{7}$/, "").replaceAll("_", " ")}${extension}`;
-};
 const dbkuDivisionCodes = {
   "Bahagian Audit Dalaman": "AUD",
   "Bahagian Projek Khas & Fasiliti Awam": "SPF",
@@ -118,7 +99,6 @@ export default function LandingPage() {
   const [selectedId, setSelectedId] = useState(null);
   const [search, setSearch] = useState("");
   const [extraFilter, setExtraFilter] = useState("all");
-  const documentBlobUrls = useRef([]);
   const employmentFilter = isInternshipPage
     ? extraFilter === "Latihan Industri" ? extraFilter : "all"
     : ["Tetap", "Kontrak"].includes(extraFilter) ? extraFilter : "all";
@@ -134,9 +114,6 @@ export default function LandingPage() {
       .catch(() => setError("Senarai jawatan tidak dapat dimuatkan buat masa ini."))
       .finally(() => setLoading(false));
   }, [vacancyType]);
-  useEffect(() => () => {
-    documentBlobUrls.current.forEach((url) => URL.revokeObjectURL(url));
-  }, []);
   const filteredOpportunities = useMemo(() => {
     const keyword = search.trim().toLowerCase();
     return opportunities.filter((job) =>
@@ -148,35 +125,6 @@ export default function LandingPage() {
     () => filteredOpportunities.find((item) => item.id === selectedId) ?? filteredOpportunities[0] ?? null,
     [filteredOpportunities, selectedId],
   );
-  const handleDocumentOpen = async (event) => {
-    event.preventDefault();
-    const documentUrl = selectedOpportunity?.official_document;
-    if (!documentUrl) return;
-
-    const viewerWindow = window.open("", "_blank");
-
-    try {
-      const blob = await fetchAuthenticatedBlob(documentUrl);
-      const documentName = readableDocumentName(
-        selectedOpportunity.official_document_name || fileNameFromUrl(documentUrl),
-      );
-      const documentFile = new File([blob], documentName, { type: blob.type || "application/pdf" });
-      const objectUrl = URL.createObjectURL(documentFile);
-      documentBlobUrls.current.push(objectUrl);
-
-      if (viewerWindow) {
-        viewerWindow.opener = null;
-        viewerWindow.location.replace(objectUrl);
-      } else {
-        window.open(objectUrl, "_blank", "noopener,noreferrer");
-      }
-    } catch {
-      if (viewerWindow) {
-        viewerWindow.close();
-      }
-      window.open(documentUrl, "_blank", "noopener,noreferrer");
-    }
-  };
 
   return (
     <div className="market-page">
@@ -293,8 +241,9 @@ export default function LandingPage() {
                 <span>Untuk mengetahui lebih lanjut, sila klik di sini:</span>
                 {selectedOpportunity.official_document && (
                   <a
-                    href={selectedOpportunity.official_document}
-                    onClick={handleDocumentOpen}
+                    href={selectedOpportunity.official_document_view_url || selectedOpportunity.official_document}
+                    target="_blank"
+                    rel="noreferrer"
                   >
                     Muat turun dokumen
                   </a>
