@@ -2561,9 +2561,8 @@ a {
 .market-detail-document {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   flex-wrap: wrap;
-  gap: 14px;
+  gap: 4px;
   margin-top: 22px;
   border-top: 1px solid #e8efeb;
   padding-top: 22px;
@@ -2573,22 +2572,14 @@ a {
 }
 
 .market-detail-document a {
-  display: inline-flex;
-  min-height: 42px;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border-radius: 8px;
-  background: var(--primary-strong);
-  color: #ffffff;
-  padding: 0 16px;
-  font-size: 14px;
+  color: var(--primary-strong);
   font-weight: 850;
-  text-decoration: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .market-detail-document a:hover {
-  background: #08733d;
+  color: #08733d;
 }
 
 .market-detail-actions {

@@ -241,7 +241,6 @@ export default function LandingPage() {
                 <span>Untuk mengetahui lebih lanjut, sila klik di sini:</span>
                 {selectedOpportunity.official_document && (
                   <a href={selectedOpportunity.official_document} target="_blank" rel="noreferrer">
-                    <Icon>download</Icon>
                     Muat turun dokumen
                   </a>
                 )}
