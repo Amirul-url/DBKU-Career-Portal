@@ -4,11 +4,19 @@ from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 from django.utils import timezone
 from django.utils.dateparse import parse_date
+from django.db import DatabaseError
 from django.db.models import Q
 
 from .models import AccountActivity, ApplicantProfileData, User
 from .serializers import AccountActivitySerializer, InternalHrmAccountSerializer, LoginSerializer, RegisterSerializer, SuperAdminAccountSerializer, UserSerializer
 from .services import build_auth_response
+
+
+def safe_record_activity(user, action, duration_seconds=0):
+    try:
+        AccountActivity.objects.create(user=user, action=action, duration_seconds=duration_seconds)
+    except DatabaseError:
+        pass
 
 
 @api_view(["POST"])
@@ -29,7 +37,7 @@ def login_view(request):
     now = timezone.now()
     user.last_login = now
     user.save(update_fields=["last_login"])
-    AccountActivity.objects.create(user=user, action="login", duration_seconds=0)
+    safe_record_activity(user, "login")
     return Response(build_auth_response(user, request))
 
 
@@ -38,12 +46,15 @@ def logout_view(request):
     if not request.user.is_authenticated:
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    latest_login = AccountActivity.objects.filter(user=request.user, action="login").order_by("-created_at").first()
-    latest_logout = AccountActivity.objects.filter(user=request.user, action="logout").order_by("-created_at").first()
-    duration_seconds = 0
-    if latest_login and (not latest_logout or latest_logout.created_at < latest_login.created_at):
-        duration_seconds = max(0, int((timezone.now() - latest_login.created_at).total_seconds()))
-    AccountActivity.objects.create(user=request.user, action="logout", duration_seconds=duration_seconds)
+    try:
+        latest_login = AccountActivity.objects.filter(user=request.user, action="login").order_by("-created_at").first()
+        latest_logout = AccountActivity.objects.filter(user=request.user, action="logout").order_by("-created_at").first()
+        duration_seconds = 0
+        if latest_login and (not latest_logout or latest_logout.created_at < latest_login.created_at):
+            duration_seconds = max(0, int((timezone.now() - latest_login.created_at).total_seconds()))
+        safe_record_activity(request.user, "logout", duration_seconds)
+    except DatabaseError:
+        pass
     return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -127,15 +138,18 @@ def superadmin_account_activities_view(request):
     if request.user.role != "superadmin":
         return Response({"detail": "Akses Super Admin diperlukan."}, status=status.HTTP_403_FORBIDDEN)
 
-    queryset = AccountActivity.objects.select_related("user").all()
-    selected_date = parse_date(request.query_params.get("date", ""))
-    if selected_date:
-        queryset = queryset.filter(created_at__date=selected_date)
     try:
-        limit = min(max(int(request.query_params.get("limit", 5)), 1), 50)
-    except ValueError:
-        limit = 5
-    return Response(AccountActivitySerializer(queryset[:limit], many=True).data)
+        queryset = AccountActivity.objects.select_related("user").all()
+        selected_date = parse_date(request.query_params.get("date", ""))
+        if selected_date:
+            queryset = queryset.filter(created_at__date=selected_date)
+        try:
+            limit = min(max(int(request.query_params.get("limit", 5)), 1), 50)
+        except ValueError:
+            limit = 5
+        return Response(AccountActivitySerializer(queryset[:limit], many=True).data)
+    except DatabaseError:
+        return Response([])
 
 
 @api_view(["GET", "POST"])
