@@ -98,7 +98,7 @@ export default function AdminHrmPage() {
   const [jobForm, setJobForm] = useState({
     title: "",
     vacancy_type: "job",
-    department: "",
+    department: "Dewan Bandaraya Kuching Utara",
     division: "",
     location: "",
     advertisement_no: "",
@@ -179,7 +179,7 @@ export default function AdminHrmPage() {
       setJobForm({
         title: "",
         vacancy_type: "job",
-        department: "",
+        department: "Dewan Bandaraya Kuching Utara",
         division: "",
         location: "",
         employment_type: "",
@@ -332,7 +332,7 @@ export default function AdminHrmPage() {
             <form className="simple-job-form" onSubmit={submitJob}>
               <header><span className="hrm-eyebrow">TAMBAH JAWATAN</span><h1>Siarkan jawatan baharu</h1><p>Masukkan ringkasan penting. Maklumat penuh disediakan melalui dokumen rasmi untuk dimuat turun pemohon.</p></header>
               <label>Tajuk jawatan<input required value={jobForm.title} onChange={(event) => setJobForm({ ...jobForm, title: event.target.value })} placeholder="cth. Penolong Pegawai Penerangan Gred S5" /></label>
-              <label>Bahagian<select required value={jobForm.division || ""} onChange={(event) => setJobForm({ ...jobForm, division: event.target.value })}><option value="">Pilih bahagian DBKU</option>{dbkuDepartments.map((division) => <option key={division} value={division}>{division}</option>)}</select></label>
+              <label>Bahagian<select required value={jobForm.division || ""} onChange={(event) => setJobForm({ ...jobForm, division: event.target.value })}><option value="">Sila pilih</option>{dbkuDepartments.map((division) => <option key={division} value={division}>{division}</option>)}</select></label>
               <label>Jabatan<input required value={jobForm.department} onChange={(event) => setJobForm({ ...jobForm, department: event.target.value })} placeholder="cth. Jabatan Pentadbiran" /></label>
               <label>Lokasi<input value={jobForm.location || ""} onChange={(event) => setJobForm({ ...jobForm, location: event.target.value })} placeholder="cth. Petra Jaya, Kuching" /></label>
               <label>Jenis lantikan<select value={jobForm.employment_type} onChange={(event) => setJobForm({ ...jobForm, employment_type: event.target.value })}><option value="">Pilih jenis</option><option>Tetap</option><option>Kontrak</option><option>Latihan Industri</option></select></label>
