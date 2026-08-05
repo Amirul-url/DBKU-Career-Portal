@@ -2582,6 +2582,37 @@ a {
   background: #ecfdf5;
 }
 
+/* Applicant vacancy browser: compact two-pane layout. */
+.market-reference-shell { max-width: 1420px; padding-top: 26px; }
+.market-reference-shell .market-search-panel { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .78fr) 94px 270px; grid-template-rows: auto auto; gap: 10px 12px; border-radius: 0; box-shadow: none; padding: 18px; }
+.market-search-label { grid-column: 1 / -1; color: #173b2b; font-size: 15px; font-weight: 850; }
+.market-reference-shell .market-search-panel label { height: 48px; border-color: #cfd8d3; border-radius: 7px; background: #fff; }
+.market-reference-shell .market-search-panel button { height: 48px; border-radius: 999px; padding: 0 16px; }
+.market-extra-filter { height: 48px; border: 1px solid #cfd8d3; border-radius: 7px; background: #fff; color: #254334; padding: 0 14px; font: inherit; font-size: 14px; font-weight: 700; }
+.market-vacancy-count { margin: 20px 0 16px; color: #173b2b; font-size: 18px; font-weight: 800; }
+.market-vacancy-count strong { color: #078044; }
+.market-reference-shell .market-layout { grid-template-columns: minmax(340px, .63fr) minmax(0, 1fr); gap: 30px; margin-top: 0; }
+.market-reference-shell .market-results { border: 0; border-radius: 0; background: transparent; box-shadow: none; padding: 0; }
+.market-reference-shell .market-results-head { display: none; }
+.market-reference-shell .market-job-list { gap: 14px; }
+.market-reference-shell .market-job-card { min-height: 0; grid-template-columns: 54px minmax(0, 1fr); border-color: #d7e0db; border-radius: 8px; box-shadow: none; padding: 18px; }
+.market-reference-shell .market-job-card.selected { border: 2px solid #16a34a; background: #fff; }
+.market-reference-shell .market-job-badge { grid-column: 1 / -1; grid-row: 1; justify-self: start; margin-bottom: 6px; }
+.market-reference-shell .market-job-icon { grid-row: 2; }
+.market-reference-shell .market-job-main { grid-row: 2; }
+.market-reference-shell .market-job-top { display: block; }
+.market-reference-shell .market-job-top small { display: block; margin-top: 8px; }
+.market-reference-shell .market-job-summary { display: none; }
+.market-reference-shell .market-job-meta { display: none; }
+.market-reference-shell .market-detail { position: sticky; top: 94px; border-radius: 8px; box-shadow: none; }
+.market-reference-shell .market-detail-icon { height: 112px; background: #effaf4; }
+.market-reference-shell .market-detail-body { padding: 28px; }
+.market-reference-shell .market-detail h2 { font-size: 28px; }
+.market-reference-shell .market-detail-meta { grid-template-columns: 1fr 1fr; gap: 18px 28px; }
+.market-reference-shell .market-detail-actions { grid-template-columns: minmax(0, 1fr) auto auto; }
+.market-reference-shell .market-detail-actions a { padding: 0 14px; }
+@media (max-width: 980px) { .market-reference-shell .market-search-panel { grid-template-columns: 1fr 1fr; } .market-reference-shell .market-search-panel button, .market-extra-filter { grid-column: span 1; } .market-reference-shell .market-layout { grid-template-columns: 1fr; } .market-reference-shell .market-detail { position: static; } }
+
 .auth-page {
   min-height: 100vh;
   background:

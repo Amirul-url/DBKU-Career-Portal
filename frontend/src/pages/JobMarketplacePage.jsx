@@ -83,11 +83,7 @@ export default function LandingPage() {
   const [selectedId, setSelectedId] = useState(null);
   const [search, setSearch] = useState("");
   const [locationSearch, setLocationSearch] = useState("");
-  const [selectedFilters, setSelectedFilters] = useState({
-    category: "Semua",
-    type: "Semua",
-    department: "Semua",
-  });
+  const [extraFilter, setExtraFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   useEffect(() => {
@@ -105,26 +101,14 @@ export default function LandingPage() {
     const locationKeyword = locationSearch.trim().toLowerCase();
     return opportunities.filter((job) =>
       (!keyword || `${job.title} ${job.department} ${job.division} ${job.summary}`.toLowerCase().includes(keyword)) &&
-      (!locationKeyword || (job.location || "").toLowerCase().includes(locationKeyword)),
-    ).filter((job) =>
-      (selectedFilters.category === "Semua" ||
-        (selectedFilters.category === "Jawatan" && job.vacancy_type === "job") ||
-        (selectedFilters.category === "Latihan Industri" && job.vacancy_type === "internship")) &&
-      (selectedFilters.type === "Semua" || job.employment_type === selectedFilters.type) &&
-      (selectedFilters.department === "Semua" || (job.division || job.department) === selectedFilters.department),
+      (!locationKeyword || (job.location || "").toLowerCase().includes(locationKeyword)) &&
+      (extraFilter === "all" || job.vacancy_type === extraFilter),
     ).map(toOpportunity);
-  }, [locationSearch, opportunities, search, selectedFilters]);
+  }, [extraFilter, locationSearch, opportunities, search]);
   const selectedOpportunity = useMemo(
     () => filteredOpportunities.find((item) => item.id === selectedId) ?? filteredOpportunities[0] ?? null,
     [filteredOpportunities, selectedId],
   );
-  const jobCount = opportunities.filter((job) => job.vacancy_type === "job").length;
-  const internshipCount = opportunities.filter((job) => job.vacancy_type === "internship").length;
-  const marketFilters = useMemo(() => [
-    ["category", "Jenis Peluang", ["Semua", "Jawatan", "Latihan Industri"]],
-    ["type", "Jenis Kerja", ["Semua", "Tetap", "Kontrak", "Latihan Industri"]],
-    ["department", "Bahagian", ["Semua", ...new Set(opportunities.map((job) => job.division || job.department).filter(Boolean))]],
-  ], [opportunities]);
 
   return (
     <div className="market-page">
@@ -150,33 +134,9 @@ export default function LandingPage() {
         </nav>
       </header>
 
-      <main className="market-shell">
-        <section className="market-intro" aria-labelledby="market-title">
-          <div>
-            <span className="market-eyebrow">Portal Kerjaya dan Latihan Industri DBKU</span>
-            <h1 id="market-title">Cari peluang kerjaya dan latihan industri DBKU.</h1>
-            <p>
-              Terokai kekosongan semasa, semak syarat jawatan, dan mulakan permohonan
-              dalam satu portal rasmi Dewan Bandaraya Kuching Utara.
-            </p>
-          </div>
-          <div className="market-intro-stats" aria-label="Ringkasan portal">
-            <span>
-              <strong>{jobCount}</strong>
-              Kekosongan
-            </span>
-            <span>
-              <strong>{new Set(opportunities.map((job) => job.division || job.department)).size}</strong>
-              Bahagian
-            </span>
-            <span>
-              <strong>{internshipCount}</strong>
-              Latihan Industri
-            </span>
-          </div>
-        </section>
-
+      <main className="market-shell market-reference-shell">
         <section className="market-search-panel" aria-label="Cari peluang">
+          <strong className="market-search-label">Cari Pekerjaan</strong>
           <label>
             <Icon>search</Icon>
             <input value={search} onChange={(event) => setSearch(event.target.value)} type="search" placeholder="Cari mengikut jawatan, kata kunci atau jabatan" />
@@ -186,46 +146,23 @@ export default function LandingPage() {
             <input value={locationSearch} onChange={(event) => setLocationSearch(event.target.value)} type="search" placeholder="Lokasi atau unit kerja" />
           </label>
           <button type="button" onClick={() => setSelectedId(filteredOpportunities[0]?.id ?? null)}>
-            <Icon>manage_search</Icon>
             Cari
           </button>
+          <select className="market-extra-filter" aria-label="Pilihan tambahan" value={extraFilter} onChange={(event) => setExtraFilter(event.target.value)}>
+            <option value="all">Pilihan Tambahan</option>
+            <option value="job">Jawatan</option>
+            <option value="internship">Latihan Industri</option>
+          </select>
         </section>
 
+        <p className="market-vacancy-count"><strong>{filteredOpportunities.length}</strong> Kekosongan Jawatan</p>
         <section className="market-layout" id="jobs">
-          <aside className="market-filters" aria-label="Tapisan">
-            <div className="market-panel-title">
-              <Icon>tune</Icon>
-              <strong>Tapisan</strong>
-            </div>
-
-            {marketFilters.map(([key, title, values]) => (
-              <div className="market-filter-group" key={key}>
-                <h2>{title}</h2>
-                {values.map((value) => (
-                  <label key={value}>
-                    <input
-                      type="checkbox"
-                      checked={selectedFilters[key] === value}
-                      onChange={() => setSelectedFilters((current) => ({ ...current, [key]: value }))}
-                    />
-                    <span>{value}</span>
-                  </label>
-                ))}
-              </div>
-            ))}
-          </aside>
-
           <section className="market-results" aria-labelledby="results-title">
             <div className="market-results-head">
               <div>
-                <h2 id="results-title">Peluang Disyorkan</h2>
-                <p>Memaparkan {filteredOpportunities.length} kekosongan semasa DBKU</p>
+                <h2 id="results-title">Senarai jawatan</h2>
+                <p>Pilih satu jawatan untuk melihat butiran penuh.</p>
               </div>
-              <select aria-label="Susun keputusan" defaultValue="recent">
-                <option value="recent">Terkini</option>
-                <option value="closing">Tarikh tutup terdekat</option>
-                <option value="salary">Julat gaji</option>
-              </select>
             </div>
 
             <div className="market-job-list">
