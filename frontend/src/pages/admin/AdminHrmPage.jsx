@@ -98,7 +98,7 @@ export default function AdminHrmPage() {
     advertisement_no: "",
     service_group: "",
     service_classification: "",
-    employment_type: "Tetap",
+    employment_type: "",
     grade: "",
     minimum_salary: "",
     maximum_salary: "",
@@ -174,7 +174,7 @@ export default function AdminHrmPage() {
         title: "",
         vacancy_type: "job",
         department: "",
-        employment_type: "Tetap",
+        employment_type: "",
         grade: "",
         closing_date: "",
         summary: "",
@@ -319,6 +319,23 @@ export default function AdminHrmPage() {
               {notice}
               <button onClick={() => setNotice("")}>×</button>
             </div>
+          )}
+          {panel === "Tambah Jawatan" && (
+            <form className="vacancy-notice-form" onSubmit={submitJob}>
+              <header className="vacancy-notice-head">
+                <img src="/logo-dbku.png" alt="Logo DBKU" />
+                <h1>DEWAN BANDARAYA KUCHING UTARA</h1>
+                <h2>Jawatan Kosong</h2>
+              </header>
+              <p className="vacancy-notice-intro">Permohonan dipelawa daripada Warganegara Malaysia yang bermastautin di Sarawak dan mempunyai kelayakan untuk mengisi jawatan berikut:</p>
+              <label className="vacancy-notice-number">Bil. Iklan<input value={jobForm.advertisement_no || ""} onChange={(event) => setJobForm({ ...jobForm, advertisement_no: event.target.value })} /></label>
+              <div className="vacancy-notice-grid">
+                <section className="vacancy-notice-section"><h3>1. Butiran Jawatan</h3><label>a) Jawatan<input required value={jobForm.title} onChange={(event) => setJobForm({ ...jobForm, title: event.target.value })} /></label><label>b) Jabatan<input required value={jobForm.department} onChange={(event) => setJobForm({ ...jobForm, department: event.target.value })} /></label><label>c) Kumpulan Perkhidmatan<input value={jobForm.service_group || ""} onChange={(event) => setJobForm({ ...jobForm, service_group: event.target.value })} /></label><label>d) Klasifikasi Perkhidmatan<input value={jobForm.service_classification || ""} onChange={(event) => setJobForm({ ...jobForm, service_classification: event.target.value })} /></label><label>e) Taraf Jawatan<input value={jobForm.employment_type} onChange={(event) => setJobForm({ ...jobForm, employment_type: event.target.value })} /></label><h3>2. Jadual Gaji</h3><div className="vacancy-notice-two"><label>Gaji Minimum (RM)<input type="number" min="0" step="0.01" value={jobForm.minimum_salary || ""} onChange={(event) => setJobForm({ ...jobForm, minimum_salary: event.target.value })} /></label><label>Gaji Maksimum (RM)<input type="number" min="0" step="0.01" value={jobForm.maximum_salary || ""} onChange={(event) => setJobForm({ ...jobForm, maximum_salary: event.target.value })} /></label></div><h3>3. Antara Skop Tugas Utama</h3><textarea value={jobForm.responsibilities || ""} onChange={(event) => setJobForm({ ...jobForm, responsibilities: event.target.value })} /></section>
+                <section className="vacancy-notice-section"><h3>4. Syarat Lantikan</h3><textarea value={jobForm.requirements || ""} onChange={(event) => setJobForm({ ...jobForm, requirements: event.target.value })} /><h3>Cara Memohon</h3><textarea value={jobForm.application_instructions || ""} onChange={(event) => setJobForm({ ...jobForm, application_instructions: event.target.value })} /><h3>Catatan Am</h3><textarea value={jobForm.application_notes || ""} onChange={(event) => setJobForm({ ...jobForm, application_notes: event.target.value })} /><label>Tarikh Akhir Permohonan<input type="date" value={jobForm.closing_date} onChange={(event) => setJobForm({ ...jobForm, closing_date: event.target.value })} /></label></section>
+              </div>
+              <label className="vacancy-notice-upload">Dokumen rasmi / borang softcopy<input type="file" accept="application/pdf,image/png,image/jpeg" onChange={(event) => setDocumentFile(event.target.files?.[0] || null)} /></label>
+              <button className="hrm-primary" type="submit"><Icon>add_circle</Icon>Terbitkan iklan</button>
+            </form>
           )}
           {panel === "Papan Pemuka" && (
             <>
