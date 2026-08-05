@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
+import DocumentViewerPage from "./pages/DocumentViewerPage";
 import JobMarketplacePage from "./pages/JobMarketplacePage";
 import ApplicantLoginPage from "./pages/applicant/ApplicantLoginPage";
 import ApplicantProfilePage from "./pages/applicant/ApplicantProfilePage";
@@ -12,6 +13,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/landing" element={<LandingPage />} />
+      <Route path="/document-viewer" element={<DocumentViewerPage />} />
       <Route path="/jobs" element={<JobMarketplacePage />} />
       <Route path="/login" element={<ApplicantLoginPage />} />
       <Route path="/profile" element={<ApplicantProfilePage />} />
