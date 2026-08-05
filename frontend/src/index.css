@@ -5844,6 +5844,73 @@ body:has(.applicant-profile-page) {
   background: var(--profile-green-bright);
 }
 
+.superadmin-personal-mirror {
+  --profile-green: #16a34a;
+  --profile-green-bright: #22c55e;
+  --profile-mint: #86efac;
+  --profile-pale: #d1fae5;
+  --profile-header-surface: #ffffff;
+  --profile-surface: #f8fafc;
+  --profile-ink: #111827;
+  color: var(--profile-ink);
+}
+
+.superadmin-personal-mirror.is-editing {
+  border-color: var(--profile-green);
+}
+
+.superadmin-personal-mirror-body {
+  padding: 28px 32px 34px;
+}
+
+.superadmin-personal-mirror .personal-edit-form {
+  gap: 28px;
+  padding-top: 14px;
+}
+
+.superadmin-personal-mirror .personal-primary-button,
+.superadmin-personal-mirror .personal-outline-button,
+.superadmin-personal-mirror .personal-add-reference {
+  cursor: default;
+  text-decoration: none;
+}
+
+.superadmin-personal-mirror .personal-primary-button[aria-disabled="true"],
+.superadmin-personal-mirror .personal-outline-button[aria-disabled="true"],
+.superadmin-personal-mirror .personal-add-reference[aria-disabled="true"] {
+  pointer-events: none;
+}
+
+.superadmin-personal-mirror .personal-field input,
+.superadmin-personal-mirror .personal-field textarea,
+.superadmin-personal-mirror .personal-select-button,
+.superadmin-personal-mirror .personal-date-group input {
+  font-size: 15px;
+}
+
+.superadmin-personal-mirror .personal-field input[readonly],
+.superadmin-personal-mirror .personal-field textarea[readonly],
+.superadmin-personal-mirror .personal-date-group input[readonly] {
+  background: #ffffff;
+}
+
+.superadmin-personal-mirror .personal-radio-group input {
+  accent-color: var(--profile-green);
+}
+
+.superadmin-personal-mirror .personal-file-card {
+  min-height: 90px;
+  padding: 14px;
+}
+
+.superadmin-personal-mirror .personal-profile-tip header {
+  grid-template-columns: 18px minmax(0, 1fr);
+}
+
+.superadmin-personal-mirror .personal-reference-card {
+  background: var(--profile-surface);
+}
+
 .profile-confirm-overlay {
   position: fixed;
   inset: 0;
