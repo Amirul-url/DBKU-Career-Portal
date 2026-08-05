@@ -2608,7 +2608,6 @@ a {
 .market-reference-shell .market-detail { position: sticky; top: 94px; overflow: visible; border-radius: 10px; box-shadow: 0 12px 30px rgba(20, 56, 38, .06); }
 .market-reference-shell .market-detail-icon { position: absolute; z-index: 1; top: 24px; right: 26px; width: 54px; height: 54px; border: 1px solid #cdebd9; border-radius: 14px; background: #effaf4; }
 .market-reference-shell .market-detail-icon .material-symbols-outlined { font-size: 29px; }
-.market-reference-shell .market-detail-icon img { width: 40px; height: 40px; object-fit: contain; }
 .market-reference-shell .market-detail-body { padding: 30px 34px 34px; }
 .market-reference-shell .market-detail-body > .market-job-badge { margin-right: 74px; }
 .market-reference-shell .market-detail h2 { max-width: calc(100% - 74px); margin-top: 14px; font-size: 29px; line-height: 1.2; }

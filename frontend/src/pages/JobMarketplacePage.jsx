@@ -176,9 +176,17 @@ export default function LandingPage() {
 
           <aside className="market-detail" aria-label="Butiran peluang dipilih">
             {selectedOpportunity ? <>
-            <div className="market-detail-icon">
-              <img src="/logo-dbku.png" alt="Logo DBKU" />
-            </div>
+            {selectedOpportunity.image ? (
+              <img
+                src={selectedOpportunity.image}
+                alt="Meja kerja perancangan bandar"
+                className="market-detail-image"
+              />
+            ) : (
+              <div className="market-detail-icon">
+                <Icon>{selectedOpportunity.icon}</Icon>
+              </div>
+            )}
 
             <div className="market-detail-body">
               <span className="market-job-badge">{selectedOpportunity.category}</span>
@@ -195,16 +203,8 @@ export default function LandingPage() {
                   {selectedOpportunity.location}
                 </span>
                 <span>
-                  <Icon>work</Icon>
-                  {selectedOpportunity.type}
-                </span>
-                <span>
-                  <Icon>schedule</Icon>
-                  Waktu bekerja biasa
-                </span>
-                <span>
-                  <Icon>description</Icon>
-                  Rujuk dokumen rasmi
+                  <Icon>payments</Icon>
+                  {selectedOpportunity.salary}
                 </span>
                 <span>
                   <Icon>event</Icon>
