@@ -122,7 +122,7 @@ export default function LandingPage() {
   const internshipCount = opportunities.filter((job) => job.vacancy_type === "internship").length;
   const marketFilters = useMemo(() => [
     ["category", "Jenis Peluang", ["Semua", "Jawatan", "Latihan Industri"]],
-    ["type", "Jenis Kerja", ["Semua", ...new Set(opportunities.map((job) => job.employment_type).filter(Boolean))]],
+    ["type", "Jenis Kerja", ["Semua", "Tetap", "Kontrak", "Latihan Industri"]],
     ["department", "Bahagian", ["Semua", ...new Set(opportunities.map((job) => job.division || job.department).filter(Boolean))]],
   ], [opportunities]);
 
