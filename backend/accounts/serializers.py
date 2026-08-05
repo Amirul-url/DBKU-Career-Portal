@@ -215,7 +215,6 @@ class SuperAdminAccountSerializer(serializers.ModelSerializer):
             "full_name",
             "first_name",
             "email",
-            "mykad_number",
             "mobile_number",
             "department",
             "role",
@@ -223,7 +222,7 @@ class SuperAdminAccountSerializer(serializers.ModelSerializer):
             "last_login",
             "password",
         )
-        read_only_fields = ("id", "last_login")
+        read_only_fields = ("id", "last_login", "role")
 
     def validate_email(self, value):
         email = value.strip().lower()
@@ -234,11 +233,6 @@ class SuperAdminAccountSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Emel ini sudah digunakan.")
         return email
 
-    def validate_role(self, value):
-        if value != "admin":
-            raise serializers.ValidationError("Peranan mestilah Pentadbir.")
-        return value
-
     def validate(self, attrs):
         if not self.instance and not attrs.get("password"):
             raise serializers.ValidationError({"password": "Kata laluan diperlukan."})
@@ -248,7 +242,7 @@ class SuperAdminAccountSerializer(serializers.ModelSerializer):
         password = validated_data.pop("password", "")
         full_name = validated_data.pop("full_name", "").strip()
         email = validated_data["email"]
-        user = User(username=email, is_staff=True, **validated_data)
+        user = User(username=email, is_staff=True, role="admin", **validated_data)
         if full_name:
             user.first_name = full_name
         user.set_password(password)

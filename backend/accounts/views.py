@@ -119,7 +119,6 @@ def superadmin_admin_accounts_view(request):
         accounts = accounts.filter(
             Q(email__icontains=query)
             | Q(first_name__icontains=query)
-            | Q(mykad_number__icontains=query)
             | Q(mobile_number__icontains=query)
             | Q(department__icontains=query)
         )
