@@ -4,11 +4,6 @@ import { Icon } from "../applicant/ApplicantAuthShared";
 
 const ADMIN_PAGE_SIZE = 5;
 const departmentOptions = ["Pengurusan Sumber Manusia (HRM)"];
-const roleOptions = [
-  ["admin", "Pentadbir"],
-  ["hr", "Pegawai HR"],
-  ["reviewer", "Penyemak"],
-];
 const blankForm = {
   full_name: "",
   mykad_number: "",
@@ -24,14 +19,6 @@ const blankForm = {
 };
 
 const display = (value) => value || "-";
-const displayDepartment = (value) => value === "HRM" ? departmentOptions[0] : display(value);
-const roleLabel = (role) => roleOptions.find(([value]) => value === role)?.[1] || role || "-";
-const formatDateTime = (value) => {
-  if (!value) return "-";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "-";
-  return new Intl.DateTimeFormat("ms-MY", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(date);
-};
 
 function AdminAccountModal({ account, error, form, mode, onChange, onClose, onSave, saving }) {
   const isEdit = mode === "edit";
@@ -78,9 +65,7 @@ function AdminAccountModal({ account, error, form, mode, onChange, onClose, onSa
               </label>
               <label className={labelClass}>
                 Peranan
-                <select className={inputClass} value={form.role} onChange={(event) => onChange("role", event.target.value)}>
-                  {roleOptions.map(([value, label]) => <option value={value} key={value}>{label}</option>)}
-                </select>
+                <input className={inputClass} readOnly value="Pentadbir" />
               </label>
               <div className={labelClass}>
                 <span>Notifikasi</span>

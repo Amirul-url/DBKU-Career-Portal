@@ -198,7 +198,7 @@ class InternalHrmAccountSerializer(serializers.Serializer):
     def create(self, validated_data):
         full_name = validated_data["full_name"].strip()
         email = validated_data["email"]
-        user = User(username=email, email=email, first_name=full_name, role="hr", department="HRM", is_staff=True)
+        user = User(username=email, email=email, first_name=full_name, role="admin", department="Pengurusan Sumber Manusia (HRM)", is_staff=True)
         user.set_password(validated_data["password"])
         user.save()
         return user
@@ -235,8 +235,8 @@ class SuperAdminAccountSerializer(serializers.ModelSerializer):
         return email
 
     def validate_role(self, value):
-        if value not in {"admin", "hr", "reviewer"}:
-            raise serializers.ValidationError("Peranan pentadbir tidak sah.")
+        if value != "admin":
+            raise serializers.ValidationError("Peranan mestilah Pentadbir.")
         return value
 
     def validate(self, attrs):

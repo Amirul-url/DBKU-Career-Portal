@@ -2,7 +2,7 @@ from rest_framework import permissions
 
 
 class CandidateApplicationPermission(permissions.BasePermission):
-    staff_roles = {"admin", "hr", "reviewer", "superadmin"}
+    staff_roles = {"admin", "superadmin"}
 
     def has_object_permission(self, request, view, obj):
         if request.user.role in self.staff_roles:

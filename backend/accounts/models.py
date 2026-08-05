@@ -5,10 +5,8 @@ from django.db import models
 class User(AbstractUser):
     ROLE_CHOICES = (
         ("superadmin", "Super Admin"),
-        ("admin", "Admin"),
-        ("hr", "HR Officer"),
-        ("reviewer", "Reviewer"),
-        ("applicant", "Applicant"),
+        ("admin", "Pentadbir"),
+        ("applicant", "Pemohon"),
     )
 
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="applicant")

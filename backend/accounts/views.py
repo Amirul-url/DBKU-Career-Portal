@@ -114,7 +114,7 @@ def superadmin_admin_accounts_view(request):
 
     query = request.query_params.get("q", "").strip()
     department = request.query_params.get("department", "").strip()
-    accounts = User.objects.filter(role__in=("admin", "hr", "reviewer")).order_by("first_name", "email")
+    accounts = User.objects.filter(role="admin").order_by("first_name", "email")
     if query:
         accounts = accounts.filter(
             Q(email__icontains=query)
@@ -136,7 +136,7 @@ def superadmin_admin_account_detail_view(request, user_id):
     if request.user.role != "superadmin":
         return Response({"detail": "Akses Super Admin diperlukan."}, status=status.HTTP_403_FORBIDDEN)
 
-    account = User.objects.filter(id=user_id, role__in=("admin", "hr", "reviewer")).first()
+    account = User.objects.filter(id=user_id, role="admin").first()
     if not account:
         return Response({"detail": "Akaun pentadbir tidak ditemui."}, status=status.HTTP_404_NOT_FOUND)
 
