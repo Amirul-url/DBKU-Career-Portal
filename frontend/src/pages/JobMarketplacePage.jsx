@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { apiRequest } from "../lib/authApi";
+import { apiRequest, fetchAuthenticatedBlob } from "../lib/authApi";
 
 const dateLabel = (value) =>
   value
@@ -18,11 +18,29 @@ const escapeHtml = (value) =>
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;");
-const openAboutBlankDocument = (documentUrl) => {
-  const viewerWindow = window.open("about:blank", "_blank");
-  if (!viewerWindow) return false;
+const fileNameFromUrl = (url) => {
+  const fallback = "Dokumen rasmi DBKU.pdf";
+  if (!url) return fallback;
 
-  viewerWindow.opener = null;
+  try {
+    const pathname = new URL(url, window.location.origin).pathname;
+    return decodeURIComponent(pathname.split("/").pop() || fallback);
+  } catch {
+    return fallback;
+  }
+};
+const normalizedDocumentName = (name) =>
+  (name || "Dokumen rasmi DBKU.pdf")
+    .replace(/_[a-z0-9]{7,}(?=\.[^.]+$)/i, "")
+    .replaceAll("_", " ");
+const writeAboutBlankDocument = (viewerWindow, { source = "", documentName = "", errorMessage = "" } = {}) => {
+  const safeDocumentName = escapeHtml(documentName || "Dokumen rasmi DBKU.pdf");
+  const content = errorMessage
+    ? `<div class="viewer-message">${escapeHtml(errorMessage)}</div>`
+    : source
+      ? `<iframe src="${escapeHtml(source)}" title="${safeDocumentName}"></iframe>`
+      : `<div class="viewer-message">Memuatkan dokumen...</div>`;
+
   viewerWindow.document.open();
   viewerWindow.document.write(`<!doctype html>
     <html lang="ms">
@@ -30,15 +48,22 @@ const openAboutBlankDocument = (documentUrl) => {
         <title>Slide 1</title>
         <style>
           html, body { width: 100%; height: 100%; margin: 0; background: #2f2f2f; }
-          iframe { width: 100%; height: 100%; border: 0; background: #2f2f2f; }
+          iframe { display: block; width: 100%; height: 100%; border: 0; background: #2f2f2f; }
+          .viewer-message {
+            align-items: center;
+            color: #ffffff;
+            display: flex;
+            font: 600 16px Arial, sans-serif;
+            height: 100%;
+            justify-content: center;
+          }
         </style>
       </head>
       <body>
-        <iframe src="${escapeHtml(documentUrl)}" title="Dokumen rasmi DBKU"></iframe>
+        ${content}
       </body>
     </html>`);
   viewerWindow.document.close();
-  return true;
 };
 const dbkuDivisionCodes = {
   "Bahagian Audit Dalaman": "AUD",
@@ -121,6 +146,7 @@ function OpportunityCard({ opportunity, selected, onSelect }) {
 
 export default function LandingPage() {
   const [searchParams] = useSearchParams();
+  const documentBlobUrls = useRef([]);
   const vacancyType = searchParams.get("type") === "internship" ? "internship" : "job";
   const isInternshipPage = vacancyType === "internship";
   const [opportunities, setOpportunities] = useState([]);
@@ -142,6 +168,9 @@ export default function LandingPage() {
       .catch(() => setError("Senarai jawatan tidak dapat dimuatkan buat masa ini."))
       .finally(() => setLoading(false));
   }, [vacancyType]);
+  useEffect(() => () => {
+    documentBlobUrls.current.forEach((url) => URL.revokeObjectURL(url));
+  }, []);
   const filteredOpportunities = useMemo(() => {
     const keyword = search.trim().toLowerCase();
     return opportunities.filter((job) =>
@@ -153,11 +182,37 @@ export default function LandingPage() {
     () => filteredOpportunities.find((item) => item.id === selectedId) ?? filteredOpportunities[0] ?? null,
     [filteredOpportunities, selectedId],
   );
-  const handleDocumentOpen = (event) => {
+  const handleDocumentOpen = async (event) => {
     const documentUrl = selectedOpportunity?.official_document_view_url || selectedOpportunity?.official_document;
     if (!documentUrl) return;
+
     event.preventDefault();
-    openAboutBlankDocument(documentUrl);
+
+    const viewerWindow = window.open("about:blank", "_blank");
+    if (!viewerWindow) return;
+
+    viewerWindow.opener = null;
+    writeAboutBlankDocument(viewerWindow, {
+      documentName: normalizedDocumentName(selectedOpportunity?.official_document_name || fileNameFromUrl(documentUrl)),
+    });
+
+    try {
+      const blob = await fetchAuthenticatedBlob(documentUrl);
+      const documentName = normalizedDocumentName(selectedOpportunity?.official_document_name || fileNameFromUrl(documentUrl));
+      const pdfBlob = blob.type === "application/pdf" ? blob : new Blob([blob], { type: "application/pdf" });
+      const objectUrl = URL.createObjectURL(pdfBlob);
+      documentBlobUrls.current.push(objectUrl);
+      viewerWindow.addEventListener("beforeunload", () => {
+        URL.revokeObjectURL(objectUrl);
+        documentBlobUrls.current = documentBlobUrls.current.filter((url) => url !== objectUrl);
+      }, { once: true });
+      writeAboutBlankDocument(viewerWindow, { source: objectUrl, documentName });
+    } catch {
+      writeAboutBlankDocument(viewerWindow, {
+        documentName: normalizedDocumentName(selectedOpportunity?.official_document_name || fileNameFromUrl(documentUrl)),
+        errorMessage: "Dokumen tidak dapat dimuatkan. Sila cuba lagi.",
+      });
+    }
   };
 
   return (
