@@ -2647,65 +2647,6 @@ a {
 .market-reference-shell .market-detail-actions button { min-height: 52px; white-space: nowrap; padding: 0 16px; }
 @media (max-width: 980px) { .market-reference-shell .market-search-panel { grid-template-columns: 1fr 1fr; } .market-reference-shell .market-search-panel button, .market-extra-filter { grid-column: span 1; } .market-reference-shell .market-layout { grid-template-columns: 1fr; } .market-reference-shell .market-detail { position: static; } }
 
-.document-viewer-page {
-  display: grid;
-  min-height: 100vh;
-  grid-template-rows: 64px minmax(0, 1fr);
-  background: #252525;
-}
-
-.document-viewer-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  background: #3b3b3b;
-  color: #ffffff;
-  padding: 0 26px;
-}
-
-.document-viewer-title,
-.document-viewer-toolbar a {
-  display: inline-flex;
-  align-items: center;
-  gap: 18px;
-  color: #ffffff;
-}
-
-.document-viewer-title strong {
-  font-size: 15px;
-  font-weight: 800;
-}
-
-.document-viewer-toolbar a {
-  justify-content: center;
-  text-decoration: none;
-}
-
-.document-viewer-toolbar .material-symbols-outlined {
-  font-size: 24px;
-}
-
-.document-viewer-page iframe {
-  width: 100%;
-  height: 100%;
-  border: 0;
-  background: #252525;
-}
-
-.document-viewer-empty {
-  display: grid;
-  place-content: center;
-  gap: 8px;
-  color: #ffffff;
-  text-align: center;
-}
-
-.document-viewer-empty h1,
-.document-viewer-empty p {
-  margin: 0;
-}
-
 .auth-page {
   min-height: 100vh;
   background:

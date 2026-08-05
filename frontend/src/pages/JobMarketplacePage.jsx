@@ -153,6 +153,8 @@ export default function LandingPage() {
     const documentUrl = selectedOpportunity?.official_document;
     if (!documentUrl) return;
 
+    const viewerWindow = window.open("", "_blank");
+
     try {
       const blob = await fetchAuthenticatedBlob(documentUrl);
       const documentName = readableDocumentName(
@@ -161,14 +163,17 @@ export default function LandingPage() {
       const documentFile = new File([blob], documentName, { type: blob.type || "application/pdf" });
       const objectUrl = URL.createObjectURL(documentFile);
       documentBlobUrls.current.push(objectUrl);
-      const viewerUrl = `/document-viewer?src=${encodeURIComponent(objectUrl)}&name=${encodeURIComponent(documentName)}`;
-      const viewerWindow = window.open(viewerUrl, "_blank", "noopener,noreferrer");
 
-      if (!viewerWindow) {
-        URL.revokeObjectURL(objectUrl);
-        documentBlobUrls.current = documentBlobUrls.current.filter((url) => url !== objectUrl);
+      if (viewerWindow) {
+        viewerWindow.opener = null;
+        viewerWindow.location.replace(objectUrl);
+      } else {
+        window.open(objectUrl, "_blank", "noopener,noreferrer");
       }
     } catch {
+      if (viewerWindow) {
+        viewerWindow.close();
+      }
       window.open(documentUrl, "_blank", "noopener,noreferrer");
     }
   };
