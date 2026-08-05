@@ -5,6 +5,7 @@ import ApplicantLoginPage from "./pages/applicant/ApplicantLoginPage";
 import ApplicantProfilePage from "./pages/applicant/ApplicantProfilePage";
 import ApplicantRegisterPage from "./pages/applicant/ApplicantRegisterPage";
 import SuperAdminShellPage from "./pages/admin/SuperAdminShellPage";
+import AdminHrmPage from "./pages/admin/AdminHrmPage";
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
       <Route path="/profile" element={<ApplicantProfilePage />} />
       <Route path="/register" element={<ApplicantRegisterPage />} />
       <Route path="/superadmin" element={<SuperAdminShellPage />} />
+      <Route path="/admin" element={<AdminHrmPage />} />
     </Routes>
   );
 }
