@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { apiRequest } from "../lib/authApi";
 
 const dateLabel = (value) =>
@@ -79,6 +79,12 @@ function OpportunityCard({ opportunity, selected, onSelect }) {
 }
 
 export default function LandingPage() {
+  const [searchParams] = useSearchParams();
+  const vacancyType = searchParams.get("type") === "internship" ? "internship" : "job";
+  const isInternshipPage = vacancyType === "internship";
+  const employmentFilter = isInternshipPage
+    ? extraFilter === "Latihan Industri" ? extraFilter : "all"
+    : ["Tetap", "Kontrak"].includes(extraFilter) ? extraFilter : "all";
   const [opportunities, setOpportunities] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [search, setSearch] = useState("");
@@ -87,7 +93,7 @@ export default function LandingPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   useEffect(() => {
-    apiRequest("/jobs/")
+    apiRequest(`/jobs/?type=${vacancyType}`)
       .then((data) => {
         const jobs = Array.isArray(data) ? data : data.results || [];
         setOpportunities(jobs);
@@ -95,16 +101,16 @@ export default function LandingPage() {
       })
       .catch(() => setError("Senarai jawatan tidak dapat dimuatkan buat masa ini."))
       .finally(() => setLoading(false));
-  }, []);
+  }, [vacancyType]);
   const filteredOpportunities = useMemo(() => {
     const keyword = search.trim().toLowerCase();
     const locationKeyword = locationSearch.trim().toLowerCase();
     return opportunities.filter((job) =>
       (!keyword || `${job.title} ${job.department} ${job.division} ${job.summary}`.toLowerCase().includes(keyword)) &&
       (!locationKeyword || (job.location || "").toLowerCase().includes(locationKeyword)) &&
-      (extraFilter === "all" || job.vacancy_type === extraFilter),
+      employmentFilter === "all" || job.employment_type === employmentFilter,
     ).map(toOpportunity);
-  }, [extraFilter, locationSearch, opportunities, search]);
+  }, [employmentFilter, locationSearch, opportunities, search]);
   const selectedOpportunity = useMemo(
     () => filteredOpportunities.find((item) => item.id === selectedId) ?? filteredOpportunities[0] ?? null,
     [filteredOpportunities, selectedId],
@@ -123,8 +129,8 @@ export default function LandingPage() {
 
           <div className="nav-links">
             <Link to="/">Laman Utama</Link>
-            <a className="active" href="#jobs">Kerja Kosong</a>
-            <a href="#jobs">Latihan Industri</a>
+            <Link className={isInternshipPage ? "" : "active"} to="/jobs">Kerja Kosong</Link>
+            <Link className={isInternshipPage ? "active" : ""} to="/jobs?type=internship">Latihan Industri</Link>
           </div>
 
           <div className="market-nav-actions">
@@ -148,14 +154,18 @@ export default function LandingPage() {
           <button type="button" onClick={() => setSelectedId(filteredOpportunities[0]?.id ?? null)}>
             Cari
           </button>
-          <select className="market-extra-filter" aria-label="Pilihan tambahan" value={extraFilter} onChange={(event) => setExtraFilter(event.target.value)}>
-            <option value="all">Pilihan Tambahan</option>
-            <option value="job">Jawatan</option>
-            <option value="internship">Latihan Industri</option>
+          <select className="market-extra-filter" aria-label="Jenis lantikan" value={extraFilter} onChange={(event) => setExtraFilter(event.target.value)}>
+            <option value="all">Jenis lantikan</option>
+            {isInternshipPage ? (
+              <option value="Latihan Industri">Latihan Industri</option>
+            ) : <>
+              <option value="Tetap">Tetap</option>
+              <option value="Kontrak">Kontrak</option>
+            </>}
           </select>
         </section>
 
-        <p className="market-vacancy-count"><strong>{filteredOpportunities.length}</strong> Kekosongan Jawatan</p>
+        <p className="market-vacancy-count"><strong>{filteredOpportunities.length}</strong> {isInternshipPage ? "Peluang Latihan Industri" : "Kekosongan Jawatan"}</p>
         <section className="market-layout" id="jobs">
           <section className="market-results" aria-labelledby="results-title">
             <div className="market-results-head">
