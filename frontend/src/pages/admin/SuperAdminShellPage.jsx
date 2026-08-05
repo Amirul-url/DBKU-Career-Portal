@@ -4,6 +4,7 @@ import { clearAuthSession, getStoredUser } from "../../lib/authApi";
 import { Icon } from "../applicant/ApplicantAuthShared";
 import SuperAdminAdministratorsPanel from "./SuperAdminAdministratorsPanel";
 import SuperAdminApplicantsPanel from "./SuperAdminApplicantsPanel";
+import SuperAdminDashboardPanel from "./SuperAdminDashboardPanel";
 import SuperAdminSuperAdminsPanel from "./SuperAdminSuperAdminsPanel";
 
 const items = [
@@ -100,6 +101,7 @@ export default function SuperAdminShellPage() {
             </details>
           </div>
         </header>
+        {activePanel === "dashboard" ? <SuperAdminDashboardPanel user={user} /> : null}
         {activePanel === "applicants" ? <SuperAdminApplicantsPanel /> : null}
         {activePanel === "administrators" ? <SuperAdminAdministratorsPanel /> : null}
         {activePanel === "superadmins" ? <SuperAdminSuperAdminsPanel /> : null}
