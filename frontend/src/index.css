@@ -84,6 +84,7 @@ body .hrm-form-title { display: flex; align-items: center; justify-content: spac
 body .hrm-template-button { border: 1px solid #a6e1bd; border-radius: 7px; background: #eaf8ef; padding: 8px 10px; color: #087942; font-size: 11px; font-weight: 900; }
 body .hrm-template-button:hover { background: #d9f4e4; }
 body .hrm-template-note { margin: -4px 0 4px; border-left: 3px solid #16a34a; background: #f0fbf4; padding: 9px 10px; color: #537064; font-size: 11px; line-height: 1.45; }
+body .hrm-form-section { margin: 8px 0 -2px; border-bottom: 1px solid #dcece3; padding: 0 0 8px; color: #087942; font-size: 13px; }
 body .hrm-job-form input[type="file"] { padding: 8px; font-size: 11px; }
 body .hrm-file-help { color: #718478; font-size: 10px; font-weight: 700; }
 body .hrm-document-column { display: grid; align-content: start; gap: 20px; }
