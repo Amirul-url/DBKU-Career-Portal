@@ -2614,7 +2614,7 @@ a {
 .market-detail-department { display: inline-flex; align-items: center; gap: 7px; margin-top: 9px; color: #52685b; font-size: 14px; font-weight: 800; }
 .market-detail-department .material-symbols-outlined { font-size: 18px; }
 .market-reference-shell .market-detail-body > p { max-width: 780px; font-size: 14px; line-height: 1.65; }
-.market-reference-shell .market-detail-meta { grid-template-columns: 1fr 1fr; gap: 18px 28px; margin-top: 20px; padding: 18px 0; }
+.market-reference-shell .market-detail-meta { grid-template-columns: 1fr; gap: 16px; margin-top: 20px; padding: 18px 0; }
 .market-reference-shell .market-detail-meta span { align-items: flex-start; line-height: 1.48; }
 .market-reference-shell .market-detail-meta .material-symbols-outlined { flex: 0 0 20px; height: 20px; margin-top: 1px; line-height: 20px; transform: translateY(-2px); }
 .market-reference-shell .market-detail-section { margin-top: 22px; }
