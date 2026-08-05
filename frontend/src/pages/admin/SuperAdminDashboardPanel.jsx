@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { apiRequest } from "../../lib/authApi";
 import { Icon } from "../applicant/ApplicantAuthShared";
 
@@ -23,10 +23,42 @@ function formatActivityDate(value) {
   });
 }
 
+function formatActivityRange(activity) {
+  if (!activity?.created_at) return "-";
+  if (activity.action !== "logout") return formatActivityDate(activity.created_at);
+
+  const logoutDate = new Date(activity.created_at);
+  const loginDate = new Date(logoutDate.getTime() - (activity.duration_seconds || 0) * 1000);
+  return `${formatActivityDate(loginDate)} - ${logoutDate.toLocaleTimeString("ms-MY", { hour: "2-digit", minute: "2-digit" })}`;
+}
+
 function shiftDate(value, offset) {
   const baseDate = value ? new Date(`${value}T00:00:00`) : new Date();
   baseDate.setDate(baseDate.getDate() + offset);
   return toDateInputValue(baseDate);
+}
+
+function buildActivitySessions(activities) {
+  const skipNextLoginByUser = new Set();
+  const sessions = [];
+
+  activities.forEach((activity) => {
+    const userKey = activity.email || activity.full_name || activity.id;
+    if (activity.action === "logout") {
+      skipNextLoginByUser.add(userKey);
+      sessions.push({ ...activity, sessionLabel: "Log masuk - Log keluar" });
+      return;
+    }
+
+    if (activity.action === "login" && skipNextLoginByUser.has(userKey)) {
+      skipNextLoginByUser.delete(userKey);
+      return;
+    }
+
+    sessions.push({ ...activity, sessionLabel: activity.action_label || "Log masuk" });
+  });
+
+  return sessions.slice(0, 5);
 }
 
 function StatCard({ accentClass, icon, rows, title }) {
@@ -104,7 +136,7 @@ export default function SuperAdminDashboardPanel({ user }) {
 
   const loadActivities = useCallback((selectedDate = activityDate) => {
     setActivityLoading(true);
-    const params = new URLSearchParams({ limit: "5" });
+    const params = new URLSearchParams({ limit: "50" });
     if (selectedDate) params.set("date", selectedDate);
     return apiRequest(`/auth/account-activities/?${params.toString()}`)
       .then(setActivities)
@@ -136,6 +168,8 @@ export default function SuperAdminDashboardPanel({ user }) {
 
   useEffect(() => { loadActivities(""); }, []);
 
+  const activitySessions = useMemo(() => buildActivitySessions(activities), [activities]);
+
   const updateActivityDate = (value) => {
     setActivityDate(value);
     loadActivities(value);
@@ -161,7 +195,7 @@ export default function SuperAdminDashboardPanel({ user }) {
           <header className="flex items-center justify-between gap-4 border-b border-slate-200 px-5 py-4">
             <div>
               <h2 className="font-bold text-slate-950">Aktiviti Terkini</h2>
-              <p className="mt-1 text-sm text-slate-500">{activityLoading ? "Memuatkan aktiviti..." : `${activities.length} aktiviti akaun terkini`}</p>
+              <p className="mt-1 text-sm text-slate-500">{activityLoading ? "Memuatkan aktiviti..." : `${activitySessions.length} aktiviti akaun terkini`}</p>
             </div>
             <div className="flex items-center gap-2">
               <input className="h-10 rounded-md border border-slate-300 px-3 text-sm font-semibold text-slate-900" type="date" value={activityDate} onChange={(event) => updateActivityDate(event.target.value)} />
@@ -183,20 +217,20 @@ export default function SuperAdminDashboardPanel({ user }) {
               </thead>
               <tbody>
                 {activityLoading ? <tr><td className="px-5 py-6 text-slate-500" colSpan="2">Memuatkan aktiviti...</td></tr> : null}
-                {!activityLoading && activities.length ? activities.map((activity) => (
+                {!activityLoading && activitySessions.length ? activitySessions.map((activity) => (
                   <tr className="border-t border-slate-100" key={activity.id}>
                     <td className="px-5 py-5">
                       <p className="font-bold text-slate-950">{display(activity.full_name || activity.email).toUpperCase()}</p>
-                      <p className="mt-1 text-slate-600">{activity.action_label}</p>
+                      <p className="mt-1 text-slate-600">{activity.sessionLabel}</p>
                       <p className="mt-1 text-slate-500">Jumlah masa: {formatDuration(activity.duration_seconds)}</p>
-                      <p className="mt-1 text-slate-500">{formatActivityDate(activity.created_at)}</p>
+                      <p className="mt-1 text-slate-500">{formatActivityRange(activity)}</p>
                     </td>
                     <td className="px-5 py-5">
                       <span className="rounded-full bg-rose-50 px-3 py-1 text-xs font-bold text-rose-600">{activity.role_label}</span>
                     </td>
                   </tr>
                 )) : null}
-                {!activityLoading && !activities.length ? <tr><td className="px-5 py-6 text-slate-500" colSpan="2">Tiada aktiviti untuk dipaparkan.</td></tr> : null}
+                {!activityLoading && !activitySessions.length ? <tr><td className="px-5 py-6 text-slate-500" colSpan="2">Tiada aktiviti untuk dipaparkan.</td></tr> : null}
               </tbody>
             </table>
           </div>
