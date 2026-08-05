@@ -33,7 +33,7 @@ export default function SuperAdminShellPage() {
   const displayName = (user.full_name || user.first_name || "Super Admin").toUpperCase();
   const email = user.email || "Akaun Super Admin";
   const photoUrl = user.profile_photo_url || "";
-  const profileChip = photoUrl ? <img src={photoUrl} alt="" /> : displayName.charAt(0);
+  const profileChip = photoUrl ? <img src={photoUrl} alt="" /> : <Icon>person</Icon>;
 
   const handleLogout = async () => {
     await recordLogoutActivity();
