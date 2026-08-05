@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { apiRequest } from "../lib/authApi";
+import { apiRequest, fetchAuthenticatedBlob } from "../lib/authApi";
 
 const dateLabel = (value) =>
   value
@@ -12,6 +12,16 @@ const dateLabel = (value) =>
     : "Tidak dinyatakan";
 const listItems = (value) =>
   value ? value.split("\n").filter(Boolean) : ["Rujuk dokumen rasmi untuk butiran lanjut."];
+const fileNameFromUrl = (url, fallback = "dokumen-rasmi-dbku") => {
+  if (!url) return fallback;
+  try {
+    const pathname = new URL(url, window.location.origin).pathname;
+    const name = pathname.split("/").filter(Boolean).pop();
+    return name ? decodeURIComponent(name) : fallback;
+  } catch {
+    return fallback;
+  }
+};
 const dbkuDivisionCodes = {
   "Bahagian Audit Dalaman": "AUD",
   "Bahagian Projek Khas & Fasiliti Awam": "SPF",
@@ -125,6 +135,25 @@ export default function LandingPage() {
     () => filteredOpportunities.find((item) => item.id === selectedId) ?? filteredOpportunities[0] ?? null,
     [filteredOpportunities, selectedId],
   );
+  const handleDocumentDownload = async (event) => {
+    event.preventDefault();
+    const documentUrl = selectedOpportunity?.official_document;
+    if (!documentUrl) return;
+
+    try {
+      const blob = await fetchAuthenticatedBlob(documentUrl);
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = fileNameFromUrl(documentUrl);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
+    } catch {
+      window.open(documentUrl, "_blank", "noopener,noreferrer");
+    }
+  };
 
   return (
     <div className="market-page">
@@ -240,7 +269,11 @@ export default function LandingPage() {
               <div className="market-detail-document">
                 <span>Untuk mengetahui lebih lanjut, sila klik di sini:</span>
                 {selectedOpportunity.official_document && (
-                  <a href={selectedOpportunity.official_document} target="_blank" rel="noreferrer">
+                  <a
+                    href={selectedOpportunity.official_document}
+                    onClick={handleDocumentDownload}
+                    download={fileNameFromUrl(selectedOpportunity.official_document)}
+                  >
                     Muat turun dokumen
                   </a>
                 )}
