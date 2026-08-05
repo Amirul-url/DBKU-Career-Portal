@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from django.db.models import Q
 
 from .models import ApplicantProfileData, User
-from .serializers import InternalHrmAccountSerializer, LoginSerializer, RegisterSerializer, UserSerializer
+from .serializers import InternalHrmAccountSerializer, LoginSerializer, RegisterSerializer, SuperAdminAccountSerializer, UserSerializer
 from .services import build_auth_response
 
 
@@ -99,3 +99,52 @@ def superadmin_applicant_profile_view(request, user_id):
         return Response({"detail": "Pemohon tidak ditemui."}, status=status.HTTP_404_NOT_FOUND)
     profile, _created = ApplicantProfileData.objects.get_or_create(user=applicant)
     return Response({"applicant": UserSerializer(applicant, context={"request": request}).data, "profile": profile_payload(profile)})
+
+
+@api_view(["GET", "POST"])
+def superadmin_admin_accounts_view(request):
+    if request.user.role != "superadmin":
+        return Response({"detail": "Akses Super Admin diperlukan."}, status=status.HTTP_403_FORBIDDEN)
+
+    if request.method == "POST":
+        serializer = SuperAdminAccountSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        return Response(SuperAdminAccountSerializer(user).data, status=status.HTTP_201_CREATED)
+
+    query = request.query_params.get("q", "").strip()
+    department = request.query_params.get("department", "").strip()
+    accounts = User.objects.filter(role__in=("admin", "hr", "reviewer")).order_by("first_name", "email")
+    if query:
+        accounts = accounts.filter(
+            Q(email__icontains=query)
+            | Q(first_name__icontains=query)
+            | Q(mykad_number__icontains=query)
+            | Q(mobile_number__icontains=query)
+            | Q(department__icontains=query)
+        )
+    if department:
+        department_aliases = [department]
+        if department == "Pengurusan Sumber Manusia (HRM)":
+            department_aliases.append("HRM")
+        accounts = accounts.filter(department__in=department_aliases)
+    return Response(SuperAdminAccountSerializer(accounts, many=True).data)
+
+
+@api_view(["PATCH", "DELETE"])
+def superadmin_admin_account_detail_view(request, user_id):
+    if request.user.role != "superadmin":
+        return Response({"detail": "Akses Super Admin diperlukan."}, status=status.HTTP_403_FORBIDDEN)
+
+    account = User.objects.filter(id=user_id, role__in=("admin", "hr", "reviewer")).first()
+    if not account:
+        return Response({"detail": "Akaun pentadbir tidak ditemui."}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "DELETE":
+        account.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    serializer = SuperAdminAccountSerializer(account, data=request.data, partial=True)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response(serializer.data)

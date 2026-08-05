@@ -204,6 +204,73 @@ class InternalHrmAccountSerializer(serializers.Serializer):
         return user
 
 
+class SuperAdminAccountSerializer(serializers.ModelSerializer):
+    full_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    password = serializers.CharField(write_only=True, required=False, allow_blank=True, min_length=8)
+
+    class Meta:
+        model = User
+        fields = (
+            "id",
+            "full_name",
+            "first_name",
+            "email",
+            "mykad_number",
+            "mobile_number",
+            "department",
+            "role",
+            "is_active",
+            "last_login",
+            "password",
+        )
+        read_only_fields = ("id", "last_login")
+
+    def validate_email(self, value):
+        email = value.strip().lower()
+        queryset = User.objects.filter(email__iexact=email)
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+        if queryset.exists():
+            raise serializers.ValidationError("Emel ini sudah digunakan.")
+        return email
+
+    def validate_role(self, value):
+        if value not in {"admin", "hr", "reviewer"}:
+            raise serializers.ValidationError("Peranan pentadbir tidak sah.")
+        return value
+
+    def validate(self, attrs):
+        if not self.instance and not attrs.get("password"):
+            raise serializers.ValidationError({"password": "Kata laluan diperlukan."})
+        return attrs
+
+    def create(self, validated_data):
+        password = validated_data.pop("password", "")
+        full_name = validated_data.pop("full_name", "").strip()
+        email = validated_data["email"]
+        user = User(username=email, is_staff=True, **validated_data)
+        if full_name:
+            user.first_name = full_name
+        user.set_password(password)
+        user.save()
+        return user
+
+    def update(self, instance, validated_data):
+        password = validated_data.pop("password", "")
+        full_name = validated_data.pop("full_name", "").strip()
+        if full_name:
+            instance.first_name = full_name
+        for field, value in validated_data.items():
+            setattr(instance, field, value)
+        if instance.email:
+            instance.username = instance.email
+        if password:
+            instance.set_password(password)
+        instance.is_staff = True
+        instance.save()
+        return instance
+
+
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField(required=False)
     username = serializers.CharField(required=False)
