@@ -147,3 +147,46 @@ def superadmin_admin_account_detail_view(request, user_id):
     serializer.is_valid(raise_exception=True)
     serializer.save()
     return Response(serializer.data)
+
+
+@api_view(["GET", "POST"])
+def superadmin_superadmin_accounts_view(request):
+    if request.user.role != "superadmin":
+        return Response({"detail": "Akses Super Admin diperlukan."}, status=status.HTTP_403_FORBIDDEN)
+
+    if request.method == "POST":
+        serializer = SuperAdminAccountSerializer(data=request.data, context={"account_role": "superadmin"})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        return Response(SuperAdminAccountSerializer(user).data, status=status.HTTP_201_CREATED)
+
+    query = request.query_params.get("q", "").strip()
+    accounts = User.objects.filter(role="superadmin").order_by("first_name", "email")
+    if query:
+        accounts = accounts.filter(
+            Q(email__icontains=query)
+            | Q(first_name__icontains=query)
+            | Q(mobile_number__icontains=query)
+        )
+    return Response(SuperAdminAccountSerializer(accounts, many=True).data)
+
+
+@api_view(["PATCH", "DELETE"])
+def superadmin_superadmin_account_detail_view(request, user_id):
+    if request.user.role != "superadmin":
+        return Response({"detail": "Akses Super Admin diperlukan."}, status=status.HTTP_403_FORBIDDEN)
+
+    account = User.objects.filter(id=user_id, role="superadmin").first()
+    if not account:
+        return Response({"detail": "Akaun Super Admin tidak ditemui."}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "DELETE":
+        if account.id == request.user.id:
+            return Response({"detail": "Akaun Super Admin sendiri tidak boleh dipadam."}, status=status.HTTP_400_BAD_REQUEST)
+        account.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    serializer = SuperAdminAccountSerializer(account, data=request.data, partial=True, context={"account_role": "superadmin"})
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response(serializer.data)

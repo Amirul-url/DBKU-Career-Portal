@@ -242,7 +242,10 @@ class SuperAdminAccountSerializer(serializers.ModelSerializer):
         password = validated_data.pop("password", "")
         full_name = validated_data.pop("full_name", "").strip()
         email = validated_data["email"]
-        user = User(username=email, is_staff=True, is_active=True, role="admin", **validated_data)
+        account_role = self.context.get("account_role", "admin")
+        user = User(username=email, is_staff=True, is_active=True, role=account_role, **validated_data)
+        if account_role == "superadmin":
+            user.is_superuser = True
         if full_name:
             user.first_name = full_name
         user.set_password(password)

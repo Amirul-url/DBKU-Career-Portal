@@ -4,6 +4,7 @@ import { clearAuthSession, getStoredUser } from "../../lib/authApi";
 import { Icon } from "../applicant/ApplicantAuthShared";
 import SuperAdminAdministratorsPanel from "./SuperAdminAdministratorsPanel";
 import SuperAdminApplicantsPanel from "./SuperAdminApplicantsPanel";
+import SuperAdminSuperAdminsPanel from "./SuperAdminSuperAdminsPanel";
 
 const items = [
   ["dashboard", "Papan Pemuka"],
@@ -59,7 +60,7 @@ export default function SuperAdminShellPage() {
             icon === "section" ? (
               isSidebarOpen ? <p className="px-4 pb-2 pt-4 text-[13px] font-bold text-slate-400" key={`${label}-${index}`}>{label}</p> : <div className="h-6" key={`${label}-${index}`} />
             ) : (
-              <button className={`flex w-full items-center rounded-md py-3 text-left text-[15px] font-semibold ${isSidebarOpen ? "gap-4 px-4" : "justify-center px-0"} ${(label === "Papan Pemuka" ? activePanel === "dashboard" : label === "Pemohon" ? activePanel === "applicants" : label === "Pentadbir" ? activePanel === "administrators" : false) ? "bg-emerald-50 text-slate-950" : "text-slate-950"}`} key={`${label}-${index}`} type="button" title={!isSidebarOpen ? label : undefined} onClick={() => { if (label === "Papan Pemuka") setActivePanel("dashboard"); if (label === "Pemohon") setActivePanel("applicants"); if (label === "Pentadbir") setActivePanel("administrators"); }}>
+              <button className={`flex w-full items-center rounded-md py-3 text-left text-[15px] font-semibold ${isSidebarOpen ? "gap-4 px-4" : "justify-center px-0"} ${(label === "Papan Pemuka" ? activePanel === "dashboard" : label === "Pemohon" ? activePanel === "applicants" : label === "Pentadbir" ? activePanel === "administrators" : label === "Super Admin" ? activePanel === "superadmins" : false) ? "bg-emerald-50 text-slate-950" : "text-slate-950"}`} key={`${label}-${index}`} type="button" title={!isSidebarOpen ? label : undefined} onClick={() => { if (label === "Papan Pemuka") setActivePanel("dashboard"); if (label === "Pemohon") setActivePanel("applicants"); if (label === "Pentadbir") setActivePanel("administrators"); if (label === "Super Admin") setActivePanel("superadmins"); }}>
                 <Icon>{icon}</Icon>
                 {isSidebarOpen ? label : <span className="sr-only">{label}</span>}
               </button>
@@ -101,6 +102,7 @@ export default function SuperAdminShellPage() {
         </header>
         {activePanel === "applicants" ? <SuperAdminApplicantsPanel /> : null}
         {activePanel === "administrators" ? <SuperAdminAdministratorsPanel /> : null}
+        {activePanel === "superadmins" ? <SuperAdminSuperAdminsPanel /> : null}
       </main>
     </div>
   );
