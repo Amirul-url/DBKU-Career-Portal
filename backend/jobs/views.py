@@ -1,10 +1,26 @@
+import mimetypes
+
+from django.http import FileResponse
 from django.db.models import Q
 from django.utils import timezone
+from rest_framework.decorators import action
+from rest_framework.exceptions import NotFound
 from rest_framework import viewsets
 
 from .models import Vacancy
 from .permissions import IsStaffOrReadOnly
 from .serializers import VacancySerializer
+
+
+def readable_document_name(file_name):
+    if not file_name:
+        return "Dokumen Rasmi DBKU.pdf"
+    base_name = file_name.rsplit("/", 1)[-1]
+    name, extension = base_name.rsplit(".", 1) if "." in base_name else (base_name, "")
+    if len(name) > 8 and name[-8] == "_" and name[-7:].isalnum():
+        name = name[:-8]
+    readable_name = name.replace("_", " ").strip() or "Dokumen Rasmi DBKU"
+    return f"{readable_name}.{extension}" if extension else readable_name
 
 
 class VacancyViewSet(viewsets.ModelViewSet):
@@ -35,3 +51,18 @@ class VacancyViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
+
+    @action(detail=True, methods=["get"], url_path="document")
+    def document(self, _request, pk=None):
+        vacancy = self.get_object()
+        if not vacancy.official_document:
+            raise NotFound("Dokumen rasmi tidak ditemui.")
+
+        content_type, _encoding = mimetypes.guess_type(vacancy.official_document.name)
+        response = FileResponse(
+            vacancy.official_document.open("rb"),
+            as_attachment=False,
+            filename=readable_document_name(vacancy.official_document.name),
+            content_type=content_type or "application/octet-stream",
+        )
+        return response

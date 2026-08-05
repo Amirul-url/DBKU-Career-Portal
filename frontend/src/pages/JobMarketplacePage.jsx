@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { apiRequest, fetchAuthenticatedBlob } from "../lib/authApi";
+import { apiRequest } from "../lib/authApi";
 
 const dateLabel = (value) =>
   value
@@ -12,58 +12,6 @@ const dateLabel = (value) =>
     : "Tidak dinyatakan";
 const listItems = (value) =>
   value ? value.split("\n").filter(Boolean) : ["Rujuk dokumen rasmi untuk butiran lanjut."];
-const escapeHtml = (value) =>
-  String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
-const fileNameFromUrl = (url, fallback = "dokumen rasmi dbku.pdf") => {
-  if (!url) return fallback;
-  try {
-    const pathname = new URL(url, window.location.origin).pathname;
-    const name = pathname.split("/").filter(Boolean).pop();
-    return name ? decodeURIComponent(name) : fallback;
-  } catch {
-    return fallback;
-  }
-};
-const readableDocumentName = (name) => {
-  const fallback = "Dokumen Rasmi DBKU.pdf";
-  if (!name) return fallback;
-  const decodedName = decodeURIComponent(name).split("/").pop() || fallback;
-  const extensionIndex = decodedName.lastIndexOf(".");
-  const baseName = extensionIndex >= 0 ? decodedName.slice(0, extensionIndex) : decodedName;
-  const extension = extensionIndex >= 0 ? decodedName.slice(extensionIndex) : "";
-  return `${baseName.replace(/_[A-Za-z0-9]{7}$/, "").replaceAll("_", " ")}${extension}`;
-};
-const writeDocumentViewer = (viewerWindow, { content = "", documentName = "" } = {}) => {
-  const safeDocumentName = escapeHtml(documentName);
-  const safeContent = escapeHtml(content);
-  const toolbar = documentName
-    ? `<div class="viewer-toolbar"><span>${safeDocumentName}</span><a href="${safeContent}" download="${safeDocumentName}">Muat turun dokumen</a></div>`
-    : "";
-  const bodyContent = content
-    ? `${toolbar}<iframe src="${safeContent}#toolbar=0" title="Dokumen rasmi DBKU"></iframe>`
-    : '<div class="loading">Memuatkan dokumen...</div>';
-  viewerWindow.document.open();
-  viewerWindow.document.write(`<!doctype html>
-    <html lang="ms">
-      <head>
-        <title>Slide 1</title>
-        <style>
-          html, body { width: 100%; height: 100%; margin: 0; background: #f8fafc; }
-          body { display: grid; grid-template-rows: auto minmax(0, 1fr); place-items: stretch; font-family: Arial, sans-serif; }
-          .loading { display: grid; place-items: center; color: #334155; font-size: 16px; font-weight: 700; }
-          .viewer-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid #dbe5df; background: #ffffff; padding: 12px 18px; color: #0f172a; font-size: 14px; font-weight: 700; }
-          .viewer-toolbar a { color: #12844d; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
-          iframe { width: 100%; height: 100%; border: 0; background: #fff; }
-        </style>
-      </head>
-      <body>${bodyContent}</body>
-    </html>`);
-  viewerWindow.document.close();
-};
 const dbkuDivisionCodes = {
   "Bahagian Audit Dalaman": "AUD",
   "Bahagian Projek Khas & Fasiliti Awam": "SPF",
@@ -177,39 +125,6 @@ export default function LandingPage() {
     () => filteredOpportunities.find((item) => item.id === selectedId) ?? filteredOpportunities[0] ?? null,
     [filteredOpportunities, selectedId],
   );
-  const handleDocumentOpen = async (event) => {
-    event.preventDefault();
-    const documentUrl = selectedOpportunity?.official_document;
-    if (!documentUrl) return;
-
-    const viewerWindow = window.open("", "_blank");
-    if (viewerWindow) {
-      viewerWindow.opener = null;
-      writeDocumentViewer(viewerWindow);
-    }
-
-    try {
-      const blob = await fetchAuthenticatedBlob(documentUrl);
-      const documentName = readableDocumentName(
-        selectedOpportunity.official_document_name || fileNameFromUrl(documentUrl),
-      );
-      const documentFile = new File([blob], documentName, { type: blob.type || "application/pdf" });
-      const objectUrl = viewerWindow?.URL?.createObjectURL(documentFile) || URL.createObjectURL(documentFile);
-      if (viewerWindow) {
-        writeDocumentViewer(viewerWindow, { content: objectUrl, documentName });
-        viewerWindow.addEventListener("beforeunload", () => viewerWindow.URL.revokeObjectURL(objectUrl), { once: true });
-      } else {
-        const openedWindow = window.open(objectUrl, "_blank", "noopener,noreferrer");
-        if (openedWindow) window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
-      }
-    } catch {
-      if (viewerWindow) {
-        viewerWindow.location.href = documentUrl;
-      } else {
-        window.open(documentUrl, "_blank", "noopener,noreferrer");
-      }
-    }
-  };
 
   return (
     <div className="market-page">
@@ -326,8 +241,9 @@ export default function LandingPage() {
                 <span>Untuk mengetahui lebih lanjut, sila klik di sini:</span>
                 {selectedOpportunity.official_document && (
                   <a
-                    href={selectedOpportunity.official_document}
-                    onClick={handleDocumentOpen}
+                    href={selectedOpportunity.official_document_view_url || selectedOpportunity.official_document}
+                    target="_blank"
+                    rel="noreferrer"
                   >
                     Muat turun dokumen
                   </a>
