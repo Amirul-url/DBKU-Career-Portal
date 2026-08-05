@@ -195,7 +195,6 @@ export default function LandingPage() {
                 <Icon>apartment</Icon>
                 {selectedOpportunity.department}
               </div>
-              <p>{selectedOpportunity.summary}</p>
 
               <div className="market-detail-meta">
                 <span>
