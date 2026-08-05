@@ -3,7 +3,14 @@ import { apiRequest } from "../../lib/authApi";
 import { Icon } from "../applicant/ApplicantAuthShared";
 
 const display = (value) => value || "-";
-const toDateInputValue = (date) => date.toISOString().slice(0, 10);
+function toDateInputValue(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+const todayInputValue = () => toDateInputValue(new Date());
 
 function formatDuration(totalSeconds = 0) {
   const hours = Math.floor(totalSeconds / 3600);
@@ -33,7 +40,7 @@ function formatActivityRange(activity) {
 }
 
 function shiftDate(value, offset) {
-  const baseDate = value ? new Date(`${value}T00:00:00`) : new Date();
+  const baseDate = new Date(`${value || todayInputValue()}T00:00:00`);
   baseDate.setDate(baseDate.getDate() + offset);
   return toDateInputValue(baseDate);
 }
@@ -129,7 +136,7 @@ export default function SuperAdminDashboardPanel({ user }) {
   const [administrators, setAdministrators] = useState([]);
   const [superadmins, setSuperadmins] = useState([]);
   const [activities, setActivities] = useState([]);
-  const [activityDate, setActivityDate] = useState("");
+  const [activityDate, setActivityDate] = useState(todayInputValue);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [activityLoading, setActivityLoading] = useState(true);
@@ -137,7 +144,7 @@ export default function SuperAdminDashboardPanel({ user }) {
   const loadActivities = useCallback((selectedDate = activityDate) => {
     setActivityLoading(true);
     const params = new URLSearchParams({ limit: "50" });
-    if (selectedDate) params.set("date", selectedDate);
+    params.set("date", selectedDate || todayInputValue());
     return apiRequest(`/auth/account-activities/?${params.toString()}`)
       .then(setActivities)
       .catch((requestError) => setError(requestError.message || "Aktiviti akaun tidak dapat dimuatkan."))
@@ -166,13 +173,14 @@ export default function SuperAdminDashboardPanel({ user }) {
     return () => { isMounted = false; };
   }, []);
 
-  useEffect(() => { loadActivities(""); }, []);
+  useEffect(() => { loadActivities(activityDate); }, []);
 
   const activitySessions = useMemo(() => buildActivitySessions(activities), [activities]);
 
   const updateActivityDate = (value) => {
-    setActivityDate(value);
-    loadActivities(value);
+    const selectedDate = value || todayInputValue();
+    setActivityDate(selectedDate);
+    loadActivities(selectedDate);
   };
 
   return (
