@@ -139,8 +139,8 @@ export default function LandingPage() {
           <button type="button" onClick={() => setSelectedId(filteredOpportunities[0]?.id ?? null)}>
             Cari
           </button>
-          <select className="market-extra-filter" aria-label="Jenis lantikan" value={extraFilter} onChange={(event) => setExtraFilter(event.target.value)}>
-            <option value="all">Jenis lantikan</option>
+          <select className="market-extra-filter" aria-label="Taraf jawatan" value={extraFilter} onChange={(event) => setExtraFilter(event.target.value)}>
+            <option value="all">Taraf jawatan</option>
             {isInternshipPage ? (
               <option value="Latihan Industri">Latihan Industri</option>
             ) : <>
