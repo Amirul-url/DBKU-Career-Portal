@@ -157,6 +157,11 @@ export default function AdminHrmPage() {
     else if (user.role !== "admin") navigate("/", { replace: true });
     else Promise.resolve().then(loadData);
   }, [loadData, navigate, user]);
+  useEffect(() => {
+    if (!notice) return undefined;
+    const timeoutId = window.setTimeout(() => setNotice(""), 5000);
+    return () => window.clearTimeout(timeoutId);
+  }, [notice]);
   const metrics = useMemo(
     () => ({
       open: jobs.filter((job) => job.status === "open").length,
