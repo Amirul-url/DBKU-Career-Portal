@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getStoredUser } from "../../lib/authApi";
 import { Icon } from "../applicant/ApplicantAuthShared";
 
-const items = [["dashboard", "Dashboard"], ["section", "USER"], ["group", "User"], ["section", "DBKU"], ["admin_panel_settings", "Admin"], ["section", "SYSTEM"], ["shield_person", "SuperAdmin"]];
+const items = [["dashboard", "Papan Pemuka"], ["section", "PEMOHON"], ["group", "Pemohon"], ["section", "DBKU"], ["admin_panel_settings", "Pentadbir"], ["section", "SISTEM"], ["shield_person", "Super Admin"]];
 
 export default function SuperAdminShellPage() {
   const navigate = useNavigate(); const user = getStoredUser();
