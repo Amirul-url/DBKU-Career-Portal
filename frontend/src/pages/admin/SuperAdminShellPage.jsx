@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { clearAuthSession, getStoredUser } from "../../lib/authApi";
 import { Icon } from "../applicant/ApplicantAuthShared";
@@ -16,6 +16,7 @@ const items = [
 export default function SuperAdminShellPage() {
   const navigate = useNavigate();
   const user = getStoredUser();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   useEffect(() => {
     if (!user) navigate("/login", { replace: true });
@@ -36,35 +37,35 @@ export default function SuperAdminShellPage() {
 
   return (
     <div className="min-h-screen min-w-[900px] bg-slate-50">
-      <aside className="fixed inset-y-0 left-0 flex w-[350px] flex-col border-r border-slate-200 bg-white">
-        <div className="grid h-[72px] grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b border-slate-200 px-4">
-          <div className="flex items-center gap-3">
+      <aside className={`fixed inset-y-0 left-0 flex flex-col border-r border-slate-200 bg-white transition-[width] duration-200 ${isSidebarOpen ? "w-[350px]" : "w-[72px]"}`}>
+        <div className={`grid h-[72px] items-center gap-2 border-b border-slate-200 ${isSidebarOpen ? "grid-cols-[minmax(0,1fr)_auto] px-4" : "grid-cols-1 justify-items-center px-0"}`}>
+          <div className={`flex min-w-0 items-center gap-3 ${isSidebarOpen ? "" : "hidden"}`}>
             <img className="h-9 w-9 object-contain" src="/logo-dbku.png" alt="DBKU" />
             <div>
               <p className="font-semibold text-slate-950">Portal Kerjaya DBKU</p>
               <p className="text-xs text-slate-500">Super Admin</p>
             </div>
           </div>
-          <button className="rounded-md border border-slate-200 bg-white p-2 text-slate-700" type="button">
+          <button className="rounded-md border border-slate-200 bg-white p-2 text-slate-700 hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700" type="button" aria-label={isSidebarOpen ? "Kecilkan sidebar" : "Buka sidebar"} title={isSidebarOpen ? "Kecilkan sidebar" : "Buka sidebar"} onClick={() => setIsSidebarOpen((current) => !current)}>
             <Icon>menu</Icon>
           </button>
         </div>
 
-        <nav className="space-y-1 px-4 py-5">
+        <nav className={`space-y-1 py-5 ${isSidebarOpen ? "px-4" : "px-3"}`}>
           {items.map(([icon, label], index) => (
             icon === "section" ? (
-              <p className="px-4 pb-2 pt-4 text-[13px] font-bold text-slate-400" key={`${label}-${index}`}>{label}</p>
+              isSidebarOpen ? <p className="px-4 pb-2 pt-4 text-[13px] font-bold text-slate-400" key={`${label}-${index}`}>{label}</p> : <div className="h-6" key={`${label}-${index}`} />
             ) : (
-              <button className={`flex w-full items-center gap-4 rounded-md px-4 py-3 text-left text-[15px] font-semibold ${index === 0 ? "bg-emerald-50 text-slate-950" : "text-slate-950"}`} key={`${label}-${index}`} type="button">
+              <button className={`flex w-full items-center rounded-md py-3 text-left text-[15px] font-semibold ${isSidebarOpen ? "gap-4 px-4" : "justify-center px-0"} ${index === 0 ? "bg-emerald-50 text-slate-950" : "text-slate-950"}`} key={`${label}-${index}`} type="button" title={!isSidebarOpen ? label : undefined}>
                 <Icon>{icon}</Icon>
-                {label}
+                {isSidebarOpen ? label : <span className="sr-only">{label}</span>}
               </button>
             )
           ))}
         </nav>
       </aside>
 
-      <main className="ml-[350px] min-h-screen bg-slate-50">
+      <main className={`min-h-screen bg-slate-50 transition-[margin] duration-200 ${isSidebarOpen ? "ml-[350px]" : "ml-[72px]"}`}>
         <header className="flex h-[72px] items-center justify-between border-b border-emerald-100 bg-white px-11">
           <div>
             <p className="text-sm font-bold text-slate-950">Selamat datang</p>
