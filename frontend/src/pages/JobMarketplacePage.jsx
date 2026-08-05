@@ -1,139 +1,33 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { apiRequest } from "../lib/authApi";
 
-const opportunities = [
-  {
-    id: "urban-planner",
-    title: "Perancang Bandar Kanan",
-    department: "Jabatan Perancangan",
-    category: "Jawatan",
-    type: "Sepenuh Masa",
-    salary: "RM 4,500 - 6,200",
-    location: "Ibu Pejabat DBKU",
-    closing: "18 Ogos 2026",
-    posted: "Disiarkan 2 hari lalu",
-    icon: "architecture",
-    image: "/senior urban planner.jpg",
-    summary:
-      "Menerajui projek pembangunan bandar strategik yang menyokong Kuching Utara yang mampan dan selesa didiami.",
-    responsibilities: [
-      "Menyediakan ringkasan perancangan bandar, laporan dan cadangan teknikal.",
-      "Menyelaras semakan pembangunan bersama jabatan dalaman dan agensi berkaitan.",
-      "Menyokong inisiatif penambahbaikan bandar melalui data perancangan dan input lapangan.",
-    ],
-    requirements: [
-      "Ijazah dalam Perancangan Bandar, Seni Bina, Geografi atau bidang berkaitan.",
-      "Minimum 5 tahun pengalaman berkaitan perancangan atau pembangunan perbandaran.",
-      "Kemahiran penulisan laporan dan penyelarasan pihak berkepentingan yang baik.",
-    ],
-  },
-  {
-    id: "it-support-intern",
-    title: "Pelatih Sokongan IT",
-    department: "Perkhidmatan Digital",
-    category: "Latihan Industri",
-    type: "Latihan Industri",
-    salary: "Elaun disediakan",
-    location: "Unit ICT",
-    closing: "25 Ogos 2026",
-    posted: "Disiarkan 4 hari lalu",
-    icon: "computer",
-    summary:
-      "Membantu perisian perbandaran, operasi meja bantuan dan dokumentasi aliran kerja digital.",
-    responsibilities: [
-      "Membantu sokongan tahap pertama untuk pengguna dalaman dan peranti.",
-      "Mendokumentasikan isu meja bantuan lazim dan langkah penyelesaian asas.",
-      "Menyokong rekod digital, kemas kini inventori dan ujian sistem.",
-    ],
-    requirements: [
-      "Pelajar diploma atau ijazah dalam IT, Sains Komputer atau bidang berkaitan.",
-      "Bersedia menjalani latihan industri minimum 3 bulan.",
-      "Selesa dengan tugasan asas perisian, perkakasan dan sokongan pengguna.",
-    ],
-  },
-  {
-    id: "environmental-officer",
-    title: "Pegawai Alam Sekitar",
-    department: "Alam Sekitar Bandar",
-    category: "Jawatan",
-    type: "Tetap",
-    salary: "RM 3,200 - 4,800",
-    location: "Pejabat Operasi",
-    closing: "30 Ogos 2026",
-    posted: "Disiarkan 1 minggu lalu",
-    icon: "eco",
-    summary:
-      "Menyelaras protokol pengurusan sisa dan inisiatif kawasan hijau di kawasan DBKU.",
-    responsibilities: [
-      "Memantau aktiviti perkhidmatan alam sekitar dalam zon bandar yang ditetapkan.",
-      "Menyediakan pemerhatian lapangan dan laporan tindakan susulan.",
-      "Menyelaras aktiviti kebersihan awam dan inisiatif hijau.",
-    ],
-    requirements: [
-      "Diploma atau ijazah dalam Sains Alam Sekitar atau disiplin berkaitan.",
-      "Pengalaman dalam perkhidmatan perbandaran adalah satu kelebihan.",
-      "Boleh menjalankan pemeriksaan lapangan dan berkomunikasi dengan komuniti.",
-    ],
-  },
-  {
-    id: "accounting-clerk",
-    title: "Pembantu Perakaunan",
-    department: "Perbendaharaan",
-    category: "Jawatan",
-    type: "Kontrak",
-    salary: "RM 2,000 - 2,800",
-    location: "Jabatan Perbendaharaan",
-    closing: "12 September 2026",
-    posted: "Disiarkan 1 minggu lalu",
-    icon: "account_balance_wallet",
-    summary:
-      "Membantu kutipan hasil perbandaran, rekod bayaran dan tugasan laporan kewangan.",
-    responsibilities: [
-      "Mengemas kini rekod bayaran dan membantu kerja penyelarasan harian.",
-      "Menyediakan jadual sokongan untuk laporan kewangan.",
-      "Mengurus dokumentasi kaunter dan tugasan pemfailan.",
-    ],
-    requirements: [
-      "SPM/STPM, diploma atau kelayakan setara dalam perakaunan atau kewangan.",
-      "Teliti dengan nombor, rekod dan kerja pentadbiran rutin.",
-      "Kemahiran asas hamparan kerja dan pengendalian dokumen.",
-    ],
-  },
-  {
-    id: "landscape-intern",
-    title: "Pelatih Seni Bina Landskap",
-    department: "Unit Landskap",
-    category: "Latihan Industri",
-    type: "Latihan Industri",
-    salary: "Elaun disediakan",
-    location: "Unit Landskap",
-    closing: "5 September 2026",
-    posted: "Disiarkan 10 hari lalu",
-    icon: "park",
-    summary:
-      "Membantu konsep penambahbaikan taman, pemerhatian tapak dan dokumentasi landskap.",
-    responsibilities: [
-      "Menyokong ukuran tapak, dokumentasi foto dan penyediaan konsep.",
-      "Membantu pegawai dengan pelan penanaman dan nota penambahbaikan ruang awam.",
-      "Menyediakan papan pembentangan ringkas dan rekod kemajuan.",
-    ],
-    requirements: [
-      "Pelajar Seni Bina Landskap, Reka Bentuk, Hortikultur atau bidang berkaitan.",
-      "Boleh bekerja di tapak dan mengurus dokumentasi pejabat.",
-      "Kemahiran asas perisian reka bentuk atau lukisan adalah satu kelebihan.",
-    ],
-  },
-];
-
-const filters = [
-  ["category", "Jenis Peluang", ["Semua", "Jawatan", "Latihan Industri"]],
-  ["type", "Jenis Kerja", ["Semua", "Sepenuh Masa", "Tetap", "Kontrak", "Latihan Industri"]],
-  [
-    "department",
-    "Jabatan",
-    ["Semua", "Jabatan Perancangan", "Perkhidmatan Digital", "Alam Sekitar Bandar", "Perbendaharaan", "Unit Landskap"],
-  ],
-];
+const dateLabel = (value) =>
+  value
+    ? new Date(value).toLocaleDateString("ms-MY", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : "Tidak dinyatakan";
+const listItems = (value) =>
+  value ? value.split("\n").filter(Boolean) : ["Rujuk dokumen rasmi untuk butiran lanjut."];
+const salaryLabel = (job) =>
+  job.minimum_salary || job.maximum_salary
+    ? `RM ${job.minimum_salary || "—"} - ${job.maximum_salary || "—"}`
+    : "Rujuk dokumen rasmi";
+const toOpportunity = (job) => ({
+  ...job,
+  department: job.division || job.department,
+  category: job.vacancy_type === "internship" ? "Latihan Industri" : "Jawatan",
+  type: job.employment_type || (job.vacancy_type === "internship" ? "Latihan Industri" : "Jawatan"),
+  salary: salaryLabel(job),
+  closing: dateLabel(job.closing_date),
+  posted: `Disiarkan ${dateLabel(job.created_at)}`,
+  icon: job.vacancy_type === "internship" ? "school" : "work",
+  responsibilities: listItems(job.responsibilities),
+  requirements: listItems(job.requirements),
+});
 
 function Icon({ children, className = "" }) {
   return (
@@ -185,11 +79,36 @@ function OpportunityCard({ opportunity, selected, onSelect }) {
 }
 
 export default function LandingPage() {
-  const [selectedId, setSelectedId] = useState(opportunities[0].id);
+  const [opportunities, setOpportunities] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
+  const [search, setSearch] = useState("");
+  const [locationSearch, setLocationSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    apiRequest("/jobs/")
+      .then((data) => {
+        const jobs = Array.isArray(data) ? data : data.results || [];
+        setOpportunities(jobs);
+        setSelectedId(jobs[0]?.id ?? null);
+      })
+      .catch(() => setError("Senarai jawatan tidak dapat dimuatkan buat masa ini."))
+      .finally(() => setLoading(false));
+  }, []);
+  const filteredOpportunities = useMemo(() => {
+    const keyword = search.trim().toLowerCase();
+    const locationKeyword = locationSearch.trim().toLowerCase();
+    return opportunities.filter((job) =>
+      (!keyword || `${job.title} ${job.department} ${job.division} ${job.summary}`.toLowerCase().includes(keyword)) &&
+      (!locationKeyword || (job.location || "").toLowerCase().includes(locationKeyword)),
+    ).map(toOpportunity);
+  }, [locationSearch, opportunities, search]);
   const selectedOpportunity = useMemo(
-    () => opportunities.find((item) => item.id === selectedId) ?? opportunities[0],
-    [selectedId],
+    () => filteredOpportunities.find((item) => item.id === selectedId) ?? filteredOpportunities[0] ?? null,
+    [filteredOpportunities, selectedId],
   );
+  const jobCount = opportunities.filter((job) => job.vacancy_type === "job").length;
+  const internshipCount = opportunities.filter((job) => job.vacancy_type === "internship").length;
 
   return (
     <div className="market-page">
@@ -227,15 +146,15 @@ export default function LandingPage() {
           </div>
           <div className="market-intro-stats" aria-label="Ringkasan portal">
             <span>
-              <strong>5</strong>
+              <strong>{jobCount}</strong>
               Kekosongan
             </span>
             <span>
-              <strong>23</strong>
-              Jabatan
+              <strong>{new Set(opportunities.map((job) => job.division || job.department)).size}</strong>
+              Bahagian
             </span>
             <span>
-              <strong>2</strong>
+              <strong>{internshipCount}</strong>
               Latihan Industri
             </span>
           </div>
@@ -244,13 +163,13 @@ export default function LandingPage() {
         <section className="market-search-panel" aria-label="Cari peluang">
           <label>
             <Icon>search</Icon>
-            <input type="search" placeholder="Cari mengikut jawatan, kata kunci atau jabatan" />
+            <input value={search} onChange={(event) => setSearch(event.target.value)} type="search" placeholder="Cari mengikut jawatan, kata kunci atau jabatan" />
           </label>
           <label>
             <Icon>location_on</Icon>
-            <input type="search" placeholder="Lokasi atau unit kerja" />
+            <input value={locationSearch} onChange={(event) => setLocationSearch(event.target.value)} type="search" placeholder="Lokasi atau unit kerja" />
           </label>
-          <button type="button">
+          <button type="button" onClick={() => setSelectedId(filteredOpportunities[0]?.id ?? null)}>
             <Icon>manage_search</Icon>
             Cari
           </button>
@@ -263,24 +182,21 @@ export default function LandingPage() {
               <strong>Tapisan</strong>
             </div>
 
-            {filters.map(([key, title, values]) => (
-              <div className="market-filter-group" key={key}>
-                <h2>{title}</h2>
-                {values.map((value) => (
-                  <label key={value}>
-                    <input type="checkbox" defaultChecked={value === "Semua"} />
-                    <span>{value}</span>
-                  </label>
-                ))}
-              </div>
-            ))}
+            <div className="market-filter-group">
+              <h2>Jenis Peluang</h2>
+              <p>Gunakan carian untuk menapis jawatan atau latihan industri yang sedang dibuka.</p>
+            </div>
+            <div className="market-filter-group">
+              <h2>Maklumat rasmi</h2>
+              <p>Butiran penuh dan borang permohonan disediakan dalam dokumen setiap jawatan.</p>
+            </div>
           </aside>
 
           <section className="market-results" aria-labelledby="results-title">
             <div className="market-results-head">
               <div>
                 <h2 id="results-title">Peluang Disyorkan</h2>
-                <p>Memaparkan {opportunities.length} kekosongan daripada jabatan DBKU</p>
+                <p>Memaparkan {filteredOpportunities.length} kekosongan semasa DBKU</p>
               </div>
               <select aria-label="Susun keputusan" defaultValue="recent">
                 <option value="recent">Terkini</option>
@@ -290,11 +206,14 @@ export default function LandingPage() {
             </div>
 
             <div className="market-job-list">
-              {opportunities.map((opportunity) => (
+              {loading && <p className="market-empty">Memuatkan jawatan semasa…</p>}
+              {error && <p className="market-empty">{error}</p>}
+              {!loading && !error && !filteredOpportunities.length && <p className="market-empty">Tiada jawatan yang sepadan.</p>}
+              {filteredOpportunities.map((opportunity) => (
                 <OpportunityCard
                   key={opportunity.id}
                   opportunity={opportunity}
-                  selected={opportunity.id === selectedOpportunity.id}
+                  selected={opportunity.id === selectedOpportunity?.id}
                   onSelect={() => setSelectedId(opportunity.id)}
                 />
               ))}
@@ -302,6 +221,7 @@ export default function LandingPage() {
           </section>
 
           <aside className="market-detail" aria-label="Butiran peluang dipilih">
+            {selectedOpportunity ? <>
             {selectedOpportunity.image ? (
               <img
                 src={selectedOpportunity.image}
@@ -358,12 +278,24 @@ export default function LandingPage() {
 
               <div className="market-detail-actions">
                 <Link to="/login">Mohon Sekarang</Link>
+                {selectedOpportunity.official_document && (
+                  <a href={selectedOpportunity.official_document} target="_blank" rel="noreferrer">
+                    <Icon>download</Icon>
+                    Muat turun dokumen
+                  </a>
+                )}
                 <button type="button">
                   <Icon>bookmark</Icon>
                   Simpan
                 </button>
               </div>
             </div>
+            </> : (
+              <div className="market-detail-body">
+                <h2>Tiada jawatan dipilih</h2>
+                <p>Pilih jawatan daripada senarai untuk melihat butiran.</p>
+              </div>
+            )}
           </aside>
         </section>
       </main>
