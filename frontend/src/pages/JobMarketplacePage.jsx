@@ -18,6 +18,7 @@ const salaryLabel = (job) =>
     : "Rujuk dokumen rasmi";
 const toOpportunity = (job) => ({
   ...job,
+  organization: job.department,
   department: job.division || job.department,
   category: job.vacancy_type === "internship" ? "Latihan Industri" : "Jawatan",
   type: job.employment_type || (job.vacancy_type === "internship" ? "Latihan Industri" : "Jawatan"),
@@ -193,7 +194,7 @@ export default function LandingPage() {
               <h2>{selectedOpportunity.title}</h2>
               <div className="market-detail-department">
                 <Icon>apartment</Icon>
-                {selectedOpportunity.department}
+                {selectedOpportunity.organization || "Dewan Bandaraya Kuching Utara"}
               </div>
 
               <div className="market-detail-meta">
