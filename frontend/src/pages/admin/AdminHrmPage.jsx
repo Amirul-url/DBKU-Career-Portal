@@ -11,8 +11,8 @@ import { Icon } from "../applicant/ApplicantAuthShared";
 const navItems = [
   ["dashboard", "Papan Pemuka"],
   ["section", "PENGURUSAN"],
-  ["add_circle", "Tambah Jawatan", "Jawatan & Latihan"],
-  ["work_history", "Urus Jawatan", "Jawatan & Latihan"],
+  ["add_circle", "Tambah Jawatan"],
+  ["work_history", "Urus Jawatan"],
   ["group", "Lihat Permohonan", "Permohonan"],
 ];
 
