@@ -72,7 +72,7 @@ function AdminAccountModal({ account, error, form, mode, onChange, onClose, onSa
                 Sahkan Kata Laluan
                 <input className={inputClass} value={form.confirm_password} onChange={(event) => onChange("confirm_password", event.target.value)} placeholder="Sahkan kata laluan" type="password" required={!isEdit || Boolean(form.password)} />
               </label>
-              {isEdit ? <p className="md:col-span-2 text-sm text-slate-700"><strong>Biarkan medan kata laluan kosong untuk mengekalkan kata laluan semasa.</strong></p> : null}
+              {isEdit ? <p className="md:col-span-2 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-800">Biarkan medan kata laluan kosong untuk mengekalkan kata laluan semasa.</p> : null}
             </div>
           </div>
 
