@@ -785,7 +785,6 @@ function JobManagementTable({ jobs, applications }) {
         <thead>
           <tr>
             <th>Bil.</th>
-            <th>Jawatan</th>
             <th>Bahagian</th>
             <th>Tarikh siar</th>
             <th>Tarikh tutup</th>
@@ -802,10 +801,6 @@ function JobManagementTable({ jobs, applications }) {
             return (
               <tr key={job.id}>
                 <td>{index + 1}</td>
-                <td>
-                  <strong>{job.title}</strong>
-                  <small>{job.location}</small>
-                </td>
                 <td>{job.division || "—"}</td>
                 <td>{dateValue(job.created_at)}</td>
                 <td>{dateValue(job.closing_date)}</td>
