@@ -9,8 +9,8 @@ const blankForm = {
   mykad_number: "",
   email: "",
   mobile_number: "",
-  department: departmentOptions[0],
-  role: "admin",
+  department: "",
+  role: "",
   is_active: true,
   password: "",
   confirm_password: "",
@@ -60,12 +60,16 @@ function AdminAccountModal({ account, error, form, mode, onChange, onClose, onSa
               <label className={labelClass}>
                 Jabatan
                 <select className={inputClass} value={form.department} onChange={(event) => onChange("department", event.target.value)} required>
+                  <option value="">Sila pilih</option>
                   {departmentOptions.map((department) => <option value={department} key={department}>{department}</option>)}
                 </select>
               </label>
               <label className={labelClass}>
                 Peranan
-                <input className={inputClass} readOnly value="Pentadbir" />
+                <select className={inputClass} value={form.role} onChange={(event) => onChange("role", event.target.value)} required>
+                  <option value="">Sila pilih</option>
+                  <option value="admin">Pentadbir</option>
+                </select>
               </label>
               <div className={labelClass}>
                 <span>Notifikasi</span>
