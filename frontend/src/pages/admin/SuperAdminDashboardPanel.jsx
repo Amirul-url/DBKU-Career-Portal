@@ -130,20 +130,20 @@ export default function SuperAdminDashboardPanel({ user }) {
   const [administrators, setAdministrators] = useState([]);
   const [superadmins, setSuperadmins] = useState([]);
   const [activities, setActivities] = useState([]);
+  const [activityDate, setActivityDate] = useState(todayInputValue);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [activityLoading, setActivityLoading] = useState(true);
-  const activityDate = todayInputValue();
 
-  const loadActivities = useCallback(() => {
+  const loadActivities = useCallback((selectedDate = activityDate) => {
     setActivityLoading(true);
     const params = new URLSearchParams({ limit: "50" });
-    params.set("date", todayInputValue());
+    params.set("date", selectedDate || todayInputValue());
     return apiRequest(`/auth/account-activities/?${params.toString()}`)
       .then(setActivities)
       .catch((requestError) => setError(requestError.message || "Aktiviti akaun tidak dapat dimuatkan."))
       .finally(() => setActivityLoading(false));
-  }, []);
+  }, [activityDate]);
 
   useEffect(() => {
     let isMounted = true;
@@ -167,9 +167,13 @@ export default function SuperAdminDashboardPanel({ user }) {
     return () => { isMounted = false; };
   }, []);
 
-  useEffect(() => { loadActivities(); }, [loadActivities]);
+  useEffect(() => { loadActivities(activityDate); }, [activityDate, loadActivities]);
 
   const activitySessions = useMemo(() => buildActivitySessions(activities), [activities]);
+
+  const updateActivityDate = (value) => {
+    setActivityDate(value || todayInputValue());
+  };
 
   return (
     <section className="p-8">
@@ -194,7 +198,7 @@ export default function SuperAdminDashboardPanel({ user }) {
               <p className="mt-1 text-sm text-slate-500">{activityLoading ? "Memuatkan aktiviti..." : `${activitySessions.length} aktiviti akaun terkini`}</p>
             </div>
             <div className="flex items-center gap-2">
-              <input className="h-10 cursor-not-allowed rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-900 opacity-100" type="date" value={activityDate} disabled aria-label="Tarikh hari ini" />
+              <input className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100" type="date" value={activityDate} onChange={(event) => updateActivityDate(event.target.value)} aria-label="Pilih tarikh aktiviti" />
               <button className="inline-flex h-10 w-10 cursor-not-allowed items-center justify-center rounded-md border border-slate-200 text-slate-400 opacity-50" type="button" aria-label="Tarikh sebelumnya" disabled>
                 <Icon>chevron_left</Icon>
               </button>
