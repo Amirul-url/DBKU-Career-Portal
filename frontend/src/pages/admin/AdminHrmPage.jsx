@@ -100,7 +100,7 @@ export default function AdminHrmPage() {
     vacancy_type: "job",
     department: "Dewan Bandaraya Kuching Utara",
     division: "",
-    location: "",
+    location: "Dewan Bandaraya Kuching Utara, Bukit Siol, Jalan Semariang, Petra Jaya, 93050, Kuching, Sarawak",
     advertisement_no: "",
     service_group: "",
     service_classification: "",
@@ -167,7 +167,7 @@ export default function AdminHrmPage() {
     event.preventDefault();
     try {
       const payload = new FormData();
-      Object.entries({ ...jobForm, location: jobForm.location || "Kuching, Sarawak" }).forEach(
+      Object.entries({ ...jobForm, location: jobForm.location || "Dewan Bandaraya Kuching Utara, Bukit Siol, Jalan Semariang, Petra Jaya, 93050, Kuching, Sarawak" }).forEach(
         ([key, value]) => payload.append(key, value || ""),
       );
       if (documentFile) payload.append("official_document", documentFile);
@@ -181,7 +181,7 @@ export default function AdminHrmPage() {
         vacancy_type: "job",
         department: "Dewan Bandaraya Kuching Utara",
         division: "",
-        location: "",
+        location: "Dewan Bandaraya Kuching Utara, Bukit Siol, Jalan Semariang, Petra Jaya, 93050, Kuching, Sarawak",
         employment_type: "",
         grade: "",
         closing_date: "",
