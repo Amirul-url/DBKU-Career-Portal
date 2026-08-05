@@ -17,7 +17,28 @@ const navItems = [
 ];
 
 const dbkuDepartments = [
-  { name: "Bahagian Audit Dalaman", code: "AUD" }, { name: "Bahagian Bangunan", code: "BGN" }, { name: "Bahagian Geoinformasi dan Pengurusan Hartanah", code: "GEO" }, { name: "Bahagian Kesihatan Persekitaran", code: "KSP" }, { name: "Bahagian Kejuruteraan", code: "ENG" }, { name: "Bahagian Kewangan", code: "FIN" }, { name: "Bahagian Korporat dan Komunikasi", code: "KOR" }, { name: "Bahagian Landskap", code: "LSK" }, { name: "Bahagian Pelesenan", code: "LSN" }, { name: "Bahagian Penguatkuasaan", code: "PGT" }, { name: "Bahagian Pengurusan dan Penyelenggaraan Aset", code: "PPA" }, { name: "Bahagian Pengurusan dan Penyelenggaraan Infrastruktur", code: "PPI" }, { name: "Bahagian Pengurusan Sumber Manusia", code: "HRM" }, { name: "Bahagian Perancangan Bandar", code: "PBD" }, { name: "Bahagian Perbendaharaan", code: "PBN" }, { name: "Bahagian Perhubungan dan Pembangunan Komuniti", code: "PPK" }, { name: "Bahagian Perolehan", code: "PRL" }, { name: "Bahagian Perundangan", code: "UND" }, { name: "Bahagian Strategik dan Inovasi", code: "STI" }, { name: "Bahagian Teknologi Maklumat", code: "ICT" }, { name: "Bahagian Ukur dan Pemetaan", code: "UPM" }, { name: "Bahagian Unit Integriti", code: "INT" }, { name: "Bahagian Keselamatan dan Kesihatan Pekerjaan", code: "KKP" },
+  { name: "Bahagian Audit Dalaman", code: "AUD" },
+  { name: "Bahagian Projek Khas & Fasiliti Awam", code: "SPF" },
+  { name: "Bahagian Hal Ehwal Undang-Undang", code: "LAW" },
+  { name: "Bahagian Penguatkuasaan dan Keselamatan", code: "ENS" },
+  { name: "Bahagian Pelesenan", code: "LES" },
+  { name: "Bahagian Pengurusan Sumber Manusia", code: "HRM" },
+  { name: "Bahagian Pentadbiran", code: "ADM" },
+  { name: "Bahagian Transformasi dan Inovasi", code: "CTS" },
+  { name: "Bahagian Kewangan", code: "FIN" },
+  { name: "Bahagian Penilaian dan Pencukaian", code: "VAL" },
+  { name: "Bahagian Teknologi Maklumat", code: "ICT" },
+  { name: "Bahagian Kesihatan Persekitaran", code: "ENV" },
+  { name: "Bahagian Perhubungan Awam", code: "PRD" },
+  { name: "Bahagian Pembangunan & Perkhidmatan", code: "CDS" },
+  { name: "Bahagian Pembangunan Sumber", code: "IRD" },
+  { name: "Bahagian Landskap", code: "LNP" },
+  { name: "Bahagian Kontrak dan Perolehan", code: "COP" },
+  { name: "Bahagian Geoinformasi dan Pengurusan Hartanah", code: "GPM" },
+  { name: "Bahagian Penyelenggaraan Infrastruktur", code: "IMT" },
+  { name: "Bahagian Bangunan", code: "BLG" },
+  { name: "Bahagian Projek Kejuruteraan", code: "ENG" },
+  { name: "Bahagian Mekanikal dan Elektrikal", code: "MNE" },
 ];
 
 const statusLabel = {
