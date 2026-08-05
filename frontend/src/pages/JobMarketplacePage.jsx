@@ -83,6 +83,11 @@ export default function LandingPage() {
   const [selectedId, setSelectedId] = useState(null);
   const [search, setSearch] = useState("");
   const [locationSearch, setLocationSearch] = useState("");
+  const [selectedFilters, setSelectedFilters] = useState({
+    category: "Semua",
+    type: "Semua",
+    department: "Semua",
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   useEffect(() => {
@@ -101,14 +106,25 @@ export default function LandingPage() {
     return opportunities.filter((job) =>
       (!keyword || `${job.title} ${job.department} ${job.division} ${job.summary}`.toLowerCase().includes(keyword)) &&
       (!locationKeyword || (job.location || "").toLowerCase().includes(locationKeyword)),
+    ).filter((job) =>
+      (selectedFilters.category === "Semua" ||
+        (selectedFilters.category === "Jawatan" && job.vacancy_type === "job") ||
+        (selectedFilters.category === "Latihan Industri" && job.vacancy_type === "internship")) &&
+      (selectedFilters.type === "Semua" || job.employment_type === selectedFilters.type) &&
+      (selectedFilters.department === "Semua" || (job.division || job.department) === selectedFilters.department),
     ).map(toOpportunity);
-  }, [locationSearch, opportunities, search]);
+  }, [locationSearch, opportunities, search, selectedFilters]);
   const selectedOpportunity = useMemo(
     () => filteredOpportunities.find((item) => item.id === selectedId) ?? filteredOpportunities[0] ?? null,
     [filteredOpportunities, selectedId],
   );
   const jobCount = opportunities.filter((job) => job.vacancy_type === "job").length;
   const internshipCount = opportunities.filter((job) => job.vacancy_type === "internship").length;
+  const marketFilters = useMemo(() => [
+    ["category", "Jenis Peluang", ["Semua", "Jawatan", "Latihan Industri"]],
+    ["type", "Jenis Kerja", ["Semua", ...new Set(opportunities.map((job) => job.employment_type).filter(Boolean))]],
+    ["department", "Bahagian", ["Semua", ...new Set(opportunities.map((job) => job.division || job.department).filter(Boolean))]],
+  ], [opportunities]);
 
   return (
     <div className="market-page">
@@ -182,14 +198,21 @@ export default function LandingPage() {
               <strong>Tapisan</strong>
             </div>
 
-            <div className="market-filter-group">
-              <h2>Jenis Peluang</h2>
-              <p>Gunakan carian untuk menapis jawatan atau latihan industri yang sedang dibuka.</p>
-            </div>
-            <div className="market-filter-group">
-              <h2>Maklumat rasmi</h2>
-              <p>Butiran penuh dan borang permohonan disediakan dalam dokumen setiap jawatan.</p>
-            </div>
+            {marketFilters.map(([key, title, values]) => (
+              <div className="market-filter-group" key={key}>
+                <h2>{title}</h2>
+                {values.map((value) => (
+                  <label key={value}>
+                    <input
+                      type="checkbox"
+                      checked={selectedFilters[key] === value}
+                      onChange={() => setSelectedFilters((current) => ({ ...current, [key]: value }))}
+                    />
+                    <span>{value}</span>
+                  </label>
+                ))}
+              </div>
+            ))}
           </aside>
 
           <section className="market-results" aria-labelledby="results-title">
