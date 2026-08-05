@@ -12,6 +12,23 @@ const dateLabel = (value) =>
     : "Tidak dinyatakan";
 const listItems = (value) =>
   value ? value.split("\n").filter(Boolean) : ["Rujuk dokumen rasmi untuk butiran lanjut."];
+const writeDocumentViewer = (viewerWindow, content = "") => {
+  viewerWindow.document.open();
+  viewerWindow.document.write(`<!doctype html>
+    <html lang="ms">
+      <head>
+        <title>Slide 1</title>
+        <style>
+          html, body { width: 100%; height: 100%; margin: 0; background: #f8fafc; }
+          body { display: grid; place-items: stretch; font-family: Arial, sans-serif; }
+          .loading { display: grid; place-items: center; color: #334155; font-size: 16px; font-weight: 700; }
+          iframe { width: 100%; height: 100%; border: 0; background: #fff; }
+        </style>
+      </head>
+      <body>${content || '<div class="loading">Memuatkan dokumen...</div>'}</body>
+    </html>`);
+  viewerWindow.document.close();
+};
 const dbkuDivisionCodes = {
   "Bahagian Audit Dalaman": "AUD",
   "Bahagian Projek Khas & Fasiliti Awam": "SPF",
@@ -134,6 +151,12 @@ export default function LandingPage() {
     const documentUrl = selectedOpportunity?.official_document;
     if (!documentUrl) return;
 
+    const viewerWindow = window.open("", "_blank");
+    if (viewerWindow) {
+      viewerWindow.opener = null;
+      writeDocumentViewer(viewerWindow);
+    }
+
     try {
       const blob = await fetchAuthenticatedBlob(documentUrl);
       const objectUrl = URL.createObjectURL(blob);
@@ -141,10 +164,17 @@ export default function LandingPage() {
         if (previousUrl) URL.revokeObjectURL(previousUrl);
         return objectUrl;
       });
-      const openedWindow = window.open(objectUrl, "_blank", "noopener,noreferrer");
-      if (!openedWindow) window.location.href = objectUrl;
+      if (viewerWindow) {
+        writeDocumentViewer(viewerWindow, `<iframe src="${objectUrl}" title="Dokumen rasmi DBKU"></iframe>`);
+      } else {
+        window.open(objectUrl, "_blank", "noopener,noreferrer") || (window.location.href = objectUrl);
+      }
     } catch {
-      window.open(documentUrl, "_blank", "noopener,noreferrer");
+      if (viewerWindow) {
+        viewerWindow.location.href = documentUrl;
+      } else {
+        window.open(documentUrl, "_blank", "noopener,noreferrer");
+      }
     }
   };
 
