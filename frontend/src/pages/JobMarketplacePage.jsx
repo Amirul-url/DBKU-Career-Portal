@@ -12,6 +12,34 @@ const dateLabel = (value) =>
     : "Tidak dinyatakan";
 const listItems = (value) =>
   value ? value.split("\n").filter(Boolean) : ["Rujuk dokumen rasmi untuk butiran lanjut."];
+const escapeHtml = (value) =>
+  String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+const openAboutBlankDocument = (documentUrl) => {
+  const viewerWindow = window.open("about:blank", "_blank");
+  if (!viewerWindow) return false;
+
+  viewerWindow.opener = null;
+  viewerWindow.document.open();
+  viewerWindow.document.write(`<!doctype html>
+    <html lang="ms">
+      <head>
+        <title>Slide 1</title>
+        <style>
+          html, body { width: 100%; height: 100%; margin: 0; background: #2f2f2f; }
+          iframe { width: 100%; height: 100%; border: 0; background: #2f2f2f; }
+        </style>
+      </head>
+      <body>
+        <iframe src="${escapeHtml(documentUrl)}" title="Dokumen rasmi DBKU"></iframe>
+      </body>
+    </html>`);
+  viewerWindow.document.close();
+  return true;
+};
 const dbkuDivisionCodes = {
   "Bahagian Audit Dalaman": "AUD",
   "Bahagian Projek Khas & Fasiliti Awam": "SPF",
@@ -125,6 +153,12 @@ export default function LandingPage() {
     () => filteredOpportunities.find((item) => item.id === selectedId) ?? filteredOpportunities[0] ?? null,
     [filteredOpportunities, selectedId],
   );
+  const handleDocumentOpen = (event) => {
+    const documentUrl = selectedOpportunity?.official_document_view_url || selectedOpportunity?.official_document;
+    if (!documentUrl) return;
+    event.preventDefault();
+    openAboutBlankDocument(documentUrl);
+  };
 
   return (
     <div className="market-page">
@@ -242,6 +276,7 @@ export default function LandingPage() {
                 {selectedOpportunity.official_document && (
                   <a
                     href={selectedOpportunity.official_document_view_url || selectedOpportunity.official_document}
+                    onClick={handleDocumentOpen}
                     target="_blank"
                     rel="noreferrer"
                   >
