@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { clearAuthSession, getStoredUser } from "../../lib/authApi";
 import { Icon } from "../applicant/ApplicantAuthShared";
+import SuperAdminApplicantsPanel from "./SuperAdminApplicantsPanel";
 
 const items = [
   ["dashboard", "Papan Pemuka"],
@@ -17,6 +18,7 @@ export default function SuperAdminShellPage() {
   const navigate = useNavigate();
   const user = getStoredUser();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [activePanel, setActivePanel] = useState("dashboard");
 
   useEffect(() => {
     if (!user) navigate("/login", { replace: true });
@@ -56,7 +58,7 @@ export default function SuperAdminShellPage() {
             icon === "section" ? (
               isSidebarOpen ? <p className="px-4 pb-2 pt-4 text-[13px] font-bold text-slate-400" key={`${label}-${index}`}>{label}</p> : <div className="h-6" key={`${label}-${index}`} />
             ) : (
-              <button className={`flex w-full items-center rounded-md py-3 text-left text-[15px] font-semibold ${isSidebarOpen ? "gap-4 px-4" : "justify-center px-0"} ${index === 0 ? "bg-emerald-50 text-slate-950" : "text-slate-950"}`} key={`${label}-${index}`} type="button" title={!isSidebarOpen ? label : undefined}>
+              <button className={`flex w-full items-center rounded-md py-3 text-left text-[15px] font-semibold ${isSidebarOpen ? "gap-4 px-4" : "justify-center px-0"} ${(label === "Papan Pemuka" ? activePanel === "dashboard" : label === "Pemohon" ? activePanel === "applicants" : false) ? "bg-emerald-50 text-slate-950" : "text-slate-950"}`} key={`${label}-${index}`} type="button" title={!isSidebarOpen ? label : undefined} onClick={() => { if (label === "Papan Pemuka") setActivePanel("dashboard"); if (label === "Pemohon") setActivePanel("applicants"); }}>
                 <Icon>{icon}</Icon>
                 {isSidebarOpen ? label : <span className="sr-only">{label}</span>}
               </button>
@@ -96,6 +98,7 @@ export default function SuperAdminShellPage() {
             </details>
           </div>
         </header>
+        {activePanel === "applicants" ? <SuperAdminApplicantsPanel /> : null}
       </main>
     </div>
   );

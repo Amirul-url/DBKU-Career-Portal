@@ -22,3 +22,16 @@ class User(AbstractUser):
 
     def __str__(self):
         return f"{self.username} ({self.role})"
+
+
+class ApplicantProfileData(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile_data")
+    personal = models.JSONField(default=dict, blank=True)
+    job_preferences = models.JSONField(default=dict, blank=True)
+    experience = models.JSONField(default=dict, blank=True)
+    academic = models.JSONField(default=dict, blank=True)
+    skills = models.JSONField(default=dict, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Profil {self.user.email}"

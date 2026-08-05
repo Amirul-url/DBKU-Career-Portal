@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getCities, getPostcodes, getStates } from "malaysia-postcodes";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { clearAuthSession, fetchAuthenticatedBlob, getStoredUser, updateCurrentUser } from "../../lib/authApi";
+import { apiRequest, clearAuthSession, fetchAuthenticatedBlob, getStoredUser, updateCurrentUser } from "../../lib/authApi";
 import { Icon } from "./ApplicantAuthShared";
 
 const sidebarNavItems = [
@@ -2518,6 +2518,28 @@ export default function ApplicantProfilePage() {
   const [skillsProfile, setSkillsProfile] = useState(() => getSavedSkills(user));
   const profileDisplayName = personalProfile.displayName || displayName;
   const profileEmail = personalProfile.email || email;
+
+  useEffect(() => {
+    if (!user || user.role !== "applicant") return undefined;
+
+    const timer = window.setTimeout(() => {
+      apiRequest("/auth/profile-data/", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          personal: personalProfile,
+          job_preferences: jobPreferences,
+          experience: experienceProfile,
+          academic: academicProfile,
+          skills: skillsProfile,
+        }),
+      }).catch(() => {
+        // Profil masih kekal di storan tempatan jika sambungan backend tidak tersedia.
+      });
+    }, 400);
+
+    return () => window.clearTimeout(timer);
+  }, [academicProfile, experienceProfile, jobPreferences, personalProfile, skillsProfile, user]);
 
   const handleSavePersonalProfile = async (profile) => {
     const savedProfile = await savePersonalProfile(user, profile);
