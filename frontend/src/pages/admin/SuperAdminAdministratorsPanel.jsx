@@ -35,7 +35,81 @@ const formatDateTime = (value) => {
 
 function AdminAccountModal({ account, error, form, mode, onChange, onClose, onSave, saving }) {
   const isEdit = mode === "edit";
-  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-5"><section className="w-full max-w-3xl overflow-hidden rounded-lg bg-white shadow-2xl" role="dialog" aria-modal="true" aria-label={isEdit ? "Kemaskini akaun pentadbir" : "Tambah akaun pentadbir"}><header className="flex items-center justify-between border-b border-slate-200 px-6 py-5"><h2 className="text-xl font-bold text-slate-950">{isEdit ? "Kemaskini Akaun" : "Tambah Akaun"}</h2><button className="rounded-md p-2 text-slate-500 hover:bg-slate-100" type="button" onClick={onClose} aria-label="Tutup"><Icon>close</Icon></button></header><form onSubmit={onSave}><div className="grid gap-4 px-6 py-5">{error ? <p className="rounded-md bg-red-50 p-3 text-sm font-semibold text-red-700">{error}</p> : null}<label className="grid gap-2 text-sm font-bold text-slate-600 md:col-span-2">Nama Penuh<input className="h-12 rounded-md border border-slate-300 px-3 font-normal text-slate-900" value={form.full_name} onChange={(event) => onChange("full_name", event.target.value)} placeholder="Masukkan nama penuh" required /></label><div className="grid gap-4 md:grid-cols-2"><label className="grid gap-2 text-sm font-bold text-slate-600">No. Kad Pengenalan<input className="h-12 rounded-md border border-slate-300 px-3 font-normal text-slate-900" value={form.mykad_number} onChange={(event) => onChange("mykad_number", event.target.value)} placeholder="Masukkan No. Kad Pengenalan" /></label><label className="grid gap-2 text-sm font-bold text-slate-600">E-mel<input className="h-12 rounded-md border border-slate-300 px-3 font-normal text-slate-900" value={form.email} onChange={(event) => onChange("email", event.target.value)} placeholder="Masukkan e-mel" type="email" required /></label><label className="grid gap-2 text-sm font-bold text-slate-600">Nombor Telefon<input className="h-12 rounded-md border border-slate-300 px-3 font-normal text-slate-900" value={form.mobile_number} onChange={(event) => onChange("mobile_number", event.target.value)} placeholder="Masukkan nombor telefon" /></label><label className="grid gap-2 text-sm font-bold text-slate-600">Jabatan<select className="h-12 rounded-md border border-slate-300 px-3 font-normal text-slate-900" value={form.department} onChange={(event) => onChange("department", event.target.value)} required>{departmentOptions.map((department) => <option value={department} key={department}>{department}</option>)}</select></label><label className="grid gap-2 text-sm font-bold text-slate-600">Peranan<select className="h-12 rounded-md border border-slate-300 px-3 font-normal text-slate-900" value={form.role} onChange={(event) => onChange("role", event.target.value)}>{roleOptions.map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></label><div className="grid gap-2 text-sm font-bold text-slate-600"><span>Notifikasi</span><div className="flex h-12 items-center gap-5 rounded-md border border-slate-300 px-3"><label className="inline-flex items-center gap-2 font-bold text-slate-700"><input type="checkbox" checked={form.notify_whatsapp} onChange={(event) => onChange("notify_whatsapp", event.target.checked)} />WhatsApp</label><label className="inline-flex items-center gap-2 font-bold text-slate-700"><input type="checkbox" checked={form.notify_email} onChange={(event) => onChange("notify_email", event.target.checked)} />E-mel</label></div></div><label className="grid gap-2 text-sm font-bold text-slate-600">Kata Laluan<input className="h-12 rounded-md border border-slate-300 px-3 font-normal text-slate-900" value={form.password} onChange={(event) => onChange("password", event.target.value)} placeholder={isEdit ? "Biarkan kosong untuk kekalkan kata laluan semasa" : "Masukkan kata laluan"} type="password" required={!isEdit} /></label><label className="grid gap-2 text-sm font-bold text-slate-600">Sahkan Kata Laluan<input className="h-12 rounded-md border border-slate-300 px-3 font-normal text-slate-900" value={form.confirm_password} onChange={(event) => onChange("confirm_password", event.target.value)} placeholder="Sahkan kata laluan" type="password" required={!isEdit || Boolean(form.password)} /></label></div>{account ? <label className="inline-flex items-center gap-2 text-sm font-bold text-slate-700"><input type="checkbox" checked={form.is_active} onChange={(event) => onChange("is_active", event.target.checked)} />Akaun aktif</label> : null}</div><footer className="flex justify-end gap-3 border-t border-slate-200 px-6 py-4"><button className="rounded-md border border-slate-300 px-4 py-2 font-bold text-slate-600" type="button" onClick={onClose}>Batal</button><button className="rounded-md bg-emerald-700 px-4 py-2 font-bold text-white hover:bg-emerald-800 disabled:opacity-60" disabled={saving} type="submit">{saving ? "Menyimpan..." : "Simpan"}</button></footer></form></section></div>;
+  const inputClass = "h-12 w-full rounded-md border border-slate-300 px-4 text-sm font-semibold text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100";
+  const labelClass = "grid gap-2 text-sm font-bold text-slate-600";
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-5">
+      <section className="w-full max-w-[780px] overflow-hidden rounded-xl bg-white shadow-2xl" role="dialog" aria-modal="true" aria-label={isEdit ? "Kemaskini akaun pentadbir" : "Tambah akaun pentadbir"}>
+        <header className="flex items-center justify-between border-b border-slate-200 px-7 py-5">
+          <h2 className="text-2xl font-bold text-slate-950">{isEdit ? "Kemaskini Akaun" : "Tambah Akaun"}</h2>
+          <button className="rounded-md p-2 text-slate-500 hover:bg-slate-100" type="button" onClick={onClose} aria-label="Tutup">
+            <Icon>close</Icon>
+          </button>
+        </header>
+
+        <form onSubmit={onSave}>
+          <div className="grid gap-5 px-7 py-6">
+            {error ? <p className="rounded-md bg-red-50 p-3 text-sm font-semibold text-red-700">{error}</p> : null}
+
+            <label className={labelClass}>
+              Nama Penuh
+              <input className={inputClass} value={form.full_name} onChange={(event) => onChange("full_name", event.target.value)} placeholder="Masukkan nama penuh" required />
+            </label>
+
+            <div className="grid gap-5 md:grid-cols-2">
+              <label className={labelClass}>
+                No. Kad Pengenalan
+                <input className={inputClass} value={form.mykad_number} onChange={(event) => onChange("mykad_number", event.target.value)} placeholder="Masukkan No. Kad Pengenalan" />
+              </label>
+              <label className={labelClass}>
+                E-mel
+                <input className={inputClass} value={form.email} onChange={(event) => onChange("email", event.target.value)} placeholder="Masukkan e-mel" type="email" required />
+              </label>
+              <label className={labelClass}>
+                Nombor Telefon
+                <input className={inputClass} value={form.mobile_number} onChange={(event) => onChange("mobile_number", event.target.value)} placeholder="Masukkan nombor telefon" />
+              </label>
+              <label className={labelClass}>
+                Jabatan
+                <select className={inputClass} value={form.department} onChange={(event) => onChange("department", event.target.value)} required>
+                  {departmentOptions.map((department) => <option value={department} key={department}>{department}</option>)}
+                </select>
+              </label>
+              <label className={labelClass}>
+                Peranan
+                <select className={inputClass} value={form.role} onChange={(event) => onChange("role", event.target.value)}>
+                  {roleOptions.map(([value, label]) => <option value={value} key={value}>{label}</option>)}
+                </select>
+              </label>
+              <div className={labelClass}>
+                <span>Notifikasi</span>
+                <div className="flex h-12 items-center gap-6 rounded-md border border-slate-300 px-4 text-sm font-bold text-slate-700">
+                  <label className="inline-flex items-center gap-2"><input type="checkbox" checked={form.notify_whatsapp} onChange={(event) => onChange("notify_whatsapp", event.target.checked)} />WhatsApp</label>
+                  <label className="inline-flex items-center gap-2"><input type="checkbox" checked={form.notify_email} onChange={(event) => onChange("notify_email", event.target.checked)} />E-mel</label>
+                </div>
+              </div>
+              <label className={labelClass}>
+                Kata Laluan
+                <input className={inputClass} value={form.password} onChange={(event) => onChange("password", event.target.value)} placeholder={isEdit ? "Kosongkan jika tidak mahu tukar" : "Masukkan kata laluan"} type="password" required={!isEdit} />
+              </label>
+              <label className={labelClass}>
+                Sahkan Kata Laluan
+                <input className={inputClass} value={form.confirm_password} onChange={(event) => onChange("confirm_password", event.target.value)} placeholder="Sahkan kata laluan" type="password" required={!isEdit || Boolean(form.password)} />
+              </label>
+            </div>
+
+            {account ? <label className="inline-flex items-center gap-2 text-sm font-bold text-slate-700"><input type="checkbox" checked={form.is_active} onChange={(event) => onChange("is_active", event.target.checked)} />Akaun aktif</label> : null}
+          </div>
+
+          <footer className="flex justify-end gap-3 border-t border-slate-200 bg-slate-50 px-7 py-4">
+            <button className="rounded-md border border-slate-300 bg-white px-5 py-2 font-bold text-slate-600 hover:bg-slate-50" type="button" onClick={onClose}>Batal</button>
+            <button className="rounded-md bg-emerald-700 px-5 py-2 font-bold text-white hover:bg-emerald-800 disabled:opacity-60" disabled={saving} type="submit">{saving ? "Menyimpan..." : "Simpan"}</button>
+          </footer>
+        </form>
+      </section>
+    </div>
+  );
 }
 
 export default function SuperAdminAdministratorsPanel() {
