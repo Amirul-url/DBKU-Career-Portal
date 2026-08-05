@@ -2,10 +2,12 @@ from rest_framework import permissions, status
 from rest_framework.decorators import api_view, parser_classes, permission_classes
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
+from django.utils import timezone
+from django.utils.dateparse import parse_date
 from django.db.models import Q
 
-from .models import ApplicantProfileData, User
-from .serializers import InternalHrmAccountSerializer, LoginSerializer, RegisterSerializer, SuperAdminAccountSerializer, UserSerializer
+from .models import AccountActivity, ApplicantProfileData, User
+from .serializers import AccountActivitySerializer, InternalHrmAccountSerializer, LoginSerializer, RegisterSerializer, SuperAdminAccountSerializer, UserSerializer
 from .services import build_auth_response
 
 
@@ -23,7 +25,26 @@ def register_view(request):
 def login_view(request):
     serializer = LoginSerializer(data=request.data, context={"request": request})
     serializer.is_valid(raise_exception=True)
-    return Response(build_auth_response(serializer.validated_data["user"], request))
+    user = serializer.validated_data["user"]
+    now = timezone.now()
+    user.last_login = now
+    user.save(update_fields=["last_login"])
+    AccountActivity.objects.create(user=user, action="login", duration_seconds=0)
+    return Response(build_auth_response(user, request))
+
+
+@api_view(["POST"])
+def logout_view(request):
+    if not request.user.is_authenticated:
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    latest_login = AccountActivity.objects.filter(user=request.user, action="login").order_by("-created_at").first()
+    latest_logout = AccountActivity.objects.filter(user=request.user, action="logout").order_by("-created_at").first()
+    duration_seconds = 0
+    if latest_login and (not latest_logout or latest_logout.created_at < latest_login.created_at):
+        duration_seconds = max(0, int((timezone.now() - latest_login.created_at).total_seconds()))
+    AccountActivity.objects.create(user=request.user, action="logout", duration_seconds=duration_seconds)
+    return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 @api_view(["GET", "PATCH"])
@@ -99,6 +120,22 @@ def superadmin_applicant_profile_view(request, user_id):
         return Response({"detail": "Pemohon tidak ditemui."}, status=status.HTTP_404_NOT_FOUND)
     profile, _created = ApplicantProfileData.objects.get_or_create(user=applicant)
     return Response({"applicant": UserSerializer(applicant, context={"request": request}).data, "profile": profile_payload(profile)})
+
+
+@api_view(["GET"])
+def superadmin_account_activities_view(request):
+    if request.user.role != "superadmin":
+        return Response({"detail": "Akses Super Admin diperlukan."}, status=status.HTTP_403_FORBIDDEN)
+
+    queryset = AccountActivity.objects.select_related("user").all()
+    selected_date = parse_date(request.query_params.get("date", ""))
+    if selected_date:
+        queryset = queryset.filter(created_at__date=selected_date)
+    try:
+        limit = min(max(int(request.query_params.get("limit", 5)), 1), 50)
+    except ValueError:
+        limit = 5
+    return Response(AccountActivitySerializer(queryset[:limit], many=True).data)
 
 
 @api_view(["GET", "POST"])

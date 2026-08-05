@@ -1,8 +1,33 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { apiRequest } from "../../lib/authApi";
 import { Icon } from "../applicant/ApplicantAuthShared";
 
 const display = (value) => value || "-";
+const toDateInputValue = (date) => date.toISOString().slice(0, 10);
+
+function formatDuration(totalSeconds = 0) {
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(hours).padStart(2, "0")}h ${String(minutes).padStart(2, "0")}m ${String(seconds).padStart(2, "0")}s`;
+}
+
+function formatActivityDate(value) {
+  if (!value) return "-";
+  return new Date(value).toLocaleString("ms-MY", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function shiftDate(value, offset) {
+  const baseDate = value ? new Date(`${value}T00:00:00`) : new Date();
+  baseDate.setDate(baseDate.getDate() + offset);
+  return toDateInputValue(baseDate);
+}
 
 function StatCard({ accentClass, icon, rows, title }) {
   return (
@@ -71,8 +96,21 @@ export default function SuperAdminDashboardPanel({ user }) {
   const [applicants, setApplicants] = useState([]);
   const [administrators, setAdministrators] = useState([]);
   const [superadmins, setSuperadmins] = useState([]);
+  const [activities, setActivities] = useState([]);
+  const [activityDate, setActivityDate] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [activityLoading, setActivityLoading] = useState(true);
+
+  const loadActivities = useCallback((selectedDate = activityDate) => {
+    setActivityLoading(true);
+    const params = new URLSearchParams({ limit: "5" });
+    if (selectedDate) params.set("date", selectedDate);
+    return apiRequest(`/auth/account-activities/?${params.toString()}`)
+      .then(setActivities)
+      .catch((requestError) => setError(requestError.message || "Aktiviti akaun tidak dapat dimuatkan."))
+      .finally(() => setActivityLoading(false));
+  }, [activityDate]);
 
   useEffect(() => {
     let isMounted = true;
@@ -96,18 +134,12 @@ export default function SuperAdminDashboardPanel({ user }) {
     return () => { isMounted = false; };
   }, []);
 
-  const activityRows = useMemo(() => {
-    const rows = [
-      ...superadmins.map((account) => ({ ...account, roleLabel: "Super Admin" })),
-      ...administrators.map((account) => ({ ...account, roleLabel: "Pentadbir" })),
-      ...applicants.map((account) => ({ ...account, roleLabel: "Pemohon" })),
-    ];
-    return rows
-      .sort((a, b) => String(b.last_login || "").localeCompare(String(a.last_login || "")))
-      .slice(0, 5);
-  }, [administrators, applicants, superadmins]);
+  useEffect(() => { loadActivities(""); }, []);
 
-  const totalAccounts = applicants.length + administrators.length + superadmins.length;
+  const updateActivityDate = (value) => {
+    setActivityDate(value);
+    loadActivities(value);
+  };
 
   return (
     <section className="p-8">
@@ -118,11 +150,10 @@ export default function SuperAdminDashboardPanel({ user }) {
 
       {error ? <p className="mb-5 rounded-md bg-red-50 p-4 text-sm font-semibold text-red-700">{error}</p> : null}
 
-      <div className="grid gap-4 xl:grid-cols-4 md:grid-cols-2">
+      <div className="grid gap-4 xl:grid-cols-3 md:grid-cols-2">
         <StatCard accentClass="bg-emerald-50 text-emerald-700" icon="group" title="Akaun Pemohon" rows={[{ icon: "group", label: "Pemohon", value: loading ? "..." : applicants.length }]} />
         <StatCard accentClass="bg-emerald-50 text-emerald-700" icon="admin_panel_settings" title="Akaun DBKU" rows={[{ icon: "admin_panel_settings", label: "Pentadbir", value: loading ? "..." : administrators.length }]} />
         <StatCard accentClass="bg-blue-50 text-blue-700" icon="shield_person" title="Akaun Sistem" rows={[{ icon: "shield_person", label: "Super Admin", value: loading ? "..." : superadmins.length }]} />
-        <StatCard accentClass="bg-amber-50 text-amber-700" icon="dashboard" title="Jumlah Akaun" rows={[{ icon: "person", label: "Keseluruhan", value: loading ? "..." : totalAccounts }]} />
       </div>
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
@@ -130,7 +161,16 @@ export default function SuperAdminDashboardPanel({ user }) {
           <header className="flex items-center justify-between gap-4 border-b border-slate-200 px-5 py-4">
             <div>
               <h2 className="font-bold text-slate-950">Aktiviti Terkini</h2>
-              <p className="mt-1 text-sm text-slate-500">{loading ? "Memuatkan aktiviti..." : `${activityRows.length} akaun terkini`}</p>
+              <p className="mt-1 text-sm text-slate-500">{activityLoading ? "Memuatkan aktiviti..." : `${activities.length} aktiviti akaun terkini`}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <input className="h-10 rounded-md border border-slate-300 px-3 text-sm font-semibold text-slate-900" type="date" value={activityDate} onChange={(event) => updateActivityDate(event.target.value)} />
+              <button className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50" type="button" aria-label="Tarikh sebelumnya" onClick={() => updateActivityDate(shiftDate(activityDate, -1))}>
+                <Icon>chevron_left</Icon>
+              </button>
+              <button className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50" type="button" aria-label="Tarikh seterusnya" onClick={() => updateActivityDate(shiftDate(activityDate, 1))}>
+                <Icon>chevron_right</Icon>
+              </button>
             </div>
           </header>
           <div className="overflow-x-auto">
@@ -142,20 +182,21 @@ export default function SuperAdminDashboardPanel({ user }) {
                 </tr>
               </thead>
               <tbody>
-                {loading ? <tr><td className="px-5 py-6 text-slate-500" colSpan="2">Memuatkan aktiviti...</td></tr> : null}
-                {!loading && activityRows.length ? activityRows.map((account) => (
-                  <tr className="border-t border-slate-100" key={`${account.roleLabel}-${account.id}`}>
+                {activityLoading ? <tr><td className="px-5 py-6 text-slate-500" colSpan="2">Memuatkan aktiviti...</td></tr> : null}
+                {!activityLoading && activities.length ? activities.map((activity) => (
+                  <tr className="border-t border-slate-100" key={activity.id}>
                     <td className="px-5 py-5">
-                      <p className="font-bold text-slate-950">{display(account.first_name || account.full_name || account.email).toUpperCase()}</p>
-                      <p className="mt-1 text-slate-600">{account.last_login ? "Log masuk" : "Akaun tersedia"}</p>
-                      <p className="mt-1 text-slate-500">{account.last_login ? new Date(account.last_login).toLocaleString("ms-MY") : display(account.email)}</p>
+                      <p className="font-bold text-slate-950">{display(activity.full_name || activity.email).toUpperCase()}</p>
+                      <p className="mt-1 text-slate-600">{activity.action_label}</p>
+                      <p className="mt-1 text-slate-500">Jumlah masa: {formatDuration(activity.duration_seconds)}</p>
+                      <p className="mt-1 text-slate-500">{formatActivityDate(activity.created_at)}</p>
                     </td>
                     <td className="px-5 py-5">
-                      <span className="rounded-full bg-rose-50 px-3 py-1 text-xs font-bold text-rose-600">{account.roleLabel}</span>
+                      <span className="rounded-full bg-rose-50 px-3 py-1 text-xs font-bold text-rose-600">{activity.role_label}</span>
                     </td>
                   </tr>
                 )) : null}
-                {!loading && !activityRows.length ? <tr><td className="px-5 py-6 text-slate-500" colSpan="2">Tiada aktiviti untuk dipaparkan.</td></tr> : null}
+                {!activityLoading && !activities.length ? <tr><td className="px-5 py-6 text-slate-500" colSpan="2">Tiada aktiviti untuk dipaparkan.</td></tr> : null}
               </tbody>
             </table>
           </div>

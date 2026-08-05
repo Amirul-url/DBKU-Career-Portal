@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getCities, getPostcodes, getStates } from "malaysia-postcodes";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { apiRequest, clearAuthSession, fetchAuthenticatedBlob, getStoredUser, updateCurrentUser } from "../../lib/authApi";
+import { apiRequest, clearAuthSession, fetchAuthenticatedBlob, getStoredUser, recordLogoutActivity, updateCurrentUser } from "../../lib/authApi";
 import { Icon } from "./ApplicantAuthShared";
 
 const sidebarNavItems = [
@@ -1090,7 +1090,8 @@ function ProfileContentHeader({ displayName, email, photoUrl }) {
   const profileInitial = displayName?.charAt(0) || email?.charAt(0) || "P";
   const profileChip = photoUrl ? <img src={photoUrl} alt="" /> : profileInitial;
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await recordLogoutActivity();
     clearAuthSession();
     navigate("/login");
   };

@@ -105,6 +105,10 @@ export function clearAuthSession() {
   localStorage.removeItem(TOKEN_STORAGE_KEYS.user);
 }
 
+export function recordLogoutActivity() {
+  return apiRequest("/auth/logout/", { method: "POST" }).catch(() => null);
+}
+
 export async function fetchAuthenticatedBlob(url) {
   const accessToken = getAccessToken();
   const headers = {};

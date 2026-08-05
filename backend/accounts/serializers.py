@@ -2,6 +2,7 @@ from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
+from .models import AccountActivity
 
 User = get_user_model()
 
@@ -266,6 +267,38 @@ class SuperAdminAccountSerializer(serializers.ModelSerializer):
         instance.is_staff = True
         instance.save()
         return instance
+
+
+class AccountActivitySerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(source="user.email", read_only=True)
+    full_name = serializers.SerializerMethodField()
+    role = serializers.CharField(source="user.role", read_only=True)
+    role_label = serializers.SerializerMethodField()
+    action_label = serializers.CharField(source="get_action_display", read_only=True)
+
+    class Meta:
+        model = AccountActivity
+        fields = (
+            "id",
+            "email",
+            "full_name",
+            "role",
+            "role_label",
+            "action",
+            "action_label",
+            "duration_seconds",
+            "created_at",
+        )
+
+    def get_full_name(self, obj):
+        return obj.user.get_full_name() or obj.user.username
+
+    def get_role_label(self, obj):
+        return {
+            "superadmin": "Super Admin",
+            "admin": "Pentadbir",
+            "applicant": "Pemohon",
+        }.get(obj.user.role, obj.user.role)
 
 
 class LoginSerializer(serializers.Serializer):

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { clearAuthSession, getStoredUser } from "../../lib/authApi";
+import { clearAuthSession, getStoredUser, recordLogoutActivity } from "../../lib/authApi";
 import { Icon } from "../applicant/ApplicantAuthShared";
 import SuperAdminAdministratorsPanel from "./SuperAdminAdministratorsPanel";
 import SuperAdminApplicantsPanel from "./SuperAdminApplicantsPanel";
@@ -35,7 +35,8 @@ export default function SuperAdminShellPage() {
   const photoUrl = user.profile_photo_url || "";
   const profileChip = photoUrl ? <img src={photoUrl} alt="" /> : displayName.charAt(0);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await recordLogoutActivity();
     clearAuthSession();
     navigate("/login", { replace: true });
   };
