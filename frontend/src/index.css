@@ -2595,15 +2595,16 @@ a {
 .market-reference-shell .market-results { border: 0; border-radius: 0; background: transparent; box-shadow: none; padding: 0; }
 .market-reference-shell .market-results-head { display: none; }
 .market-reference-shell .market-job-list { gap: 14px; }
-.market-reference-shell .market-job-card { min-height: 0; grid-template-columns: 54px minmax(0, 1fr); border-color: #d7e0db; border-radius: 8px; box-shadow: none; padding: 18px; }
+.market-reference-shell .market-job-card { min-height: 0; grid-template-columns: 72px minmax(0, 1fr); align-items: start; border-color: #d7e0db; border-radius: 8px; box-shadow: none; padding: 20px; }
 .market-reference-shell .market-job-card.selected { border: 2px solid #16a34a; background: #fff; }
-.market-reference-shell .market-job-badge { grid-column: 1 / -1; grid-row: 1; justify-self: start; margin-bottom: 6px; }
-.market-reference-shell .market-job-icon { grid-row: 2; }
-.market-reference-shell .market-job-main { grid-row: 2; }
-.market-reference-shell .market-job-top { display: block; }
-.market-reference-shell .market-job-top small { display: block; margin-top: 8px; }
-.market-reference-shell .market-job-summary { display: none; }
-.market-reference-shell .market-job-meta { display: none; }
+.market-card-logo { display: grid; width: 56px; height: 56px; place-items: center; overflow: hidden; border: 1px solid #dce6e1; border-radius: 5px; background: #fff; }
+.market-card-logo img { width: 48px; height: 48px; object-fit: contain; }
+.market-reference-shell .market-job-main { display: grid; gap: 5px; padding-top: 1px; }
+.market-job-title { color: #142033; font-size: 18px; font-weight: 850; line-height: 1.35; }
+.market-reference-shell .market-job-dept { color: #516c5e; font-size: 14px; font-weight: 750; }
+.market-job-location,.market-job-type,.market-job-posted { color: #617069; font-size: 14px; line-height: 1.4; }
+.market-job-type { color: #42584c; font-weight: 700; }
+.market-job-posted { display: block; margin-top: 5px; color: #8a968f; font-size: 13px; }
 .market-reference-shell .market-detail { position: sticky; top: 94px; overflow: visible; border-radius: 10px; box-shadow: 0 12px 30px rgba(20, 56, 38, .06); }
 .market-reference-shell .market-detail-icon { position: absolute; z-index: 1; top: 24px; right: 26px; width: 54px; height: 54px; border: 1px solid #cdebd9; border-radius: 14px; background: #effaf4; }
 .market-reference-shell .market-detail-icon .material-symbols-outlined { font-size: 29px; }

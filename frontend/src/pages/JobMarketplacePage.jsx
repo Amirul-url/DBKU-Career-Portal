@@ -48,32 +48,16 @@ function OpportunityCard({ opportunity, selected, onSelect }) {
       className={`market-job-card ${selected ? "selected" : ""}`}
       onClick={onSelect}
     >
-      <span className="market-job-icon">
-        <Icon>{opportunity.icon}</Icon>
+      <span className="market-card-logo">
+        <img src="/logo-dbku.png" alt="Logo DBKU" />
       </span>
       <span className="market-job-main">
-        <span className="market-job-top">
-          <strong>{opportunity.title}</strong>
-          <small>{opportunity.posted}</small>
-        </span>
+        <strong className="market-job-title">{opportunity.title}</strong>
         <span className="market-job-dept">{opportunity.department}</span>
-        <span className="market-job-summary">{opportunity.summary}</span>
-        <span className="market-job-meta">
-          <span>
-            <Icon>work</Icon>
-            {opportunity.type}
-          </span>
-          <span>
-            <Icon>payments</Icon>
-            {opportunity.salary}
-          </span>
-          <span>
-            <Icon>event</Icon>
-            Tutup {opportunity.closing}
-          </span>
-        </span>
+        <span className="market-job-location">{opportunity.location}</span>
+        <span className="market-job-type">{opportunity.type}, Waktu bekerja biasa</span>
+        <small className="market-job-posted">{opportunity.posted}</small>
       </span>
-      <span className="market-job-badge">{opportunity.category}</span>
     </button>
   );
 }
