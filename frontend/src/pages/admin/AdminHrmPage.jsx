@@ -323,7 +323,6 @@ export default function AdminHrmPage() {
           {panel === "Tambah Jawatan" && (
             <form className="vacancy-notice-form" onSubmit={submitJob}>
               <header className="vacancy-notice-head">
-                <img src="/logo-dbku.png" alt="Logo DBKU" />
                 <h1>DEWAN BANDARAYA KUCHING UTARA</h1>
                 <h2>Jawatan Kosong</h2>
               </header>
