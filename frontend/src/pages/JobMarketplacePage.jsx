@@ -191,13 +191,13 @@ export default function LandingPage() {
             <div className="market-detail-body">
               <span className="market-job-badge">{selectedOpportunity.category}</span>
               <h2>{selectedOpportunity.title}</h2>
+              <div className="market-detail-department">
+                <Icon>apartment</Icon>
+                {selectedOpportunity.department}
+              </div>
               <p>{selectedOpportunity.summary}</p>
 
               <div className="market-detail-meta">
-                <span>
-                  <Icon>apartment</Icon>
-                  {selectedOpportunity.department}
-                </span>
                 <span>
                   <Icon>location_on</Icon>
                   {selectedOpportunity.location}
