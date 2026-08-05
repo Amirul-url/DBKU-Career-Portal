@@ -40,6 +40,7 @@ const getActiveClass = ({ isActive }) => (isActive ? "active" : undefined);
 const iconMap = {
   add_circle: CirclePlus,
   cancel: X,
+  close: X,
   check: Check,
   description: FileText,
   dashboard: LayoutDashboard,

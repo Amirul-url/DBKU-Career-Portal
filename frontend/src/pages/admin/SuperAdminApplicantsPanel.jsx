@@ -8,7 +8,7 @@ function valueOrDash(value) {
 }
 
 function ReadOnlySection({ children, title }) {
-  return <section className="rounded-lg border border-emerald-100 border-t-4 border-t-emerald-500 bg-white p-5"><h3 className="mb-4 text-lg font-bold text-slate-900">{title}</h3>{children}</section>;
+  return <details className="group rounded-lg border border-emerald-100 border-t-4 border-t-emerald-500 bg-white" open><summary className="flex cursor-pointer list-none items-center justify-between px-5 py-4 [&::-webkit-details-marker]:hidden"><h3 className="text-2xl font-bold text-slate-950">{title}</h3><span className="text-emerald-700 transition-transform group-open:rotate-180"><Icon>expand_more</Icon></span></summary><div className="border-t border-slate-200 px-5 pb-5 pt-5">{children}</div></details>;
 }
 
 function DetailGrid({ values }) {
