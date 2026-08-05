@@ -87,7 +87,7 @@ body .hrm-template-note { margin: -4px 0 4px; border-left: 3px solid #16a34a; ba
 body .hrm-job-form input[type="file"] { padding: 8px; font-size: 11px; }
 body .hrm-file-help { color: #718478; font-size: 10px; font-weight: 700; }
 body .hrm-document-column { display: grid; align-content: start; gap: 20px; }
-body .hrm-document-preview { overflow: hidden; }
+body .hrm-document-preview { display: none; overflow: hidden; }
 body .hrm-document-preview header span { max-width: 220px; overflow: hidden; color: #718478; font-size: 11px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
 body .hrm-document-preview iframe { display: block; width: 100%; height: 510px; border: 0; background: #f8fafc; }
 body .hrm-document-preview img { display: block; width: 100%; max-height: 610px; object-fit: contain; background: #f8fafc; }
