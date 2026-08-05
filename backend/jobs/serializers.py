@@ -13,6 +13,7 @@ class VacancySerializer(serializers.ModelSerializer):
             "title",
             "vacancy_type",
             "department",
+            "division",
             "advertisement_no",
             "service_group",
             "service_classification",

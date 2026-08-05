@@ -99,6 +99,7 @@ export default function AdminHrmPage() {
     title: "",
     vacancy_type: "job",
     department: "",
+    division: "",
     location: "",
     advertisement_no: "",
     service_group: "",
@@ -179,6 +180,7 @@ export default function AdminHrmPage() {
         title: "",
         vacancy_type: "job",
         department: "",
+        division: "",
         location: "",
         employment_type: "",
         grade: "",
@@ -330,7 +332,8 @@ export default function AdminHrmPage() {
             <form className="simple-job-form" onSubmit={submitJob}>
               <header><span className="hrm-eyebrow">TAMBAH JAWATAN</span><h1>Siarkan jawatan baharu</h1><p>Masukkan ringkasan penting. Maklumat penuh disediakan melalui dokumen rasmi untuk dimuat turun pemohon.</p></header>
               <label>Tajuk jawatan<input required value={jobForm.title} onChange={(event) => setJobForm({ ...jobForm, title: event.target.value })} placeholder="cth. Penolong Pegawai Penerangan Gred S5" /></label>
-              <div className="simple-job-form-grid"><label>Bahagian<select required value={jobForm.department} onChange={(event) => setJobForm({ ...jobForm, department: event.target.value })}><option value="">Pilih bahagian DBKU</option>{dbkuDepartments.map((department) => <option key={department} value={department}>{department}</option>)}</select></label><label>Lokasi<input value={jobForm.location || ""} onChange={(event) => setJobForm({ ...jobForm, location: event.target.value })} placeholder="cth. Petra Jaya, Kuching" /></label></div>
+              <label>Bahagian<select required value={jobForm.division || ""} onChange={(event) => setJobForm({ ...jobForm, division: event.target.value })}><option value="">Pilih bahagian DBKU</option>{dbkuDepartments.map((division) => <option key={division} value={division}>{division}</option>)}</select></label>
+              <div className="simple-job-form-grid"><label>Jabatan<input required value={jobForm.department} onChange={(event) => setJobForm({ ...jobForm, department: event.target.value })} placeholder="cth. Jabatan Pentadbiran" /></label><label>Lokasi<input value={jobForm.location || ""} onChange={(event) => setJobForm({ ...jobForm, location: event.target.value })} placeholder="cth. Petra Jaya, Kuching" /></label></div>
               <div className="simple-job-form-grid"><label>Jenis lantikan<select value={jobForm.employment_type} onChange={(event) => setJobForm({ ...jobForm, employment_type: event.target.value })}><option value="">Pilih jenis</option><option>Tetap</option><option>Kontrak</option><option>Latihan Industri</option></select></label><label>Tarikh tutup<input required type="date" value={jobForm.closing_date} onChange={(event) => setJobForm({ ...jobForm, closing_date: event.target.value })} /></label></div>
               <label>Ringkasan jawatan<textarea required value={jobForm.summary} onChange={(event) => setJobForm({ ...jobForm, summary: event.target.value })} placeholder="Terangkan ringkas peranan atau perkara utama jawatan ini..." /></label>
               <label>Dokumen rasmi untuk pemohon<input required type="file" accept="application/pdf,image/png,image/jpeg" onChange={(event) => setDocumentFile(event.target.files?.[0] || null)} /><small>Muat naik fail iklan atau borang permohonan. Pemohon akan memuat turun fail ini untuk butiran penuh.</small></label>

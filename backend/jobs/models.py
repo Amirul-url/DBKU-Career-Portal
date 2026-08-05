@@ -19,6 +19,7 @@ class Vacancy(models.Model):
     title = models.CharField(max_length=180)
     vacancy_type = models.CharField(max_length=20, choices=TYPE_CHOICES)
     department = models.CharField(max_length=120)
+    division = models.CharField(max_length=120, blank=True)
     advertisement_no = models.CharField(max_length=60, blank=True)
     service_group = models.CharField(max_length=100, blank=True)
     service_classification = models.CharField(max_length=100, blank=True)
