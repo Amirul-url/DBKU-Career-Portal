@@ -39,12 +39,6 @@ function formatActivityRange(activity) {
   return `${formatActivityDate(loginDate)} - ${logoutDate.toLocaleTimeString("ms-MY", { hour: "2-digit", minute: "2-digit" })}`;
 }
 
-function shiftDate(value, offset) {
-  const baseDate = new Date(`${value || todayInputValue()}T00:00:00`);
-  baseDate.setDate(baseDate.getDate() + offset);
-  return toDateInputValue(baseDate);
-}
-
 function buildActivitySessions(activities) {
   const skipNextLoginByUser = new Set();
   const sessions = [];
@@ -136,20 +130,20 @@ export default function SuperAdminDashboardPanel({ user }) {
   const [administrators, setAdministrators] = useState([]);
   const [superadmins, setSuperadmins] = useState([]);
   const [activities, setActivities] = useState([]);
-  const [activityDate, setActivityDate] = useState(todayInputValue);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [activityLoading, setActivityLoading] = useState(true);
+  const activityDate = todayInputValue();
 
-  const loadActivities = useCallback((selectedDate = activityDate) => {
+  const loadActivities = useCallback(() => {
     setActivityLoading(true);
     const params = new URLSearchParams({ limit: "50" });
-    params.set("date", selectedDate || todayInputValue());
+    params.set("date", todayInputValue());
     return apiRequest(`/auth/account-activities/?${params.toString()}`)
       .then(setActivities)
       .catch((requestError) => setError(requestError.message || "Aktiviti akaun tidak dapat dimuatkan."))
       .finally(() => setActivityLoading(false));
-  }, [activityDate]);
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -173,15 +167,9 @@ export default function SuperAdminDashboardPanel({ user }) {
     return () => { isMounted = false; };
   }, []);
 
-  useEffect(() => { loadActivities(activityDate); }, []);
+  useEffect(() => { loadActivities(); }, [loadActivities]);
 
   const activitySessions = useMemo(() => buildActivitySessions(activities), [activities]);
-
-  const updateActivityDate = (value) => {
-    const selectedDate = value || todayInputValue();
-    setActivityDate(selectedDate);
-    loadActivities(selectedDate);
-  };
 
   return (
     <section className="p-8">
@@ -206,11 +194,11 @@ export default function SuperAdminDashboardPanel({ user }) {
               <p className="mt-1 text-sm text-slate-500">{activityLoading ? "Memuatkan aktiviti..." : `${activitySessions.length} aktiviti akaun terkini`}</p>
             </div>
             <div className="flex items-center gap-2">
-              <input className="h-10 rounded-md border border-slate-300 px-3 text-sm font-semibold text-slate-900" type="date" value={activityDate} onChange={(event) => updateActivityDate(event.target.value)} />
-              <button className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50" type="button" aria-label="Tarikh sebelumnya" onClick={() => updateActivityDate(shiftDate(activityDate, -1))}>
+              <input className="h-10 cursor-not-allowed rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-900 opacity-100" type="date" value={activityDate} disabled aria-label="Tarikh hari ini" />
+              <button className="inline-flex h-10 w-10 cursor-not-allowed items-center justify-center rounded-md border border-slate-200 text-slate-400 opacity-50" type="button" aria-label="Tarikh sebelumnya" disabled>
                 <Icon>chevron_left</Icon>
               </button>
-              <button className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50" type="button" aria-label="Tarikh seterusnya" onClick={() => updateActivityDate(shiftDate(activityDate, 1))}>
+              <button className="inline-flex h-10 w-10 cursor-not-allowed items-center justify-center rounded-md border border-slate-200 text-slate-400 opacity-50" type="button" aria-label="Tarikh seterusnya" disabled>
                 <Icon>chevron_right</Icon>
               </button>
             </div>
