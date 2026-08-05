@@ -82,14 +82,14 @@ export default function LandingPage() {
   const [searchParams] = useSearchParams();
   const vacancyType = searchParams.get("type") === "internship" ? "internship" : "job";
   const isInternshipPage = vacancyType === "internship";
-  const employmentFilter = isInternshipPage
-    ? extraFilter === "Latihan Industri" ? extraFilter : "all"
-    : ["Tetap", "Kontrak"].includes(extraFilter) ? extraFilter : "all";
   const [opportunities, setOpportunities] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [search, setSearch] = useState("");
   const [locationSearch, setLocationSearch] = useState("");
   const [extraFilter, setExtraFilter] = useState("all");
+  const employmentFilter = isInternshipPage
+    ? extraFilter === "Latihan Industri" ? extraFilter : "all"
+    : ["Tetap", "Kontrak"].includes(extraFilter) ? extraFilter : "all";
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   useEffect(() => {
@@ -108,7 +108,7 @@ export default function LandingPage() {
     return opportunities.filter((job) =>
       (!keyword || `${job.title} ${job.department} ${job.division} ${job.summary}`.toLowerCase().includes(keyword)) &&
       (!locationKeyword || (job.location || "").toLowerCase().includes(locationKeyword)) &&
-      employmentFilter === "all" || job.employment_type === employmentFilter,
+      (employmentFilter === "all" || job.employment_type === employmentFilter),
     ).map(toOpportunity);
   }, [employmentFilter, locationSearch, opportunities, search]);
   const selectedOpportunity = useMemo(
