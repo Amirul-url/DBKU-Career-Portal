@@ -5,6 +5,12 @@ from .models import Vacancy
 
 class VacancySerializer(serializers.ModelSerializer):
     is_open = serializers.BooleanField(read_only=True)
+    official_document_name = serializers.SerializerMethodField()
+
+    def get_official_document_name(self, obj):
+        if not obj.official_document:
+            return ""
+        return obj.official_document.name.rsplit("/", 1)[-1]
 
     class Meta:
         model = Vacancy
@@ -28,6 +34,7 @@ class VacancySerializer(serializers.ModelSerializer):
             "application_instructions",
             "application_notes",
             "official_document",
+            "official_document_name",
             "closing_date",
             "status",
             "is_open",
