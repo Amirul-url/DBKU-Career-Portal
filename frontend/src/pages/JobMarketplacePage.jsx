@@ -237,32 +237,18 @@ export default function LandingPage() {
                 </span>
               </div>
 
-              <div className="market-detail-section">
-                <h3>Tanggungjawab</h3>
-                <ul>
-                  {selectedOpportunity.responsibilities.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="market-detail-section">
-                <h3>Syarat Kelayakan</h3>
-                <ul>
-                  {selectedOpportunity.requirements.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="market-detail-actions">
-                <Link to="/login">Mohon Sekarang</Link>
+              <div className="market-detail-document">
+                <span>Untuk mengetahui lebih lanjut, sila klik di sini:</span>
                 {selectedOpportunity.official_document && (
                   <a href={selectedOpportunity.official_document} target="_blank" rel="noreferrer">
                     <Icon>download</Icon>
                     Muat turun dokumen
                   </a>
                 )}
+              </div>
+
+              <div className="market-detail-actions">
+                <Link to="/login">Mohon Sekarang</Link>
                 <button type="button">
                   <Icon>bookmark</Icon>
                   Simpan
