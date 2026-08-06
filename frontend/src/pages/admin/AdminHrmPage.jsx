@@ -433,7 +433,7 @@ export default function AdminHrmPage() {
               )
             ) : (
               <NavLink
-                className={({ isActive }) => `flex w-full items-center rounded-md py-3 text-left text-[15px] font-semibold ${isSidebarOpen ? "gap-4 px-4" : "justify-center px-0"} ${isActive ? "bg-emerald-50 text-slate-950" : "text-slate-950"}`}
+                className={({ isActive }) => `flex w-full items-center rounded-md py-3 text-left text-[14px] font-semibold ${isSidebarOpen ? "gap-4 px-4" : "justify-center px-0"} ${isActive ? "bg-emerald-50 text-slate-950" : "text-slate-950"}`}
                 end
                 key={`${item.label}-${index}`}
                 onClick={() => {
