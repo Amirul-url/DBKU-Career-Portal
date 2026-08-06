@@ -10,11 +10,14 @@ import { Icon } from "../applicant/ApplicantAuthShared";
 
 const navItems = [
   ["dashboard", "Papan Pemuka"],
-  ["section", "PENGURUSAN"],
+  ["section", "JAWATAN DBKU"],
   ["add_circle", "Tambah Jawatan DBKU", "Tambah Jawatan", "job"],
-  ["school", "Tambah Jawatan Latihan Industri", "Tambah Jawatan", "internship"],
-  ["work_history", "Urus Jawatan"],
-  ["group", "Lihat Permohonan", "Permohonan"],
+  ["work_history", "Urus Jawatan DBKU", "Urus Jawatan", "job"],
+  ["group", "Permohonan Jawatan DBKU", "Permohonan", "job"],
+  ["section", "LATIHAN INDUSTRI"],
+  ["school", "Tambah Latihan Industri", "Tambah Jawatan", "internship"],
+  ["work_history", "Urus Latihan Industri", "Urus Jawatan", "internship"],
+  ["group", "Permohonan Latihan Industri", "Permohonan", "internship"],
 ];
 
 const dbkuDepartments = [
@@ -117,6 +120,10 @@ const createEmptyJobForm = (vacancyType = "job") => ({
   application_notes: "",
   status: "open",
 });
+const opportunityTypeLabels = {
+  job: "Jawatan DBKU",
+  internship: "Latihan Industri",
+};
 
 function Badge({ status }) {
   return (
@@ -131,6 +138,7 @@ export default function AdminHrmPage() {
   const [user] = useState(getStoredUser);
   const [panel, setPanel] = useState("Papan Pemuka");
   const [activeMenu, setActiveMenu] = useState("Papan Pemuka");
+  const [activeVacancyType, setActiveVacancyType] = useState("job");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [jobs, setJobs] = useState([]);
   const [applications, setApplications] = useState([]);
@@ -204,8 +212,9 @@ export default function AdminHrmPage() {
       if (documentPreviewUrl) URL.revokeObjectURL(documentPreviewUrl);
       setDocumentFile(null);
       setDocumentPreviewUrl("");
-      setJobForm(createEmptyJobForm());
-      setActiveMenu("Urus Jawatan");
+      setJobForm(createEmptyJobForm(jobForm.vacancy_type));
+      setActiveVacancyType(jobForm.vacancy_type);
+      setActiveMenu(jobForm.vacancy_type === "internship" ? "Urus Latihan Industri" : "Urus Jawatan DBKU");
       setPanel("Urus Jawatan");
       loadData();
     } catch (error) {
@@ -220,6 +229,7 @@ export default function AdminHrmPage() {
   const openCreatePanel = (label, vacancyType = "job") => {
     setActiveMenu(label);
     setPanel("Tambah Jawatan");
+    setActiveVacancyType(vacancyType);
     if (jobForm.vacancy_type !== vacancyType) {
       if (documentPreviewUrl) URL.revokeObjectURL(documentPreviewUrl);
       setDocumentFile(null);
@@ -227,7 +237,19 @@ export default function AdminHrmPage() {
       setJobForm(createEmptyJobForm(vacancyType));
     }
   };
+  const openFilteredPanel = (label, view, vacancyType = "job") => {
+    setActiveMenu(label);
+    setPanel(view);
+    setActiveVacancyType(vacancyType);
+  };
   if (!user || user.role !== "admin") return null;
+  const activeOpportunityLabel = opportunityTypeLabels[activeVacancyType] || opportunityTypeLabels.job;
+  const jobTypesById = new Map(jobs.map((job) => [job.id, job.vacancy_type]));
+  const filteredJobs = jobs.filter((job) => job.vacancy_type === activeVacancyType);
+  const filteredApplications = applications.filter((application) => {
+    const vacancyType = application.vacancy_detail?.vacancy_type || jobTypesById.get(application.vacancy);
+    return vacancyType === activeVacancyType;
+  });
   const latest = applications.slice(0, 6);
   const isInternshipForm = jobForm.vacancy_type === "internship";
   return (
@@ -284,6 +306,8 @@ export default function AdminHrmPage() {
                 onClick={() => {
                   if (view === "Tambah Jawatan") {
                     openCreatePanel(label, vacancyType);
+                  } else if (vacancyType) {
+                    openFilteredPanel(label, view, vacancyType);
                   } else {
                     setActiveMenu(label);
                     setPanel(view);
@@ -422,7 +446,7 @@ export default function AdminHrmPage() {
                       <h2>Permohonan terkini</h2>
                       <p>Calon yang memerlukan semakan anda</p>
                     </div>
-                    <button onClick={() => setPanel("Lihat Permohonan")}>
+                    <button onClick={() => openFilteredPanel("Permohonan Jawatan DBKU", "Permohonan", "job")}>
                       Lihat semua <Icon>chevron_right</Icon>
                     </button>
                   </header>
@@ -711,27 +735,27 @@ export default function AdminHrmPage() {
               <div className="hrm-heading">
                 <div>
                   <span className="hrm-eyebrow">URUS JAWATAN</span>
-                  <h1>Senarai jawatan</h1>
-                  <p>Semak semua iklan jawatan yang telah disiarkan.</p>
+                  <h1>Senarai {activeOpportunityLabel}</h1>
+                  <p>Semak semua iklan {activeOpportunityLabel.toLowerCase()} yang telah disiarkan.</p>
                 </div>
                 <button
                   className="hrm-primary"
                   type="button"
                   onClick={() => {
-                    openCreatePanel("Tambah Jawatan DBKU");
+                    openCreatePanel(activeVacancyType === "internship" ? "Tambah Latihan Industri" : "Tambah Jawatan DBKU", activeVacancyType);
                   }}
                 >
-                  <Icon>add_circle</Icon>Tambah jawatan
+                  <Icon>add_circle</Icon>Tambah {activeOpportunityLabel}
                 </button>
               </div>
               <section className="hrm-card hrm-table-card">
                 <header>
                   <div>
-                    <h2>Jawatan disiarkan</h2>
-                    <p>{jobs.length} rekod jawatan</p>
+                    <h2>{activeOpportunityLabel} disiarkan</h2>
+                    <p>{filteredJobs.length} rekod {activeOpportunityLabel.toLowerCase()}</p>
                   </div>
                 </header>
-                <JobManagementTable jobs={jobs} applications={applications} />
+                <JobManagementTable jobs={filteredJobs} applications={applications} itemLabel={activeOpportunityLabel.toLowerCase()} />
               </section>
             </>
           )}
@@ -740,21 +764,21 @@ export default function AdminHrmPage() {
               <div className="hrm-heading">
                 <div>
                   <span className="hrm-eyebrow">PENGURUSAN PERMOHONAN</span>
-                  <h1>Semak dan buat keputusan</h1>
+                  <h1>Permohonan {activeOpportunityLabel}</h1>
                   <p>
-                    Pilih calon yang memenuhi keperluan DBKU dengan lebih cepat.
+                    Pilih calon yang memenuhi keperluan {activeOpportunityLabel.toLowerCase()} dengan lebih cepat.
                   </p>
                 </div>
               </div>
               <section className="hrm-card hrm-table-card">
                 <header>
                   <div>
-                    <h2>Semua permohonan</h2>
-                    <p>{applications.length} permohonan direkodkan</p>
+                    <h2>Permohonan {activeOpportunityLabel}</h2>
+                    <p>{filteredApplications.length} permohonan direkodkan</p>
                   </div>
                 </header>
                 <ApplicationTable
-                  applications={applications}
+                  applications={filteredApplications}
                   onReview={setReview}
                 />
               </section>
@@ -778,9 +802,9 @@ function Stat({ icon, label, value, tone }) {
     </article>
   );
 }
-function JobManagementTable({ jobs, applications }) {
+function JobManagementTable({ jobs, applications, itemLabel = "jawatan" }) {
   if (!jobs.length)
-    return <p className="hrm-empty">Belum ada jawatan disiarkan.</p>;
+    return <p className="hrm-empty">Belum ada {itemLabel} disiarkan.</p>;
 
   return (
     <div className="hrm-table-wrap">
