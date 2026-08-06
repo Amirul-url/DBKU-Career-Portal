@@ -1162,7 +1162,7 @@ function ProfileSidebar({ isOpen, onToggle }) {
           item.to ? (
             <NavLink
               to={item.to}
-              end
+              end={item.end}
               className={({ isActive }) => (isActive ? "active" : undefined)}
               key={item.label}
               title={!isOpen ? item.label : undefined}
