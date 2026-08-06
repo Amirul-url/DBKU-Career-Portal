@@ -115,6 +115,7 @@ const buildQuickJobSummary = (form) =>
     form.division ? `Bahagian: ${form.division}` : "",
     form.employment_type ? `Taraf jawatan: ${form.employment_type}` : "",
   ].filter(Boolean).join("\n");
+const jobEditFields = ["title", "division", "department", "location", "employment_type", "closing_date", "status"];
 const opportunityTypeLabels = {
   job: "Jawatan DBKU",
   internship: "Latihan Industri",
@@ -153,6 +154,10 @@ export default function AdminHrmPage() {
   const [notice, setNotice] = useState("");
   const [documentFile, setDocumentFile] = useState(null);
   const [documentPreviewUrl, setDocumentPreviewUrl] = useState("");
+  const [jobModalMode, setJobModalMode] = useState("");
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [jobActionForm, setJobActionForm] = useState({});
+  const [jobActionSaving, setJobActionSaving] = useState(false);
   const routeState = getAdminRouteState(location.pathname);
   const [jobForm, setJobForm] = useState(() => createEmptyJobForm(routeState.vacancyType || "job"));
   const panel = routeState.panel || "dashboard";
@@ -233,6 +238,63 @@ export default function AdminHrmPage() {
       loadData();
     } catch (error) {
       setNotice(error.message);
+    }
+  };
+  const openJobView = (job) => {
+    setSelectedJob(job);
+    setJobModalMode("view");
+  };
+  const openJobEdit = (job) => {
+    setSelectedJob(job);
+    setJobActionForm({
+      title: job.title || "",
+      division: job.division || "",
+      department: job.department || "",
+      location: job.location || "",
+      employment_type: job.employment_type || "",
+      closing_date: job.closing_date || "",
+      status: job.status || "open",
+    });
+    setJobModalMode("edit");
+  };
+  const closeJobModal = () => {
+    setJobModalMode("");
+    setSelectedJob(null);
+    setJobActionForm({});
+    setJobActionSaving(false);
+  };
+  const saveJobEdit = async (event) => {
+    event.preventDefault();
+    if (!selectedJob) return;
+
+    try {
+      setJobActionSaving(true);
+      const payload = jobEditFields.reduce((current, field) => {
+        current[field] = jobActionForm[field] || "";
+        return current;
+      }, {});
+      await apiRequest(`/jobs/${selectedJob.id}/`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      });
+      setNotice("Iklan jawatan berjaya dikemaskini.");
+      closeJobModal();
+      loadData();
+    } catch (error) {
+      setNotice(error.message || "Iklan jawatan tidak dapat dikemaskini.");
+      setJobActionSaving(false);
+    }
+  };
+  const deleteJob = async (job) => {
+    const confirmed = window.confirm(`Padam iklan "${job.title}"? Tindakan ini tidak boleh dibuat asal.`);
+    if (!confirmed) return;
+
+    try {
+      await apiRequest(`/jobs/${job.id}/`, { method: "DELETE" });
+      setNotice("Iklan jawatan telah dipadam.");
+      loadData();
+    } catch (error) {
+      setNotice(error.message || "Iklan jawatan tidak dapat dipadam.");
     }
   };
   const submitJob = async (event) => {
@@ -777,7 +839,14 @@ export default function AdminHrmPage() {
                     <p>{filteredJobs.length} rekod {activeOpportunityLabel.toLowerCase()}</p>
                   </div>
                 </header>
-                <JobManagementTable jobs={filteredJobs} applications={applications} itemLabel={activeOpportunityLabel.toLowerCase()} />
+                <JobManagementTable
+                  jobs={filteredJobs}
+                  applications={applications}
+                  itemLabel={activeOpportunityLabel.toLowerCase()}
+                  onDelete={deleteJob}
+                  onEdit={openJobEdit}
+                  onView={openJobView}
+                />
               </section>
             </>
           )}
@@ -807,6 +876,17 @@ export default function AdminHrmPage() {
             </>
           )}
         </section>
+        {jobModalMode && selectedJob ? (
+          <JobActionModal
+            form={jobActionForm}
+            job={selectedJob}
+            mode={jobModalMode}
+            onChange={(field, value) => setJobActionForm((current) => ({ ...current, [field]: value }))}
+            onClose={closeJobModal}
+            onSave={saveJobEdit}
+            saving={jobActionSaving}
+          />
+        ) : null}
       </main>
     </div>
   );
@@ -859,7 +939,7 @@ function DashboardCategoryCard({ label, metrics, onCreate, onManage, onViewAppli
     </article>
   );
 }
-function JobManagementTable({ jobs, applications, itemLabel = "jawatan" }) {
+function JobManagementTable({ jobs, applications, itemLabel = "jawatan", onDelete, onEdit, onView }) {
   if (!jobs.length)
     return <p className="hrm-empty">Belum ada {itemLabel} disiarkan.</p>;
 
@@ -874,6 +954,7 @@ function JobManagementTable({ jobs, applications, itemLabel = "jawatan" }) {
             <th>Tarikh tutup</th>
             <th>Pemohon</th>
             <th>Status</th>
+            <th>Tindakan</th>
           </tr>
         </thead>
         <tbody>
@@ -899,11 +980,74 @@ function JobManagementTable({ jobs, applications, itemLabel = "jawatan" }) {
                     {statusText}
                   </span>
                 </td>
+                <td>
+                  <div className="hrm-actions hrm-job-actions">
+                    <button className="view" type="button" onClick={() => onView(job)}>
+                      <Icon>visibility</Icon>View
+                    </button>
+                    <button className="edit" type="button" onClick={() => onEdit(job)}>
+                      <Icon>edit</Icon>Edit
+                    </button>
+                    <button className="delete" type="button" onClick={() => onDelete(job)}>
+                      <Icon>delete</Icon>Delete
+                    </button>
+                  </div>
+                </td>
               </tr>
             );
           })}
         </tbody>
       </table>
+    </div>
+  );
+}
+function JobActionModal({ form, job, mode, onChange, onClose, onSave, saving }) {
+  const isEdit = mode === "edit";
+
+  return (
+    <div className="hrm-modal-backdrop" role="presentation">
+      <section className="hrm-job-modal" role="dialog" aria-modal="true" aria-labelledby="job-action-title">
+        <header>
+          <div>
+            <span className="hrm-eyebrow">{isEdit ? "EDIT IKLAN" : "BUTIRAN IKLAN"}</span>
+            <h2 id="job-action-title">{job.title}</h2>
+          </div>
+          <button type="button" onClick={onClose} aria-label="Tutup">×</button>
+        </header>
+
+        {isEdit ? (
+          <form className="hrm-job-modal-form" onSubmit={onSave}>
+            <label>Tajuk jawatan<input required value={form.title || ""} onChange={(event) => onChange("title", event.target.value)} /></label>
+            <label>Bahagian<select required value={form.division || ""} onChange={(event) => onChange("division", event.target.value)}><option value="">Sila pilih</option>{dbkuDepartments.map((division) => <option key={division.code} value={division.name}>{division.name} ({division.code})</option>)}</select></label>
+            <label>Jabatan<input required value={form.department || ""} onChange={(event) => onChange("department", event.target.value)} /></label>
+            <label>Lokasi<input value={form.location || ""} onChange={(event) => onChange("location", event.target.value)} /></label>
+            <div className="hrm-form-two">
+              <label>Taraf jawatan<select value={form.employment_type || ""} onChange={(event) => onChange("employment_type", event.target.value)}><option value="">Pilih jenis</option><option>Tetap</option><option>Kontrak</option></select></label>
+              <label>Status<select value={form.status || "open"} onChange={(event) => onChange("status", event.target.value)}><option value="open">Aktif</option><option value="closed">Ditutup</option><option value="draft">Draf</option><option value="archived">Arkib</option></select></label>
+            </div>
+            <label>Tarikh tutup<input type="date" value={form.closing_date || ""} onChange={(event) => onChange("closing_date", event.target.value)} /></label>
+            <footer>
+              <button className="hrm-secondary" type="button" onClick={onClose}>Batal</button>
+              <button className="hrm-primary" type="submit" disabled={saving}>{saving ? "Menyimpan..." : "Simpan"}</button>
+            </footer>
+          </form>
+        ) : (
+          <div className="hrm-job-modal-details">
+            <dl>
+              <div><dt>Bahagian</dt><dd>{job.division || "—"}</dd></div>
+              <div><dt>Jabatan</dt><dd>{job.department || "—"}</dd></div>
+              <div><dt>Lokasi</dt><dd>{job.location || "—"}</dd></div>
+              <div><dt>Taraf jawatan</dt><dd>{job.employment_type || "—"}</dd></div>
+              <div><dt>Tarikh siar</dt><dd>{dateValue(job.created_at)}</dd></div>
+              <div><dt>Tarikh tutup</dt><dd>{dateValue(job.closing_date)}</dd></div>
+              <div><dt>Status</dt><dd>{job.is_open ?? job.status === "open" ? "Aktif" : job.status}</dd></div>
+            </dl>
+            <footer>
+              <button className="hrm-primary" type="button" onClick={onClose}>Tutup</button>
+            </footer>
+          </div>
+        )}
+      </section>
     </div>
   );
 }
