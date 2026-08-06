@@ -5168,23 +5168,27 @@ body:has(.applicant-profile-page) {
   grid-template-columns: minmax(360px, 0.62fr) minmax(0, 1fr);
 }
 
-.applicant-market-shell.market-reference-shell .market-job-list {
+.applicant-market-shell.market-reference-shell .market-job-list,
+.saved-market-shell.market-reference-shell .market-job-list {
   max-height: max(500px, calc(100vh - 348px));
   overflow-y: auto;
   padding-right: 10px;
   scrollbar-gutter: stable;
 }
 
-.applicant-market-shell.market-reference-shell .market-job-list::-webkit-scrollbar {
+.applicant-market-shell.market-reference-shell .market-job-list::-webkit-scrollbar,
+.saved-market-shell.market-reference-shell .market-job-list::-webkit-scrollbar {
   width: 8px;
 }
 
-.applicant-market-shell.market-reference-shell .market-job-list::-webkit-scrollbar-thumb {
+.applicant-market-shell.market-reference-shell .market-job-list::-webkit-scrollbar-thumb,
+.saved-market-shell.market-reference-shell .market-job-list::-webkit-scrollbar-thumb {
   border-radius: 999px;
   background: #b8c8bf;
 }
 
-.applicant-market-shell.market-reference-shell .market-job-list::-webkit-scrollbar-track {
+.applicant-market-shell.market-reference-shell .market-job-list::-webkit-scrollbar-track,
+.saved-market-shell.market-reference-shell .market-job-list::-webkit-scrollbar-track {
   background: transparent;
 }
 
