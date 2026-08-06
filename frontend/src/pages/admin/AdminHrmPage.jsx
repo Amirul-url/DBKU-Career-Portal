@@ -11,7 +11,8 @@ import { Icon } from "../applicant/ApplicantAuthShared";
 const navItems = [
   ["dashboard", "Papan Pemuka"],
   ["section", "PENGURUSAN"],
-  ["add_circle", "Tambah Jawatan"],
+  ["add_circle", "Tambah Jawatan DBKU", "Tambah Jawatan", "job"],
+  ["school", "Tambah Jawatan Latihan Industri", "Tambah Jawatan", "internship"],
   ["work_history", "Urus Jawatan"],
   ["group", "Lihat Permohonan", "Permohonan"],
 ];
@@ -95,6 +96,27 @@ const dbkuS5Template = {
   application_notes:
     "Permohonan tidak lengkap, tidak memenuhi syarat atau diterima selepas tarikh tutup tidak akan dipertimbangkan. Hanya pemohon yang layak selepas tapisan akan dipanggil untuk ujian dan temu duga.",
 };
+const createEmptyJobForm = (vacancyType = "job") => ({
+  title: "",
+  vacancy_type: vacancyType,
+  department: "Dewan Bandaraya Kuching Utara",
+  division: "",
+  location: "Dewan Bandaraya Kuching Utara, Bukit Siol, Jalan Semariang, Petra Jaya, 93050, Kuching, Sarawak",
+  advertisement_no: "",
+  service_group: "",
+  service_classification: "",
+  employment_type: vacancyType === "internship" ? "Latihan Industri" : "",
+  grade: "",
+  minimum_salary: "",
+  maximum_salary: "",
+  closing_date: "",
+  summary: "",
+  responsibilities: "",
+  requirements: "",
+  application_instructions: "",
+  application_notes: "",
+  status: "open",
+});
 
 function Badge({ status }) {
   return (
@@ -116,27 +138,7 @@ export default function AdminHrmPage() {
   const [notice, setNotice] = useState("");
   const [documentFile, setDocumentFile] = useState(null);
   const [documentPreviewUrl, setDocumentPreviewUrl] = useState("");
-  const [jobForm, setJobForm] = useState({
-    title: "",
-    vacancy_type: "job",
-    department: "Dewan Bandaraya Kuching Utara",
-    division: "",
-    location: "Dewan Bandaraya Kuching Utara, Bukit Siol, Jalan Semariang, Petra Jaya, 93050, Kuching, Sarawak",
-    advertisement_no: "",
-    service_group: "",
-    service_classification: "",
-    employment_type: "",
-    grade: "",
-    minimum_salary: "",
-    maximum_salary: "",
-    closing_date: "",
-    summary: "",
-    responsibilities: "",
-    requirements: "",
-    application_instructions: "",
-    application_notes: "",
-    status: "open",
-  });
+  const [jobForm, setJobForm] = useState(() => createEmptyJobForm());
 
   const loadData = useCallback(() => {
     setLoading(true);
@@ -202,20 +204,7 @@ export default function AdminHrmPage() {
       if (documentPreviewUrl) URL.revokeObjectURL(documentPreviewUrl);
       setDocumentFile(null);
       setDocumentPreviewUrl("");
-      setJobForm({
-        title: "",
-        vacancy_type: "job",
-        department: "Dewan Bandaraya Kuching Utara",
-        division: "",
-        location: "Dewan Bandaraya Kuching Utara, Bukit Siol, Jalan Semariang, Petra Jaya, 93050, Kuching, Sarawak",
-        employment_type: "",
-        grade: "",
-        closing_date: "",
-        summary: "",
-        responsibilities: "",
-        requirements: "",
-        status: "open",
-      });
+      setJobForm(createEmptyJobForm());
       setActiveMenu("Urus Jawatan");
       setPanel("Urus Jawatan");
       loadData();
@@ -228,8 +217,19 @@ export default function AdminHrmPage() {
     clearAuthSession();
     navigate("/login");
   };
+  const openCreatePanel = (label, vacancyType = "job") => {
+    setActiveMenu(label);
+    setPanel("Tambah Jawatan");
+    if (jobForm.vacancy_type !== vacancyType) {
+      if (documentPreviewUrl) URL.revokeObjectURL(documentPreviewUrl);
+      setDocumentFile(null);
+      setDocumentPreviewUrl("");
+      setJobForm(createEmptyJobForm(vacancyType));
+    }
+  };
   if (!user || user.role !== "admin") return null;
   const latest = applications.slice(0, 6);
+  const isInternshipForm = jobForm.vacancy_type === "internship";
   return (
     <div className="min-h-screen min-w-[900px] bg-slate-50">
       <aside
@@ -263,7 +263,7 @@ export default function AdminHrmPage() {
           </button>
         </div>
         <nav className={`space-y-1 py-5 ${isSidebarOpen ? "px-4" : "px-3"}`}>
-          {navItems.map(([icon, label, view = label], index) =>
+          {navItems.map(([icon, label, view = label, vacancyType], index) =>
             icon === "section" ? (
               isSidebarOpen ? (
                 <p
@@ -282,8 +282,12 @@ export default function AdminHrmPage() {
                 type="button"
                 title={!isSidebarOpen ? label : undefined}
                 onClick={() => {
-                  setActiveMenu(label);
-                  setPanel(view);
+                  if (view === "Tambah Jawatan") {
+                    openCreatePanel(label, vacancyType);
+                  } else {
+                    setActiveMenu(label);
+                    setPanel(view);
+                  }
                 }}
               >
                 <Icon>{icon}</Icon>
@@ -357,8 +361,8 @@ export default function AdminHrmPage() {
           )}
           {panel === "Tambah Jawatan" && (
             <form className="simple-job-form" onSubmit={submitJob}>
-              <header><span className="hrm-eyebrow">TAMBAH JAWATAN</span><h1>Siarkan jawatan baharu</h1><p>Masukkan ringkasan penting. Maklumat penuh disediakan melalui dokumen rasmi untuk dimuat turun pemohon.</p></header>
-              <label>Tajuk jawatan<input required value={jobForm.title} onChange={(event) => setJobForm({ ...jobForm, title: event.target.value })} placeholder="cth. Penolong Pegawai Penerangan Gred S5" /></label>
+              <header><span className="hrm-eyebrow">{isInternshipForm ? "TAMBAH JAWATAN LATIHAN INDUSTRI" : "TAMBAH JAWATAN DBKU"}</span><h1>{isInternshipForm ? "Siarkan jawatan latihan industri baharu" : "Siarkan jawatan DBKU baharu"}</h1><p>Masukkan ringkasan penting. Maklumat penuh disediakan melalui dokumen rasmi untuk dimuat turun pemohon.</p></header>
+              <label>Tajuk jawatan<input required value={jobForm.title} onChange={(event) => setJobForm({ ...jobForm, title: event.target.value })} placeholder={isInternshipForm ? "cth. Latihan Industri Teknologi Maklumat" : "cth. Penolong Pegawai Penerangan Gred S5"} /></label>
               <label>Bahagian<select required value={jobForm.division || ""} onChange={(event) => setJobForm({ ...jobForm, division: event.target.value })}><option value="">Sila pilih</option>{dbkuDepartments.map((division) => <option key={division.code} value={division.name}>{division.name} ({division.code})</option>)}</select></label>
               <label>Jabatan<input required value={jobForm.department} onChange={(event) => setJobForm({ ...jobForm, department: event.target.value })} placeholder="cth. Jabatan Pentadbiran" /></label>
               <label>Lokasi<input value={jobForm.location || ""} onChange={(event) => setJobForm({ ...jobForm, location: event.target.value })} placeholder="cth. Petra Jaya, Kuching" /></label>
@@ -380,7 +384,7 @@ export default function AdminHrmPage() {
                 </div>
                 <button
                   className="hrm-primary"
-                  onClick={() => setPanel("Tambah Jawatan")}
+                  onClick={() => openCreatePanel("Tambah Jawatan DBKU")}
                 >
                   <Icon>add_circle</Icon>Tambah jawatan
                 </button>
@@ -714,8 +718,7 @@ export default function AdminHrmPage() {
                   className="hrm-primary"
                   type="button"
                   onClick={() => {
-                    setActiveMenu("Tambah Jawatan");
-                    setPanel("Tambah Jawatan");
+                    openCreatePanel("Tambah Jawatan DBKU");
                   }}
                 >
                   <Icon>add_circle</Icon>Tambah jawatan
