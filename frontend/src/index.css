@@ -4023,6 +4023,8 @@ body:has(.applicant-profile-page) {
   color: #111827;
   font-size: 18px;
   line-height: 1.78;
+  text-align: justify;
+  text-align-last: left;
 }
 
 .internship-copy-card {
