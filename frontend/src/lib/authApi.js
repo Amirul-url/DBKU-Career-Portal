@@ -207,6 +207,20 @@ export function dashboardPathForUser(user) {
   return dashboardPathForRole(user?.role);
 }
 
+export function getAccessTokenExpiryMs() {
+  const token = getAccessToken();
+  if (!token) {
+    return 0;
+  }
+
+  try {
+    const payload = JSON.parse(window.atob(token.split(".")[1] || ""));
+    return Number(payload.exp || 0) * 1000;
+  } catch {
+    return 0;
+  }
+}
+
 async function requestAccessTokenRefresh() {
   const refreshToken = getRefreshToken();
   if (!refreshToken) {
