@@ -192,8 +192,6 @@ a {
   justify-content: center;
   overflow: hidden;
   border-radius: 10px;
-  background: #ffffff;
-  box-shadow: 0 6px 16px rgba(6, 78, 59, 0.08);
 }
 
 .brand-mark img {
@@ -2620,7 +2618,7 @@ a {
 .market-reference-shell .market-job-list { gap: 14px; }
 .market-reference-shell .market-job-card { min-height: 0; grid-template-columns: 72px minmax(0, 1fr); align-items: start; border-color: #d7e0db; border-radius: 8px; box-shadow: none; padding: 20px; }
 .market-reference-shell .market-job-card.selected { border: 2px solid #16a34a; background: #fff; }
-.market-card-logo { display: grid; width: 56px; height: 56px; place-items: center; overflow: hidden; border-radius: 5px; background: #fff; }
+.market-card-logo { display: grid; width: 56px; height: 56px; place-items: center; overflow: hidden; border-radius: 5px; }
 .market-card-logo img { width: 48px; height: 48px; object-fit: contain; }
 .market-reference-shell .market-job-main { display: grid; gap: 5px; padding-top: 1px; }
 .market-job-title { color: #142033; font-size: 18px; font-weight: 850; line-height: 1.35; }
