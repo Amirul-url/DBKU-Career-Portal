@@ -1027,14 +1027,14 @@ function JobManagementTable({ jobs, applications, itemLabel = "jawatan", onDelet
                 </td>
                 <td>
                   <div className="hrm-actions hrm-job-actions">
-                    <button className="view" type="button" onClick={() => onView(job)}>
-                      <Icon>visibility</Icon>Lihat
+                    <button className="view" type="button" aria-label="Lihat" title="Lihat" onClick={() => onView(job)}>
+                      <Icon>visibility</Icon>
                     </button>
-                    <button className="edit" type="button" onClick={() => onEdit(job)}>
-                      <Icon>edit</Icon>Kemaskini
+                    <button className="edit" type="button" aria-label="Kemaskini" title="Kemaskini" onClick={() => onEdit(job)}>
+                      <Icon>edit</Icon>
                     </button>
-                    <button className="delete" type="button" onClick={() => onDelete(job)}>
-                      <Icon>delete</Icon>Padam
+                    <button className="delete" type="button" aria-label="Padam" title="Padam" onClick={() => onDelete(job)}>
+                      <Icon>delete</Icon>
                     </button>
                   </div>
                 </td>
