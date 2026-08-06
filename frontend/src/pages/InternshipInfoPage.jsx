@@ -75,12 +75,6 @@ export default function InternshipInfoPage() {
           </div>
 
           <article className="internship-copy-card">
-            <h3>Peluang Latihan Industri dengan Dewan Bandaraya Kuching Utara</h3>
-            <p>
-              Kami mengalu-alukan pelajar yang bermotivasi tinggi, berdisiplin dan komited untuk memohon latihan
-              industri di jabatan atau bahagian berkaitan dalam DBKU.
-            </p>
-
             <h4>Kelayakan dan syarat asas</h4>
             <ol>
               <li>Warganegara Malaysia.</li>
