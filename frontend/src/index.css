@@ -4769,11 +4769,52 @@ body:has(.applicant-profile-page) {
   font-weight: 900;
 }
 
+.applicant-search-tabs {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  gap: 34px;
+}
+
+.applicant-search-tabs a {
+  display: inline-flex;
+  min-height: var(--profile-header-height);
+  align-items: center;
+  border-bottom: 3px solid transparent;
+  color: #5f6d66;
+  font-size: 16px;
+  font-weight: 850;
+}
+
+.applicant-search-tabs a.active {
+  border-bottom-color: var(--profile-green);
+  color: var(--profile-green);
+}
+
+.applicant-search-page .profile-content-header {
+  align-items: stretch;
+}
+
 .profile-shell {
   width: auto;
   max-width: none;
   margin: 0;
   padding: 36px 44px 72px;
+}
+
+.applicant-market-shell {
+  width: auto;
+  max-width: none;
+  margin: 0;
+  padding: 36px 56px 72px;
+}
+
+.applicant-market-shell.market-reference-shell .market-search-panel {
+  background: #ffffff;
+}
+
+.applicant-market-shell.market-reference-shell .market-layout {
+  grid-template-columns: minmax(360px, 0.62fr) minmax(0, 1fr);
 }
 
 .profile-layout {

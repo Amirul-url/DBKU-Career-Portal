@@ -106,10 +106,10 @@ function OpportunityCard({ opportunity, selected, onSelect }) {
   );
 }
 
-export default function LandingPage() {
+export function JobMarketplaceContent({ actionTarget = "/login", embedded = false, vacancyType: vacancyTypeProp } = {}) {
   const [searchParams] = useSearchParams();
   const documentBlobUrls = useRef([]);
-  const vacancyType = searchParams.get("type") === "internship" ? "internship" : "job";
+  const vacancyType = vacancyTypeProp || (searchParams.get("type") === "internship" ? "internship" : "job");
   const isInternshipPage = vacancyType === "internship";
   const [opportunities, setOpportunities] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
@@ -191,30 +191,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="market-page">
-      <header className="top-app-bar">
-        <nav className="nav-inner" aria-label="Navigasi utama">
-          <Link className="brand" to="/">
-            <span className="brand-mark">
-              <img src="/logo-dbku.png" alt="Logo DBKU" />
-            </span>
-            <span>Portal Kerjaya DBKU</span>
-          </Link>
-
-          <div className="nav-links">
-            <Link to="/">Laman Utama</Link>
-            <Link className={isInternshipPage ? "" : "active"} to="/jobs">Kerja Kosong</Link>
-            <Link to="/internships">Latihan Industri</Link>
-          </div>
-
-          <div className="market-nav-actions">
-            <Link to="/login">Log Masuk</Link>
-            <Link to="/register" className="market-register-link">Daftar Akaun</Link>
-          </div>
-        </nav>
-      </header>
-
-      <main className="market-shell market-reference-shell">
+      <main className={`market-shell market-reference-shell ${embedded ? "applicant-market-shell" : ""}`}>
         <section className="market-search-panel" aria-label="Cari peluang">
           <strong className="market-search-label">Cari Pekerjaan</strong>
           <label>
@@ -315,7 +292,7 @@ export default function LandingPage() {
               </div>
 
               <div className="market-detail-actions">
-                <Link to="/login">Mohon Sekarang</Link>
+                <Link to={actionTarget}>Mohon Sekarang</Link>
                 <button type="button">
                   <Icon>bookmark</Icon>
                   Simpan
@@ -331,6 +308,38 @@ export default function LandingPage() {
           </aside>
         </section>
       </main>
+  );
+}
+
+export default function JobMarketplacePage() {
+  const [searchParams] = useSearchParams();
+  const isInternshipPage = searchParams.get("type") === "internship";
+
+  return (
+    <div className="market-page">
+      <header className="top-app-bar">
+        <nav className="nav-inner" aria-label="Navigasi utama">
+          <Link className="brand" to="/">
+            <span className="brand-mark">
+              <img src="/logo-dbku.png" alt="Logo DBKU" />
+            </span>
+            <span>Portal Kerjaya DBKU</span>
+          </Link>
+
+          <div className="nav-links">
+            <Link to="/">Laman Utama</Link>
+            <Link className={isInternshipPage ? "" : "active"} to="/jobs">Kerja Kosong</Link>
+            <Link to="/internships">Latihan Industri</Link>
+          </div>
+
+          <div className="market-nav-actions">
+            <Link to="/login">Log Masuk</Link>
+            <Link to="/register" className="market-register-link">Daftar Akaun</Link>
+          </div>
+        </nav>
+      </header>
+
+      <JobMarketplaceContent />
     </div>
   );
 }

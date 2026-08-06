@@ -1078,7 +1078,7 @@ function ChoicePillGroup({ error, label, multiple = false, onChange, options, op
   );
 }
 
-function ProfileContentHeader({ displayName, email, photoUrl }) {
+export function ProfileContentHeader({ displayName, email, photoUrl, leading = null }) {
   const navigate = useNavigate();
   const profileInitial = displayName?.charAt(0) || email?.charAt(0) || "P";
   const profileChip = photoUrl ? <img src={photoUrl} alt="" /> : profileInitial;
@@ -1091,10 +1091,12 @@ function ProfileContentHeader({ displayName, email, photoUrl }) {
 
   return (
     <header className="profile-content-header">
-      <div>
-        <p>Selamat datang</p>
-        <strong>{displayName}</strong>
-      </div>
+      {leading || (
+        <div>
+          <p>Selamat datang</p>
+          <strong>{displayName}</strong>
+        </div>
+      )}
       <div className="profile-actions">
         <button type="button" className="profile-icon-button" aria-label="Notifikasi">
           <Icon>notifications</Icon>
@@ -1132,7 +1134,9 @@ export function ApplicantPersonalReadOnlyView({ applicant, profile }) {
   return <div className="personal-edit-panel"><div className="personal-edit-form"><ProfileFormRow label="Foto Profil"><div className="personal-photo-upload"><div className="personal-photo-preview">{photo ? <img src={photo} alt="" /> : name.charAt(0)}</div><div><strong>Foto profil pemohon</strong><p>Paparan baca sahaja.</p></div></div></ProfileFormRow><ProfileFormRow label="Maklumat Peribadi">{field("Nama Penuh", name)}{field("Nombor Kad Pengenalan", details.identificationNumber || applicant.mykad_number)}<div className="personal-date-group"><span>Tarikh Lahir</span><div><label>Hari<input readOnly value={value(details.birthDay)} /></label><label>Bulan<input readOnly value={value(details.birthMonth)} /></label><label>Tahun<input readOnly value={value(details.birthYear)} /></label></div></div>{field("Bangsa", details.race)}<fieldset className="personal-radio-group"><legend>Kewarganegaraan</legend><div>{["Malaysia", "Penduduk tetap"].map((item) => <label key={item}><input type="radio" checked={details.citizenship === item} readOnly />{item}</label>)}</div></fieldset><fieldset className="personal-radio-group"><legend>Jantina</legend><div>{["Perempuan", "Lelaki"].map((item) => <label key={item}><input type="radio" checked={details.gender === item} readOnly />{item}</label>)}</div></fieldset></ProfileFormRow><ProfileFormRow label="Aksesibiliti dan Kesihatan"><div className="personal-helper-copy">Maklumat kesihatan pemohon adalah sulit.</div><fieldset className="personal-radio-group"><legend>Adakah anda mempunyai sebarang masalah kesihatan?</legend><div>{["Ya", "Tidak"].map((item) => <label key={item}><input type="radio" checked={details.hasHealthIssue === item} readOnly />{item}</label>)}</div></fieldset><fieldset className="personal-radio-group"><legend>Adakah anda mempunyai sebarang ketidakupayaan?</legend><div>{["Ya", "Tidak"].map((item) => <label key={item}><input type="radio" checked={details.hasDisability === item} readOnly />{item}</label>)}</div></fieldset></ProfileFormRow><ProfileFormRow label="Alamat">{field("Negeri", details.state)}{field("Bandar", details.city)}{field("Poskod", details.postcode)}<PersonalField label="Alamat" noIndicator><textarea readOnly value={value(details.address || applicant.address)} /></PersonalField></ProfileFormRow><ProfileFormRow label="Butiran Hubungan">{field("Alamat E-mel", email)}{field("Nombor Telefon Bimbit Utama", details.primaryPhone || applicant.mobile_number)}{field("Nombor Telefon Bimbit Lain", details.secondaryPhone)}</ProfileFormRow><ProfileFormRow label="Resume"><div className="personal-profile-tip"><header><span><Icon>emoji_objects</Icon></span><strong>Tingkatkan ketampakan profil anda.</strong></header><p>Resume dan video resume pemohon tersedia untuk semakan.</p></div><div className="personal-button-row">{personal.resumeFileUrl || applicant.resume_file_url ? <a className="personal-primary-button" href={personal.resumeFileUrl || applicant.resume_file_url} target="_blank" rel="noreferrer">Muat Turun Resume</a> : null}{personal.videoResumeFileUrl || applicant.video_resume_file_url ? <a className="personal-primary-button" href={personal.videoResumeFileUrl || applicant.video_resume_file_url} target="_blank" rel="noreferrer">Muat Turun Video Resume</a> : null}</div>{field("LinkedIn", details.linkedIn)}</ProfileFormRow></div></div>;
 }
 
-function ProfileSidebar({ isOpen, onToggle }) {
+export function ProfileSidebar({ isOpen, onToggle }) {
+  const location = useLocation();
+
   return (
     <aside className={`profile-sidebar ${isOpen ? "open" : "collapsed"}`} aria-label="Navigasi pemohon">
       <div className="profile-sidebar-head">
@@ -1163,7 +1167,10 @@ function ProfileSidebar({ isOpen, onToggle }) {
             <NavLink
               to={item.to}
               end={item.end}
-              className={({ isActive }) => (isActive ? "active" : undefined)}
+              className={({ isActive }) => {
+                const isActiveRoute = item.activePaths?.length ? item.activePaths.includes(location.pathname) : isActive;
+                return isActiveRoute ? "active" : undefined;
+              }}
               key={item.label}
               title={!isOpen ? item.label : undefined}
             >

@@ -4,6 +4,7 @@ import LandingPage from "./pages/LandingPage";
 import InternshipInfoPage from "./pages/InternshipInfoPage";
 import JobMarketplacePage from "./pages/JobMarketplacePage";
 import ApplicantLoginPage from "./pages/applicant/ApplicantLoginPage";
+import ApplicantJobSearchPage from "./pages/applicant/ApplicantJobSearchPage";
 import ApplicantProfilePage from "./pages/applicant/ApplicantProfilePage";
 import ApplicantRegisterPage from "./pages/applicant/ApplicantRegisterPage";
 import SuperAdminShellPage from "./pages/admin/SuperAdminShellPage";
@@ -207,6 +208,8 @@ export default function App() {
         <Route path="/jobs" element={<JobMarketplacePage />} />
         <Route path="/internships" element={<InternshipInfoPage />} />
         <Route path="/login" element={<ApplicantLoginPage />} />
+        <Route path="/profile/jobs" element={<ApplicantJobSearchPage />} />
+        <Route path="/profile/internships" element={<ApplicantJobSearchPage />} />
         <Route path="/profile" element={<Navigate to="/profile/personal" replace />} />
         <Route path="/profile/:section" element={<ApplicantProfilePage />} />
         <Route path="/register" element={<ApplicantRegisterPage />} />
