@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
+import InternshipInfoPage from "./pages/InternshipInfoPage";
 import JobMarketplacePage from "./pages/JobMarketplacePage";
 import ApplicantLoginPage from "./pages/applicant/ApplicantLoginPage";
 import ApplicantProfilePage from "./pages/applicant/ApplicantProfilePage";
@@ -204,6 +205,7 @@ export default function App() {
         <Route path="/" element={<HomeRoute />} />
         <Route path="/landing" element={<LandingPage />} />
         <Route path="/jobs" element={<JobMarketplacePage />} />
+        <Route path="/internships" element={<InternshipInfoPage />} />
         <Route path="/login" element={<ApplicantLoginPage />} />
         <Route path="/profile" element={<Navigate to="/profile/personal" replace />} />
         <Route path="/profile/:section" element={<ApplicantProfilePage />} />

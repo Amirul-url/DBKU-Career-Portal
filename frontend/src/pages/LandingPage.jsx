@@ -65,7 +65,7 @@ export default function LandingPage() {
           <div className="nav-links">
             <Link className="active" to="/">Laman Utama</Link>
             <Link to="/jobs">Kerja Kosong</Link>
-            <Link to="/jobs">Latihan Industri</Link>
+            <Link to="/internships">Latihan Industri</Link>
           </div>
 
           <div className="market-nav-actions">
@@ -126,7 +126,7 @@ export default function LandingPage() {
               <h2>Jawatan yang sedang dibuka</h2>
             </div>
             {latestRoles.map(([title, department, type]) => (
-              <Link to="/jobs" key={title}>
+              <Link to={type === "Latihan Industri" ? "/internships" : "/jobs"} key={title}>
                 <span>
                   <Icon>{type === "Latihan Industri" ? "school" : "work"}</Icon>
                 </span>

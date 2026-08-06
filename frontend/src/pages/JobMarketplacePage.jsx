@@ -204,7 +204,7 @@ export default function LandingPage() {
           <div className="nav-links">
             <Link to="/">Laman Utama</Link>
             <Link className={isInternshipPage ? "" : "active"} to="/jobs">Kerja Kosong</Link>
-            <Link className={isInternshipPage ? "active" : ""} to="/jobs?type=internship">Latihan Industri</Link>
+            <Link to="/internships">Latihan Industri</Link>
           </div>
 
           <div className="market-nav-actions">

@@ -4,12 +4,10 @@ export const ADMIN_ROUTES = {
     job: "/admin/jobs/applications",
   },
   create: {
-    internship: "/admin/internships/create",
     job: "/admin/jobs/create",
   },
   dashboard: "/admin/dashboard",
   manage: {
-    internship: "/admin/internships",
     job: "/admin/jobs",
   },
 };
@@ -21,8 +19,6 @@ export const adminNavItems = [
   { icon: "work_history", label: "Urus Jawatan DBKU", panel: "manage", to: ADMIN_ROUTES.manage.job, vacancyType: "job" },
   { icon: "group", label: "Permohonan Jawatan DBKU", panel: "applications", to: ADMIN_ROUTES.applications.job, vacancyType: "job" },
   { kind: "section", label: "LATIHAN INDUSTRI" },
-  { icon: "school", label: "Tambah Latihan Industri", panel: "create", to: ADMIN_ROUTES.create.internship, vacancyType: "internship" },
-  { icon: "work_history", label: "Urus Latihan Industri", panel: "manage", to: ADMIN_ROUTES.manage.internship, vacancyType: "internship" },
   { icon: "group", label: "Permohonan Latihan Industri", panel: "applications", to: ADMIN_ROUTES.applications.internship, vacancyType: "internship" },
 ];
 

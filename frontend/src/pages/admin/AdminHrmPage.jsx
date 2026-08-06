@@ -123,7 +123,6 @@ const dashboardTypes = [
   {
     type: "internship",
     label: "Latihan Industri",
-    createLabel: "Tambah Latihan Industri",
     applicationsLabel: "Permohonan Latihan Industri",
   },
 ];
@@ -444,8 +443,8 @@ export default function AdminHrmPage() {
                     key={item.type}
                     label={item.label}
                     metrics={dashboardMetrics[item.type]}
-                    onCreate={() => openCreatePanel(item.createLabel, item.type)}
-                    onManage={() => openFilteredPanel(item.type === "internship" ? "Urus Latihan Industri" : "Urus Jawatan DBKU", "Urus Jawatan", item.type)}
+                    onCreate={item.type === "job" ? () => openCreatePanel("Tambah Jawatan DBKU", item.type) : null}
+                    onManage={item.type === "job" ? () => openFilteredPanel("Urus Jawatan DBKU", "Urus Jawatan", item.type) : null}
                     onViewApplications={() => openFilteredPanel(item.applicationsLabel, "Permohonan", item.type)}
                   />
                 ))}
@@ -815,9 +814,11 @@ function DashboardCategoryCard({ label, metrics, onCreate, onManage, onViewAppli
           <span>{label}</span>
           <h2>{metrics?.open || 0} iklan aktif</h2>
         </div>
-        <button onClick={onCreate} type="button">
-          <Icon>add_circle</Icon>Tambah
-        </button>
+        {onCreate ? (
+          <button onClick={onCreate} type="button">
+            <Icon>add_circle</Icon>Tambah
+          </button>
+        ) : null}
       </header>
       <div className="hrm-category-metrics">
         <span>
@@ -834,7 +835,7 @@ function DashboardCategoryCard({ label, metrics, onCreate, onManage, onViewAppli
         </span>
       </div>
       <footer>
-        <button onClick={onManage} type="button">Urus iklan</button>
+        {onManage ? <button onClick={onManage} type="button">Urus iklan</button> : null}
         <button onClick={onViewApplications} type="button">Lihat permohonan</button>
       </footer>
     </article>

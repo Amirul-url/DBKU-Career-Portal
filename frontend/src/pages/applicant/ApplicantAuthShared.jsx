@@ -93,7 +93,7 @@ export function ApplicantAuthNav() {
         <div className="nav-links">
           <NavLink to="/" end className={getActiveClass}>Laman Utama</NavLink>
           <NavLink to="/jobs" className={getActiveClass}>Kerja Kosong</NavLink>
-          <NavLink to="/jobs" className={getActiveClass}>Latihan Industri</NavLink>
+          <NavLink to="/internships" className={getActiveClass}>Latihan Industri</NavLink>
         </div>
 
         <div className="market-nav-actions">
