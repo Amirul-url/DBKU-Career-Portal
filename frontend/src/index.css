@@ -62,7 +62,7 @@ body .hrm-brand strong { font-size: 18px; }
 body .hrm-brand span { color: #64748b; font-size: 12px; }
 body .hrm-sidebar nav { display: block; padding: 20px 16px; }
 body .hrm-sidebar nav p { margin: 20px 16px 9px; color: #94a3b8; font-size: 13px; font-weight: 900; }
-body .hrm-sidebar nav button { width: 100%; gap: 16px; border-radius: 7px; padding: 14px 17px; color: #020c20; font-size: 15px; }
+body .hrm-sidebar nav button { width: 100%; gap: 16px; border-radius: 7px; padding: 14px 17px; color: #020c20; font-size: 14px; }
 body .hrm-sidebar nav button:hover, body .hrm-sidebar nav button.active { background: #e7fbf1; color: #0f172a; }
 body .hrm-sidebar nav .app-svg-icon { font-size: 25px; color: #020c20; }
 body .hrm-side-help { display: none; }
