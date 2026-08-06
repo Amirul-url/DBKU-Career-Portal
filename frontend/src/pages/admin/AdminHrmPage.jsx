@@ -206,7 +206,16 @@ export default function AdminHrmPage() {
         total: typeApplications.length,
       };
     };
+    const overallMetrics = {
+      applications,
+      jobs,
+      new: applications.filter((app) => app.status === "submitted").length,
+      open: jobs.filter((job) => job.status === "open").length,
+      shortlist: applications.filter((app) => app.status === "shortlisted").length,
+      total: applications.length,
+    };
     return {
+      all: overallMetrics,
       internship: metricsByType("internship"),
       job: metricsByType("job"),
     };
@@ -274,8 +283,10 @@ export default function AdminHrmPage() {
   if (!user || user.role !== "admin") return null;
   const activeOpportunityLabel = opportunityTypeLabels[activeVacancyType] || opportunityTypeLabels.job;
   const activeMetrics = dashboardMetrics[activeVacancyType] || dashboardMetrics.job;
+  const overallMetrics = dashboardMetrics.all;
   const filteredJobs = activeMetrics.jobs;
   const filteredApplications = activeMetrics.applications;
+  const latestApplications = overallMetrics.applications.slice(0, 6);
   const isInternshipForm = jobForm.vacancy_type === "internship";
   return (
     <div className="min-h-screen min-w-[900px] bg-slate-50">
@@ -428,21 +439,72 @@ export default function AdminHrmPage() {
                 <div>
                   <h1>Ringkasan pengambilan</h1>
                   <p>
-                    Pantau jawatan DBKU dan latihan industri secara berasingan.
+                    Pantau prestasi jawatan DBKU dan latihan industri dalam satu paparan.
                   </p>
                 </div>
               </div>
-              <div className="hrm-dashboard-sections">
+              <div className="hrm-stats">
+                <Stat icon="work_history" label="Iklan aktif" value={overallMetrics.open} tone="green" />
+                <Stat icon="description" label="Jumlah permohonan" value={overallMetrics.total} tone="blue" />
+                <Stat icon="stars" label="Disenarai pendek" value={overallMetrics.shortlist} tone="mint" />
+                <Stat icon="notifications" label="Permohonan baharu" value={overallMetrics.new} tone="amber" />
+              </div>
+              <div className="hrm-category-grid">
                 {dashboardTypes.map((item) => (
-                  <DashboardOverview
+                  <DashboardCategoryCard
                     key={item.type}
                     label={item.label}
                     metrics={dashboardMetrics[item.type]}
                     onCreate={() => openCreatePanel(item.createLabel, item.type)}
-                    onReview={setReview}
+                    onManage={() => openFilteredPanel(item.type === "internship" ? "Urus Latihan Industri" : "Urus Jawatan DBKU", "Urus Jawatan", item.type)}
                     onViewApplications={() => openFilteredPanel(item.applicationsLabel, "Permohonan", item.type)}
                   />
                 ))}
+              </div>
+              <div className="hrm-grid">
+                <section className="hrm-card hrm-table-card">
+                  <header>
+                    <div>
+                      <h2>Permohonan terkini</h2>
+                      <p>Calon daripada jawatan DBKU dan latihan industri</p>
+                    </div>
+                    <div className="hrm-card-actions">
+                      <button onClick={() => openFilteredPanel("Permohonan Jawatan DBKU", "Permohonan", "job")} type="button">
+                        DBKU <Icon>chevron_right</Icon>
+                      </button>
+                      <button onClick={() => openFilteredPanel("Permohonan Latihan Industri", "Permohonan", "internship")} type="button">
+                        Latihan Industri <Icon>chevron_right</Icon>
+                      </button>
+                    </div>
+                  </header>
+                  <ApplicationTable applications={latestApplications} onReview={setReview} compact />
+                </section>
+                <section className="hrm-card hrm-analytics">
+                  <header>
+                    <h2>Analitik pemohon</h2>
+                    <p>Agihan status permohonan keseluruhan</p>
+                  </header>
+                  <div className="hrm-chart">
+                    {applicationStatusKeys.map((status) => {
+                      const statusCount = overallMetrics.applications.filter((app) => app.status === status).length;
+                      const statusPercent = overallMetrics.applications.length ? Math.max(8, (statusCount / overallMetrics.applications.length) * 100) : 8;
+                      return (
+                        <div key={status}>
+                          <span>
+                            <Badge status={status} />
+                          </span>
+                          <i>
+                            <b style={{ width: `${statusPercent}%` }} />
+                          </i>
+                          <strong>{statusCount}</strong>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <footer>
+                    <Icon>history</Icon> Dikemas kini secara langsung
+                  </footer>
+                </section>
               </div>
             </>
           )}
@@ -756,69 +818,37 @@ function Stat({ icon, label, value, tone }) {
     </article>
   );
 }
-function DashboardOverview({ label, metrics, onCreate, onReview, onViewApplications }) {
-  const applications = metrics?.applications || [];
-  const latestApplications = applications.slice(0, 6);
-
+function DashboardCategoryCard({ label, metrics, onCreate, onManage, onViewApplications }) {
   return (
-    <section className="hrm-dashboard-section" aria-label={`Ringkasan ${label}`}>
-      <div className="hrm-heading">
+    <article className="hrm-category-card">
+      <header>
         <div>
-          <span className="hrm-eyebrow">{label.toUpperCase()}</span>
-          <h1>Ringkasan {label}</h1>
-          <p>Pantau iklan aktif dan kemajuan permohonan {label.toLowerCase()}.</p>
+          <span>{label}</span>
+          <h2>{metrics?.open || 0} iklan aktif</h2>
         </div>
-        <button className="hrm-primary" onClick={onCreate} type="button">
-          <Icon>add_circle</Icon>Tambah {label}
+        <button onClick={onCreate} type="button">
+          <Icon>add_circle</Icon>Tambah
         </button>
+      </header>
+      <div className="hrm-category-metrics">
+        <span>
+          <strong>{metrics?.total || 0}</strong>
+          Permohonan
+        </span>
+        <span>
+          <strong>{metrics?.new || 0}</strong>
+          Baharu
+        </span>
+        <span>
+          <strong>{metrics?.shortlist || 0}</strong>
+          Disenarai pendek
+        </span>
       </div>
-      <div className="hrm-stats">
-        <Stat icon="work_history" label="Iklan aktif" value={metrics?.open || 0} tone="green" />
-        <Stat icon="description" label="Jumlah permohonan" value={metrics?.total || 0} tone="blue" />
-        <Stat icon="stars" label="Disenarai pendek" value={metrics?.shortlist || 0} tone="mint" />
-        <Stat icon="notifications" label="Permohonan baharu" value={metrics?.new || 0} tone="amber" />
-      </div>
-      <div className="hrm-grid">
-        <section className="hrm-card hrm-table-card">
-          <header>
-            <div>
-              <h2>Permohonan terkini {label}</h2>
-              <p>Calon yang memerlukan semakan anda</p>
-            </div>
-            <button onClick={onViewApplications} type="button">
-              Lihat semua <Icon>chevron_right</Icon>
-            </button>
-          </header>
-          <ApplicationTable applications={latestApplications} onReview={onReview} compact />
-        </section>
-        <section className="hrm-card hrm-analytics">
-          <header>
-            <h2>Analitik pemohon {label}</h2>
-            <p>Agihan status permohonan semasa</p>
-          </header>
-          <div className="hrm-chart">
-            {applicationStatusKeys.map((status) => {
-              const statusCount = applications.filter((app) => app.status === status).length;
-              const statusPercent = applications.length ? Math.max(8, (statusCount / applications.length) * 100) : 8;
-              return (
-                <div key={status}>
-                  <span>
-                    <Badge status={status} />
-                  </span>
-                  <i>
-                    <b style={{ width: `${statusPercent}%` }} />
-                  </i>
-                  <strong>{statusCount}</strong>
-                </div>
-              );
-            })}
-          </div>
-          <footer>
-            <Icon>history</Icon> Dikemas kini secara langsung
-          </footer>
-        </section>
-      </div>
-    </section>
+      <footer>
+        <button onClick={onManage} type="button">Urus iklan</button>
+        <button onClick={onViewApplications} type="button">Lihat permohonan</button>
+      </footer>
+    </article>
   );
 }
 function JobManagementTable({ jobs, applications, itemLabel = "jawatan" }) {
