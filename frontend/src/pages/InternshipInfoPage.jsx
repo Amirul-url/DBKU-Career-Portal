@@ -66,7 +66,6 @@ export default function InternshipInfoPage() {
 
         <section className="internship-content-shell">
           <div className="internship-intro">
-            <span>Latihan Industri DBKU</span>
             <h2>Peluang pembelajaran dalam persekitaran perkhidmatan bandar raya.</h2>
             <p>
               DBKU membuka peluang kepada pelajar institusi pengajian tinggi untuk menjalani latihan industri mengikut
