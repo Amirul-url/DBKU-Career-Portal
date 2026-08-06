@@ -994,7 +994,7 @@ function JobManagementTable({ jobs, applications, itemLabel = "jawatan", onDelet
         <thead>
           <tr>
             <th>Bil.</th>
-            <th>Bahagian</th>
+            <th>Tajuk jawatan</th>
             <th>Tarikh siar</th>
             <th>Tarikh tutup</th>
             <th>Pemohon</th>
@@ -1016,7 +1016,7 @@ function JobManagementTable({ jobs, applications, itemLabel = "jawatan", onDelet
             return (
               <tr key={job.id}>
                 <td>{index + 1}</td>
-                <td>{job.division || "—"}</td>
+                <td>{job.title || "—"}</td>
                 <td>{dateValue(job.created_at)}</td>
                 <td>{dateValue(job.closing_date)}</td>
                 <td>{applicantCount}</td>
