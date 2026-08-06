@@ -419,8 +419,15 @@ export default function AdminHrmPage() {
             </div>
           )}
           {panel === "create" && (
-            <form className="simple-job-form" onSubmit={submitJob}>
-              <header><span className="hrm-eyebrow">{isInternshipForm ? "TAMBAH JAWATAN LATIHAN INDUSTRI" : "TAMBAH JAWATAN DBKU"}</span><h1>{isInternshipForm ? "Siarkan jawatan latihan industri baharu" : "Siarkan jawatan DBKU baharu"}</h1><p>Masukkan ringkasan penting. Maklumat penuh disediakan melalui dokumen rasmi untuk dimuat turun pemohon.</p></header>
+            <>
+              <div className="hrm-heading">
+                <div>
+                  <span className="hrm-eyebrow">{isInternshipForm ? "TAMBAH JAWATAN LATIHAN INDUSTRI" : "TAMBAH JAWATAN DBKU"}</span>
+                  <h1>{isInternshipForm ? "Siarkan jawatan latihan industri baharu" : "Siarkan jawatan DBKU baharu"}</h1>
+                  <p>Masukkan ringkasan penting. Maklumat penuh disediakan melalui dokumen rasmi untuk dimuat turun pemohon.</p>
+                </div>
+              </div>
+              <form className="simple-job-form" onSubmit={submitJob}>
               <label>Tajuk jawatan<input required value={jobForm.title} onChange={(event) => setJobForm({ ...jobForm, title: event.target.value })} placeholder={isInternshipForm ? "cth. Latihan Industri Teknologi Maklumat" : "cth. Penolong Pegawai Penerangan Gred S5"} /></label>
               <label>Bahagian<select required value={jobForm.division || ""} onChange={(event) => setJobForm({ ...jobForm, division: event.target.value })}><option value="">Sila pilih</option>{dbkuDepartments.map((division) => <option key={division.code} value={division.name}>{division.name} ({division.code})</option>)}</select></label>
               <label>Jabatan<input required value={jobForm.department} onChange={(event) => setJobForm({ ...jobForm, department: event.target.value })} placeholder="cth. Jabatan Pentadbiran" /></label>
@@ -429,7 +436,8 @@ export default function AdminHrmPage() {
               <label>Tarikh tutup<input required type="date" value={jobForm.closing_date} onChange={(event) => setJobForm({ ...jobForm, closing_date: event.target.value })} /></label>
               <label>Dokumen rasmi untuk pemohon<input required type="file" accept="application/pdf,image/png,image/jpeg" onChange={(event) => setDocumentFile(event.target.files?.[0] || null)} /><small>Muat naik fail iklan atau borang permohonan. Pemohon akan memuat turun fail ini untuk butiran penuh.</small></label>
               <button className="hrm-primary" type="submit"><Icon>add_circle</Icon>Siarkan jawatan</button>
-            </form>
+              </form>
+            </>
           )}
           {panel === "dashboard" && (
             <>
