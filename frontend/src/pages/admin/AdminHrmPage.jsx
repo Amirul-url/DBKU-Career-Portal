@@ -1017,6 +1017,7 @@ function JobManagementTable({ jobs, applications, itemLabel = "jawatan", onDelet
 }
 function JobActionModal({ form, job, mode, onChange, onClose, onSave, saving }) {
   const isEdit = mode === "edit";
+  const isOpen = job.is_open ?? job.status === "open";
 
   return (
     <div className="hrm-modal-backdrop" role="presentation">
@@ -1046,16 +1047,33 @@ function JobActionModal({ form, job, mode, onChange, onClose, onSave, saving }) 
             </footer>
           </form>
         ) : (
-          <div className="hrm-job-modal-details">
-            <dl>
-              <div><dt>Bahagian</dt><dd>{job.division || "—"}</dd></div>
-              <div><dt>Jabatan</dt><dd>{job.department || "—"}</dd></div>
-              <div><dt>Lokasi</dt><dd>{job.location || "—"}</dd></div>
-              <div><dt>Taraf jawatan</dt><dd>{job.employment_type || "—"}</dd></div>
-              <div><dt>Tarikh siar</dt><dd>{dateValue(job.created_at)}</dd></div>
-              <div><dt>Tarikh tutup</dt><dd>{dateValue(job.closing_date)}</dd></div>
-              <div><dt>Status</dt><dd>{job.is_open ?? job.status === "open" ? "Aktif" : job.status}</dd></div>
-            </dl>
+          <div className="hrm-job-modal-details hrm-job-preview">
+            <div className="market-detail-icon">
+              <Icon>{job.vacancy_type === "internship" ? "school" : "work"}</Icon>
+            </div>
+            <span className="market-job-badge">{job.vacancy_type === "internship" ? "Latihan Industri" : "Jawatan"}</span>
+            <h2>{job.title}</h2>
+            <div className="market-detail-department">{job.department || "Dewan Bandaraya Kuching Utara"}</div>
+            <div className="market-detail-meta">
+              <span><Icon>work</Icon>Taraf jawatan: {job.employment_type || "—"}</span>
+              <span><Icon>apartment</Icon>Bahagian: {job.division || "—"}</span>
+              <span><Icon>location_on</Icon>{job.location || "—"}</span>
+              <span><Icon>event</Icon>Tarikh tutup: {dateValue(job.closing_date)}</span>
+            </div>
+            <div className="market-detail-document">
+              <span>Untuk mengetahui lebih lanjut, sila klik di sini:</span>
+              {job.official_document ? (
+                <a href={job.official_document_view_url || job.official_document} target="_blank" rel="noreferrer">
+                  Muat turun dokumen
+                </a>
+              ) : (
+                <strong>Dokumen belum tersedia</strong>
+              )}
+            </div>
+            <div className="hrm-preview-status">
+              <span className={`hrm-badge ${isOpen ? "green" : "slate"}`}>{isOpen ? "Aktif" : "Ditutup"}</span>
+              <small>Disiarkan {dateValue(job.created_at)}</small>
+            </div>
             <footer>
               <button className="hrm-primary" type="button" onClick={onClose}>Tutup</button>
             </footer>
