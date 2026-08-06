@@ -1052,11 +1052,10 @@ function JobActionModal({ form, job, mode, onChange, onClose, onDocumentOpen, on
 
   return (
     <div className="hrm-modal-backdrop" role="presentation">
-      <section className="hrm-job-modal" role="dialog" aria-modal="true" aria-labelledby="job-action-title">
+      <section className="hrm-job-modal" role="dialog" aria-modal="true" aria-labelledby={isEdit ? "job-action-mode" : "job-action-title"}>
         <header>
           <div>
-            <span className="hrm-eyebrow">{isEdit ? "EDIT IKLAN" : "BUTIRAN IKLAN"}</span>
-            {isEdit ? <h2 id="job-action-title">{job.title}</h2> : null}
+            <span className="hrm-eyebrow" id={isEdit ? "job-action-mode" : undefined}>{isEdit ? "EDIT IKLAN" : "BUTIRAN IKLAN"}</span>
           </div>
           <button type="button" onClick={onClose} aria-label="Tutup">×</button>
         </header>
