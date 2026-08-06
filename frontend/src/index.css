@@ -4052,6 +4052,19 @@ body:has(.applicant-profile-page) {
   margin-top: 14px;
 }
 
+.internship-work-hours {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: 22px;
+  row-gap: 8px;
+  margin-top: 10px;
+  padding-left: 48px;
+}
+
+.internship-work-hours span {
+  line-height: 1.45;
+}
+
 .internship-field-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4134,6 +4147,11 @@ body:has(.applicant-profile-page) {
   .internship-field-grid,
   .internship-cta-panel {
     grid-template-columns: 1fr;
+  }
+
+  .internship-work-hours {
+    grid-template-columns: 1fr;
+    padding-left: 0;
   }
 
   .internship-cta-panel {

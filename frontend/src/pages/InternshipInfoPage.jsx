@@ -75,12 +75,52 @@ export default function InternshipInfoPage() {
           </div>
 
           <article className="internship-copy-card">
-            <h4>Kelayakan dan syarat asas</h4>
+            <h4>Syarat-syarat bagi latihan industri / praktikal</h4>
             <ol>
-              <li>Warganegara Malaysia.</li>
-              <li>Dilindungi insurans oleh institusi / kolej / universiti masing-masing.</li>
               <li>
-                Sedang mengikuti pengajian di institusi yang diiktiraf dan bidang pengajian berkaitan dengan fungsi DBKU.
+                Pelajar yang menjalani latihan industri / praktikal di DBKU akan dibayar elaun sebanyak RM500.00 secara
+                bulanan setelah genap tempoh sebulan dari tarikh melapor diri terhad untuk tempoh maksimum tiga (3)
+                bulan sahaja. Namun demikian, pembayaran elaun ini adalah tertakluk kepada kuota pengambilan pelajar
+                latihan industri / praktikal bagi tahun semasa mengikut bahagian-bahagian di DBKU.
+              </li>
+              <li>
+                Sekiranya kuota elaun telah dipenuhi, pelajar masih berpeluang menjalani latihan industri di DBKU tetapi{" "}
+                <strong>tidak akan dibayar sebarang elaun</strong>. Penerimaan pelajar tanpa elaun akan dipertimbangkan
+                berdasarkan keperluan organisasi. Walaupun tanpa elaun, pelajar tetap akan mendapat pengalaman kerja yang
+                bermakna serta sijil pengesahan tamat latihan sebagai pengiktirafan.
+              </li>
+              <li>
+                Pelajar tidak akan mendapat kemudahan perkhidmatan seperti pegawai DBKU termasuk pengangkutan dan
+                penginapan.
+              </li>
+              <li>
+                Pihak DBKU tidak akan bertanggungjawab ke atas sebarang kecederaan atau kemalangan yang berlaku kepada
+                pelajar sepanjang latihan.
+              </li>
+              <li>Pelajar diwajibkan berpakaian kemas, sopan dan bersesuaian dengan imej profesional.</li>
+              <li>
+                Pelajar dikehendaki menepati waktu bekerja seperti berikut semasa menjalani latihan industri / praktikal
+                di DBKU:
+                <div className="internship-work-hours">
+                  <span>Isnin – Khamis</span>
+                  <span>8.00 pagi – 1.00 petang<br />2.00 petang – 5.00 petang</span>
+                  <span>Jumaat</span>
+                  <span>8.00 pagi – 11.45 pagi<br />2.15 petang – 5.00 petang</span>
+                </div>
+              </li>
+              <li>
+                Pelajar bertanggungjawab untuk menyelesaikan tugasan yang diberikan oleh penyelia dan melengkapkan
+                laporan yang telah ditetapkan oleh institut pengajian.
+              </li>
+              <li>
+                Pelajar latihan industri / praktikal dibenarkan bercuti tetapi perlu mendapatkan kebenaran Ketua
+                Penyelaras dari institut pengajian dan Pegawai Penyelia Pelajar terlebih dahulu.
+              </li>
+              <li>Mematuhi arahan / peraturan yang telah ditetapkan oleh pihak DBKU dari semasa ke semasa.</li>
+              <li>Menjaga nama baik DBKU dan institut pengajian.</li>
+              <li>
+                Pihak DBKU mempunyai hak untuk melaporkan dan menamatkan program latihan industri / praktikal sekiranya
+                pelajar didapati melakukan sebarang salah laku disiplin.
               </li>
             </ol>
 
@@ -93,11 +133,6 @@ export default function InternshipInfoPage() {
                 </span>
               ))}
             </div>
-
-            <h4>Logistik</h4>
-            <p>
-              Pelajar bertanggungjawab mengurus penginapan dan pengangkutan sendiri sepanjang tempoh latihan industri.
-            </p>
 
             <h4>Permohonan</h4>
             <p>
