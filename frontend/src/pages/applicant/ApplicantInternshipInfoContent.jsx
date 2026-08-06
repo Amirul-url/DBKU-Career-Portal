@@ -1,4 +1,4 @@
-import { Icon } from "./ApplicantAuthShared";
+import { Link } from "react-router-dom";
 
 const fieldOptions = [
   "Kejuruteraan Awam",
@@ -19,6 +19,14 @@ const requiredDocuments = [
   "1 salinan muka depan akaun bank",
   "Buku log",
 ];
+
+function Icon({ children, className = "" }) {
+  return (
+    <span className={`material-symbols-outlined notranslate ${className}`} aria-hidden="true" translate="no">
+      {children}
+    </span>
+  );
+}
 
 export default function ApplicantInternshipInfoContent() {
   return (
@@ -110,6 +118,17 @@ export default function ApplicantInternshipInfoContent() {
               <li key={document}>{document}</li>
             ))}
           </ol>
+
+          <div className="internship-cta-panel">
+            <div>
+              <strong>Bersedia untuk hantar permohonan?</strong>
+              <p>Lengkapkan profil sebelum membuat permohonan latihan industri.</p>
+            </div>
+            <Link to="/profile">
+              Mohon Latihan Industri
+              <Icon>arrow_forward</Icon>
+            </Link>
+          </div>
         </article>
       </section>
     </main>
