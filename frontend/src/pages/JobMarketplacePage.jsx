@@ -272,14 +272,9 @@ export function JobMarketplaceContent({ actionTarget = "/login", embedded = fals
                 alt="Meja kerja perancangan bandar"
                 className="market-detail-image"
               />
-            ) : (
-              <div className="market-detail-icon">
-                <Icon>{selectedOpportunity.icon}</Icon>
-              </div>
-            )}
+            ) : null}
 
             <div className="market-detail-body">
-              <span className="market-job-badge">{selectedOpportunity.category}</span>
               <h2>{selectedOpportunity.title}</h2>
               <div className="market-detail-department">
                 {selectedOpportunity.organization || "Dewan Bandaraya Kuching Utara"}

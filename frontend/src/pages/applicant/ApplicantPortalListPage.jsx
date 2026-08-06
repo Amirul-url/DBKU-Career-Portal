@@ -155,10 +155,6 @@ function SavedVacancyList({ onRemove, vacancies }) {
         <aside className="market-detail" aria-label="Butiran jawatan disimpan">
           {selectedVacancy ? (
             <div className="market-detail-body">
-              <div className="market-detail-icon">
-                <Icon>{selectedVacancy.vacancy_type === "internship" ? "school" : "work"}</Icon>
-              </div>
-              <span className="market-job-badge">{selectedVacancy.category || "Jawatan"}</span>
               <h2>{selectedVacancy.title || "Jawatan DBKU"}</h2>
               <div className="market-detail-department">
                 {selectedVacancy.organization || "Dewan Bandaraya Kuching Utara"}

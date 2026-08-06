@@ -130,6 +130,53 @@ a {
   text-decoration: none;
 }
 
+.hrm-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border-top: 1px solid #e8f0eb;
+  padding: 14px 20px;
+  color: #617069;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.hrm-pagination div {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.hrm-pagination button {
+  display: inline-grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid #cfe0d6;
+  border-radius: 7px;
+  background: #fff;
+  color: #0f8d50;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.hrm-pagination button:hover:not(:disabled) {
+  border-color: #16a34a;
+  background: #eaf8f0;
+}
+
+.hrm-pagination button:disabled {
+  cursor: not-allowed;
+  opacity: .45;
+}
+
+.hrm-pagination strong {
+  min-width: 42px;
+  color: #42584c;
+  text-align: center;
+}
+
 .material-symbols-outlined {
   display: inline-flex;
   align-items: center;
@@ -2647,8 +2694,7 @@ a {
 .market-reference-shell .market-detail-icon { position: absolute; z-index: 1; top: 24px; right: 26px; width: 54px; height: 54px; border: 1px solid #cdebd9; border-radius: 14px; background: #effaf4; }
 .market-reference-shell .market-detail-icon .material-symbols-outlined { font-size: 29px; }
 .market-reference-shell .market-detail-body { padding: 30px 34px 34px; }
-.market-reference-shell .market-detail-body > .market-job-badge { margin-right: 74px; }
-.market-reference-shell .market-detail h2 { max-width: calc(100% - 74px); margin-top: 14px; font-size: 29px; line-height: 1.2; }
+.market-reference-shell .market-detail h2 { max-width: 100%; margin-top: 0; font-size: 29px; line-height: 1.2; }
 .market-detail-department { display: inline-flex; align-items: center; gap: 7px; margin-top: 9px; color: #52685b; font-size: 14px; font-weight: 800; }
 .market-detail-department .material-symbols-outlined { font-size: 18px; }
 .market-reference-shell .market-detail-body > p { max-width: 780px; font-size: 14px; line-height: 1.65; }

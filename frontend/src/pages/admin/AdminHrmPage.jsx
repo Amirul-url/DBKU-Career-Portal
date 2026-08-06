@@ -985,10 +985,28 @@ function DashboardCategoryCard({ label, metrics, onCreate, onManage, onViewAppli
   );
 }
 function JobManagementTable({ jobs, applications, itemLabel = "jawatan", onDelete, onEdit, onView }) {
+  const rowsPerPage = 5;
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(jobs.length / rowsPerPage));
+  const activePage = Math.min(currentPage, totalPages);
+  const startIndex = (activePage - 1) * rowsPerPage;
+  const visibleJobs = jobs.slice(startIndex, startIndex + rowsPerPage);
+  const visibleStart = jobs.length ? startIndex + 1 : 0;
+  const visibleEnd = Math.min(startIndex + rowsPerPage, jobs.length);
+
+  useEffect(() => {
+    setCurrentPage((page) => Math.min(page, totalPages));
+  }, [totalPages]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [itemLabel]);
+
   if (!jobs.length)
     return <p className="hrm-empty">Belum ada {itemLabel} disiarkan.</p>;
 
   return (
+    <>
     <div className="hrm-table-wrap">
       <table>
         <thead>
@@ -1003,7 +1021,7 @@ function JobManagementTable({ jobs, applications, itemLabel = "jawatan", onDelet
           </tr>
         </thead>
         <tbody>
-          {jobs.map((job, index) => {
+          {visibleJobs.map((job, index) => {
             const applicantCount = applications.filter(
               (application) => application.vacancy === job.id,
             ).length;
@@ -1015,7 +1033,7 @@ function JobManagementTable({ jobs, applications, itemLabel = "jawatan", onDelet
                 : "Ditutup";
             return (
               <tr key={job.id}>
-                <td>{index + 1}</td>
+                <td>{startIndex + index + 1}</td>
                 <td>{job.title || "—"}</td>
                 <td>{dateValue(job.created_at)}</td>
                 <td>{dateValue(job.closing_date)}</td>
@@ -1044,6 +1062,31 @@ function JobManagementTable({ jobs, applications, itemLabel = "jawatan", onDelet
         </tbody>
       </table>
     </div>
+    <footer className="hrm-pagination">
+      <span>
+        Memaparkan {visibleStart}-{visibleEnd} daripada {jobs.length} rekod
+      </span>
+      <div>
+        <button
+          type="button"
+          aria-label="Halaman sebelumnya"
+          disabled={activePage === 1}
+          onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+        >
+          &lt;
+        </button>
+        <strong>{activePage} / {totalPages}</strong>
+        <button
+          type="button"
+          aria-label="Halaman seterusnya"
+          disabled={activePage === totalPages}
+          onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+        >
+          &gt;
+        </button>
+      </div>
+    </footer>
+    </>
   );
 }
 function JobActionModal({ form, job, mode, onChange, onClose, onDocumentOpen, onSave, saving }) {
