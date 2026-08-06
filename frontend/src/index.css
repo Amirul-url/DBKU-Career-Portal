@@ -3921,11 +3921,11 @@ body:has(.applicant-profile-page) {
   color: #006c49;
 }
 
-.profile-account-trigger .material-symbols-outlined {
+.profile-account-trigger > .material-symbols-outlined {
   font-size: 20px;
 }
 
-.profile-account-menu[open] .profile-account-trigger .material-symbols-outlined {
+.profile-account-menu[open] .profile-account-trigger > .material-symbols-outlined {
   transform: rotate(180deg);
 }
 
