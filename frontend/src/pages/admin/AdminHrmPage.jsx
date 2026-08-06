@@ -109,6 +109,12 @@ const createEmptyJobForm = (vacancyType = "job") => ({
   application_notes: "",
   status: "open",
 });
+const buildQuickJobSummary = (form) =>
+  [
+    form.title,
+    form.division ? `Bahagian: ${form.division}` : "",
+    form.employment_type ? `Taraf jawatan: ${form.employment_type}` : "",
+  ].filter(Boolean).join("\n");
 const opportunityTypeLabels = {
   job: "Jawatan DBKU",
   internship: "Latihan Industri",
@@ -233,7 +239,12 @@ export default function AdminHrmPage() {
     event.preventDefault();
     try {
       const payload = new FormData();
-      Object.entries({ ...jobForm, location: jobForm.location || "Dewan Bandaraya Kuching Utara, Bukit Siol, Jalan Semariang, Petra Jaya, 93050, Kuching, Sarawak" }).forEach(
+      const normalizedJobForm = {
+        ...jobForm,
+        location: jobForm.location || "Dewan Bandaraya Kuching Utara, Bukit Siol, Jalan Semariang, Petra Jaya, 93050, Kuching, Sarawak",
+        summary: jobForm.summary || buildQuickJobSummary(jobForm),
+      };
+      Object.entries(normalizedJobForm).forEach(
         ([key, value]) => payload.append(key, value || ""),
       );
       if (documentFile) payload.append("official_document", documentFile);
