@@ -1,18 +1,26 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { loginApplicant, saveAuthSession } from "../../lib/authApi";
+import { getStoredUser, loginApplicant, saveAuthSession } from "../../lib/authApi";
 import { ApplicantAuthLayout, AuthField, PasswordField } from "./ApplicantAuthShared";
+
+const dashboardPathForRole = (role) =>
+  role === "superadmin" ? "/superadmin" : role === "admin" ? "/admin" : "/profile";
 
 function LoginForm() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [storedUser] = useState(getStoredUser);
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [status, setStatus] = useState(
     location.state?.message ? { type: "success", message: location.state.message } : { type: "", message: "" }
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (storedUser) navigate(dashboardPathForRole(storedUser.role), { replace: true });
+  }, [navigate, storedUser]);
 
   const handleChange = (event) => {
     const { name, value, dataset } = event.currentTarget;
@@ -28,7 +36,7 @@ function LoginForm() {
     try {
       const data = await loginApplicant(formData);
       saveAuthSession(data);
-      navigate(data.user?.role === "superadmin" ? "/superadmin" : data.user?.role === "admin" ? "/admin" : "/profile");
+      navigate(dashboardPathForRole(data.user?.role), { replace: true });
     } catch (error) {
       setStatus({ type: "error", message: error.message });
     } finally {
