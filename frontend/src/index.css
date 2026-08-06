@@ -177,6 +177,33 @@ a {
   text-align: center;
 }
 
+.hrm-status-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #52685b;
+  font-size: 12px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.hrm-status-filter select {
+  min-width: 148px;
+  border: 1px solid #cfe0d6;
+  border-radius: 7px;
+  background: #fff;
+  padding: 8px 10px;
+  color: #1c3024;
+  font: inherit;
+  font-size: 12px;
+  outline: 0;
+}
+
+.hrm-status-filter select:focus {
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px #dcf6e7;
+}
+
 .material-symbols-outlined {
   display: inline-flex;
   align-items: center;

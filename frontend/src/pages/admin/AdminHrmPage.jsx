@@ -135,6 +135,23 @@ const dashboardTypes = [
   },
 ];
 const applicationStatusKeys = ["submitted", "screening", "shortlisted", "rejected"];
+const jobStatusOptions = [
+  { value: "all", label: "Semua status" },
+  { value: "active", label: "Aktif" },
+  { value: "expired", label: "Tamat tempoh" },
+  { value: "closed", label: "Ditutup" },
+];
+const getJobDisplayStatus = (job) => {
+  const isOpen = job.is_open ?? job.status === "open";
+  if (isOpen) return "active";
+  return job.status === "open" ? "expired" : "closed";
+};
+const getJobStatusText = (job) => {
+  const displayStatus = getJobDisplayStatus(job);
+  if (displayStatus === "active") return "Aktif";
+  if (displayStatus === "expired") return "Tamat tempoh";
+  return "Ditutup";
+};
 
 function Badge({ status }) {
   return (
@@ -160,6 +177,7 @@ export default function AdminHrmPage() {
   const [jobActionForm, setJobActionForm] = useState({});
   const [jobActionSaving, setJobActionSaving] = useState(false);
   const [jobDeleteTarget, setJobDeleteTarget] = useState(null);
+  const [jobStatusFilter, setJobStatusFilter] = useState("all");
   const documentBlobUrls = useRef([]);
   const routeState = getAdminRouteState(location.pathname);
   const [jobForm, setJobForm] = useState(() => createEmptyJobForm(routeState.vacancyType || "job"));
@@ -199,6 +217,9 @@ export default function AdminHrmPage() {
     },
     [],
   );
+  useEffect(() => {
+    setJobStatusFilter("all");
+  }, [activeVacancyType]);
   const dashboardMetrics = useMemo(() => {
     const jobTypesById = new Map(jobs.map((job) => [job.id, job.vacancy_type]));
     const applicationsByType = (type) =>
@@ -382,7 +403,9 @@ export default function AdminHrmPage() {
   const activeOpportunityLabel = opportunityTypeLabels[activeVacancyType] || opportunityTypeLabels.job;
   const activeMetrics = dashboardMetrics[activeVacancyType] || dashboardMetrics.job;
   const overallMetrics = dashboardMetrics.all;
-  const filteredJobs = activeMetrics.jobs;
+  const filteredJobs = activeMetrics.jobs.filter((job) =>
+    jobStatusFilter === "all" ? true : getJobDisplayStatus(job) === jobStatusFilter,
+  );
   const filteredApplications = activeMetrics.applications;
   const latestApplications = overallMetrics.applications.slice(0, 6);
   const isInternshipForm = jobForm.vacancy_type === "internship";
@@ -872,12 +895,30 @@ export default function AdminHrmPage() {
                 <header>
                   <div>
                     <h2>{activeOpportunityLabel} disiarkan</h2>
-                    <p>{filteredJobs.length} rekod {activeOpportunityLabel.toLowerCase()}</p>
+                    <p>
+                      {filteredJobs.length} rekod {activeOpportunityLabel.toLowerCase()}
+                      {jobStatusFilter !== "all" ? ` daripada ${activeMetrics.jobs.length}` : ""}
+                    </p>
                   </div>
+                  <label className="hrm-status-filter">
+                    <span>Status</span>
+                    <select value={jobStatusFilter} onChange={(event) => setJobStatusFilter(event.target.value)}>
+                      {jobStatusOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
                 </header>
                 <JobManagementTable
                   jobs={filteredJobs}
                   applications={applications}
+                  emptyMessage={
+                    activeMetrics.jobs.length && jobStatusFilter !== "all"
+                      ? `Tiada ${activeOpportunityLabel.toLowerCase()} dengan status ini.`
+                      : ""
+                  }
                   itemLabel={activeOpportunityLabel.toLowerCase()}
                   onDelete={requestDeleteJob}
                   onEdit={openJobEdit}
@@ -984,7 +1025,7 @@ function DashboardCategoryCard({ label, metrics, onCreate, onManage, onViewAppli
     </article>
   );
 }
-function JobManagementTable({ jobs, applications, itemLabel = "jawatan", onDelete, onEdit, onView }) {
+function JobManagementTable({ jobs, applications, emptyMessage = "", itemLabel = "jawatan", onDelete, onEdit, onView }) {
   const rowsPerPage = 5;
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.max(1, Math.ceil(jobs.length / rowsPerPage));
@@ -1003,7 +1044,7 @@ function JobManagementTable({ jobs, applications, itemLabel = "jawatan", onDelet
   }, [itemLabel]);
 
   if (!jobs.length)
-    return <p className="hrm-empty">Belum ada {itemLabel} disiarkan.</p>;
+    return <p className="hrm-empty">{emptyMessage || `Belum ada ${itemLabel} disiarkan.`}</p>;
 
   return (
     <>
@@ -1025,12 +1066,8 @@ function JobManagementTable({ jobs, applications, itemLabel = "jawatan", onDelet
             const applicantCount = applications.filter(
               (application) => application.vacancy === job.id,
             ).length;
-            const isOpen = job.is_open ?? job.status === "open";
-            const statusText = isOpen
-              ? "Aktif"
-              : job.status === "open"
-                ? "Tamat tempoh"
-                : "Ditutup";
+            const isOpen = getJobDisplayStatus(job) === "active";
+            const statusText = getJobStatusText(job);
             return (
               <tr key={job.id}>
                 <td>{startIndex + index + 1}</td>
