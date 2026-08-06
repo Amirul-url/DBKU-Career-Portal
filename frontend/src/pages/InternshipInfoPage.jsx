@@ -15,7 +15,6 @@ const requiredDocuments = [
   "Surat rasmi daripada institusi / kolej / universiti",
   "Transkrip akademik terkini",
   "Resume",
-  "Surat tawaran menjalani latihan industri / praktikal",
   "1 keping gambar berukuran passport",
   "1 salinan muka depan akaun bank",
   "Buku log",
