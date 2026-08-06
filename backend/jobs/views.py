@@ -10,17 +10,7 @@ from rest_framework import viewsets
 from .models import Vacancy
 from .permissions import IsStaffOrReadOnly
 from .serializers import VacancySerializer
-
-
-def readable_document_name(file_name):
-    if not file_name:
-        return "Dokumen Rasmi DBKU.pdf"
-    base_name = file_name.rsplit("/", 1)[-1]
-    name, extension = base_name.rsplit(".", 1) if "." in base_name else (base_name, "")
-    if len(name) > 8 and name[-8] == "_" and name[-7:].isalnum():
-        name = name[:-8]
-    readable_name = name.replace("_", " ").strip() or "Dokumen Rasmi DBKU"
-    return f"{readable_name}.{extension}" if extension else readable_name
+from .utils import vacancy_document_name
 
 
 class VacancyViewSet(viewsets.ModelViewSet):
@@ -62,7 +52,7 @@ class VacancyViewSet(viewsets.ModelViewSet):
         response = FileResponse(
             vacancy.official_document.open("rb"),
             as_attachment=False,
-            filename=readable_document_name(vacancy.official_document.name),
+            filename=vacancy_document_name(vacancy),
             content_type=content_type or "application/octet-stream",
         )
         return response

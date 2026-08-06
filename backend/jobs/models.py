@@ -34,6 +34,7 @@ class Vacancy(models.Model):
     application_instructions = models.TextField(blank=True)
     application_notes = models.TextField(blank=True)
     official_document = models.FileField(upload_to="vacancy_documents/", blank=True)
+    official_document_original_name = models.CharField(max_length=255, blank=True)
     closing_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="draft")
     created_by = models.ForeignKey(

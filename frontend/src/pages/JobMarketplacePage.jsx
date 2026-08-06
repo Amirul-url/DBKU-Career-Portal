@@ -12,12 +12,6 @@ const dateLabel = (value) =>
     : "Tidak dinyatakan";
 const listItems = (value) =>
   value ? value.split("\n").filter(Boolean) : ["Rujuk dokumen rasmi untuk butiran lanjut."];
-const escapeHtml = (value) =>
-  String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
 const fileNameFromUrl = (url) => {
   const fallback = "Dokumen rasmi DBKU.pdf";
   if (!url) return fallback;
@@ -33,38 +27,6 @@ const normalizedDocumentName = (name) =>
   (name || "Dokumen rasmi DBKU.pdf")
     .replace(/_[a-z0-9]{7,}(?=\.[^.]+$)/i, "")
     .replaceAll("_", " ");
-const writeAboutBlankDocument = (viewerWindow, { source = "", documentName = "", errorMessage = "" } = {}) => {
-  const safeDocumentName = escapeHtml(documentName || "Dokumen rasmi DBKU.pdf");
-  const content = errorMessage
-    ? `<div class="viewer-message">${escapeHtml(errorMessage)}</div>`
-    : source
-      ? `<iframe src="${escapeHtml(source)}" title="${safeDocumentName}"></iframe>`
-      : `<div class="viewer-message">Memuatkan dokumen...</div>`;
-
-  viewerWindow.document.open();
-  viewerWindow.document.write(`<!doctype html>
-    <html lang="ms">
-      <head>
-        <title>Slide 1</title>
-        <style>
-          html, body { width: 100%; height: 100%; margin: 0; background: #2f2f2f; }
-          iframe { display: block; width: 100%; height: 100%; border: 0; background: #2f2f2f; }
-          .viewer-message {
-            align-items: center;
-            color: #ffffff;
-            display: flex;
-            font: 600 16px Arial, sans-serif;
-            height: 100%;
-            justify-content: center;
-          }
-        </style>
-      </head>
-      <body>
-        ${content}
-      </body>
-    </html>`);
-  viewerWindow.document.close();
-};
 const dbkuDivisionCodes = {
   "Bahagian Audit Dalaman": "AUD",
   "Bahagian Projek Khas & Fasiliti Awam": "SPF",
@@ -188,30 +150,43 @@ export default function LandingPage() {
 
     event.preventDefault();
 
-    const viewerWindow = window.open("about:blank", "_blank");
-    if (!viewerWindow) return;
-
-    viewerWindow.opener = null;
-    writeAboutBlankDocument(viewerWindow, {
-      documentName: normalizedDocumentName(selectedOpportunity?.official_document_name || fileNameFromUrl(documentUrl)),
-    });
-
     try {
       const blob = await fetchAuthenticatedBlob(documentUrl);
       const documentName = normalizedDocumentName(selectedOpportunity?.official_document_name || fileNameFromUrl(documentUrl));
       const pdfBlob = blob.type === "application/pdf" ? blob : new Blob([blob], { type: "application/pdf" });
       const objectUrl = URL.createObjectURL(pdfBlob);
+      const previousTitle = document.title;
       documentBlobUrls.current.push(objectUrl);
-      viewerWindow.addEventListener("beforeunload", () => {
+      const printFrame = document.createElement("iframe");
+      printFrame.title = documentName;
+      printFrame.style.cssText = "position:fixed;width:0;height:0;border:0;visibility:hidden;";
+      let isCleanedUp = false;
+      const cleanup = () => {
+        if (isCleanedUp) return;
+        isCleanedUp = true;
+        document.title = previousTitle;
         URL.revokeObjectURL(objectUrl);
         documentBlobUrls.current = documentBlobUrls.current.filter((url) => url !== objectUrl);
+        printFrame.remove();
+      };
+      printFrame.addEventListener("load", () => {
+        window.setTimeout(() => {
+          const frameWindow = printFrame.contentWindow;
+          if (!frameWindow) return cleanup();
+          document.title = documentName;
+          window.addEventListener("afterprint", cleanup, { once: true });
+          frameWindow.addEventListener("afterprint", cleanup, { once: true });
+          frameWindow.focus();
+          frameWindow.print();
+          window.setTimeout(() => {
+            document.title = previousTitle;
+          }, 0);
+        }, 600);
       }, { once: true });
-      writeAboutBlankDocument(viewerWindow, { source: objectUrl, documentName });
+      document.body.appendChild(printFrame);
+      printFrame.src = objectUrl;
     } catch {
-      writeAboutBlankDocument(viewerWindow, {
-        documentName: normalizedDocumentName(selectedOpportunity?.official_document_name || fileNameFromUrl(documentUrl)),
-        errorMessage: "Dokumen tidak dapat dimuatkan. Sila cuba lagi.",
-      });
+      window.alert("Dokumen tidak dapat dimuatkan. Sila cuba lagi.");
     }
   };
 
@@ -332,7 +307,6 @@ export default function LandingPage() {
                   <a
                     href={selectedOpportunity.official_document_view_url || selectedOpportunity.official_document}
                     onClick={handleDocumentOpen}
-                    target="_blank"
                     rel="noreferrer"
                   >
                     Muat turun dokumen

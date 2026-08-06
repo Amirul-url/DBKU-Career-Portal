@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from .models import Vacancy
+from .utils import vacancy_document_name
 
 
 class VacancySerializer(serializers.ModelSerializer):
@@ -11,7 +12,7 @@ class VacancySerializer(serializers.ModelSerializer):
     def get_official_document_name(self, obj):
         if not obj.official_document:
             return ""
-        return obj.official_document.name.rsplit("/", 1)[-1]
+        return vacancy_document_name(obj)
 
     def get_official_document_view_url(self, obj):
         if not obj.official_document:
@@ -51,3 +52,15 @@ class VacancySerializer(serializers.ModelSerializer):
             "updated_at",
         )
         read_only_fields = ("id", "created_at", "updated_at")
+
+    def create(self, validated_data):
+        uploaded_document = validated_data.get("official_document")
+        if uploaded_document:
+            validated_data["official_document_original_name"] = uploaded_document.name
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        uploaded_document = validated_data.get("official_document")
+        if uploaded_document:
+            validated_data["official_document_original_name"] = uploaded_document.name
+        return super().update(instance, validated_data)
