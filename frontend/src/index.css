@@ -4822,8 +4822,9 @@ body:has(.applicant-profile-page) {
 }
 
 .applicant-internship-page .internship-content-shell {
-  max-width: 1230px;
-  padding: 46px 48px 78px;
+  width: min(1280px, calc(100% - 96px));
+  max-width: none;
+  padding: 46px 0 78px;
 }
 
 .applicant-internship-page .internship-hero-overlay h1 {
