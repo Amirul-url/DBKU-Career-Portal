@@ -1244,6 +1244,15 @@ a {
   color: var(--primary-strong);
 }
 
+.corporate-empty {
+  border-top: 1px solid #e8efeb;
+  margin: 0;
+  padding: 18px 0 4px;
+  color: #64736b;
+  font-size: 13px;
+  font-weight: 750;
+}
+
 .corporate-latest strong,
 .corporate-latest small,
 .corporate-process b,

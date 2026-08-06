@@ -1,11 +1,7 @@
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
-const stats = [
-  ["5", "Kekosongan Aktif"],
-  ["23", "Jabatan DBKU"],
-  ["2", "Program Latihan Industri"],
-  ["100%", "Permohonan Dalam Talian"],
-];
+import { apiRequest } from "../lib/authApi";
 
 const services = [
   {
@@ -23,12 +19,6 @@ const services = [
     title: "Semak Status",
     text: "Pantau perkembangan permohonan melalui akaun pemohon yang berdaftar.",
   },
-];
-
-const latestRoles = [
-  ["Pegawai Perancang Bandar Kanan", "Jabatan Perancangan", "Sepenuh Masa"],
-  ["Pelatih Sokongan Teknologi Maklumat", "Perkhidmatan Digital", "Latihan Industri"],
-  ["Kerani Akaun", "Perbendaharaan", "Kontrak"],
 ];
 
 const steps = [
@@ -51,6 +41,54 @@ function Icon({ children, className = "" }) {
 }
 
 export default function LandingPage() {
+  const [vacancies, setVacancies] = useState([]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    apiRequest("/jobs/", { signal: controller.signal })
+      .then((data) => {
+        setVacancies(Array.isArray(data) ? data : data.results || []);
+      })
+      .catch((error) => {
+        if (error.name !== "AbortError") {
+          setVacancies([]);
+        }
+      });
+
+    return () => controller.abort();
+  }, []);
+
+  const { latestRoles, stats } = useMemo(() => {
+    const activeVacancies = vacancies.filter((vacancy) => vacancy.is_open ?? vacancy.status === "open");
+    const jobVacancies = activeVacancies.filter((vacancy) => vacancy.vacancy_type === "job");
+    const internshipVacancies = activeVacancies.filter((vacancy) => vacancy.vacancy_type === "internship");
+    const departments = new Set(
+      jobVacancies
+        .map((vacancy) => vacancy.division || vacancy.department)
+        .filter(Boolean),
+    );
+    const latest = [...activeVacancies]
+      .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
+      .slice(0, 3)
+      .map((vacancy) => ({
+        department: vacancy.division || vacancy.department || "Dewan Bandaraya Kuching Utara",
+        title: vacancy.title || (vacancy.vacancy_type === "internship" ? "Latihan Industri DBKU" : "Jawatan DBKU"),
+        type: vacancy.vacancy_type === "internship" ? "Latihan Industri" : vacancy.employment_type || "Jawatan",
+        url: vacancy.vacancy_type === "internship" ? "/internships" : "/jobs",
+      }));
+
+    return {
+      latestRoles: latest,
+      stats: [
+        [String(activeVacancies.length), "Kekosongan Aktif"],
+        [String(departments.size), "Jabatan DBKU"],
+        [String(internshipVacancies.length), "Program Latihan Industri"],
+        ["Aktif", "Permohonan Dalam Talian"],
+      ],
+    };
+  }, [vacancies]);
+
   return (
     <div className="landing-page corporate-landing-page">
       <header className="top-app-bar">
@@ -125,18 +163,20 @@ export default function LandingPage() {
               <span>Peluang Terkini</span>
               <h2>Jawatan yang sedang dibuka</h2>
             </div>
-            {latestRoles.map(([title, department, type]) => (
-              <Link to={type === "Latihan Industri" ? "/internships" : "/jobs"} key={title}>
+            {latestRoles.length ? latestRoles.map((role) => (
+              <Link to={role.url} key={role.title}>
                 <span>
-                  <Icon>{type === "Latihan Industri" ? "school" : "work"}</Icon>
+                  <Icon>{role.type === "Latihan Industri" ? "school" : "work"}</Icon>
                 </span>
                 <div>
-                  <strong>{title}</strong>
-                  <small>{department}</small>
+                  <strong>{role.title}</strong>
+                  <small>{role.department}</small>
                 </div>
-                <em>{type}</em>
+                <em>{role.type}</em>
               </Link>
-            ))}
+            )) : (
+              <p className="corporate-empty">Tiada peluang aktif dipaparkan buat masa ini.</p>
+            )}
           </div>
 
           <div className="corporate-process">
