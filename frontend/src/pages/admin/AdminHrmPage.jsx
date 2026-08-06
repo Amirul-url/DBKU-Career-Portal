@@ -158,6 +158,7 @@ export default function AdminHrmPage() {
   const [selectedJob, setSelectedJob] = useState(null);
   const [jobActionForm, setJobActionForm] = useState({});
   const [jobActionSaving, setJobActionSaving] = useState(false);
+  const [jobDeleteTarget, setJobDeleteTarget] = useState(null);
   const routeState = getAdminRouteState(location.pathname);
   const [jobForm, setJobForm] = useState(() => createEmptyJobForm(routeState.vacancyType || "job"));
   const panel = routeState.panel || "dashboard";
@@ -285,16 +286,21 @@ export default function AdminHrmPage() {
       setJobActionSaving(false);
     }
   };
-  const deleteJob = async (job) => {
-    const confirmed = window.confirm(`Padam iklan "${job.title}"? Tindakan ini tidak boleh dibuat asal.`);
-    if (!confirmed) return;
-
+  const requestDeleteJob = (job) => {
+    setJobDeleteTarget(job);
+  };
+  const confirmDeleteJob = async () => {
+    if (!jobDeleteTarget) return;
     try {
-      await apiRequest(`/jobs/${job.id}/`, { method: "DELETE" });
+      setJobActionSaving(true);
+      await apiRequest(`/jobs/${jobDeleteTarget.id}/`, { method: "DELETE" });
       setNotice("Iklan jawatan telah dipadam.");
+      setJobDeleteTarget(null);
+      setJobActionSaving(false);
       loadData();
     } catch (error) {
       setNotice(error.message || "Iklan jawatan tidak dapat dipadam.");
+      setJobActionSaving(false);
     }
   };
   const submitJob = async (event) => {
@@ -843,7 +849,7 @@ export default function AdminHrmPage() {
                   jobs={filteredJobs}
                   applications={applications}
                   itemLabel={activeOpportunityLabel.toLowerCase()}
-                  onDelete={deleteJob}
+                  onDelete={requestDeleteJob}
                   onEdit={openJobEdit}
                   onView={openJobView}
                 />
@@ -884,6 +890,14 @@ export default function AdminHrmPage() {
             onChange={(field, value) => setJobActionForm((current) => ({ ...current, [field]: value }))}
             onClose={closeJobModal}
             onSave={saveJobEdit}
+            saving={jobActionSaving}
+          />
+        ) : null}
+        {jobDeleteTarget ? (
+          <JobDeleteModal
+            job={jobDeleteTarget}
+            onCancel={() => setJobDeleteTarget(null)}
+            onConfirm={confirmDeleteJob}
             saving={jobActionSaving}
           />
         ) : null}
@@ -983,13 +997,13 @@ function JobManagementTable({ jobs, applications, itemLabel = "jawatan", onDelet
                 <td>
                   <div className="hrm-actions hrm-job-actions">
                     <button className="view" type="button" onClick={() => onView(job)}>
-                      <Icon>visibility</Icon>View
+                      <Icon>visibility</Icon>Lihat
                     </button>
                     <button className="edit" type="button" onClick={() => onEdit(job)}>
-                      <Icon>edit</Icon>Edit
+                      <Icon>edit</Icon>Kemaskini
                     </button>
                     <button className="delete" type="button" onClick={() => onDelete(job)}>
-                      <Icon>delete</Icon>Delete
+                      <Icon>delete</Icon>Padam
                     </button>
                   </div>
                 </td>
@@ -1047,6 +1061,32 @@ function JobActionModal({ form, job, mode, onChange, onClose, onSave, saving }) 
             </footer>
           </div>
         )}
+      </section>
+    </div>
+  );
+}
+function JobDeleteModal({ job, onCancel, onConfirm, saving }) {
+  return (
+    <div className="hrm-modal-backdrop" role="presentation">
+      <section className="hrm-job-modal hrm-delete-modal" role="dialog" aria-modal="true" aria-labelledby="job-delete-title">
+        <header>
+          <div>
+            <span className="hrm-eyebrow">PADAM IKLAN</span>
+            <h2 id="job-delete-title">Padam iklan jawatan?</h2>
+          </div>
+          <button type="button" onClick={onCancel} aria-label="Tutup">×</button>
+        </header>
+        <div className="hrm-job-modal-details">
+          <p className="hrm-delete-message">
+            Adakah anda pasti mahu memadam iklan <strong>{job.title}</strong>? Tindakan ini tidak boleh dibuat asal.
+          </p>
+          <footer>
+            <button className="hrm-secondary" type="button" onClick={onCancel} disabled={saving}>Batal</button>
+            <button className="hrm-danger" type="button" onClick={onConfirm} disabled={saving}>
+              {saving ? "Memadam..." : "Padam iklan"}
+            </button>
+          </footer>
+        </div>
       </section>
     </div>
   );
