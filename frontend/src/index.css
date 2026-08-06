@@ -204,6 +204,16 @@ a {
   box-shadow: 0 0 0 3px #dcf6e7;
 }
 
+.hrm-sticky-topbar,
+.profile-content-header,
+.superadmin-topbar,
+.fas-super-work > header {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  background: #ffffff;
+}
+
 .material-symbols-outlined {
   display: inline-flex;
   align-items: center;
@@ -5083,7 +5093,7 @@ body:has(.applicant-profile-page) {
 .profile-content-header {
   position: sticky;
   top: 0;
-  z-index: 30;
+  z-index: 60;
   display: flex;
   min-height: var(--profile-header-height);
   align-items: center;

@@ -484,7 +484,7 @@ export default function AdminHrmPage() {
       <main
         className={`min-h-screen bg-slate-50 transition-[margin] duration-200 ${isSidebarOpen ? "ml-[350px]" : "ml-[72px]"}`}
       >
-        <header className="flex h-[72px] items-center justify-between border-b border-emerald-100 bg-white px-11">
+        <header className="hrm-sticky-topbar flex h-[72px] items-center justify-between border-b border-emerald-100 bg-white px-11">
           <div>
             <p className="text-sm font-bold text-slate-950">Selamat datang</p>
             <strong className="mt-1 block text-[17px] text-slate-950">
