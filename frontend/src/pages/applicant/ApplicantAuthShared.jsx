@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   Bell,
+  Bookmark,
   Brain,
   BriefcaseBusiness,
   Check,
@@ -9,6 +10,7 @@ import {
   ChevronRight,
   ChevronUp,
   CirclePlus,
+  ClipboardList,
   Eye,
   EyeOff,
   FileText,
@@ -72,6 +74,8 @@ const iconMap = {
   shield: ShieldCheck,
   shield_person: ShieldUser,
   admin_panel_settings: UserCog,
+  assignment: ClipboardList,
+  bookmark: Bookmark,
   stars: Sparkles,
   tune: SlidersHorizontal,
   visibility: Eye,

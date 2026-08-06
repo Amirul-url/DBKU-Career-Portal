@@ -4736,6 +4736,179 @@ body:has(.applicant-profile-page) {
   background: transparent;
 }
 
+.applicant-list-shell {
+  max-width: 1180px;
+}
+
+.applicant-page-icon {
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--profile-pale);
+  color: var(--profile-green);
+}
+
+.applicant-page-icon .app-svg-icon {
+  font-size: 24px;
+}
+
+.applicant-list-status,
+.applicant-list-error,
+.applicant-list-empty,
+.applicant-list-card {
+  border: 1px solid #c9f5de;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.applicant-list-status,
+.applicant-list-error {
+  margin: 24px 0 0;
+  padding: 18px 20px;
+  color: #52615a;
+  font-weight: 800;
+}
+
+.applicant-list-error {
+  border-color: #fecaca;
+  background: #fff5f5;
+  color: #b42318;
+}
+
+.applicant-list-empty {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  margin-top: 28px;
+  padding: 34px;
+}
+
+.applicant-list-empty > span {
+  display: inline-flex;
+  width: 48px;
+  height: 48px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--profile-pale);
+  color: var(--profile-green);
+}
+
+.applicant-list-empty h2,
+.applicant-list-empty p {
+  margin: 0;
+}
+
+.applicant-list-empty h2 {
+  color: var(--profile-ink);
+  font-size: 22px;
+}
+
+.applicant-list-empty p {
+  max-width: 560px;
+  color: #52615a;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.applicant-list-empty a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 8px;
+  border-radius: 8px;
+  background: var(--profile-green);
+  padding: 12px 18px;
+  color: #ffffff;
+  font-weight: 900;
+}
+
+.applicant-list-grid {
+  display: grid;
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.applicant-list-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, .45fr);
+  gap: 20px;
+  padding: 22px 24px;
+}
+
+.applicant-list-card h2,
+.applicant-list-card p,
+.applicant-list-card dl,
+.applicant-list-card dd {
+  margin: 0;
+}
+
+.applicant-list-card h2 {
+  margin-top: 10px;
+  color: var(--profile-ink);
+  font-size: 22px;
+}
+
+.applicant-list-card p {
+  margin-top: 6px;
+  color: #52615a;
+  font-weight: 800;
+}
+
+.applicant-list-card dl {
+  display: grid;
+  gap: 12px;
+}
+
+.applicant-list-card dt {
+  color: #789083;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.applicant-list-card dd {
+  margin-top: 3px;
+  color: var(--profile-ink);
+  font-weight: 900;
+}
+
+.applicant-status-pill {
+  display: inline-flex;
+  border-radius: 999px;
+  background: #e7f1ff;
+  padding: 6px 10px;
+  color: #1769aa;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.applicant-status-pill.submitted,
+.applicant-status-pill.screening {
+  background: #e7f1ff;
+  color: #1769aa;
+}
+
+.applicant-status-pill.shortlisted {
+  background: #dcfce7;
+  color: #087a42;
+}
+
+.applicant-status-pill.rejected,
+.applicant-status-pill.withdrawn {
+  background: #fee2e2;
+  color: #b42318;
+}
+
+@media (max-width: 760px) {
+  .applicant-list-card {
+    grid-template-columns: 1fr;
+  }
+}
+
 .profile-content-header {
   position: sticky;
   top: 0;
