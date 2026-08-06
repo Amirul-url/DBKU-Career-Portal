@@ -4725,7 +4725,7 @@ body:has(.applicant-profile-page) {
   border-radius: 8px;
   padding: 10px 12px;
   color: var(--profile-ink);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 850;
 }
 
