@@ -1,0 +1,81 @@
+from datetime import timedelta
+
+from django.test import override_settings
+from django.utils import timezone
+from rest_framework.test import APITestCase
+
+from .models import LoginSession, User
+
+
+class LoginSessionTests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="sessionuser",
+            email="session@example.com",
+            password="Password123!",
+            role="admin",
+        )
+
+    def test_login_creates_session_and_logout_closes_it(self):
+        login_response = self.client.post(
+            "/api/auth/login/",
+            {"email": "session@example.com", "password": "Password123!"},
+            format="json",
+        )
+
+        self.assertEqual(login_response.status_code, 200)
+        session_id = login_response.data["login_session_id"]
+        session = LoginSession.objects.get(pk=session_id)
+        self.assertEqual(session.user, self.user)
+        self.assertIsNone(session.logout_at)
+
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {login_response.data['access']}")
+        logout_response = self.client.post(
+            "/api/auth/logout/",
+            {"login_session_id": session_id},
+            format="json",
+        )
+
+        self.assertEqual(logout_response.status_code, 200)
+        session.refresh_from_db()
+        self.assertIsNotNone(session.logout_at)
+        self.assertIsNotNone(session.duration_seconds)
+
+    def test_login_again_closes_existing_open_session_and_starts_new_one(self):
+        first_login = self.client.post(
+            "/api/auth/login/",
+            {"email": "session@example.com", "password": "Password123!"},
+            format="json",
+        )
+        second_login = self.client.post(
+            "/api/auth/login/",
+            {"email": "session@example.com", "password": "Password123!"},
+            format="json",
+        )
+
+        self.assertEqual(first_login.status_code, 200)
+        self.assertEqual(second_login.status_code, 200)
+        first_session = LoginSession.objects.get(pk=first_login.data["login_session_id"])
+        second_session = LoginSession.objects.get(pk=second_login.data["login_session_id"])
+        self.assertEqual(first_session.user, self.user)
+        self.assertEqual(second_session.user, self.user)
+        self.assertIsNotNone(first_session.logout_at)
+        self.assertIsNotNone(first_session.duration_seconds)
+        self.assertIsNone(second_session.logout_at)
+        self.assertIsNone(second_session.duration_seconds)
+
+    @override_settings(LOGIN_SESSION_TIMEOUT_SECONDS=3600)
+    def test_login_again_caps_stale_session_duration_at_timeout(self):
+        stale_login_at = timezone.now() - timedelta(hours=3)
+        stale_session = LoginSession.objects.create(user=self.user, login_at=stale_login_at)
+
+        login_response = self.client.post(
+            "/api/auth/login/",
+            {"email": "session@example.com", "password": "Password123!"},
+            format="json",
+        )
+
+        self.assertEqual(login_response.status_code, 200)
+        stale_session.refresh_from_db()
+        self.assertEqual(stale_session.logout_at, stale_login_at + timedelta(hours=1))
+        self.assertEqual(stale_session.duration_seconds, 3600)

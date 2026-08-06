@@ -3,8 +3,11 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api"
 const TOKEN_STORAGE_KEYS = {
   access: "dbku_access_token",
   refresh: "dbku_refresh_token",
+  session: "dbku_login_session_id",
   user: "dbku_user",
 };
+
+let refreshTokenPromise = null;
 
 function getMessageFromPayload(payload) {
   if (!payload) {
@@ -35,6 +38,14 @@ function getAccessToken() {
   return localStorage.getItem(TOKEN_STORAGE_KEYS.access);
 }
 
+function getRefreshToken() {
+  return localStorage.getItem(TOKEN_STORAGE_KEYS.refresh);
+}
+
+function getStoredLoginSessionId() {
+  return localStorage.getItem(TOKEN_STORAGE_KEYS.session);
+}
+
 async function authRequest(path, payload) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method: "POST",
@@ -55,18 +66,35 @@ async function authRequest(path, payload) {
 
 export async function apiRequest(path, options = {}) {
   const accessToken = getAccessToken();
-  const headers = {
-    ...(options.headers || {}),
+  const isFormData = options.body instanceof FormData;
+  const isPublicAuthRequest =
+    path.startsWith("/auth/login/") ||
+    path.startsWith("/auth/register/") ||
+    path.startsWith("/token/");
+
+  const makeRequest = (token) => {
+    const headers = {
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(options.headers || {}),
+    };
+
+    return fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      headers,
+    });
   };
 
-  if (accessToken) {
-    headers.Authorization = `Bearer ${accessToken}`;
+  let response = await makeRequest(isPublicAuthRequest ? null : accessToken);
+
+  if (response.status === 401 && accessToken && !isPublicAuthRequest) {
+    const refreshedAccessToken = await refreshAccessToken();
+    if (!refreshedAccessToken) {
+      throw new Error("Sesi log masuk telah tamat. Sila log masuk semula.");
+    }
+    response = await makeRequest(refreshedAccessToken);
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers,
-  });
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
@@ -80,6 +108,12 @@ export function saveAuthSession(data) {
   localStorage.setItem(TOKEN_STORAGE_KEYS.access, data.access);
   localStorage.setItem(TOKEN_STORAGE_KEYS.refresh, data.refresh);
   localStorage.setItem(TOKEN_STORAGE_KEYS.user, JSON.stringify(data.user));
+  if (data.login_session_id) {
+    localStorage.setItem(TOKEN_STORAGE_KEYS.session, String(data.login_session_id));
+  } else {
+    localStorage.removeItem(TOKEN_STORAGE_KEYS.session);
+  }
+  window.dispatchEvent(new Event("dbku:auth-changed"));
 }
 
 export function saveStoredUser(user) {
@@ -102,22 +136,37 @@ export function getStoredUser() {
 export function clearAuthSession() {
   localStorage.removeItem(TOKEN_STORAGE_KEYS.access);
   localStorage.removeItem(TOKEN_STORAGE_KEYS.refresh);
+  localStorage.removeItem(TOKEN_STORAGE_KEYS.session);
   localStorage.removeItem(TOKEN_STORAGE_KEYS.user);
+  window.dispatchEvent(new Event("dbku:auth-changed"));
 }
 
 export function recordLogoutActivity() {
-  return apiRequest("/auth/logout/", { method: "POST" }).catch(() => null);
+  return apiRequest("/auth/logout/", {
+    method: "POST",
+    body: JSON.stringify({
+      login_session_id: getStoredLoginSessionId() || undefined,
+    }),
+  }).catch(() => null);
 }
 
 export async function fetchAuthenticatedBlob(url) {
+  const makeRequest = (accessToken) =>
+    fetch(url, {
+      headers: {
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      },
+    });
+
   const accessToken = getAccessToken();
-  const headers = {};
+  let response = await makeRequest(accessToken);
 
-  if (accessToken) {
-    headers.Authorization = `Bearer ${accessToken}`;
+  if (response.status === 401 && accessToken) {
+    const refreshedAccessToken = await refreshAccessToken();
+    if (refreshedAccessToken) {
+      response = await makeRequest(refreshedAccessToken);
+    }
   }
-
-  const response = await fetch(url, { headers });
 
   if (!response.ok) {
     throw new Error("Fail tidak dapat dibuka. Sila cuba lagi.");
@@ -140,6 +189,67 @@ export function loginApplicant({ email, password }) {
     email: email.trim().toLowerCase(),
     password,
   });
+}
+
+export function dashboardPathForRole(role) {
+  if (role === "superadmin") {
+    return "/superadmin";
+  }
+
+  if (role === "admin") {
+    return "/admin";
+  }
+
+  return "/profile";
+}
+
+export function dashboardPathForUser(user) {
+  return dashboardPathForRole(user?.role);
+}
+
+async function requestAccessTokenRefresh() {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) {
+    clearAuthSession();
+    return null;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/token/refresh/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        refresh: refreshToken,
+      }),
+    });
+
+    const data = await response.json().catch(() => null);
+    if (!response.ok || !data?.access) {
+      clearAuthSession();
+      return null;
+    }
+
+    localStorage.setItem(TOKEN_STORAGE_KEYS.access, data.access);
+    if (data.refresh) {
+      localStorage.setItem(TOKEN_STORAGE_KEYS.refresh, data.refresh);
+    }
+
+    return data.access;
+  } catch {
+    return null;
+  }
+}
+
+export function refreshAccessToken() {
+  if (!refreshTokenPromise) {
+    refreshTokenPromise = requestAccessTokenRefresh().finally(() => {
+      refreshTokenPromise = null;
+    });
+  }
+
+  return refreshTokenPromise;
 }
 
 export function updateCurrentUser(formData) {

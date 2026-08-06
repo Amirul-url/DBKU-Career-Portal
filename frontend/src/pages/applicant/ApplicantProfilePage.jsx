@@ -1093,7 +1093,7 @@ function ProfileContentHeader({ displayName, email, photoUrl }) {
   const handleLogout = async () => {
     await recordLogoutActivity();
     clearAuthSession();
-    navigate("/login");
+    navigate("/login", { replace: true });
   };
 
   return (

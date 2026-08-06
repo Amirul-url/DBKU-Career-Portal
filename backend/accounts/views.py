@@ -1,5 +1,5 @@
 from rest_framework import permissions, status
-from rest_framework.decorators import api_view, parser_classes, permission_classes
+from rest_framework.decorators import api_view, authentication_classes, parser_classes, permission_classes
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 from django.utils import timezone
@@ -7,9 +7,10 @@ from django.utils.dateparse import parse_date
 from django.db import DatabaseError
 from django.db.models import Q
 
-from .models import AccountActivity, ApplicantProfileData, User
+from .models import AccountActivity, ApplicantProfileData, LoginSession, User
 from .serializers import AccountActivitySerializer, InternalHrmAccountSerializer, LoginSerializer, RegisterSerializer, SuperAdminAccountSerializer, UserSerializer
 from .services import build_auth_response
+from .session_services import close_login_session, close_open_login_sessions
 
 
 def safe_record_activity(user, action, duration_seconds=0):
@@ -29,24 +30,41 @@ def register_view(request):
 
 
 @api_view(["POST"])
+@authentication_classes([])
 @permission_classes([permissions.AllowAny])
 def login_view(request):
     serializer = LoginSerializer(data=request.data, context={"request": request})
     serializer.is_valid(raise_exception=True)
     user = serializer.validated_data["user"]
     now = timezone.now()
+    close_open_login_sessions(user, now)
+    login_session = LoginSession.objects.create(user=user, login_at=now)
     user.last_login = now
     user.save(update_fields=["last_login"])
     safe_record_activity(user, "login")
-    return Response(build_auth_response(user, request))
+    return Response(build_auth_response(user, request, login_session))
 
 
 @api_view(["POST"])
+@permission_classes([permissions.IsAuthenticated])
 def logout_view(request):
-    if not request.user.is_authenticated:
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
     try:
+        session_id = request.data.get("login_session_id")
+        session = None
+        if session_id:
+            session = LoginSession.objects.filter(
+                pk=session_id,
+                user=request.user,
+                logout_at__isnull=True,
+            ).first()
+        if not session:
+            session = LoginSession.objects.filter(
+                user=request.user,
+                logout_at__isnull=True,
+            ).order_by("-login_at").first()
+        if session:
+            close_login_session(session, timezone.now())
+
         latest_login = AccountActivity.objects.filter(user=request.user, action="login").order_by("-created_at").first()
         latest_logout = AccountActivity.objects.filter(user=request.user, action="logout").order_by("-created_at").first()
         duration_seconds = 0
@@ -55,7 +73,7 @@ def logout_view(request):
         safe_record_activity(request.user, "logout", duration_seconds)
     except DatabaseError:
         pass
-    return Response(status=status.HTTP_204_NO_CONTENT)
+    return Response({"message": "Logged out."}, status=status.HTTP_200_OK)
 
 
 @api_view(["GET", "PATCH"])

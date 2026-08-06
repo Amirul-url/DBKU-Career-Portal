@@ -51,3 +51,16 @@ class AccountActivity(models.Model):
 
     def __str__(self):
         return f"{self.user.email} - {self.get_action_display()}"
+
+
+class LoginSession(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="login_sessions")
+    login_at = models.DateTimeField()
+    logout_at = models.DateTimeField(null=True, blank=True)
+    duration_seconds = models.PositiveIntegerField(null=True, blank=True)
+
+    class Meta:
+        ordering = ("-login_at",)
+
+    def __str__(self):
+        return f"{self.user.email} - {self.login_at}"

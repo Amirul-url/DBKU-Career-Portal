@@ -2,11 +2,8 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { getStoredUser, loginApplicant, saveAuthSession } from "../../lib/authApi";
+import { dashboardPathForRole, getStoredUser, loginApplicant, saveAuthSession } from "../../lib/authApi";
 import { ApplicantAuthLayout, AuthField, PasswordField } from "./ApplicantAuthShared";
-
-const dashboardPathForRole = (role) =>
-  role === "superadmin" ? "/superadmin" : role === "admin" ? "/admin" : "/profile";
 
 function LoginForm() {
   const location = useLocation();

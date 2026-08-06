@@ -262,7 +262,7 @@ export default function AdminHrmPage() {
   const logout = async () => {
     await recordLogoutActivity();
     clearAuthSession();
-    navigate("/login");
+    navigate("/login", { replace: true });
   };
   const openCreatePanel = (label, vacancyType = "job") => {
     setActiveMenu(label);
