@@ -5168,6 +5168,26 @@ body:has(.applicant-profile-page) {
   grid-template-columns: minmax(360px, 0.62fr) minmax(0, 1fr);
 }
 
+.applicant-market-shell.market-reference-shell .market-job-list {
+  max-height: max(360px, calc(100vh - 384px));
+  overflow-y: auto;
+  padding-right: 10px;
+  scrollbar-gutter: stable;
+}
+
+.applicant-market-shell.market-reference-shell .market-job-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.applicant-market-shell.market-reference-shell .market-job-list::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #b8c8bf;
+}
+
+.applicant-market-shell.market-reference-shell .market-job-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 .applicant-internship-page {
   background: #ffffff;
 }
