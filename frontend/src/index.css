@@ -4740,6 +4740,17 @@ body:has(.applicant-profile-page) {
   max-width: 1180px;
 }
 
+.applicant-list-shell .profile-heading {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 14px;
+}
+
+.applicant-list-shell .profile-heading p {
+  grid-column: 2;
+}
+
 .applicant-page-icon {
   display: inline-flex;
   width: 44px;
@@ -4776,6 +4787,22 @@ body:has(.applicant-profile-page) {
   border-color: #fecaca;
   background: #fff5f5;
   color: #b42318;
+}
+
+.applicant-list-error p {
+  margin: 0;
+}
+
+.applicant-list-error button {
+  margin-top: 12px;
+  border: 0;
+  border-radius: 8px;
+  background: #b42318;
+  padding: 10px 14px;
+  color: #ffffff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
 }
 
 .applicant-list-empty {

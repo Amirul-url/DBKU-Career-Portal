@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { apiRequest, getStoredUser } from "../../lib/authApi";
 import { APPLICANT_ROUTES } from "../../modules/applicant/applicantRoutes";
@@ -83,9 +83,15 @@ function ApplicationList({ applications, loading }) {
   );
 }
 
+function getApplicationRows(data) {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.results)) return data.results;
+  return [];
+}
+
 export default function ApplicantPortalListPage({ page }) {
   const navigate = useNavigate();
-  const user = getStoredUser();
+  const [user] = useState(() => getStoredUser());
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(page === "applications");
@@ -93,6 +99,38 @@ export default function ApplicantPortalListPage({ page }) {
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
   const email = user?.email || "Belum dikemaskini";
   const isApplicationsPage = page === "applications";
+
+  const loadApplications = useCallback(() => {
+    if (!user || user.role !== "applicant" || !isApplicationsPage) return undefined;
+
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 10000);
+    let isMounted = true;
+
+    setLoading(true);
+    setError("");
+    apiRequest("/applications/", { signal: controller.signal })
+      .then((data) => {
+        if (isMounted) setApplications(getApplicationRows(data));
+      })
+      .catch((requestError) => {
+        if (!isMounted) return;
+        const message = requestError.name === "AbortError"
+          ? "Permohonan mengambil masa terlalu lama untuk dimuatkan. Sila cuba semula."
+          : requestError.message || "Permohonan tidak dapat dimuatkan.";
+        setError(message);
+      })
+      .finally(() => {
+        window.clearTimeout(timeoutId);
+        if (isMounted) setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+      window.clearTimeout(timeoutId);
+      controller.abort();
+    };
+  }, [isApplicationsPage, user]);
 
   useEffect(() => {
     if (!user) {
@@ -103,26 +141,8 @@ export default function ApplicantPortalListPage({ page }) {
   }, [navigate, user]);
 
   useEffect(() => {
-    if (!user || user.role !== "applicant" || !isApplicationsPage) return undefined;
-
-    let isMounted = true;
-    setLoading(true);
-    setError("");
-    apiRequest("/applications/")
-      .then((data) => {
-        if (isMounted) setApplications(Array.isArray(data) ? data : []);
-      })
-      .catch((requestError) => {
-        if (isMounted) setError(requestError.message || "Permohonan tidak dapat dimuatkan.");
-      })
-      .finally(() => {
-        if (isMounted) setLoading(false);
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [isApplicationsPage, user]);
+    return loadApplications();
+  }, [loadApplications]);
 
   const pageContent = useMemo(() => {
     if (isApplicationsPage) {
@@ -158,8 +178,12 @@ export default function ApplicantPortalListPage({ page }) {
             <p>{pageContent.description}</p>
           </div>
 
-          {error ? <p className="applicant-list-error">{error}</p> : null}
-          {isApplicationsPage ? (
+          {error ? (
+            <section className="applicant-list-error">
+              <p>{error}</p>
+              <button type="button" onClick={loadApplications}>Cuba semula</button>
+            </section>
+          ) : isApplicationsPage ? (
             <ApplicationList applications={applications} loading={loading} />
           ) : (
             <EmptyState
