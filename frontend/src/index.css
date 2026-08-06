@@ -4817,6 +4817,14 @@ body:has(.applicant-profile-page) {
   grid-template-columns: minmax(360px, 0.62fr) minmax(0, 1fr);
 }
 
+.applicant-internship-page {
+  background: #ffffff;
+}
+
+.applicant-internship-page .internship-content-shell {
+  max-width: 1230px;
+}
+
 .profile-layout {
   display: block;
   margin-top: 34px;

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { getStoredUser } from "../../lib/authApi";
 import { JobMarketplaceContent } from "../JobMarketplacePage";
+import ApplicantInternshipInfoContent from "./ApplicantInternshipInfoContent";
 import { ProfileContentHeader, ProfileSidebar } from "./ApplicantProfilePage";
 
 export default function ApplicantJobSearchPage() {
@@ -11,7 +12,7 @@ export default function ApplicantJobSearchPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
   const email = user?.email || "Belum dikemaskini";
-  const vacancyType = location.pathname.includes("/internships") ? "internship" : "job";
+  const isInternshipPage = location.pathname.includes("/internships");
 
   useEffect(() => {
     if (!user) {
@@ -40,7 +41,11 @@ export default function ApplicantJobSearchPage() {
             </nav>
           )}
         />
-        <JobMarketplaceContent actionTarget="/profile" embedded vacancyType={vacancyType} />
+        {isInternshipPage ? (
+          <ApplicantInternshipInfoContent />
+        ) : (
+          <JobMarketplaceContent actionTarget="/profile" embedded vacancyType="job" />
+        )}
       </div>
     </div>
   );
