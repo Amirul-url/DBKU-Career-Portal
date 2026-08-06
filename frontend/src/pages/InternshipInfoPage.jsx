@@ -60,7 +60,6 @@ export default function InternshipInfoPage() {
             <img src="/senior urban planner.jpg" alt="" />
           </div>
           <div className="internship-hero-overlay">
-            <span>Portal Kerjaya DBKU</span>
             <h1>Peluang Latihan Industri</h1>
           </div>
         </section>
