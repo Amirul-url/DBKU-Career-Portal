@@ -4045,7 +4045,18 @@ body:has(.applicant-profile-page) {
 
 .internship-copy-card ol {
   margin: 0;
-  padding-left: 23px;
+  padding-left: 32px;
+  list-style: decimal;
+}
+
+.internship-copy-card li {
+  display: list-item;
+  padding-left: 8px;
+}
+
+.internship-copy-card li::marker {
+  color: #111827;
+  font-weight: 700;
 }
 
 .internship-copy-card li + li {
