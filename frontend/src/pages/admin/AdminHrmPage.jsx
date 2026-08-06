@@ -416,7 +416,6 @@ export default function AdminHrmPage() {
               <label>Lokasi<input value={jobForm.location || ""} onChange={(event) => setJobForm({ ...jobForm, location: event.target.value })} placeholder="cth. Petra Jaya, Kuching" /></label>
               <label>Taraf jawatan<select value={jobForm.employment_type} onChange={(event) => setJobForm({ ...jobForm, employment_type: event.target.value })}><option value="">Pilih jenis</option><option>Tetap</option><option>Kontrak</option><option>Latihan Industri</option></select></label>
               <label>Tarikh tutup<input required type="date" value={jobForm.closing_date} onChange={(event) => setJobForm({ ...jobForm, closing_date: event.target.value })} /></label>
-              <label>Ringkasan jawatan<textarea required value={jobForm.summary} onChange={(event) => setJobForm({ ...jobForm, summary: event.target.value })} placeholder="Terangkan ringkas peranan atau perkara utama jawatan ini..." /></label>
               <label>Dokumen rasmi untuk pemohon<input required type="file" accept="application/pdf,image/png,image/jpeg" onChange={(event) => setDocumentFile(event.target.files?.[0] || null)} /><small>Muat naik fail iklan atau borang permohonan. Pemohon akan memuat turun fail ini untuk butiran penuh.</small></label>
               <button className="hrm-primary" type="submit"><Icon>add_circle</Icon>Siarkan jawatan</button>
             </form>
