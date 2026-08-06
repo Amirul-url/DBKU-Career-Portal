@@ -1056,7 +1056,7 @@ function JobActionModal({ form, job, mode, onChange, onClose, onDocumentOpen, on
         <header>
           <div>
             <span className="hrm-eyebrow">{isEdit ? "EDIT IKLAN" : "BUTIRAN IKLAN"}</span>
-            <h2 id="job-action-title">{job.title}</h2>
+            {isEdit ? <h2 id="job-action-title">{job.title}</h2> : null}
           </div>
           <button type="button" onClick={onClose} aria-label="Tutup">×</button>
         </header>
@@ -1079,7 +1079,7 @@ function JobActionModal({ form, job, mode, onChange, onClose, onDocumentOpen, on
           </form>
         ) : (
           <div className="hrm-job-modal-details hrm-job-preview">
-            <h2>{job.title}</h2>
+            <h2 id="job-action-title">{job.title}</h2>
             <div className="market-detail-department">{job.department || "Dewan Bandaraya Kuching Utara"}</div>
             <div className="market-detail-meta">
               <span><Icon>work</Icon>Taraf jawatan: {job.employment_type || "—"}</span>
