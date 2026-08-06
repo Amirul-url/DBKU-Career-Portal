@@ -3060,6 +3060,16 @@ body:has(.auth-page) {
   text-align: center;
 }
 
+.hrm-dashboard-sections {
+  display: grid;
+  gap: 34px;
+}
+
+.hrm-dashboard-section + .hrm-dashboard-section {
+  border-top: 1px solid #dfece5;
+  padding-top: 34px;
+}
+
 .register-auth-page .auth-switch-link {
   margin-top: 13px;
 }
