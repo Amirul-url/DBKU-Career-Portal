@@ -15,8 +15,10 @@ const requiredDocuments = [
   "Surat rasmi daripada institusi / kolej / universiti",
   "Transkrip akademik terkini",
   "Resume",
-  "Salinan kad pengenalan dan kad pelajar untuk tujuan pengesahan",
-  "Dokumen sokongan lain sekiranya berkaitan",
+  "Surat tawaran menjalani latihan industri / praktikal",
+  "1 keping gambar berukuran passport",
+  "1 salinan muka depan akaun bank",
+  "Buku log",
 ];
 
 function Icon({ children, className = "" }) {
