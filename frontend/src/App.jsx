@@ -205,10 +205,11 @@ export default function App() {
         <Route path="/landing" element={<LandingPage />} />
         <Route path="/jobs" element={<JobMarketplacePage />} />
         <Route path="/login" element={<ApplicantLoginPage />} />
-        <Route path="/profile" element={<ApplicantProfilePage />} />
+        <Route path="/profile" element={<Navigate to="/profile/personal" replace />} />
+        <Route path="/profile/:section" element={<ApplicantProfilePage />} />
         <Route path="/register" element={<ApplicantRegisterPage />} />
-        <Route path="/superadmin" element={<SuperAdminShellPage />} />
-        <Route path="/admin" element={<AdminHrmPage />} />
+        <Route path="/superadmin/*" element={<SuperAdminShellPage />} />
+        <Route path="/admin/*" element={<AdminHrmPage />} />
       </Routes>
     </>
   );

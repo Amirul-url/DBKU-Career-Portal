@@ -1,16 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getCities, getPostcodes, getStates } from "malaysia-postcodes";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { apiRequest, clearAuthSession, fetchAuthenticatedBlob, getStoredUser, recordLogoutActivity, updateCurrentUser } from "../../lib/authApi";
+import { applicantSidebarNavItems, getApplicantSectionId } from "../../modules/applicant/applicantRoutes";
 import { Icon } from "./ApplicantAuthShared";
-
-const sidebarNavItems = [
-  { icon: "stars", label: "Padanan Kerja", to: "/jobs" },
-  { icon: "search", label: "Cari Kerja", to: "/jobs" },
-  { icon: "work_history", label: "Kerja Saya", href: "#applications" },
-  { icon: "person", label: "Profil", to: "/profile" },
-  { icon: "more_horiz", label: "Lagi", href: "#more" },
-];
 
 const emptyProfileCards = [
   {
@@ -1165,10 +1158,11 @@ function ProfileSidebar({ isOpen, onToggle }) {
       </div>
 
       <nav className="profile-main-nav">
-        {sidebarNavItems.map((item) => (
+        {applicantSidebarNavItems.map((item) => (
           item.to ? (
             <NavLink
               to={item.to}
+              end
               className={({ isActive }) => (isActive ? "active" : undefined)}
               key={item.label}
               title={!isOpen ? item.label : undefined}
@@ -2476,6 +2470,7 @@ function SkillsSummary({ data }) {
 }
 
 export default function ApplicantProfilePage() {
+  const location = useLocation();
   const navigate = useNavigate();
   const user = getStoredUser();
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -2755,6 +2750,17 @@ export default function ApplicantProfilePage() {
     }
   }, [navigate, user]);
 
+  useEffect(() => {
+    const sectionId = getApplicantSectionId(location.pathname);
+    if (!sectionId) return undefined;
+
+    const timeoutId = window.setTimeout(() => {
+      document.getElementById(sectionId)?.scrollIntoView({ block: "start", behavior: "smooth" });
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [location.pathname]);
+
   if (!user || user.role !== "applicant") {
     return null;
   }
@@ -2777,7 +2783,7 @@ export default function ApplicantProfilePage() {
           <div className="profile-layout">
             <div className="profile-content">
               <ProfileCard
-                id="profile-section-1"
+                id="profile-section-personal"
                 isEditing={editingSection === "personal"}
                 title="Maklumat Peribadi"
                 onEdit={handlePersonalEditToggle}
@@ -2811,7 +2817,7 @@ export default function ApplicantProfilePage() {
               </ProfileCard>
 
               <ProfileCard
-                id="profile-section-2"
+                id="profile-section-job-preferences"
                 isEditing={editingSection === "jobPreferences"}
                 title="Pilihan Pekerjaan"
                 onEdit={handleJobPreferencesEditToggle}
@@ -2828,15 +2834,15 @@ export default function ApplicantProfilePage() {
                 )}
               </ProfileCard>
 
-              <ProfileCard id="profile-section-3" isEditing={editingSection === "experience"} title="Pengalaman" onEdit={handleExperienceEditToggle}>
+              <ProfileCard id="profile-section-experience" isEditing={editingSection === "experience"} title="Pengalaman" onEdit={handleExperienceEditToggle}>
                 {editingSection === "experience" ? <ExperienceForm data={getSavedDraft(user, "experience") || experienceProfile} onDraftChange={handleExperienceDraftChange} onSave={handleExperienceSave} /> : <ExperienceSummary data={experienceProfile} />}
               </ProfileCard>
 
-              <ProfileCard id="profile-section-4" isEditing={editingSection === "academic"} title="Akademik" onEdit={handleAcademicEditToggle}>
+              <ProfileCard id="profile-section-academic" isEditing={editingSection === "academic"} title="Akademik" onEdit={handleAcademicEditToggle}>
                 {editingSection === "academic" ? <AcademicForm data={getSavedDraft(user, "academic") || academicProfile} onDraftChange={handleAcademicDraftChange} onSave={handleAcademicSave} /> : <AcademicSummary data={academicProfile} />}
               </ProfileCard>
 
-              <ProfileCard id="profile-section-5" isEditing={editingSection === "skills"} title="Kemahiran" onEdit={handleSkillsEditToggle}>
+              <ProfileCard id="profile-section-skills" isEditing={editingSection === "skills"} title="Kemahiran" onEdit={handleSkillsEditToggle}>
                 {editingSection === "skills" ? <SkillsForm data={getSavedDraft(user, "skills") || skillsProfile} onDraftChange={handleSkillsDraftChange} onSave={handleSkillsSave} /> : <SkillsSummary data={skillsProfile} />}
               </ProfileCard>
 

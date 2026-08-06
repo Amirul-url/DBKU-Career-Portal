@@ -1,24 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   apiRequest,
   clearAuthSession,
   getStoredUser,
   recordLogoutActivity,
 } from "../../lib/authApi";
+import { adminNavItems, getAdminRoutePath, getAdminRouteState } from "../../modules/admin/adminRoutes";
 import { Icon } from "../applicant/ApplicantAuthShared";
-
-const navItems = [
-  ["dashboard", "Papan Pemuka"],
-  ["section", "JAWATAN DBKU"],
-  ["add_circle", "Tambah Jawatan DBKU", "Tambah Jawatan", "job"],
-  ["work_history", "Urus Jawatan DBKU", "Urus Jawatan", "job"],
-  ["group", "Permohonan Jawatan DBKU", "Permohonan", "job"],
-  ["section", "LATIHAN INDUSTRI"],
-  ["school", "Tambah Latihan Industri", "Tambah Jawatan", "internship"],
-  ["work_history", "Urus Latihan Industri", "Urus Jawatan", "internship"],
-  ["group", "Permohonan Latihan Industri", "Permohonan", "internship"],
-];
 
 const dbkuDepartments = [
   { name: "Bahagian Audit Dalaman", code: "AUD" },
@@ -149,11 +138,9 @@ function Badge({ status }) {
 }
 
 export default function AdminHrmPage() {
+  const location = useLocation();
   const navigate = useNavigate();
   const [user] = useState(getStoredUser);
-  const [panel, setPanel] = useState("Papan Pemuka");
-  const [activeMenu, setActiveMenu] = useState("Papan Pemuka");
-  const [activeVacancyType, setActiveVacancyType] = useState("job");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [jobs, setJobs] = useState([]);
   const [applications, setApplications] = useState([]);
@@ -161,7 +148,13 @@ export default function AdminHrmPage() {
   const [notice, setNotice] = useState("");
   const [documentFile, setDocumentFile] = useState(null);
   const [documentPreviewUrl, setDocumentPreviewUrl] = useState("");
-  const [jobForm, setJobForm] = useState(() => createEmptyJobForm());
+  const routeState = getAdminRouteState(location.pathname);
+  const [jobForm, setJobForm] = useState(() => createEmptyJobForm(routeState.vacancyType || "job"));
+  const panel = routeState.panel || "dashboard";
+  const activeVacancyType = routeState.vacancyType || jobForm.vacancy_type || "job";
+  const isKnownRoute =
+    location.pathname === "/admin" ||
+    adminNavItems.some((item) => item.to === location.pathname.replace(/\/+$/, ""));
 
   const loadData = useCallback(() => {
     setLoading(true);
@@ -251,9 +244,7 @@ export default function AdminHrmPage() {
       setDocumentFile(null);
       setDocumentPreviewUrl("");
       setJobForm(createEmptyJobForm(jobForm.vacancy_type));
-      setActiveVacancyType(jobForm.vacancy_type);
-      setActiveMenu(jobForm.vacancy_type === "internship" ? "Urus Latihan Industri" : "Urus Jawatan DBKU");
-      setPanel("Urus Jawatan");
+      navigate(getAdminRoutePath("manage", jobForm.vacancy_type));
       loadData();
     } catch (error) {
       setNotice(error.message);
@@ -264,23 +255,22 @@ export default function AdminHrmPage() {
     clearAuthSession();
     navigate("/login", { replace: true });
   };
-  const openCreatePanel = (label, vacancyType = "job") => {
-    setActiveMenu(label);
-    setPanel("Tambah Jawatan");
-    setActiveVacancyType(vacancyType);
+  const openCreatePanel = (_label, vacancyType = "job") => {
     if (jobForm.vacancy_type !== vacancyType) {
       if (documentPreviewUrl) URL.revokeObjectURL(documentPreviewUrl);
       setDocumentFile(null);
       setDocumentPreviewUrl("");
       setJobForm(createEmptyJobForm(vacancyType));
     }
+    navigate(getAdminRoutePath("create", vacancyType));
   };
-  const openFilteredPanel = (label, view, vacancyType = "job") => {
-    setActiveMenu(label);
-    setPanel(view);
-    setActiveVacancyType(vacancyType);
+  const openFilteredPanel = (_label, view, vacancyType = "job") => {
+    const panelName = view === "Permohonan" ? "applications" : "manage";
+    navigate(getAdminRoutePath(panelName, vacancyType));
   };
   if (!user || user.role !== "admin") return null;
+  if (location.pathname === "/admin") return <Navigate to="dashboard" replace />;
+  if (!isKnownRoute) return <Navigate to="/admin/dashboard" replace />;
   const activeOpportunityLabel = opportunityTypeLabels[activeVacancyType] || opportunityTypeLabels.job;
   const activeMetrics = dashboardMetrics[activeVacancyType] || dashboardMetrics.job;
   const overallMetrics = dashboardMetrics.all;
@@ -321,42 +311,41 @@ export default function AdminHrmPage() {
           </button>
         </div>
         <nav className={`space-y-1 py-5 ${isSidebarOpen ? "px-4" : "px-3"}`}>
-          {navItems.map(([icon, label, view = label, vacancyType], index) =>
-            icon === "section" ? (
+          {adminNavItems.map((item, index) =>
+            item.kind === "section" ? (
               isSidebarOpen ? (
                 <p
                   className="px-4 pb-2 pt-4 text-[13px] font-bold text-slate-400"
-                  key={label}
+                  key={item.label}
                 >
-                  {label}
+                  {item.label}
                 </p>
               ) : (
-                <div className="h-6" key={label} />
+                <div className="h-6" key={item.label} />
               )
             ) : (
-              <button
-                className={`flex w-full items-center rounded-md py-3 text-left text-[15px] font-semibold ${isSidebarOpen ? "gap-4 px-4" : "justify-center px-0"} ${activeMenu === label ? "bg-emerald-50 text-slate-950" : "text-slate-950"}`}
-                key={`${label}-${index}`}
-                type="button"
-                title={!isSidebarOpen ? label : undefined}
+              <NavLink
+                className={({ isActive }) => `flex w-full items-center rounded-md py-3 text-left text-[15px] font-semibold ${isSidebarOpen ? "gap-4 px-4" : "justify-center px-0"} ${isActive ? "bg-emerald-50 text-slate-950" : "text-slate-950"}`}
+                end
+                key={`${item.label}-${index}`}
                 onClick={() => {
-                  if (view === "Tambah Jawatan") {
-                    openCreatePanel(label, vacancyType);
-                  } else if (vacancyType) {
-                    openFilteredPanel(label, view, vacancyType);
-                  } else {
-                    setActiveMenu(label);
-                    setPanel(view);
+                  if (item.panel === "create" && item.vacancyType && jobForm.vacancy_type !== item.vacancyType) {
+                    if (documentPreviewUrl) URL.revokeObjectURL(documentPreviewUrl);
+                    setDocumentFile(null);
+                    setDocumentPreviewUrl("");
+                    setJobForm(createEmptyJobForm(item.vacancyType));
                   }
                 }}
+                title={!isSidebarOpen ? item.label : undefined}
+                to={item.to}
               >
-                <Icon>{icon}</Icon>
+                <Icon>{item.icon}</Icon>
                 {isSidebarOpen ? (
-                  label
+                  item.label
                 ) : (
-                  <span className="sr-only">{label}</span>
+                  <span className="sr-only">{item.label}</span>
                 )}
-              </button>
+              </NavLink>
             ),
           )}
         </nav>
@@ -419,7 +408,7 @@ export default function AdminHrmPage() {
               <button onClick={() => setNotice("")}>×</button>
             </div>
           )}
-          {panel === "Tambah Jawatan" && (
+          {panel === "create" && (
             <form className="simple-job-form" onSubmit={submitJob}>
               <header><span className="hrm-eyebrow">{isInternshipForm ? "TAMBAH JAWATAN LATIHAN INDUSTRI" : "TAMBAH JAWATAN DBKU"}</span><h1>{isInternshipForm ? "Siarkan jawatan latihan industri baharu" : "Siarkan jawatan DBKU baharu"}</h1><p>Masukkan ringkasan penting. Maklumat penuh disediakan melalui dokumen rasmi untuk dimuat turun pemohon.</p></header>
               <label>Tajuk jawatan<input required value={jobForm.title} onChange={(event) => setJobForm({ ...jobForm, title: event.target.value })} placeholder={isInternshipForm ? "cth. Latihan Industri Teknologi Maklumat" : "cth. Penolong Pegawai Penerangan Gred S5"} /></label>
@@ -433,7 +422,7 @@ export default function AdminHrmPage() {
               <button className="hrm-primary" type="submit"><Icon>add_circle</Icon>Siarkan jawatan</button>
             </form>
           )}
-          {panel === "Papan Pemuka" && (
+          {panel === "dashboard" && (
             <>
               <div className="hrm-heading">
                 <div>
@@ -508,7 +497,7 @@ export default function AdminHrmPage() {
               </div>
             </>
           )}
-          {panel === "Jawatan & Latihan" && (
+          {panel === "advanced-create" && (
             <>
               <div className="hrm-heading">
                 <div>
@@ -746,7 +735,7 @@ export default function AdminHrmPage() {
               </div>
             </>
           )}
-          {panel === "Urus Jawatan" && (
+          {panel === "manage" && (
             <>
               <div className="hrm-heading">
                 <div>
@@ -775,7 +764,7 @@ export default function AdminHrmPage() {
               </section>
             </>
           )}
-          {panel === "Permohonan" && (
+          {panel === "applications" && (
             <>
               <div className="hrm-heading">
                 <div>

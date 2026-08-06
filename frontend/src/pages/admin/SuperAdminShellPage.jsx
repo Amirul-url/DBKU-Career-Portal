@@ -1,27 +1,17 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, NavLink, Route, Routes, useNavigate } from "react-router-dom";
 import { clearAuthSession, getStoredUser, recordLogoutActivity } from "../../lib/authApi";
+import { superAdminNavItems } from "../../modules/superadmin/superAdminRoutes";
 import { Icon } from "../applicant/ApplicantAuthShared";
 import SuperAdminAdministratorsPanel from "./SuperAdminAdministratorsPanel";
 import SuperAdminApplicantsPanel from "./SuperAdminApplicantsPanel";
 import SuperAdminDashboardPanel from "./SuperAdminDashboardPanel";
 import SuperAdminSuperAdminsPanel from "./SuperAdminSuperAdminsPanel";
 
-const items = [
-  ["dashboard", "Papan Pemuka"],
-  ["section", "PEMOHON"],
-  ["group", "Pemohon"],
-  ["section", "DBKU"],
-  ["admin_panel_settings", "Pentadbir"],
-  ["section", "SISTEM"],
-  ["shield_person", "Super Admin"],
-];
-
 export default function SuperAdminShellPage() {
   const navigate = useNavigate();
   const user = getStoredUser();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [activePanel, setActivePanel] = useState("dashboard");
 
   useEffect(() => {
     if (!user) navigate("/login", { replace: true });
@@ -58,14 +48,20 @@ export default function SuperAdminShellPage() {
         </div>
 
         <nav className={`space-y-1 py-5 ${isSidebarOpen ? "px-4" : "px-3"}`}>
-          {items.map(([icon, label], index) => (
-            icon === "section" ? (
-              isSidebarOpen ? <p className="px-4 pb-2 pt-4 text-[13px] font-bold text-slate-400" key={`${label}-${index}`}>{label}</p> : <div className="h-6" key={`${label}-${index}`} />
+          {superAdminNavItems.map((item, index) => (
+            item.kind === "section" ? (
+              isSidebarOpen ? <p className="px-4 pb-2 pt-4 text-[13px] font-bold text-slate-400" key={`${item.label}-${index}`}>{item.label}</p> : <div className="h-6" key={`${item.label}-${index}`} />
             ) : (
-              <button className={`flex w-full items-center rounded-md py-3 text-left text-[15px] font-semibold ${isSidebarOpen ? "gap-4 px-4" : "justify-center px-0"} ${(label === "Papan Pemuka" ? activePanel === "dashboard" : label === "Pemohon" ? activePanel === "applicants" : label === "Pentadbir" ? activePanel === "administrators" : label === "Super Admin" ? activePanel === "superadmins" : false) ? "bg-emerald-50 text-slate-950" : "text-slate-950"}`} key={`${label}-${index}`} type="button" title={!isSidebarOpen ? label : undefined} onClick={() => { if (label === "Papan Pemuka") setActivePanel("dashboard"); if (label === "Pemohon") setActivePanel("applicants"); if (label === "Pentadbir") setActivePanel("administrators"); if (label === "Super Admin") setActivePanel("superadmins"); }}>
-                <Icon>{icon}</Icon>
-                {isSidebarOpen ? label : <span className="sr-only">{label}</span>}
-              </button>
+              <NavLink
+                className={({ isActive }) => `flex w-full items-center rounded-md py-3 text-left text-[15px] font-semibold ${isSidebarOpen ? "gap-4 px-4" : "justify-center px-0"} ${isActive ? "bg-emerald-50 text-slate-950" : "text-slate-950"}`}
+                end
+                key={`${item.label}-${index}`}
+                title={!isSidebarOpen ? item.label : undefined}
+                to={item.to}
+              >
+                <Icon>{item.icon}</Icon>
+                {isSidebarOpen ? item.label : <span className="sr-only">{item.label}</span>}
+              </NavLink>
             )
           ))}
         </nav>
@@ -102,10 +98,14 @@ export default function SuperAdminShellPage() {
             </details>
           </div>
         </header>
-        {activePanel === "dashboard" ? <SuperAdminDashboardPanel user={user} /> : null}
-        {activePanel === "applicants" ? <SuperAdminApplicantsPanel /> : null}
-        {activePanel === "administrators" ? <SuperAdminAdministratorsPanel /> : null}
-        {activePanel === "superadmins" ? <SuperAdminSuperAdminsPanel /> : null}
+        <Routes>
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<SuperAdminDashboardPanel user={user} />} />
+          <Route path="applicants" element={<SuperAdminApplicantsPanel />} />
+          <Route path="admins" element={<SuperAdminAdministratorsPanel />} />
+          <Route path="superadmins" element={<SuperAdminSuperAdminsPanel />} />
+          <Route path="*" element={<Navigate to="dashboard" replace />} />
+        </Routes>
       </main>
     </div>
   );

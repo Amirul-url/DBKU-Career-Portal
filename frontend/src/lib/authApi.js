@@ -193,14 +193,14 @@ export function loginApplicant({ email, password }) {
 
 export function dashboardPathForRole(role) {
   if (role === "superadmin") {
-    return "/superadmin";
+    return "/superadmin/dashboard";
   }
 
   if (role === "admin") {
-    return "/admin";
+    return "/admin/dashboard";
   }
 
-  return "/profile";
+  return "/profile/personal";
 }
 
 export function dashboardPathForUser(user) {
