@@ -2655,6 +2655,9 @@ a {
 .market-reference-shell .market-detail-actions { grid-template-columns: minmax(0, 1fr) auto; align-items: stretch; margin-top: 26px; }
 .market-reference-shell .market-detail-actions a,
 .market-reference-shell .market-detail-actions button { min-height: 52px; white-space: nowrap; padding: 0 16px; }
+.saved-market-shell { max-width: none; padding-top: 18px; }
+.saved-market-shell .market-vacancy-count { margin-top: 0; }
+.market-detail-document strong { color: #6b7d72; font-size: 14px; font-weight: 850; }
 @media (max-width: 980px) { .market-reference-shell .market-search-panel { grid-template-columns: 1fr 1fr; } .market-reference-shell .market-search-panel button, .market-extra-filter { grid-column: span 1; } .market-reference-shell .market-layout { grid-template-columns: 1fr; } .market-reference-shell .market-detail { position: static; } }
 
 .auth-page {
@@ -4750,7 +4753,7 @@ body:has(.applicant-profile-page) {
 }
 
 .applicant-list-shell {
-  max-width: 1180px;
+  max-width: 1420px;
 }
 
 .applicant-list-shell .profile-heading {

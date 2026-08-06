@@ -84,7 +84,45 @@ function ApplicationList({ applications, loading }) {
   );
 }
 
+function SavedVacancyCard({ onSelect, selected, vacancy }) {
+  return (
+    <button
+      type="button"
+      className={`market-job-card ${selected ? "selected" : ""}`}
+      onClick={onSelect}
+    >
+      <span className="market-card-logo">
+        <img src="/logo-dbku.png" alt="Logo DBKU" />
+      </span>
+      <span className="market-job-main">
+        <strong className="market-job-title">{vacancy.title || "Jawatan DBKU"}</strong>
+        <span className="market-job-dept">{vacancy.department || vacancy.organization || "Dewan Bandaraya Kuching Utara"}</span>
+        <span className="market-job-location">{vacancy.location || "Dewan Bandaraya Kuching Utara"}</span>
+        <span className="market-job-type">{vacancy.type || vacancy.category || "Jawatan"}, Waktu bekerja biasa</span>
+        <small className="market-job-posted">{vacancy.posted || "Disimpan dalam senarai"}</small>
+      </span>
+    </button>
+  );
+}
+
 function SavedVacancyList({ onRemove, vacancies }) {
+  const [selectedId, setSelectedId] = useState(vacancies[0]?.id ?? null);
+  const selectedVacancy = useMemo(
+    () => vacancies.find((item) => item.id === selectedId) ?? vacancies[0] ?? null,
+    [selectedId, vacancies],
+  );
+
+  useEffect(() => {
+    if (!vacancies.length) {
+      setSelectedId(null);
+      return;
+    }
+
+    if (!vacancies.some((item) => item.id === selectedId)) {
+      setSelectedId(vacancies[0].id);
+    }
+  }, [selectedId, vacancies]);
+
   if (!vacancies.length) {
     return (
       <EmptyState
@@ -98,36 +136,82 @@ function SavedVacancyList({ onRemove, vacancies }) {
   }
 
   return (
-    <div className="applicant-list-grid">
-      {vacancies.map((vacancy) => (
-        <article className="applicant-list-card saved-vacancy-card" key={vacancy.id}>
-          <div>
-            <span className="applicant-status-pill saved">Disimpan</span>
-            <h2>{vacancy.title || "Jawatan DBKU"}</h2>
-            <p>{vacancy.department || vacancy.organization || "Dewan Bandaraya Kuching Utara"}</p>
+    <section className="saved-market-shell market-reference-shell">
+      <p className="market-vacancy-count"><strong>{vacancies.length}</strong> Senarai Simpan</p>
+      <section className="market-layout">
+        <section className="market-results" aria-label="Senarai jawatan disimpan">
+          <div className="market-job-list">
+            {vacancies.map((vacancy) => (
+              <SavedVacancyCard
+                key={vacancy.id}
+                vacancy={vacancy}
+                selected={vacancy.id === selectedVacancy?.id}
+                onSelect={() => setSelectedId(vacancy.id)}
+              />
+            ))}
           </div>
-          <dl>
-            <div>
-              <dt>Taraf jawatan</dt>
-              <dd>{vacancy.type || vacancy.category || "-"}</dd>
+        </section>
+
+        <aside className="market-detail" aria-label="Butiran jawatan disimpan">
+          {selectedVacancy ? (
+            <div className="market-detail-body">
+              <div className="market-detail-icon">
+                <Icon>{selectedVacancy.vacancy_type === "internship" ? "school" : "work"}</Icon>
+              </div>
+              <span className="market-job-badge">{selectedVacancy.category || "Jawatan"}</span>
+              <h2>{selectedVacancy.title || "Jawatan DBKU"}</h2>
+              <div className="market-detail-department">
+                {selectedVacancy.organization || "Dewan Bandaraya Kuching Utara"}
+              </div>
+
+              <div className="market-detail-meta">
+                <span>
+                  <Icon>work</Icon>
+                  Taraf jawatan: {selectedVacancy.type || selectedVacancy.category || "-"}
+                </span>
+                <span>
+                  <Icon>apartment</Icon>
+                  Bahagian: {selectedVacancy.department || "-"}
+                </span>
+                <span>
+                  <Icon>location_on</Icon>
+                  {selectedVacancy.location || "Dewan Bandaraya Kuching Utara"}
+                </span>
+                <span>
+                  <Icon>event</Icon>
+                  Tarikh tutup: {selectedVacancy.closing || "-"}
+                </span>
+              </div>
+
+              <div className="market-detail-document">
+                <span>Untuk mengetahui lebih lanjut, sila klik di sini:</span>
+                {selectedVacancy.official_document ? (
+                  <a
+                    href={selectedVacancy.official_document_view_url || selectedVacancy.official_document}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Muat turun dokumen
+                  </a>
+                ) : (
+                  <strong>Dokumen belum tersedia</strong>
+                )}
+              </div>
+
+              <div className="market-detail-actions">
+                <Link to={selectedVacancy.vacancy_type === "internship" ? APPLICANT_ROUTES.internships : APPLICANT_ROUTES.jobs}>
+                  Mohon Sekarang
+                </Link>
+                <button className="saved" type="button" onClick={() => onRemove(selectedVacancy.id)}>
+                  <Icon>bookmark_added</Icon>
+                  Disimpan
+                </button>
+              </div>
             </div>
-            <div>
-              <dt>Tarikh tutup</dt>
-              <dd>{vacancy.closing || "-"}</dd>
-            </div>
-          </dl>
-          <div className="saved-vacancy-actions">
-            <Link to={vacancy.vacancy_type === "internship" ? APPLICANT_ROUTES.internships : APPLICANT_ROUTES.jobs}>
-              Lihat butiran
-            </Link>
-            <button type="button" onClick={() => onRemove(vacancy.id)}>
-              <Icon>delete</Icon>
-              Buang
-            </button>
-          </div>
-        </article>
-      ))}
-    </div>
+          ) : null}
+        </aside>
+      </section>
+    </section>
   );
 }
 
