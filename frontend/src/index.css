@@ -3958,9 +3958,7 @@ body:has(.applicant-profile-page) {
   content: "";
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(circle at center, rgba(15, 23, 42, 0.16), rgba(15, 23, 42, 0.42)),
-    linear-gradient(90deg, rgba(6, 78, 59, 0.58), rgba(15, 23, 42, 0.28));
+  background: linear-gradient(90deg, rgba(6, 78, 59, 0.12), rgba(15, 23, 42, 0.08));
 }
 
 .internship-hero-overlay {
@@ -3974,19 +3972,18 @@ body:has(.applicant-profile-page) {
   padding: 24px;
   text-align: center;
   color: #ffffff;
-  text-shadow: 0 5px 24px rgba(0, 0, 0, 0.62);
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.48), 0 1px 2px rgba(0, 0, 0, 0.42);
 }
 
 .internship-hero-overlay h1 {
   margin: 0;
   max-width: min(1180px, calc(100% - 48px));
-  border-radius: 28px;
-  background: linear-gradient(90deg, rgba(15, 23, 42, 0.18), rgba(15, 23, 42, 0.34), rgba(15, 23, 42, 0.18));
-  padding: 12px 28px 18px;
+  padding: 0 28px;
   font-size: clamp(46px, 5.7vw, 78px);
   font-weight: 800;
   line-height: 1.04;
   letter-spacing: -2px;
+  -webkit-text-stroke: 1px rgba(15, 23, 42, 0.16);
 }
 
 .internship-content-shell {
