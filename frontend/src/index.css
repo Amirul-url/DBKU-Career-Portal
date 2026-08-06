@@ -2603,6 +2603,19 @@ a {
   background: #ecfdf5;
 }
 
+.market-detail-actions button.saved {
+  border-color: var(--primary-strong);
+  background: #ecfdf5;
+  color: var(--primary-strong);
+}
+
+.market-save-notice {
+  margin: 10px 0 0;
+  color: var(--primary-strong);
+  font-size: 13px;
+  font-weight: 800;
+}
+
 /* Applicant vacancy browser: compact two-pane layout. */
 .market-reference-shell { max-width: 1420px; padding-top: 26px; }
 .market-reference-shell .market-search-panel { display: grid; grid-template-columns: minmax(0, 1fr) 94px 270px; grid-template-rows: auto auto; gap: 10px 12px; border-radius: 0; box-shadow: none; padding: 18px; }
@@ -4866,6 +4879,11 @@ body:has(.applicant-profile-page) {
   padding: 22px 24px;
 }
 
+.applicant-list-card.saved-vacancy-card {
+  grid-template-columns: minmax(0, 1fr) minmax(220px, .35fr) auto;
+  align-items: center;
+}
+
 .applicant-list-card h2,
 .applicant-list-card p,
 .applicant-list-card dl,
@@ -4930,9 +4948,55 @@ body:has(.applicant-profile-page) {
   color: #b42318;
 }
 
+.applicant-status-pill.saved {
+  background: #dcfce7;
+  color: #087a42;
+}
+
+.saved-vacancy-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.saved-vacancy-actions a,
+.saved-vacancy-actions button {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 8px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.saved-vacancy-actions a {
+  background: var(--profile-green);
+  color: #ffffff;
+}
+
+.saved-vacancy-actions button {
+  border: 1px solid #fecaca;
+  background: #fff5f5;
+  color: #b42318;
+}
+
+.saved-vacancy-actions .app-svg-icon {
+  font-size: 17px;
+}
+
 @media (max-width: 760px) {
-  .applicant-list-card {
+  .applicant-list-card,
+  .applicant-list-card.saved-vacancy-card {
     grid-template-columns: 1fr;
+  }
+
+  .saved-vacancy-actions {
+    flex-wrap: wrap;
   }
 }
 

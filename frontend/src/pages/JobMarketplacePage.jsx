@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { apiRequest, fetchAuthenticatedBlob } from "../lib/authApi";
+import { apiRequest, fetchAuthenticatedBlob, getStoredUser } from "../lib/authApi";
+import { getSavedVacancies, removeSavedVacancy, upsertSavedVacancy } from "../modules/applicant/savedVacancies";
 
 const dateLabel = (value) =>
   value
@@ -115,11 +116,14 @@ export function JobMarketplaceContent({ actionTarget = "/login", embedded = fals
   const [selectedId, setSelectedId] = useState(null);
   const [search, setSearch] = useState("");
   const [extraFilter, setExtraFilter] = useState("all");
+  const [savedVacancies, setSavedVacancies] = useState([]);
+  const [saveNotice, setSaveNotice] = useState("");
   const employmentFilter = isInternshipPage
     ? extraFilter === "Latihan Industri" ? extraFilter : "all"
     : ["Tetap", "Kontrak"].includes(extraFilter) ? extraFilter : "all";
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const user = useMemo(() => getStoredUser(), []);
   useEffect(() => {
     apiRequest(`/jobs/?type=${vacancyType}`)
       .then((data) => {
@@ -133,6 +137,9 @@ export function JobMarketplaceContent({ actionTarget = "/login", embedded = fals
   useEffect(() => () => {
     documentBlobUrls.current.forEach((url) => URL.revokeObjectURL(url));
   }, []);
+  useEffect(() => {
+    setSavedVacancies(getSavedVacancies(user));
+  }, [user]);
   const filteredOpportunities = useMemo(() => {
     const keyword = search.trim().toLowerCase();
     return opportunities.filter((job) =>
@@ -144,6 +151,26 @@ export function JobMarketplaceContent({ actionTarget = "/login", embedded = fals
     () => filteredOpportunities.find((item) => item.id === selectedId) ?? filteredOpportunities[0] ?? null,
     [filteredOpportunities, selectedId],
   );
+  useEffect(() => {
+    setSaveNotice("");
+  }, [selectedOpportunity?.id]);
+  const selectedOpportunitySaved = selectedOpportunity
+    ? savedVacancies.some((item) => item.id === selectedOpportunity.id)
+    : false;
+  const handleSaveToggle = () => {
+    if (!selectedOpportunity) return;
+
+    if (!user) {
+      setSaveNotice("Sila log masuk untuk menyimpan jawatan.");
+      return;
+    }
+
+    const nextSavedVacancies = selectedOpportunitySaved
+      ? removeSavedVacancy(user, selectedOpportunity.id)
+      : upsertSavedVacancy(user, selectedOpportunity);
+    setSavedVacancies(nextSavedVacancies);
+    setSaveNotice(selectedOpportunitySaved ? "Jawatan dikeluarkan daripada senarai simpan." : "Jawatan disimpan.");
+  };
   const handleDocumentOpen = async (event) => {
     const documentUrl = selectedOpportunity?.official_document_view_url || selectedOpportunity?.official_document;
     if (!documentUrl) return;
@@ -292,11 +319,16 @@ export function JobMarketplaceContent({ actionTarget = "/login", embedded = fals
 
               <div className="market-detail-actions">
                 <Link to={actionTarget}>Mohon Sekarang</Link>
-                <button type="button">
-                  <Icon>bookmark</Icon>
-                  Simpan
+                <button
+                  type="button"
+                  className={selectedOpportunitySaved ? "saved" : ""}
+                  onClick={handleSaveToggle}
+                >
+                  <Icon>{selectedOpportunitySaved ? "bookmark_added" : "bookmark"}</Icon>
+                  {selectedOpportunitySaved ? "Disimpan" : "Simpan"}
                 </button>
               </div>
+              {saveNotice ? <p className="market-save-notice">{saveNotice}</p> : null}
             </div>
             </> : (
               <div className="market-detail-body">

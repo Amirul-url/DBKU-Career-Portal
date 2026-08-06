@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { apiRequest, getStoredUser } from "../../lib/authApi";
 import { APPLICANT_ROUTES } from "../../modules/applicant/applicantRoutes";
+import { getSavedVacancies, removeSavedVacancy } from "../../modules/applicant/savedVacancies";
 import { Icon } from "./ApplicantAuthShared";
 import { ProfileContentHeader, ProfileSidebar } from "./ApplicantProfilePage";
 
@@ -83,6 +84,53 @@ function ApplicationList({ applications, loading }) {
   );
 }
 
+function SavedVacancyList({ onRemove, vacancies }) {
+  if (!vacancies.length) {
+    return (
+      <EmptyState
+        actionLabel="Cari kerja"
+        actionTo={APPLICANT_ROUTES.jobs}
+        icon="bookmark"
+        title="Tiada senarai simpan lagi"
+        message="Gunakan butang Simpan pada butiran jawatan untuk menyimpan peluang yang ingin dilihat semula."
+      />
+    );
+  }
+
+  return (
+    <div className="applicant-list-grid">
+      {vacancies.map((vacancy) => (
+        <article className="applicant-list-card saved-vacancy-card" key={vacancy.id}>
+          <div>
+            <span className="applicant-status-pill saved">Disimpan</span>
+            <h2>{vacancy.title || "Jawatan DBKU"}</h2>
+            <p>{vacancy.department || vacancy.organization || "Dewan Bandaraya Kuching Utara"}</p>
+          </div>
+          <dl>
+            <div>
+              <dt>Taraf jawatan</dt>
+              <dd>{vacancy.type || vacancy.category || "-"}</dd>
+            </div>
+            <div>
+              <dt>Tarikh tutup</dt>
+              <dd>{vacancy.closing || "-"}</dd>
+            </div>
+          </dl>
+          <div className="saved-vacancy-actions">
+            <Link to={vacancy.vacancy_type === "internship" ? APPLICANT_ROUTES.internships : APPLICANT_ROUTES.jobs}>
+              Lihat butiran
+            </Link>
+            <button type="button" onClick={() => onRemove(vacancy.id)}>
+              <Icon>delete</Icon>
+              Buang
+            </button>
+          </div>
+        </article>
+      ))}
+    </div>
+  );
+}
+
 function getApplicationRows(data) {
   if (Array.isArray(data)) return data;
   if (Array.isArray(data?.results)) return data.results;
@@ -94,6 +142,7 @@ export default function ApplicantPortalListPage({ page }) {
   const [user] = useState(() => getStoredUser());
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [applications, setApplications] = useState([]);
+  const [savedVacancies, setSavedVacancies] = useState(() => getSavedVacancies(user));
   const [loading, setLoading] = useState(page === "applications");
   const [error, setError] = useState("");
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
@@ -160,6 +209,10 @@ export default function ApplicantPortalListPage({ page }) {
     };
   }, [isApplicationsPage]);
 
+  const handleRemoveSavedVacancy = (vacancyId) => {
+    setSavedVacancies(removeSavedVacancy(user, vacancyId));
+  };
+
   if (!user || user.role !== "applicant") {
     return null;
   }
@@ -186,13 +239,7 @@ export default function ApplicantPortalListPage({ page }) {
           ) : isApplicationsPage ? (
             <ApplicationList applications={applications} loading={loading} />
           ) : (
-            <EmptyState
-              actionLabel="Cari kerja"
-              actionTo={APPLICANT_ROUTES.jobs}
-              icon="bookmark"
-              title="Tiada senarai simpan lagi"
-              message="Gunakan butang Simpan pada butiran jawatan untuk menyimpan peluang yang ingin dilihat semula."
-            />
+            <SavedVacancyList vacancies={savedVacancies} onRemove={handleRemoveSavedVacancy} />
           )}
         </main>
       </div>
