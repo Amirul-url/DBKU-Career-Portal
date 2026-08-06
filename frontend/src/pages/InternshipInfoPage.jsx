@@ -135,12 +135,6 @@ export default function InternshipInfoPage() {
               ))}
             </div>
 
-            <h4>Permohonan</h4>
-            <p>
-              Sila kemukakan permohonan latihan industri kepada Bahagian Pengurusan Sumber Manusia DBKU atau melalui
-              saluran rasmi yang dimaklumkan dari semasa ke semasa.
-            </p>
-
             <h4>Dokumen yang diperlukan</h4>
             <ol>
               {requiredDocuments.map((document) => (
