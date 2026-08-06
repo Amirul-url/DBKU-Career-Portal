@@ -66,10 +66,11 @@ export default function InternshipInfoPage() {
 
         <section className="internship-content-shell">
           <div className="internship-intro">
-            <h2>Peluang pembelajaran dalam persekitaran perkhidmatan bandar raya.</h2>
+            <h2>Latihan industri dan praktikal bersama Dewan Bandaraya Kuching Utara.</h2>
             <p>
-              DBKU membuka peluang kepada pelajar institusi pengajian tinggi untuk menjalani latihan industri mengikut
-              keperluan bahagian, bidang pengajian dan kekosongan semasa.
+              Dewan Bandaraya Kuching Utara tiada halangan untuk menerima pelajar institusi pengajian tinggi yang ingin
+              menjalani latihan industri atau praktikal, tertakluk kepada kesesuaian penempatan, bidang pengajian dan
+              keperluan semasa jabatan.
             </p>
           </div>
 
