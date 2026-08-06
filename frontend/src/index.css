@@ -4823,6 +4823,49 @@ body:has(.applicant-profile-page) {
 
 .applicant-internship-page .internship-content-shell {
   max-width: 1230px;
+  padding: 46px 48px 78px;
+}
+
+.applicant-internship-page .internship-hero-overlay h1 {
+  font-size: clamp(38px, 4.8vw, 64px);
+}
+
+.applicant-internship-page .internship-intro {
+  max-width: 920px;
+  margin-bottom: 46px;
+}
+
+.applicant-internship-page .internship-intro h2 {
+  font-size: clamp(28px, 3.2vw, 38px);
+  line-height: 1.22;
+}
+
+.applicant-internship-page .internship-intro p,
+.applicant-internship-page .internship-copy-card p,
+.applicant-internship-page .internship-copy-card li {
+  font-size: 16px;
+  line-height: 1.72;
+}
+
+.applicant-internship-page .internship-copy-card h4 {
+  font-size: 16px;
+}
+
+.applicant-internship-page .internship-copy-card li + li {
+  margin-top: 10px;
+}
+
+.applicant-internship-page .internship-field-grid span {
+  font-size: 15px;
+  padding: 11px 12px;
+}
+
+.applicant-internship-page .internship-cta-panel strong {
+  font-size: 18px;
+}
+
+.applicant-internship-page .internship-cta-panel p {
+  font-size: 14px;
 }
 
 .profile-layout {
