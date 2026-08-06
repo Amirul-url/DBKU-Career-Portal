@@ -5169,7 +5169,7 @@ body:has(.applicant-profile-page) {
 }
 
 .applicant-market-shell.market-reference-shell .market-job-list {
-  max-height: max(360px, calc(100vh - 384px));
+  max-height: max(560px, calc(100vh - 300px));
   overflow-y: auto;
   padding-right: 10px;
   scrollbar-gutter: stable;
