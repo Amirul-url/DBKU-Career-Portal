@@ -255,7 +255,6 @@ export function JobMarketplaceContent({ actionTarget = "/login", embedded = fals
               <span className="market-job-badge">{selectedOpportunity.category}</span>
               <h2>{selectedOpportunity.title}</h2>
               <div className="market-detail-department">
-                <Icon>apartment</Icon>
                 {selectedOpportunity.organization || "Dewan Bandaraya Kuching Utara"}
               </div>
 
