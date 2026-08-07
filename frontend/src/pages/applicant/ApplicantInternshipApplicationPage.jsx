@@ -193,7 +193,10 @@ export default function ApplicantInternshipApplicationPage() {
                         <input accept=".jpg" type="file" onChange={updatePassportPhoto} />
                       </label>
                       {passportPhoto?.name ? <small>{passportPhoto.name}</small> : null}
-                      <p><strong>Note</strong> Sila pastikan gambar yang dimuatnaik adalah dalam format .jpg (3.5 cm x 5.0 cm)</p>
+                      <p>
+                        <strong>Note</strong>
+                        <span>Sila pastikan gambar yang dimuatnaik adalah dalam format .jpg (3.5 cm x 5.0 cm)</span>
+                      </p>
                     </aside>
                   </div>
 
