@@ -5634,8 +5634,8 @@ body:has(.applicant-profile-page) {
 
 .student-info-fields {
   display: grid;
-  grid-template-columns: minmax(210px, 290px) minmax(210px, 290px);
-  gap: 10px 16px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 11px;
 }
 
 .student-info-fields label,
@@ -5648,11 +5648,15 @@ body:has(.applicant-profile-page) {
 .student-info-fields label {
   display: grid;
   gap: 5px;
+  max-width: 290px;
 }
 
-.student-info-fields label.wide,
+.student-info-fields label.wide {
+  max-width: 595px;
+}
+
 .student-info-note {
-  grid-column: 1 / -1;
+  max-width: 595px;
 }
 
 .student-info-fields input,
