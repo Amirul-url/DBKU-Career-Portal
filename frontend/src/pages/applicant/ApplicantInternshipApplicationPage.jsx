@@ -118,24 +118,31 @@ const selectOptions = {
 
 const maritalStatusOptions = ["Tidak Dinyatakan", "Bujang", "Duda", "Janda", "Berkahwin"];
 
+const addressCountryAliases = { MALAYSIA: "Malaysia", BRUNEI: "Brunei", INDONESIA: "Indonesia", SINGAPORE: "Singapura", SINGAPURA: "Singapura", "LAIN-LAIN": "Lain-lain" };
+const addressDistrictAliases = {
+  "BAHAGIAN KUCHING": "Bahagian Kuching",
+  "BAHAGIAN SAMARAHAN": "Bahagian Samarahan",
+  "BAHAGIAN SERIAN": "Bahagian Serian",
+  "BAHAGIAN SRI AMAN": "Bahagian Sri Aman",
+  "BAHAGIAN BETONG": "Bahagian Betong",
+  "BAHAGIAN SARIKEI": "Bahagian Sarikei",
+  "BAHAGIAN SIBU": "Bahagian Sibu",
+  "BAHAGIAN KAPIT": "Bahagian Kapit",
+  "BAHAGIAN MUKAH": "Bahagian Mukah",
+  "BAHAGIAN BINTULU": "Bahagian Bintulu",
+  "BAHAGIAN MIRI": "Bahagian Miri",
+  "BAHAGIAN LIMBANG": "Bahagian Limbang",
+  "LAIN-LAIN": "Lain-lain",
+};
+const malaysiaStateAliases = { SARAWAK: "Sarawak", SABAH: "Sabah", JOHOR: "Johor", KEDAH: "Kedah", KELANTAN: "Kelantan", MELAKA: "Melaka", "NEGERI SEMBILAN": "Negeri Sembilan", PAHANG: "Pahang", PERAK: "Perak", PERLIS: "Perlis", "PULAU PINANG": "Pulau Pinang", SELANGOR: "Selangor", TERENGGANU: "Terengganu", "WP KUALA LUMPUR": "WP Kuala Lumpur", "WP LABUAN": "WP Labuan", "WP PUTRAJAYA": "WP Putrajaya" };
+
 const valueAliases = {
-  address1Country: { MALAYSIA: "Malaysia", BRUNEI: "Brunei", INDONESIA: "Indonesia", SINGAPORE: "Singapura", SINGAPURA: "Singapura", "LAIN-LAIN": "Lain-lain" },
-  address1District: {
-    "BAHAGIAN KUCHING": "Bahagian Kuching",
-    "BAHAGIAN SAMARAHAN": "Bahagian Samarahan",
-    "BAHAGIAN SERIAN": "Bahagian Serian",
-    "BAHAGIAN SRI AMAN": "Bahagian Sri Aman",
-    "BAHAGIAN BETONG": "Bahagian Betong",
-    "BAHAGIAN SARIKEI": "Bahagian Sarikei",
-    "BAHAGIAN SIBU": "Bahagian Sibu",
-    "BAHAGIAN KAPIT": "Bahagian Kapit",
-    "BAHAGIAN MUKAH": "Bahagian Mukah",
-    "BAHAGIAN BINTULU": "Bahagian Bintulu",
-    "BAHAGIAN MIRI": "Bahagian Miri",
-    "BAHAGIAN LIMBANG": "Bahagian Limbang",
-    "LAIN-LAIN": "Lain-lain",
-  },
-  address1State: { SARAWAK: "Sarawak", SABAH: "Sabah", JOHOR: "Johor", KEDAH: "Kedah", KELANTAN: "Kelantan", MELAKA: "Melaka", "NEGERI SEMBILAN": "Negeri Sembilan", PAHANG: "Pahang", PERAK: "Perak", PERLIS: "Perlis", "PULAU PINANG": "Pulau Pinang", SELANGOR: "Selangor", TERENGGANU: "Terengganu", "WP KUALA LUMPUR": "WP Kuala Lumpur", "WP LABUAN": "WP Labuan", "WP PUTRAJAYA": "WP Putrajaya" },
+  address1Country: addressCountryAliases,
+  address1District: addressDistrictAliases,
+  address1State: malaysiaStateAliases,
+  address2Country: addressCountryAliases,
+  address2District: addressDistrictAliases,
+  address2State: malaysiaStateAliases,
   citizenship: { WARGANEGARA: "Warganegara", "BUKAN WARGANEGARA": "Bukan Warganegara" },
   citizenshipCountry: { MALAYSIA: "Malaysia", BRUNEI: "Brunei", INDONESIA: "Indonesia", "LAIN-LAIN": "Lain-lain" },
   ethnicity: { MELANAU: "Melanau", MELAYU: "Melayu", IBAN: "Iban", BIDAYUH: "Bidayuh", CINA: "Cina", "LAIN-LAIN": "Lain-lain" },
@@ -144,8 +151,8 @@ const valueAliases = {
   nativeStatus: { BUMIPUTERA: "Bumiputera", "BUKAN BUMIPUTERA": "Bukan Bumiputera" },
   religion: { MUSLIM: "Islam", CHRISTIAN: "Kristian", BUDDHIST: "Buddha", HINDU: "Hindu", "LAIN-LAIN": "Lain-lain" },
   sponsorship: { BIASISWA: "Biasiswa Korporat / GLC", SENDIRI: "Sendiri" },
-  stateOfBirth: { SARAWAK: "Sarawak", SABAH: "Sabah", JOHOR: "Johor", KEDAH: "Kedah", KELANTAN: "Kelantan", MELAKA: "Melaka", "NEGERI SEMBILAN": "Negeri Sembilan", PAHANG: "Pahang", PERAK: "Perak", PERLIS: "Perlis", "PULAU PINANG": "Pulau Pinang", SELANGOR: "Selangor", TERENGGANU: "Terengganu", "WP KUALA LUMPUR": "WP Kuala Lumpur", "WP LABUAN": "WP Labuan", "WP PUTRAJAYA": "WP Putrajaya" },
-  residenceState: { SARAWAK: "Sarawak", SABAH: "Sabah", JOHOR: "Johor", KEDAH: "Kedah", KELANTAN: "Kelantan", MELAKA: "Melaka", "NEGERI SEMBILAN": "Negeri Sembilan", PAHANG: "Pahang", PERAK: "Perak", PERLIS: "Perlis", "PULAU PINANG": "Pulau Pinang", SELANGOR: "Selangor", TERENGGANU: "Terengganu", "WP KUALA LUMPUR": "WP Kuala Lumpur", "WP LABUAN": "WP Labuan", "WP PUTRAJAYA": "WP Putrajaya" },
+  stateOfBirth: malaysiaStateAliases,
+  residenceState: malaysiaStateAliases,
   qualification: { MATRICULATION: "Matrikulasi", DIPLOMA: "Diploma", FOUNDATION: "Asasi", DEGREE: "Ijazah Sarjana Muda", MASTER: "Ijazah Sarjana", PHD: "PhD / Doktor Falsafah" },
 };
 
