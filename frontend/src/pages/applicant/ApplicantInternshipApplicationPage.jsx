@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getStoredUser } from "../../lib/authApi";
 import { Icon } from "./ApplicantAuthShared";
@@ -52,6 +52,7 @@ export default function ApplicantInternshipApplicationPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [notice, setNotice] = useState("");
   const [passportPhoto, setPassportPhoto] = useState(null);
+  const passportPhotoInputRef = useRef(null);
   const [studentInfo, setStudentInfo] = useState({
     citizenship: "WARGANEGARA",
     citizenshipCountry: "MALAYSIA",
@@ -104,14 +105,37 @@ export default function ApplicantInternshipApplicationPage() {
 
   const updatePassportPhoto = (event) => {
     const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
     setNotice("");
     setPassportPhoto((current) => {
       if (current?.previewUrl) {
         URL.revokeObjectURL(current.previewUrl);
       }
 
-      return file ? { name: file.name, previewUrl: URL.createObjectURL(file) } : null;
+      return { name: file.name, previewUrl: URL.createObjectURL(file) };
     });
+  };
+
+  const openPassportPhotoPicker = () => {
+    passportPhotoInputRef.current?.click();
+  };
+
+  const deletePassportPhoto = () => {
+    setNotice("");
+    setPassportPhoto((current) => {
+      if (current?.previewUrl) {
+        URL.revokeObjectURL(current.previewUrl);
+      }
+
+      return null;
+    });
+
+    if (passportPhotoInputRef.current) {
+      passportPhotoInputRef.current.value = "";
+    }
   };
 
   const handleUpdate = (event) => {
@@ -181,7 +205,7 @@ export default function ApplicantInternshipApplicationPage() {
                     </div>
 
                     <aside className="student-info-photo-card">
-                      <label className="student-passport-upload">
+                      <div className="student-passport-upload">
                         {passportPhoto?.previewUrl ? (
                           <img src={passportPhoto.previewUrl} alt="Gambar passport pelajar" />
                         ) : (
@@ -191,8 +215,18 @@ export default function ApplicantInternshipApplicationPage() {
                             <small>3.5 cm x 5.0 cm</small>
                           </span>
                         )}
-                        <input accept=".jpg" type="file" onChange={updatePassportPhoto} />
-                      </label>
+                      </div>
+                      <input className="student-passport-input" ref={passportPhotoInputRef} accept=".jpg" type="file" onChange={updatePassportPhoto} />
+                      <div className="student-passport-actions">
+                        <button type="button" onClick={openPassportPhotoPicker}>
+                          <Icon>upload_file</Icon>
+                          Upload
+                        </button>
+                        <button disabled={!passportPhoto} type="button" onClick={deletePassportPhoto}>
+                          <Icon>delete</Icon>
+                          Delete
+                        </button>
+                      </div>
                       {passportPhoto?.name ? <small>{passportPhoto.name}</small> : null}
                       <p>
                         <strong>Note</strong>
