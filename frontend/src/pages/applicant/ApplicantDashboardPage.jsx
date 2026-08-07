@@ -28,7 +28,7 @@ export default function ApplicantDashboardPage() {
 
   useEffect(() => {
     if (!user) {
-      navigate("/login", { replace: true, state: { message: "Sila log masuk untuk melihat dashboard anda." } });
+      navigate("/login", { replace: true, state: { message: "Sila log masuk untuk melihat papan pemuka anda." } });
     } else if (user.role !== "applicant") {
       navigate("/", { replace: true });
     }
@@ -48,7 +48,7 @@ export default function ApplicantDashboardPage() {
             <span className="applicant-page-icon">
               <Icon>dashboard</Icon>
             </span>
-            <h1>Dashboard</h1>
+            <h1>Papan Pemuka</h1>
             <p>Pantau profil, permohonan dan peluang kerjaya anda dalam satu paparan.</p>
           </div>
 
