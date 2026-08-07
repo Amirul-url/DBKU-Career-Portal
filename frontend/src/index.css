@@ -5525,7 +5525,7 @@ body:has(.applicant-profile-page) {
 
 .student-info-workspace {
   display: grid;
-  grid-template-columns: 160px minmax(0, 1fr);
+  grid-template-columns: 210px minmax(0, 1fr);
   min-height: 720px;
 }
 
@@ -5540,6 +5540,7 @@ body:has(.applicant-profile-page) {
 
 .student-info-sidebar button {
   display: flex;
+  width: 100%;
   min-height: 34px;
   align-items: center;
   gap: 7px;
@@ -5551,6 +5552,7 @@ body:has(.applicant-profile-page) {
   font-size: 12px;
   font-weight: 750;
   text-align: left;
+  white-space: nowrap;
 }
 
 .student-info-sidebar button.active,
