@@ -204,7 +204,6 @@ export default function ApplicantInternshipApplicationPage() {
           <section className="student-info-panel" aria-label="Maklumat asas pelajar">
             <header className="student-info-titlebar">
               <h1>Maklumat Asas Pelajar</h1>
-              <button type="button">Hantar Maklum Balas</button>
             </header>
 
             <div className="student-info-workspace">

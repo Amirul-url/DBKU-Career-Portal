@@ -5501,8 +5501,6 @@ body:has(.applicant-profile-page) {
   display: flex;
   min-height: 52px;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
   background: var(--student-pale);
   padding: 0 18px;
 }
@@ -5512,15 +5510,6 @@ body:has(.applicant-profile-page) {
   color: var(--student-ink);
   font-size: 20px;
   font-weight: 850;
-}
-
-.student-info-titlebar button {
-  border: 0;
-  background: transparent;
-  color: #087942;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 750;
 }
 
 .student-info-workspace {
@@ -5574,16 +5563,17 @@ body:has(.applicant-profile-page) {
 .student-info-tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
-  border-bottom: 1px solid #d7e8df;
-  padding-left: 0;
+  gap: 6px;
+  border: 1px solid #cfe8da;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .82);
+  padding: 10px;
 }
 
 .student-info-tabs button {
   min-height: 42px;
   border: 1px solid transparent;
-  border-bottom: 0;
-  border-radius: 6px 6px 0 0;
+  border-radius: 7px;
   background: transparent;
   color: #13844a;
   padding: 0 12px;
@@ -5596,6 +5586,7 @@ body:has(.applicant-profile-page) {
   border-color: #d7e8df;
   background: #ffffff;
   color: var(--student-ink);
+  box-shadow: 0 8px 18px rgba(17, 24, 39, .04);
 }
 
 .student-info-form {
@@ -5862,8 +5853,6 @@ body:has(.applicant-profile-page) {
 
 @media (max-width: 700px) {
   .student-info-titlebar {
-    align-items: flex-start;
-    flex-direction: column;
     padding: 14px;
   }
 
