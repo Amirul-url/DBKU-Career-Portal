@@ -52,7 +52,7 @@ export default function ApplicantDashboardPage() {
           <section className="applicant-dashboard-guide">
             <div>
               <span className="dashboard-guide-icon">
-                <Icon>person_check</Icon>
+                <Icon>person</Icon>
               </span>
               <h2>Lengkapkan profil anda</h2>
               <p>
