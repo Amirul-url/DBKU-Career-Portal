@@ -159,6 +159,15 @@ const getDefaultStudentInfo = () => ({
   address1Phone: "",
   address1Postcode: "",
   address1State: "",
+  address2City: "",
+  address2Country: "",
+  address2District: "",
+  address2Line1: "",
+  address2Line2: "",
+  address2Line3: "",
+  address2Phone: "",
+  address2Postcode: "",
+  address2State: "",
   citizenship: "",
   citizenshipCountry: "",
   dateOfBirth: "",
@@ -286,13 +295,39 @@ export default function ApplicantInternshipApplicationPage() {
   };
 
   const openInfoTab = (tab) => {
-    if (!["Maklumat Peribadi", "Alamat 1"].includes(tab)) {
+    if (!["Maklumat Peribadi", "Alamat 1", "Alamat 2"].includes(tab)) {
       return;
     }
 
     setNotice("");
     setActiveInfoTab(tab);
   };
+
+  const renderAddressFields = (prefix) => (
+    <div className="student-info-fields student-address-fields">
+      <label>Alamat 1<input value={studentInfo[`${prefix}Line1`]} onChange={updateStudentInfo(`${prefix}Line1`)} /></label>
+      <label>Alamat 2<input value={studentInfo[`${prefix}Line2`]} onChange={updateStudentInfo(`${prefix}Line2`)} /></label>
+      <label>Alamat 3<input value={studentInfo[`${prefix}Line3`]} onChange={updateStudentInfo(`${prefix}Line3`)} /></label>
+      <label>Poskod<input value={studentInfo[`${prefix}Postcode`]} onChange={updateStudentInfo(`${prefix}Postcode`)} /></label>
+      <label className="wide">Bandar<input value={studentInfo[`${prefix}City`]} onChange={updateStudentInfo(`${prefix}City`)} /></label>
+      <label>Negeri<select value={studentInfo[`${prefix}State`]} onChange={updateStudentInfo(`${prefix}State`)}><option value="">Pilih negeri</option>{selectOptions.state.map((option) => <option key={option}>{option}</option>)}</select></label>
+      <label>Daerah
+        <select value={studentInfo[`${prefix}District`]} onChange={updateStudentInfo(`${prefix}District`)}>
+          <option value="">Pilih daerah</option>
+          {Object.entries(selectOptions.districtGroups).map(([state, districts]) => (
+            <optgroup key={state} label={state}>
+              {districts.map((option) => <option key={`${state}-${option}`} value={option}>{option}</option>)}
+            </optgroup>
+          ))}
+        </select>
+      </label>
+      <label>Negara<select value={studentInfo[`${prefix}Country`]} onChange={updateStudentInfo(`${prefix}Country`)}><option value="">Pilih negara</option>{selectOptions.addressCountry.map((option) => <option key={option}>{option}</option>)}</select></label>
+      <label>No. Telefon<input value={studentInfo[`${prefix}Phone`]} onChange={updateStudentInfo(`${prefix}Phone`)} /></label>
+    </div>
+  );
+
+  const isAddressTab = activeInfoTab === "Alamat 1" || activeInfoTab === "Alamat 2";
+  const formTitle = activeInfoTab === "Alamat 1" ? "Alamat Tetap" : activeInfoTab === "Alamat 2" ? "Alamat Surat Menyurat" : "Maklumat Peribadi";
 
   return (
     <div className={`applicant-profile-page ${sidebarOpen ? "sidebar-open" : "sidebar-collapsed"}`}>
@@ -330,30 +365,11 @@ export default function ApplicantInternshipApplicationPage() {
                 </nav>
 
                 <form className="student-info-form" onSubmit={handleUpdate}>
-                  <h2>{activeInfoTab === "Alamat 1" ? "Alamat Tetap" : "Maklumat Peribadi"}</h2>
+                  <h2>{formTitle}</h2>
                   {notice ? <p className="student-info-notice">{notice}</p> : null}
 
-                  {activeInfoTab === "Alamat 1" ? (
-                    <div className="student-info-fields student-address-fields">
-                      <label>Alamat 1<input value={studentInfo.address1Line1} onChange={updateStudentInfo("address1Line1")} /></label>
-                      <label>Alamat 2<input value={studentInfo.address1Line2} onChange={updateStudentInfo("address1Line2")} /></label>
-                      <label>Alamat 3<input value={studentInfo.address1Line3} onChange={updateStudentInfo("address1Line3")} /></label>
-                      <label>Poskod<input value={studentInfo.address1Postcode} onChange={updateStudentInfo("address1Postcode")} /></label>
-                      <label className="wide">Bandar<input value={studentInfo.address1City} onChange={updateStudentInfo("address1City")} /></label>
-                      <label>Negeri<select value={studentInfo.address1State} onChange={updateStudentInfo("address1State")}><option value="">Pilih negeri</option>{selectOptions.state.map((option) => <option key={option}>{option}</option>)}</select></label>
-                      <label>Daerah
-                        <select value={studentInfo.address1District} onChange={updateStudentInfo("address1District")}>
-                          <option value="">Pilih daerah</option>
-                          {Object.entries(selectOptions.districtGroups).map(([state, districts]) => (
-                            <optgroup key={state} label={state}>
-                              {districts.map((option) => <option key={`${state}-${option}`} value={option}>{option}</option>)}
-                            </optgroup>
-                          ))}
-                        </select>
-                      </label>
-                      <label>Negara<select value={studentInfo.address1Country} onChange={updateStudentInfo("address1Country")}><option value="">Pilih negara</option>{selectOptions.addressCountry.map((option) => <option key={option}>{option}</option>)}</select></label>
-                      <label>No. Telefon<input value={studentInfo.address1Phone} onChange={updateStudentInfo("address1Phone")} /></label>
-                    </div>
+                  {isAddressTab ? (
+                    renderAddressFields(activeInfoTab === "Alamat 1" ? "address1" : "address2")
                   ) : (
                     <div className="student-info-layout">
                       <div className="student-info-fields">
