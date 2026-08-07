@@ -23,10 +23,8 @@ const infoTabs = [
   "Maklumat Peribadi",
   "Alamat 1",
   "Alamat 2",
-  "Maklumat Mengundi",
   "Maklumat Kursus",
   "Maklumat Bahasa",
-  "Status Kursus",
   "Maklumat E-Portfolio",
 ];
 
