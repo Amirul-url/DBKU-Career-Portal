@@ -2,6 +2,7 @@ export const APPLICANT_ROUTES = {
   academic: "/profile/academic",
   applications: "/profile/applications",
   experience: "/profile/experience",
+  internshipApplication: "/profile/internship-application",
   internships: "/profile/internships",
   jobPreferences: "/profile/job-preferences",
   jobs: "/profile/jobs",
@@ -20,7 +21,7 @@ const applicantSectionRoutes = [
 ];
 
 export const applicantSidebarNavItems = [
-  { activePaths: [APPLICANT_ROUTES.jobs, APPLICANT_ROUTES.internships], icon: "search", label: "Cari Kerja", to: APPLICANT_ROUTES.jobs },
+  { activePaths: [APPLICANT_ROUTES.jobs, APPLICANT_ROUTES.internships, APPLICANT_ROUTES.internshipApplication], icon: "search", label: "Cari Kerja", to: APPLICANT_ROUTES.jobs },
   { icon: "assignment", label: "Permohonan Saya", to: APPLICANT_ROUTES.applications },
   { icon: "bookmark", label: "Senarai Simpan", to: APPLICANT_ROUTES.saved },
   {

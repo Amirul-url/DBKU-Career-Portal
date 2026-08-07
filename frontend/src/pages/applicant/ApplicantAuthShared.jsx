@@ -1,5 +1,7 @@
 import { useState } from "react";
 import {
+  ArrowLeft,
+  ArrowRight,
   Bell,
   Bookmark,
   BookmarkCheck,
@@ -37,6 +39,7 @@ import {
   SlidersHorizontal,
   Sparkles,
   Trash2,
+  Upload,
   UserRound,
   UserCog,
   UsersRound,
@@ -79,6 +82,8 @@ const iconMap = {
   shield_person: ShieldUser,
   admin_panel_settings: UserCog,
   apartment: Building2,
+  arrow_back: ArrowLeft,
+  arrow_forward: ArrowRight,
   assignment: ClipboardList,
   bookmark: Bookmark,
   bookmark_added: BookmarkCheck,
@@ -86,6 +91,7 @@ const iconMap = {
   location_on: MapPin,
   stars: Sparkles,
   tune: SlidersHorizontal,
+  upload_file: Upload,
   visibility: Eye,
   visibility_off: EyeOff,
   work: BriefcaseBusiness,

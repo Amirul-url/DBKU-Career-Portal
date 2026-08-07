@@ -5258,6 +5258,235 @@ body:has(.applicant-profile-page) {
   font-size: 14px;
 }
 
+.internship-application-shell {
+  max-width: 1280px;
+}
+
+.internship-application-heading {
+  max-width: 850px;
+}
+
+.internship-application-heading > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 18px;
+  color: var(--profile-green);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.internship-application-heading > span {
+  color: var(--profile-green);
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.internship-application-heading h1,
+.internship-application-heading p {
+  margin: 0;
+}
+
+.internship-application-heading h1 {
+  margin-top: 8px;
+  color: var(--profile-ink);
+  font-size: 32px;
+  line-height: 1.15;
+}
+
+.internship-application-heading p {
+  margin-top: 10px;
+  color: #52615a;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.internship-form-notice,
+.internship-form-error {
+  border-radius: 8px;
+  margin: 22px 0 0;
+  padding: 14px 16px;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.internship-form-notice {
+  border: 1px solid #bdebd1;
+  background: #ecfdf5;
+  color: #087942;
+}
+
+.internship-form-error {
+  border: 1px solid #fecaca;
+  background: #fff5f5;
+  color: #b42318;
+}
+
+.internship-application-form {
+  display: grid;
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.internship-application-form > section {
+  border: 1px solid #c9f5de;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 24px;
+}
+
+.internship-application-form header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.internship-application-form header > span {
+  display: inline-flex;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--profile-pale);
+  color: var(--profile-green);
+}
+
+.internship-application-form h2,
+.internship-application-form p {
+  margin: 0;
+}
+
+.internship-application-form h2 {
+  color: var(--profile-ink);
+  font-size: 20px;
+}
+
+.internship-application-form header p {
+  margin-top: 5px;
+  color: #64736b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.internship-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.internship-form-grid.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.internship-form-grid label,
+.internship-document-grid label {
+  display: grid;
+  gap: 7px;
+  color: #2f4a3b;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.internship-form-grid input,
+.internship-form-grid select,
+.internship-form-grid textarea {
+  width: 100%;
+  border: 1px solid #cfe0d6;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 11px 12px;
+  color: var(--profile-ink);
+  font: inherit;
+  font-size: 14px;
+  outline: 0;
+}
+
+.internship-form-grid textarea {
+  min-height: 86px;
+  resize: vertical;
+}
+
+.internship-form-grid input:focus,
+.internship-form-grid select:focus,
+.internship-form-grid textarea:focus {
+  border-color: var(--profile-green);
+  box-shadow: 0 0 0 3px #dcfce7;
+}
+
+.internship-document-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.internship-document-grid label {
+  border: 1px solid #d7e8df;
+  border-radius: 9px;
+  background: #fbfefc;
+  padding: 16px;
+}
+
+.internship-document-grid input {
+  max-width: 100%;
+  color: #52615a;
+  font-size: 13px;
+}
+
+.internship-document-grid small {
+  color: #64736b;
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+
+.internship-application-form > footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.internship-secondary-button,
+.internship-submit-button {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 999px;
+  padding: 0 22px;
+  font: inherit;
+  font-weight: 950;
+}
+
+.internship-secondary-button {
+  border: 1px solid #cfe0d6;
+  background: #ffffff;
+  color: #254334;
+}
+
+.internship-submit-button {
+  border: 0;
+  background: var(--profile-green);
+  color: #ffffff;
+}
+
+.internship-submit-button:hover {
+  background: #0f8d50;
+}
+
+@media (max-width: 900px) {
+  .internship-form-grid,
+  .internship-form-grid.two,
+  .internship-document-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .profile-layout {
   display: block;
   margin-top: 34px;

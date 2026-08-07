@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { APPLICANT_ROUTES } from "../../modules/applicant/applicantRoutes";
 
 const fieldOptions = [
   "Kejuruteraan Awam",
@@ -124,7 +125,7 @@ export default function ApplicantInternshipInfoContent() {
               <strong>Bersedia untuk hantar permohonan?</strong>
               <p>Lengkapkan profil sebelum membuat permohonan latihan industri.</p>
             </div>
-            <Link to="/profile">
+            <Link to={APPLICANT_ROUTES.internshipApplication}>
               Mohon Latihan Industri
               <Icon>arrow_forward</Icon>
             </Link>
