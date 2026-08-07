@@ -4989,8 +4989,7 @@ body:has(.applicant-profile-page) {
   margin-top: 18px;
 }
 
-.applicant-dashboard-grid article,
-.applicant-dashboard-checklist {
+.applicant-dashboard-grid article {
   border: 1px solid #c9f5de;
   border-radius: 8px;
   background: #ffffff;
@@ -5020,40 +5019,6 @@ body:has(.applicant-profile-page) {
   color: #52615a;
   font-weight: 700;
   line-height: 1.45;
-}
-
-.applicant-dashboard-checklist {
-  margin-top: 18px;
-}
-
-.applicant-dashboard-checklist h2 {
-  margin: 0;
-  color: var(--profile-ink);
-  font-size: 20px;
-}
-
-.applicant-dashboard-checklist div {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 16px;
-}
-
-.applicant-dashboard-checklist span {
-  display: inline-flex;
-  min-height: 44px;
-  align-items: center;
-  gap: 9px;
-  border-radius: 8px;
-  background: #f8fafc;
-  padding: 0 12px;
-  color: #52615a;
-  font-weight: 800;
-}
-
-.applicant-dashboard-checklist span.complete {
-  background: var(--profile-pale);
-  color: var(--profile-green);
 }
 
 .applicant-list-status,
@@ -5454,8 +5419,7 @@ body:has(.applicant-profile-page) {
 
 @media (max-width: 760px) {
   .applicant-dashboard-guide,
-  .applicant-dashboard-grid,
-  .applicant-dashboard-checklist div {
+  .applicant-dashboard-grid {
     grid-template-columns: 1fr;
   }
 

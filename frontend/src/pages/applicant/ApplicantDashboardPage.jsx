@@ -91,17 +91,6 @@ export default function ApplicantDashboardPage() {
             </article>
           </section>
 
-          <section className="applicant-dashboard-checklist">
-            <h2>Senarai semak profil</h2>
-            <div>
-              {checklist.map((item) => (
-                <span className={item.done ? "complete" : ""} key={item.label}>
-                  <Icon>{item.done ? "check_circle" : "radio_button_unchecked"}</Icon>
-                  {item.label}
-                </span>
-              ))}
-            </div>
-          </section>
         </main>
       </div>
     </div>
