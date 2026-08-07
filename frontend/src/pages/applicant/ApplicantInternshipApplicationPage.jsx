@@ -334,7 +334,7 @@ export default function ApplicantInternshipApplicationPage() {
         </select>
       </label>
       <label>Negara<select value={studentInfo[`${prefix}Country`]} onChange={updateStudentInfo(`${prefix}Country`)}><option value="">Sila pilih</option>{selectOptions.addressCountry.map((option) => <option key={option}>{option}</option>)}</select></label>
-      <label>No. Telefon<input value={studentInfo[`${prefix}Phone`]} onChange={updateStudentInfo(`${prefix}Phone`)} /></label>
+      <label>No. Telefon<input inputMode="numeric" pattern="[0-9]*" value={studentInfo[`${prefix}Phone`]} onChange={updateNumericStudentInfo(`${prefix}Phone`)} /></label>
     </div>
   );
 
@@ -419,7 +419,7 @@ export default function ApplicantInternshipApplicationPage() {
                         <label>Tarikh Lahir<input type="date" value={studentInfo.dateOfBirth} onChange={updateStudentInfo("dateOfBirth")} /></label>
                         <label>Tajaan<select value={studentInfo.sponsorship} onChange={updateStudentInfo("sponsorship")}><option value="">Sila pilih</option>{selectOptions.sponsorship.map((option) => <option key={option}>{option}</option>)}</select></label>
                         <label>Kelayakan Kemasukan<select value={studentInfo.qualification} onChange={updateStudentInfo("qualification")}><option value="">Sila pilih</option>{selectOptions.qualification.map((option) => <option key={option}>{option}</option>)}</select></label>
-                        <label>No. Telefon<input value={studentInfo.phone} onChange={updateStudentInfo("phone")} /></label>
+                        <label>No. Telefon<input inputMode="numeric" pattern="[0-9]*" value={studentInfo.phone} onChange={updateNumericStudentInfo("phone")} /></label>
                         <label className="wide">Alamat E-mel<input type="email" value={studentInfo.email} onChange={updateStudentInfo("email")} /></label>
                       </div>
 
