@@ -29,6 +29,22 @@ const infoTabs = [
 ];
 
 const selectOptions = {
+  addressCountry: ["Malaysia", "Brunei", "Indonesia", "Singapura", "Lain-lain"],
+  district: [
+    "Bahagian Kuching",
+    "Bahagian Samarahan",
+    "Bahagian Serian",
+    "Bahagian Sri Aman",
+    "Bahagian Betong",
+    "Bahagian Sarikei",
+    "Bahagian Sibu",
+    "Bahagian Kapit",
+    "Bahagian Mukah",
+    "Bahagian Bintulu",
+    "Bahagian Miri",
+    "Bahagian Limbang",
+    "Lain-lain",
+  ],
   citizenship: ["Warganegara", "Bukan Warganegara"],
   citizenshipCountry: ["Malaysia", "Brunei", "Indonesia", "Lain-lain"],
   ethnicity: ["Melanau", "Melayu", "Iban", "Bidayuh", "Cina", "Lain-lain"],
@@ -79,6 +95,23 @@ const selectOptions = {
 const maritalStatusOptions = ["Tidak Dinyatakan", "Bujang", "Duda", "Janda", "Berkahwin"];
 
 const valueAliases = {
+  address1Country: { MALAYSIA: "Malaysia", BRUNEI: "Brunei", INDONESIA: "Indonesia", SINGAPORE: "Singapura", SINGAPURA: "Singapura", "LAIN-LAIN": "Lain-lain" },
+  address1District: {
+    "BAHAGIAN KUCHING": "Bahagian Kuching",
+    "BAHAGIAN SAMARAHAN": "Bahagian Samarahan",
+    "BAHAGIAN SERIAN": "Bahagian Serian",
+    "BAHAGIAN SRI AMAN": "Bahagian Sri Aman",
+    "BAHAGIAN BETONG": "Bahagian Betong",
+    "BAHAGIAN SARIKEI": "Bahagian Sarikei",
+    "BAHAGIAN SIBU": "Bahagian Sibu",
+    "BAHAGIAN KAPIT": "Bahagian Kapit",
+    "BAHAGIAN MUKAH": "Bahagian Mukah",
+    "BAHAGIAN BINTULU": "Bahagian Bintulu",
+    "BAHAGIAN MIRI": "Bahagian Miri",
+    "BAHAGIAN LIMBANG": "Bahagian Limbang",
+    "LAIN-LAIN": "Lain-lain",
+  },
+  address1State: { SARAWAK: "Sarawak", SABAH: "Sabah", JOHOR: "Johor", KEDAH: "Kedah", KELANTAN: "Kelantan", MELAKA: "Melaka", "NEGERI SEMBILAN": "Negeri Sembilan", PAHANG: "Pahang", PERAK: "Perak", PERLIS: "Perlis", "PULAU PINANG": "Pulau Pinang", SELANGOR: "Selangor", TERENGGANU: "Terengganu", "WP KUALA LUMPUR": "WP Kuala Lumpur" },
   citizenship: { WARGANEGARA: "Warganegara", "BUKAN WARGANEGARA": "Bukan Warganegara" },
   citizenshipCountry: { MALAYSIA: "Malaysia", BRUNEI: "Brunei", INDONESIA: "Indonesia", "LAIN-LAIN": "Lain-lain" },
   ethnicity: { MELANAU: "Melanau", MELAYU: "Melayu", IBAN: "Iban", BIDAYUH: "Bidayuh", CINA: "Cina", "LAIN-LAIN": "Lain-lain" },
@@ -93,6 +126,15 @@ const valueAliases = {
 };
 
 const getDefaultStudentInfo = () => ({
+  address1City: "",
+  address1Country: "",
+  address1District: "",
+  address1Line1: "",
+  address1Line2: "",
+  address1Line3: "",
+  address1Phone: "",
+  address1Postcode: "",
+  address1State: "",
   citizenship: "",
   citizenshipCountry: "",
   dateOfBirth: "",
@@ -149,6 +191,7 @@ export default function ApplicantInternshipApplicationPage() {
   const user = getStoredUser();
   const savedDraft = loadStudentInfoDraft(user);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activeInfoTab, setActiveInfoTab] = useState("Maklumat Peribadi");
   const [notice, setNotice] = useState("");
   const [passportPhoto, setPassportPhoto] = useState(() => savedDraft?.passportPhoto || null);
   const passportPhotoInputRef = useRef(null);
@@ -215,7 +258,16 @@ export default function ApplicantInternshipApplicationPage() {
 
   const handleUpdate = (event) => {
     event.preventDefault();
-    setNotice("Maklumat asas pelajar telah dikemas kini untuk draf permohonan latihan industri.");
+    setNotice(`${activeInfoTab} telah dikemas kini untuk draf permohonan latihan industri.`);
+  };
+
+  const openInfoTab = (tab) => {
+    if (!["Maklumat Peribadi", "Alamat 1"].includes(tab)) {
+      return;
+    }
+
+    setNotice("");
+    setActiveInfoTab(tab);
   };
 
   return (
@@ -242,83 +294,104 @@ export default function ApplicantInternshipApplicationPage() {
               <div className="student-info-content">
                 <nav className="student-info-tabs" aria-label="Bahagian maklumat pelajar">
                   {infoTabs.map((tab, index) => (
-                    <button className={index === 0 ? "active" : ""} key={tab} type="button">{tab}</button>
+                    <button
+                      className={activeInfoTab === tab ? "active" : ""}
+                      key={tab}
+                      type="button"
+                      onClick={() => openInfoTab(tab)}
+                    >
+                      {tab}
+                    </button>
                   ))}
                 </nav>
 
                 <form className="student-info-form" onSubmit={handleUpdate}>
-                  <h2>Maklumat Peribadi</h2>
+                  <h2>{activeInfoTab === "Alamat 1" ? "Alamat Tetap" : "Maklumat Peribadi"}</h2>
                   {notice ? <p className="student-info-notice">{notice}</p> : null}
 
-                  <div className="student-info-layout">
-                    <div className="student-info-fields">
-                      <label className="wide">Nama<input value={studentInfo.name} onChange={updateStudentInfo("name")} /></label>
-                      <label>No. Kad Pengenalan<input value={studentInfo.icNo} onChange={updateStudentInfo("icNo")} /></label>
-                      <label className="student-plain-select-label">Jantina
-                        <select value={studentInfo.gender} onChange={updateStudentInfo("gender")}>
-                          <option value="">Pilih jantina</option>
-                          {selectOptions.gender.map((option) => <option key={option}>{option}</option>)}
-                        </select>
-                      </label>
-                      <label className="student-plain-select-label">Etnik
-                        <select value={studentInfo.ethnicity} onChange={updateStudentInfo("ethnicity")}>
-                          <option value="">Pilih etnik</option>
-                          {selectOptions.ethnicity.map((option) => <option key={option}>{option}</option>)}
-                        </select>
-                      </label>
-                      <label className="student-plain-select-label">Status Bumiputera
-                        <select value={studentInfo.nativeStatus} onChange={updateStudentInfo("nativeStatus")}>
-                          <option value="">Pilih status</option>
-                          {selectOptions.nativeStatus.map((option) => <option key={option}>{option}</option>)}
-                        </select>
-                      </label>
-                      <label>Status Kewarganegaraan Malaysia<select value={studentInfo.citizenship} onChange={updateStudentInfo("citizenship")}>{selectOptions.citizenship.map((option) => <option key={option}>{option}</option>)}</select></label>
-                      <label>Negara Kewarganegaraan<select value={studentInfo.citizenshipCountry} onChange={updateStudentInfo("citizenshipCountry")}>{selectOptions.citizenshipCountry.map((option) => <option key={option}>{option}</option>)}</select></label>
-                      <label>Agama<select value={studentInfo.religion} onChange={updateStudentInfo("religion")}><option value="">Pilih agama</option>{selectOptions.religion.map((option) => <option key={option}>{option}</option>)}</select></label>
-                      <label>Status Perkahwinan
-                        <select value={studentInfo.maritalStatus} onChange={updateStudentInfo("maritalStatus")}>
-                          <option value="">Pilih status perkahwinan</option>
-                          {maritalStatusOptions.map((option) => <option key={option}>{option}</option>)}
-                        </select>
-                      </label>
-                      <label>Negeri Kelahiran<select value={studentInfo.stateOfBirth} onChange={updateStudentInfo("stateOfBirth")}>{selectOptions.state.map((option) => <option key={option}>{option}</option>)}</select></label>
-                      <label>Negeri Kediaman<select value={studentInfo.residenceState} onChange={updateStudentInfo("residenceState")}>{selectOptions.state.map((option) => <option key={option}>{option}</option>)}</select></label>
-                      <label>Tarikh Lahir<input type="date" value={studentInfo.dateOfBirth} onChange={updateStudentInfo("dateOfBirth")} /></label>
-                      <label>Tajaan<select value={studentInfo.sponsorship} onChange={updateStudentInfo("sponsorship")}><option value="">Pilih tajaan</option>{selectOptions.sponsorship.map((option) => <option key={option}>{option}</option>)}</select></label>
-                      <label>Kelayakan Kemasukan<select value={studentInfo.qualification} onChange={updateStudentInfo("qualification")}><option value="">Pilih kelayakan</option>{selectOptions.qualification.map((option) => <option key={option}>{option}</option>)}</select></label>
-                      <label>No. Telefon<input value={studentInfo.phone} onChange={updateStudentInfo("phone")} /></label>
-                      <label className="wide">Alamat E-mel<input type="email" value={studentInfo.email} onChange={updateStudentInfo("email")} /></label>
+                  {activeInfoTab === "Alamat 1" ? (
+                    <div className="student-info-fields student-address-fields">
+                      <label>Alamat 1<input value={studentInfo.address1Line1} onChange={updateStudentInfo("address1Line1")} /></label>
+                      <label>Alamat 2<input value={studentInfo.address1Line2} onChange={updateStudentInfo("address1Line2")} /></label>
+                      <label>Alamat 3<input value={studentInfo.address1Line3} onChange={updateStudentInfo("address1Line3")} /></label>
+                      <label>Poskod<input value={studentInfo.address1Postcode} onChange={updateStudentInfo("address1Postcode")} /></label>
+                      <label className="wide">Bandar<input value={studentInfo.address1City} onChange={updateStudentInfo("address1City")} /></label>
+                      <label>Negeri<select value={studentInfo.address1State} onChange={updateStudentInfo("address1State")}><option value="">Pilih negeri</option>{selectOptions.state.map((option) => <option key={option}>{option}</option>)}</select></label>
+                      <label>Daerah<select value={studentInfo.address1District} onChange={updateStudentInfo("address1District")}><option value="">Pilih daerah</option>{selectOptions.district.map((option) => <option key={option}>{option}</option>)}</select></label>
+                      <label>Negara<select value={studentInfo.address1Country} onChange={updateStudentInfo("address1Country")}><option value="">Pilih negara</option>{selectOptions.addressCountry.map((option) => <option key={option}>{option}</option>)}</select></label>
+                      <label>No. Telefon<input value={studentInfo.address1Phone} onChange={updateStudentInfo("address1Phone")} /></label>
                     </div>
+                  ) : (
+                    <div className="student-info-layout">
+                      <div className="student-info-fields">
+                        <label className="wide">Nama<input value={studentInfo.name} onChange={updateStudentInfo("name")} /></label>
+                        <label>No. Kad Pengenalan<input value={studentInfo.icNo} onChange={updateStudentInfo("icNo")} /></label>
+                        <label className="student-plain-select-label">Jantina
+                          <select value={studentInfo.gender} onChange={updateStudentInfo("gender")}>
+                            <option value="">Pilih jantina</option>
+                            {selectOptions.gender.map((option) => <option key={option}>{option}</option>)}
+                          </select>
+                        </label>
+                        <label className="student-plain-select-label">Etnik
+                          <select value={studentInfo.ethnicity} onChange={updateStudentInfo("ethnicity")}>
+                            <option value="">Pilih etnik</option>
+                            {selectOptions.ethnicity.map((option) => <option key={option}>{option}</option>)}
+                          </select>
+                        </label>
+                        <label className="student-plain-select-label">Status Bumiputera
+                          <select value={studentInfo.nativeStatus} onChange={updateStudentInfo("nativeStatus")}>
+                            <option value="">Pilih status</option>
+                            {selectOptions.nativeStatus.map((option) => <option key={option}>{option}</option>)}
+                          </select>
+                        </label>
+                        <label>Status Kewarganegaraan Malaysia<select value={studentInfo.citizenship} onChange={updateStudentInfo("citizenship")}>{selectOptions.citizenship.map((option) => <option key={option}>{option}</option>)}</select></label>
+                        <label>Negara Kewarganegaraan<select value={studentInfo.citizenshipCountry} onChange={updateStudentInfo("citizenshipCountry")}>{selectOptions.citizenshipCountry.map((option) => <option key={option}>{option}</option>)}</select></label>
+                        <label>Agama<select value={studentInfo.religion} onChange={updateStudentInfo("religion")}><option value="">Pilih agama</option>{selectOptions.religion.map((option) => <option key={option}>{option}</option>)}</select></label>
+                        <label>Status Perkahwinan
+                          <select value={studentInfo.maritalStatus} onChange={updateStudentInfo("maritalStatus")}>
+                            <option value="">Pilih status perkahwinan</option>
+                            {maritalStatusOptions.map((option) => <option key={option}>{option}</option>)}
+                          </select>
+                        </label>
+                        <label>Negeri Kelahiran<select value={studentInfo.stateOfBirth} onChange={updateStudentInfo("stateOfBirth")}>{selectOptions.state.map((option) => <option key={option}>{option}</option>)}</select></label>
+                        <label>Negeri Kediaman<select value={studentInfo.residenceState} onChange={updateStudentInfo("residenceState")}>{selectOptions.state.map((option) => <option key={option}>{option}</option>)}</select></label>
+                        <label>Tarikh Lahir<input type="date" value={studentInfo.dateOfBirth} onChange={updateStudentInfo("dateOfBirth")} /></label>
+                        <label>Tajaan<select value={studentInfo.sponsorship} onChange={updateStudentInfo("sponsorship")}><option value="">Pilih tajaan</option>{selectOptions.sponsorship.map((option) => <option key={option}>{option}</option>)}</select></label>
+                        <label>Kelayakan Kemasukan<select value={studentInfo.qualification} onChange={updateStudentInfo("qualification")}><option value="">Pilih kelayakan</option>{selectOptions.qualification.map((option) => <option key={option}>{option}</option>)}</select></label>
+                        <label>No. Telefon<input value={studentInfo.phone} onChange={updateStudentInfo("phone")} /></label>
+                        <label className="wide">Alamat E-mel<input type="email" value={studentInfo.email} onChange={updateStudentInfo("email")} /></label>
+                      </div>
 
-                    <aside className="student-info-photo-card">
-                      <div className="student-passport-upload">
-                        {passportPhoto?.previewUrl ? (
-                          <img src={passportPhoto.previewUrl} alt="Gambar pasport pelajar" />
-                        ) : (
-                          <span>
+                      <aside className="student-info-photo-card">
+                        <div className="student-passport-upload">
+                          {passportPhoto?.previewUrl ? (
+                            <img src={passportPhoto.previewUrl} alt="Gambar pasport pelajar" />
+                          ) : (
+                            <span>
+                              <Icon>upload_file</Icon>
+                              <b>Muat naik gambar pasport</b>
+                              <small>3.5 cm x 5.0 cm</small>
+                            </span>
+                          )}
+                        </div>
+                        <input className="student-passport-input" ref={passportPhotoInputRef} accept=".jpg" type="file" onChange={updatePassportPhoto} />
+                        <div className="student-passport-actions">
+                          <button type="button" onClick={openPassportPhotoPicker}>
                             <Icon>upload_file</Icon>
-                            <b>Muat naik gambar pasport</b>
-                            <small>3.5 cm x 5.0 cm</small>
-                          </span>
-                        )}
-                      </div>
-                      <input className="student-passport-input" ref={passportPhotoInputRef} accept=".jpg" type="file" onChange={updatePassportPhoto} />
-                      <div className="student-passport-actions">
-                        <button type="button" onClick={openPassportPhotoPicker}>
-                          <Icon>upload_file</Icon>
-                          Muat Naik
-                        </button>
-                        <button disabled={!passportPhoto} type="button" onClick={deletePassportPhoto}>
-                          <Icon>delete</Icon>
-                          Padam
-                        </button>
-                      </div>
-                      <p>
-                        <strong>Nota</strong>
-                        <span>Sila pastikan gambar yang dimuatnaik adalah dalam format .jpg</span>
-                      </p>
-                    </aside>
-                  </div>
+                            Muat Naik
+                          </button>
+                          <button disabled={!passportPhoto} type="button" onClick={deletePassportPhoto}>
+                            <Icon>delete</Icon>
+                            Padam
+                          </button>
+                        </div>
+                        <p>
+                          <strong>Nota</strong>
+                          <span>Sila pastikan gambar yang dimuatnaik adalah dalam format .jpg</span>
+                        </p>
+                      </aside>
+                    </div>
+                  )}
 
                   <button className="student-info-update" type="submit">Kemas Kini</button>
                 </form>

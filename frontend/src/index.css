@@ -5648,6 +5648,18 @@ body:has(.applicant-profile-page) {
   max-width: 595px;
 }
 
+.student-address-fields {
+  max-width: 560px;
+}
+
+.student-address-fields label {
+  max-width: 290px;
+}
+
+.student-address-fields label.wide {
+  max-width: 430px;
+}
+
 .student-info-note {
   max-width: 595px;
 }
