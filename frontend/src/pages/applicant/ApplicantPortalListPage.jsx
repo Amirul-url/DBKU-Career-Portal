@@ -151,10 +151,10 @@ function ApplicationList({ applications, loading }) {
             </select>
           </label>
           <label>
-            <span>Susun tarikh</span>
+            <span>Turutan</span>
             <select value={sortOrder} onChange={(event) => setSortOrder(event.target.value)}>
-              <option value="desc">Menurun</option>
-              <option value="asc">Menaik</option>
+              <option value="desc">Permohonan baru</option>
+              <option value="asc">Permohonan lama</option>
             </select>
           </label>
         </div>

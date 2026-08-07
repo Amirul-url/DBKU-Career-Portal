@@ -4992,7 +4992,7 @@ body:has(.applicant-profile-page) {
   justify-content: space-between;
   gap: 18px;
   border-bottom: 1px solid #d8eee2;
-  padding: 22px 24px 18px;
+  padding: 18px 22px 16px;
 }
 
 .applicant-table-toolbar h2,
@@ -5002,13 +5002,15 @@ body:has(.applicant-profile-page) {
 
 .applicant-table-toolbar h2 {
   color: var(--profile-ink);
-  font-size: 22px;
+  font-size: 18px;
+  font-weight: 700;
 }
 
 .applicant-table-toolbar p {
-  margin-top: 5px;
+  margin-top: 4px;
   color: #52615a;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .applicant-table-controls {
@@ -5023,8 +5025,8 @@ body:has(.applicant-profile-page) {
   gap: 6px;
   min-width: 180px;
   color: #52615a;
-  font-size: 12px;
-  font-weight: 900;
+  font-size: 11px;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
@@ -5036,8 +5038,8 @@ body:has(.applicant-profile-page) {
   padding: 0 12px;
   color: var(--profile-ink);
   font: inherit;
-  font-size: 14px;
-  font-weight: 800;
+  font-size: 13px;
+  font-weight: 600;
   text-transform: none;
 }
 
@@ -5054,7 +5056,7 @@ body:has(.applicant-profile-page) {
 .applicant-applications-table th,
 .applicant-applications-table td {
   border-bottom: 1px solid #d8eee2;
-  padding: 16px 18px;
+  padding: 14px 18px;
   text-align: left;
   vertical-align: middle;
 }
@@ -5062,20 +5064,22 @@ body:has(.applicant-profile-page) {
 .applicant-applications-table th {
   background: #f8fafc;
   color: #52615a;
-  font-size: 12px;
-  font-weight: 900;
+  font-size: 11px;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
 .applicant-applications-table td {
   color: var(--profile-ink);
-  font-weight: 800;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .applicant-applications-table td strong {
   display: block;
   color: var(--profile-ink);
-  font-size: 15px;
+  font-size: 14px;
+  font-weight: 700;
   line-height: 1.35;
 }
 
@@ -5093,7 +5097,7 @@ body:has(.applicant-profile-page) {
   padding: 0 13px;
   color: #ffffff;
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 700;
   white-space: nowrap;
 }
 
@@ -5112,9 +5116,10 @@ body:has(.applicant-profile-page) {
   justify-content: space-between;
   gap: 14px;
   border-top: 1px solid #d8eee2;
-  padding: 16px 24px;
+  padding: 14px 22px;
   color: #52615a;
-  font-weight: 800;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .applicant-table-pagination div {
@@ -5133,8 +5138,8 @@ body:has(.applicant-profile-page) {
   background: #ffffff;
   color: var(--profile-green);
   font: inherit;
-  font-size: 18px;
-  font-weight: 900;
+  font-size: 17px;
+  font-weight: 700;
 }
 
 .applicant-table-pagination button:not(:disabled) {
