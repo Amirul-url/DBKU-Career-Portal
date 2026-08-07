@@ -46,37 +46,70 @@ const selectOptions = {
   qualification: ["STPM", "MATRICULATION", "DIPLOMA", "FOUNDATION", "DEGREE"],
 };
 
+const getDefaultStudentInfo = (user) => ({
+  citizenship: "WARGANEGARA",
+  citizenshipCountry: "MALAYSIA",
+  dateOfBirth: "",
+  email: user?.email || "",
+  ethnicity: "",
+  gender: "",
+  got: "No",
+  householdIncome: "",
+  icNo: "",
+  maritalStatus: "SINGLE",
+  matricNo: "",
+  name: user?.full_name || user?.first_name || "",
+  nativeStatus: "",
+  phone: user?.mobile_number || "",
+  religion: "",
+  residenceState: "SARAWAK",
+  schoolType: "",
+  sponsorship: "",
+  stateOfBirth: "SARAWAK",
+  statusB40: "No",
+  umsEmail: "",
+  qualification: "",
+});
+
+const getDraftStorageKey = (user) => `dbku_internship_student_info_${user?.id || user?.email || "guest"}`;
+
+function loadStudentInfoDraft(user) {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const saved = window.localStorage.getItem(getDraftStorageKey(user));
+    return saved ? JSON.parse(saved) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveStudentInfoDraft(user, payload) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(getDraftStorageKey(user), JSON.stringify(payload));
+  } catch {
+    // Browser storage may be unavailable or full; keep the current in-memory state.
+  }
+}
+
 export default function ApplicantInternshipApplicationPage() {
   const navigate = useNavigate();
   const user = getStoredUser();
+  const savedDraft = loadStudentInfoDraft(user);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [notice, setNotice] = useState("");
-  const [passportPhoto, setPassportPhoto] = useState(null);
+  const [passportPhoto, setPassportPhoto] = useState(() => savedDraft?.passportPhoto || null);
   const passportPhotoInputRef = useRef(null);
-  const [studentInfo, setStudentInfo] = useState({
-    citizenship: "WARGANEGARA",
-    citizenshipCountry: "MALAYSIA",
-    dateOfBirth: "",
-    email: user?.email || "",
-    ethnicity: "",
-    gender: "",
-    got: "No",
-    householdIncome: "",
-    icNo: "",
-    maritalStatus: "SINGLE",
-    matricNo: "",
-    name: user?.full_name || user?.first_name || "",
-    nativeStatus: "",
-    phone: user?.mobile_number || "",
-    religion: "",
-    residenceState: "SARAWAK",
-    schoolType: "",
-    sponsorship: "",
-    stateOfBirth: "SARAWAK",
-    statusB40: "No",
-    umsEmail: "",
-    qualification: "",
-  });
+  const [studentInfo, setStudentInfo] = useState(() => ({
+    ...getDefaultStudentInfo(user),
+    ...(savedDraft?.studentInfo || {}),
+  }));
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
   const email = user?.email || "Belum dikemaskini";
 
@@ -88,11 +121,15 @@ export default function ApplicantInternshipApplicationPage() {
     }
   }, [navigate, user]);
 
-  useEffect(() => () => {
-    if (passportPhoto?.previewUrl) {
-      URL.revokeObjectURL(passportPhoto.previewUrl);
+  useEffect(() => {
+    if (user?.role === "applicant") {
+      saveStudentInfoDraft(user, {
+        passportPhoto,
+        savedAt: new Date().toISOString(),
+        studentInfo,
+      });
     }
-  }, [passportPhoto]);
+  }, [passportPhoto, studentInfo, user]);
 
   if (!user || user.role !== "applicant") {
     return null;
@@ -110,13 +147,11 @@ export default function ApplicantInternshipApplicationPage() {
     }
 
     setNotice("");
-    setPassportPhoto((current) => {
-      if (current?.previewUrl) {
-        URL.revokeObjectURL(current.previewUrl);
-      }
-
-      return { name: file.name, previewUrl: URL.createObjectURL(file) };
-    });
+    const reader = new FileReader();
+    reader.onload = () => {
+      setPassportPhoto({ name: file.name, previewUrl: String(reader.result || "") });
+    };
+    reader.readAsDataURL(file);
   };
 
   const openPassportPhotoPicker = () => {
@@ -125,13 +160,7 @@ export default function ApplicantInternshipApplicationPage() {
 
   const deletePassportPhoto = () => {
     setNotice("");
-    setPassportPhoto((current) => {
-      if (current?.previewUrl) {
-        URL.revokeObjectURL(current.previewUrl);
-      }
-
-      return null;
-    });
+    setPassportPhoto(null);
 
     if (passportPhotoInputRef.current) {
       passportPhotoInputRef.current.value = "";
