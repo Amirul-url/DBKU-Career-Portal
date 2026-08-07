@@ -114,13 +114,16 @@ function saveStudentInfoDraft(user, payload) {
 
 function SearchableSelect({ label, onChange, options, placeholder, value }) {
   const [isOpen, setIsOpen] = useState(false);
-  const typedValue = String(value || "").trim();
+  const [search, setSearch] = useState("");
+  const typedValue = search.trim();
   const normalizedSearch = typedValue.toLowerCase();
   const filteredOptions = options.filter((option) => option.toLowerCase().includes(normalizedSearch));
+  const hasExactMatch = options.some((option) => option.toLowerCase() === normalizedSearch);
 
   const commitValue = (nextValue) => {
     onChange(nextValue);
     setIsOpen(false);
+    setSearch("");
   };
 
   return (
@@ -130,36 +133,42 @@ function SearchableSelect({ label, onChange, options, placeholder, value }) {
         onBlur={(event) => {
           if (!event.currentTarget.contains(event.relatedTarget)) {
             setIsOpen(false);
+            setSearch("");
           }
         }}
       >
-        <div className="student-search-select-control">
-          <input
-            placeholder={placeholder}
-            type="text"
-            value={value}
-            onChange={(event) => {
-              onChange(event.target.value);
-              setIsOpen(true);
-            }}
-            onFocus={() => setIsOpen(true)}
-            onKeyDown={(event) => {
-              if (event.key === "Escape") {
-                setIsOpen(false);
-              }
-            }}
-          />
-          <button
-            aria-label={`Buka cadangan ${label}`}
-            type="button"
-            onClick={() => setIsOpen((current) => !current)}
-          >
-            <Icon>expand_more</Icon>
-          </button>
-        </div>
+        <button
+          className={`student-search-select-trigger ${value ? "" : "placeholder"}`}
+          type="button"
+          onClick={() => {
+            setIsOpen((current) => !current);
+            setSearch("");
+          }}
+        >
+          <span>{value || placeholder}</span>
+          <Icon>expand_more</Icon>
+        </button>
         {isOpen ? (
           <div className="student-search-select-menu">
-            <p className="student-search-select-hint">Taip nilai lain jika tiada dalam senarai.</p>
+            <div className="student-search-select-search">
+              <input
+                autoFocus
+                placeholder={`Cari ${label.toLowerCase()}`}
+                type="search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && typedValue) {
+                    event.preventDefault();
+                    commitValue(typedValue);
+                  } else if (event.key === "Escape") {
+                    setIsOpen(false);
+                    setSearch("");
+                  }
+                }}
+              />
+              <Icon>search</Icon>
+            </div>
             <div className="student-search-select-options">
               {filteredOptions.map((option) => (
                 <button
@@ -172,8 +181,17 @@ function SearchableSelect({ label, onChange, options, placeholder, value }) {
                   {option}
                 </button>
               ))}
+              {typedValue && !hasExactMatch ? (
+                <button
+                  className="custom-option"
+                  type="button"
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => commitValue(typedValue)}
+                >
+                  Guna "{typedValue}"
+                </button>
+              ) : null}
               {!filteredOptions.length && !typedValue ? <p>Tiada pilihan ditemui</p> : null}
-              {!filteredOptions.length && typedValue ? <p>Nilai "{typedValue}" akan disimpan.</p> : null}
             </div>
           </div>
         ) : null}
