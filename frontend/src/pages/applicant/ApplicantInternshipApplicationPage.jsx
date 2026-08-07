@@ -315,6 +315,10 @@ export default function ApplicantInternshipApplicationPage() {
     setActiveInfoTab(tab);
   };
 
+  const goToNextInfoTab = () => {
+    openInfoTab("Alamat 1");
+  };
+
   const renderAddressFields = (prefix) => (
     <div className="student-info-fields student-address-fields">
       <label>Alamat 1<input value={studentInfo[`${prefix}Line1`]} onChange={updateStudentInfo(`${prefix}Line1`)} /></label>
@@ -454,7 +458,15 @@ export default function ApplicantInternshipApplicationPage() {
                     </div>
                   )}
 
-                  <button className="student-info-update" type="submit">Kemas Kini</button>
+                  <div className="student-info-actions">
+                    <button className="student-info-update" type="submit">Kemas Kini</button>
+                    {activeInfoTab === "Maklumat Peribadi" ? (
+                      <button className="student-info-next" type="button" onClick={goToNextInfoTab}>
+                        Seterusnya
+                        <Icon>arrow_forward</Icon>
+                      </button>
+                    ) : null}
+                  </div>
                 </form>
               </div>
             </div>

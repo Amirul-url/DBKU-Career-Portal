@@ -5928,21 +5928,49 @@ body:has(.applicant-profile-page) {
   min-width: 0;
 }
 
-.student-info-update {
-  min-height: 36px;
+.student-info-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
   margin-top: 18px;
-  border: 0;
+}
+
+.student-info-update,
+.student-info-next {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid transparent;
   border-radius: 6px;
-  background: var(--student-green);
-  color: #ffffff;
   padding: 0 18px;
   font: inherit;
   font-size: 13px;
   font-weight: 850;
 }
 
+.student-info-update {
+  background: var(--student-green);
+  color: #ffffff;
+}
+
 .student-info-update:hover {
   background: #12843d;
+}
+
+.student-info-next {
+  border-color: #bbf7d0;
+  background: #ffffff;
+  color: var(--student-green);
+}
+
+.student-info-next:hover {
+  background: #f0fdf4;
+}
+
+.student-info-next .material-symbols-outlined {
+  font-size: 17px;
 }
 
 @media (max-width: 1100px) {
