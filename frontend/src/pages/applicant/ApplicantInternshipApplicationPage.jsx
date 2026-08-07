@@ -269,6 +269,11 @@ export default function ApplicantInternshipApplicationPage() {
     setStudentInfo((current) => ({ ...current, [field]: event.target.value }));
   };
 
+  const updateNumericStudentInfo = (field) => (event) => {
+    setNotice("");
+    setStudentInfo((current) => ({ ...current, [field]: event.target.value.replace(/\D/g, "") }));
+  };
+
   const updatePassportPhoto = (event) => {
     const file = event.target.files?.[0];
     if (!file) {
@@ -381,7 +386,7 @@ export default function ApplicantInternshipApplicationPage() {
                     <div className="student-info-layout">
                       <div className="student-info-fields">
                         <label className="wide">Nama<input value={studentInfo.name} onChange={updateStudentInfo("name")} /></label>
-                        <label>No. Kad Pengenalan<input value={studentInfo.icNo} onChange={updateStudentInfo("icNo")} /></label>
+                        <label>No. Kad Pengenalan<input inputMode="numeric" pattern="[0-9]*" value={studentInfo.icNo} onChange={updateNumericStudentInfo("icNo")} /></label>
                         <label className="student-plain-select-label">Jantina
                           <select value={studentInfo.gender} onChange={updateStudentInfo("gender")}>
                             <option value="">Pilih jantina</option>
