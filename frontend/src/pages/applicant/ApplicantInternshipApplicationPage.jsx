@@ -322,10 +322,10 @@ export default function ApplicantInternshipApplicationPage() {
       <label>Alamat 3<input value={studentInfo[`${prefix}Line3`]} onChange={updateStudentInfo(`${prefix}Line3`)} /></label>
       <label>Poskod<input value={studentInfo[`${prefix}Postcode`]} onChange={updateStudentInfo(`${prefix}Postcode`)} /></label>
       <label className="wide">Bandar<input value={studentInfo[`${prefix}City`]} onChange={updateStudentInfo(`${prefix}City`)} /></label>
-      <label>Negeri<select value={studentInfo[`${prefix}State`]} onChange={updateStudentInfo(`${prefix}State`)}><option value="">Pilih negeri</option>{selectOptions.state.map((option) => <option key={option}>{option}</option>)}</select></label>
+      <label>Negeri<select value={studentInfo[`${prefix}State`]} onChange={updateStudentInfo(`${prefix}State`)}><option value="">Sila pilih</option>{selectOptions.state.map((option) => <option key={option}>{option}</option>)}</select></label>
       <label>Daerah
         <select value={studentInfo[`${prefix}District`]} onChange={updateStudentInfo(`${prefix}District`)}>
-          <option value="">Pilih daerah</option>
+          <option value="">Sila pilih</option>
           {Object.entries(selectOptions.districtGroups).map(([state, districts]) => (
             <optgroup key={state} label={state}>
               {districts.map((option) => <option key={`${state}-${option}`} value={option}>{option}</option>)}
@@ -333,7 +333,7 @@ export default function ApplicantInternshipApplicationPage() {
           ))}
         </select>
       </label>
-      <label>Negara<select value={studentInfo[`${prefix}Country`]} onChange={updateStudentInfo(`${prefix}Country`)}><option value="">Pilih negara</option>{selectOptions.addressCountry.map((option) => <option key={option}>{option}</option>)}</select></label>
+      <label>Negara<select value={studentInfo[`${prefix}Country`]} onChange={updateStudentInfo(`${prefix}Country`)}><option value="">Sila pilih</option>{selectOptions.addressCountry.map((option) => <option key={option}>{option}</option>)}</select></label>
       <label>No. Telefon<input value={studentInfo[`${prefix}Phone`]} onChange={updateStudentInfo(`${prefix}Phone`)} /></label>
     </div>
   );
@@ -389,36 +389,36 @@ export default function ApplicantInternshipApplicationPage() {
                         <label>No. Kad Pengenalan<input inputMode="numeric" pattern="[0-9]*" value={studentInfo.icNo} onChange={updateNumericStudentInfo("icNo")} /></label>
                         <label className="student-plain-select-label">Jantina
                           <select value={studentInfo.gender} onChange={updateStudentInfo("gender")}>
-                            <option value="">Pilih jantina</option>
+                            <option value="">Sila pilih</option>
                             {selectOptions.gender.map((option) => <option key={option}>{option}</option>)}
                           </select>
                         </label>
                         <label className="student-plain-select-label">Etnik
                           <select value={studentInfo.ethnicity} onChange={updateStudentInfo("ethnicity")}>
-                            <option value="">Pilih etnik</option>
+                            <option value="">Sila pilih</option>
                             {selectOptions.ethnicity.map((option) => <option key={option}>{option}</option>)}
                           </select>
                         </label>
                         <label className="student-plain-select-label">Status Bumiputera
                           <select value={studentInfo.nativeStatus} onChange={updateStudentInfo("nativeStatus")}>
-                            <option value="">Pilih status</option>
+                            <option value="">Sila pilih</option>
                             {selectOptions.nativeStatus.map((option) => <option key={option}>{option}</option>)}
                           </select>
                         </label>
-                        <label>Status Kewarganegaraan Malaysia<select value={studentInfo.citizenship} onChange={updateStudentInfo("citizenship")}>{selectOptions.citizenship.map((option) => <option key={option}>{option}</option>)}</select></label>
-                        <label>Negara Kewarganegaraan<select value={studentInfo.citizenshipCountry} onChange={updateStudentInfo("citizenshipCountry")}>{selectOptions.citizenshipCountry.map((option) => <option key={option}>{option}</option>)}</select></label>
-                        <label>Agama<select value={studentInfo.religion} onChange={updateStudentInfo("religion")}><option value="">Pilih agama</option>{selectOptions.religion.map((option) => <option key={option}>{option}</option>)}</select></label>
+                        <label>Status Kewarganegaraan Malaysia<select value={studentInfo.citizenship} onChange={updateStudentInfo("citizenship")}><option value="">Sila pilih</option>{selectOptions.citizenship.map((option) => <option key={option}>{option}</option>)}</select></label>
+                        <label>Negara Kewarganegaraan<select value={studentInfo.citizenshipCountry} onChange={updateStudentInfo("citizenshipCountry")}><option value="">Sila pilih</option>{selectOptions.citizenshipCountry.map((option) => <option key={option}>{option}</option>)}</select></label>
+                        <label>Agama<select value={studentInfo.religion} onChange={updateStudentInfo("religion")}><option value="">Sila pilih</option>{selectOptions.religion.map((option) => <option key={option}>{option}</option>)}</select></label>
                         <label>Status Perkahwinan
                           <select value={studentInfo.maritalStatus} onChange={updateStudentInfo("maritalStatus")}>
-                            <option value="">Pilih status perkahwinan</option>
+                            <option value="">Sila pilih</option>
                             {maritalStatusOptions.map((option) => <option key={option}>{option}</option>)}
                           </select>
                         </label>
-                        <label>Negeri Kelahiran<select value={studentInfo.stateOfBirth} onChange={updateStudentInfo("stateOfBirth")}>{selectOptions.state.map((option) => <option key={option}>{option}</option>)}</select></label>
-                        <label>Negeri Kediaman<select value={studentInfo.residenceState} onChange={updateStudentInfo("residenceState")}>{selectOptions.state.map((option) => <option key={option}>{option}</option>)}</select></label>
+                        <label>Negeri Kelahiran<select value={studentInfo.stateOfBirth} onChange={updateStudentInfo("stateOfBirth")}><option value="">Sila pilih</option>{selectOptions.state.map((option) => <option key={option}>{option}</option>)}</select></label>
+                        <label>Negeri Kediaman<select value={studentInfo.residenceState} onChange={updateStudentInfo("residenceState")}><option value="">Sila pilih</option>{selectOptions.state.map((option) => <option key={option}>{option}</option>)}</select></label>
                         <label>Tarikh Lahir<input type="date" value={studentInfo.dateOfBirth} onChange={updateStudentInfo("dateOfBirth")} /></label>
-                        <label>Tajaan<select value={studentInfo.sponsorship} onChange={updateStudentInfo("sponsorship")}><option value="">Pilih tajaan</option>{selectOptions.sponsorship.map((option) => <option key={option}>{option}</option>)}</select></label>
-                        <label>Kelayakan Kemasukan<select value={studentInfo.qualification} onChange={updateStudentInfo("qualification")}><option value="">Pilih kelayakan</option>{selectOptions.qualification.map((option) => <option key={option}>{option}</option>)}</select></label>
+                        <label>Tajaan<select value={studentInfo.sponsorship} onChange={updateStudentInfo("sponsorship")}><option value="">Sila pilih</option>{selectOptions.sponsorship.map((option) => <option key={option}>{option}</option>)}</select></label>
+                        <label>Kelayakan Kemasukan<select value={studentInfo.qualification} onChange={updateStudentInfo("qualification")}><option value="">Sila pilih</option>{selectOptions.qualification.map((option) => <option key={option}>{option}</option>)}</select></label>
                         <label>No. Telefon<input value={studentInfo.phone} onChange={updateStudentInfo("phone")} /></label>
                         <label className="wide">Alamat E-mel<input type="email" value={studentInfo.email} onChange={updateStudentInfo("email")} /></label>
                       </div>
