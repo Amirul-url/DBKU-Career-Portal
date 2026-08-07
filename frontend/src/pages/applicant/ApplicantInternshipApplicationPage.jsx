@@ -33,14 +33,12 @@ const selectOptions = {
   citizenshipCountry: ["Malaysia", "Brunei", "Indonesia", "Lain-lain"],
   ethnicity: ["Melanau", "Melayu", "Iban", "Bidayuh", "Cina", "Lain-lain"],
   gender: ["Lelaki", "Perempuan"],
-  got: ["Tidak", "Ya"],
   maritalStatus: ["Bujang", "Berkahwin"],
   nativeStatus: ["Bumiputera", "Bukan Bumiputera"],
   religion: ["Islam", "Kristian", "Buddha", "Hindu", "Lain-lain"],
   schoolType: ["Sekolah Menengah Kebangsaan", "Sekolah Menengah Teknik", "Lain-lain"],
   sponsorship: ["PTPTN", "Biasiswa", "Sendiri"],
   state: ["Sarawak", "Sabah", "Johor", "Kedah", "Kelantan", "Melaka", "Negeri Sembilan", "Pahang", "Perak", "Perlis", "Pulau Pinang", "Selangor", "Terengganu", "WP Kuala Lumpur"],
-  statusB40: ["Ya", "Tidak"],
   qualification: ["STPM", "Matrikulasi", "Diploma", "Asasi", "Ijazah"],
 };
 
@@ -49,7 +47,6 @@ const valueAliases = {
   citizenshipCountry: { MALAYSIA: "Malaysia", BRUNEI: "Brunei", INDONESIA: "Indonesia", "LAIN-LAIN": "Lain-lain" },
   ethnicity: { MELANAU: "Melanau", MELAYU: "Melayu", IBAN: "Iban", BIDAYUH: "Bidayuh", CINA: "Cina", "LAIN-LAIN": "Lain-lain" },
   gender: { MALE: "Lelaki", FEMALE: "Perempuan" },
-  got: { No: "Tidak", Yes: "Ya" },
   maritalStatus: { SINGLE: "Bujang", MARRIED: "Berkahwin" },
   nativeStatus: { BUMIPUTERA: "Bumiputera", "BUKAN BUMIPUTERA": "Bukan Bumiputera" },
   religion: { MUSLIM: "Islam", CHRISTIAN: "Kristian", BUDDHIST: "Buddha", HINDU: "Hindu", "LAIN-LAIN": "Lain-lain" },
@@ -57,7 +54,6 @@ const valueAliases = {
   sponsorship: { BIASISWA: "Biasiswa", SENDIRI: "Sendiri" },
   stateOfBirth: { SARAWAK: "Sarawak", SABAH: "Sabah", JOHOR: "Johor", KEDAH: "Kedah", KELANTAN: "Kelantan", MELAKA: "Melaka", "NEGERI SEMBILAN": "Negeri Sembilan", PAHANG: "Pahang", PERAK: "Perak", PERLIS: "Perlis", "PULAU PINANG": "Pulau Pinang", SELANGOR: "Selangor", TERENGGANU: "Terengganu", "WP KUALA LUMPUR": "WP Kuala Lumpur" },
   residenceState: { SARAWAK: "Sarawak", SABAH: "Sabah", JOHOR: "Johor", KEDAH: "Kedah", KELANTAN: "Kelantan", MELAKA: "Melaka", "NEGERI SEMBILAN": "Negeri Sembilan", PAHANG: "Pahang", PERAK: "Perak", PERLIS: "Perlis", "PULAU PINANG": "Pulau Pinang", SELANGOR: "Selangor", TERENGGANU: "Terengganu", "WP KUALA LUMPUR": "WP Kuala Lumpur" },
-  statusB40: { No: "Tidak", Yes: "Ya" },
   qualification: { MATRICULATION: "Matrikulasi", DIPLOMA: "Diploma", FOUNDATION: "Asasi", DEGREE: "Ijazah" },
 };
 
@@ -68,8 +64,6 @@ const getDefaultStudentInfo = () => ({
   email: "",
   ethnicity: "",
   gender: "",
-  got: "",
-  householdIncome: "",
   icNo: "",
   maritalStatus: "",
   matricNo: "",
@@ -81,7 +75,6 @@ const getDefaultStudentInfo = () => ({
   schoolType: "",
   sponsorship: "",
   stateOfBirth: "",
-  statusB40: "",
   umsEmail: "",
   qualification: "",
 });
@@ -246,11 +239,6 @@ export default function ApplicantInternshipApplicationPage() {
                       <label>No. Telefon<input value={studentInfo.phone} onChange={updateStudentInfo("phone")} /></label>
                       <label className="wide">Alamat E-mel UMS<input type="email" value={studentInfo.umsEmail} onChange={updateStudentInfo("umsEmail")} /></label>
                       <label className="wide">Alamat E-mel<input type="email" value={studentInfo.email} onChange={updateStudentInfo("email")} /></label>
-                      <label>Pendapatan Isi Rumah<input value={studentInfo.householdIncome} onChange={updateStudentInfo("householdIncome")} /></label>
-                      <label>Status <em>B40</em><select value={studentInfo.statusB40} onChange={updateStudentInfo("statusB40")}>{selectOptions.statusB40.map((option) => <option key={option}>{option}</option>)}</select></label>
-                      <p className="student-info-note"><strong>Nota:</strong> Status B40 ini akan disahkan semasa semakan permohonan.</p>
-                      <label>Status Tamat Pengajian Tepat Masa (GOT)<select value={studentInfo.got} onChange={updateStudentInfo("got")}>{selectOptions.got.map((option) => <option key={option}>{option}</option>)}</select></label>
-                      <p className="student-info-note"><strong>Nota:</strong> Status GOT ini hanya untuk rujukan pelajar pascasiswazah.</p>
                     </div>
 
                     <aside className="student-info-photo-card">
