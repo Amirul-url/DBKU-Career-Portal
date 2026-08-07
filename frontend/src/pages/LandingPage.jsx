@@ -77,7 +77,7 @@ export default function LandingPage() {
       stats: [
         [String(jobVacancies.length), "Kekosongan Aktif"],
         ["23", "Jabatan DBKU"],
-        ["Terbuka", "Program Latihan Industri"],
+        ["1", "Program Latihan Industri Terbuka"],
         ["100%", "Permohonan Dalam Talian"],
       ],
     };
