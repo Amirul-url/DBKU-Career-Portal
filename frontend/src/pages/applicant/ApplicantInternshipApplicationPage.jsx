@@ -227,7 +227,6 @@ export default function ApplicantInternshipApplicationPage() {
                           Delete
                         </button>
                       </div>
-                      {passportPhoto?.name ? <small>{passportPhoto.name}</small> : null}
                       <p>
                         <strong>Note</strong>
                         <span>Sila pastikan gambar yang dimuatnaik adalah dalam format .jpg</span>
