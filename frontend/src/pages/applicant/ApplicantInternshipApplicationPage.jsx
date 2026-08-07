@@ -108,7 +108,6 @@ const getDefaultStudentInfo = () => ({
   residenceState: "",
   sponsorship: "",
   stateOfBirth: "",
-  umsEmail: "",
   qualification: "",
 });
 
@@ -288,7 +287,6 @@ export default function ApplicantInternshipApplicationPage() {
                       <label>Tajaan<select value={studentInfo.sponsorship} onChange={updateStudentInfo("sponsorship")}><option value="">Pilih tajaan</option>{selectOptions.sponsorship.map((option) => <option key={option}>{option}</option>)}</select></label>
                       <label>Kelayakan Kemasukan<select value={studentInfo.qualification} onChange={updateStudentInfo("qualification")}><option value="">Pilih kelayakan</option>{selectOptions.qualification.map((option) => <option key={option}>{option}</option>)}</select></label>
                       <label>No. Telefon<input value={studentInfo.phone} onChange={updateStudentInfo("phone")} /></label>
-                      <label className="wide">Alamat E-mel UMS<input type="email" value={studentInfo.umsEmail} onChange={updateStudentInfo("umsEmail")} /></label>
                       <label className="wide">Alamat E-mel<input type="email" value={studentInfo.email} onChange={updateStudentInfo("email")} /></label>
                     </div>
 
