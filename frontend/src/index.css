@@ -7018,6 +7018,11 @@ body:has(.applicant-profile-page) {
   accent-color: var(--profile-green);
 }
 
+.personal-address-location {
+  display: grid;
+  gap: 12px;
+}
+
 .personal-address-map {
   display: grid;
   gap: 12px;
@@ -7026,6 +7031,57 @@ body:has(.applicant-profile-page) {
   border-radius: 8px;
   background: #ffffff;
   padding: 14px;
+}
+
+.personal-address-search {
+  display: grid;
+  gap: 7px;
+}
+
+.personal-address-search > label {
+  color: var(--profile-ink);
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
+.personal-address-search-box {
+  position: relative;
+}
+
+.personal-address-search textarea,
+.personal-address-map-coordinates input {
+  width: 100%;
+  border: 1px solid #111827;
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--profile-ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  outline: 0;
+  padding: 12px 14px;
+}
+
+.personal-address-search textarea {
+  min-height: 116px;
+  resize: vertical;
+}
+
+.personal-address-map-coordinates input {
+  min-height: 44px;
+  padding-block: 0;
+}
+
+.personal-address-search textarea:focus,
+.personal-address-map-coordinates input:focus {
+  border-color: var(--profile-green);
+  box-shadow: 0 0 0 3px var(--profile-mint);
+}
+
+.personal-address-search.has-error textarea {
+  border-color: var(--profile-green);
+  box-shadow: 0 0 0 3px var(--profile-pale);
 }
 
 .personal-address-map-head {
@@ -7081,6 +7137,11 @@ body:has(.applicant-profile-page) {
 }
 
 .personal-address-suggestions {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  z-index: 35;
   display: grid;
   max-height: 230px;
   overflow-y: auto;
@@ -7139,9 +7200,22 @@ body:has(.applicant-profile-page) {
 }
 
 .personal-address-map-coordinates {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.personal-address-map-coordinates label {
+  display: grid;
+  gap: 6px;
+  color: var(--profile-ink);
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
+.personal-address-map-coordinates input {
+  background: #f8fafc;
 }
 
 .experience-form .personal-form-row {

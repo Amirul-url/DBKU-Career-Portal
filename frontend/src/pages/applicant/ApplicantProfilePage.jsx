@@ -725,16 +725,72 @@ function PersonalSelect({ disabled = false, onChange, options, placeholder, sear
   );
 }
 
-function ApplicantAddressMap({ address, latitude, longitude, onLocationChange }) {
+function formatMapAddressText(value) {
+  return String(value || "").trim().replace(/\s+/g, " ");
+}
+
+function escapeMapRegExp(value) {
+  return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function formatMapAddressWithPostcode(parts, postcode, city) {
+  const cleanParts = (Array.isArray(parts) ? parts : [])
+    .map((part) => String(part || "").trim())
+    .filter(Boolean);
+  const cleanPostcode = String(postcode || "").trim();
+  const cleanCity = String(city || "").trim();
+
+  if (!cleanPostcode) {
+    return formatMapAddressText(cleanParts.join(", "));
+  }
+
+  const postcodePattern = new RegExp(`\\b${escapeMapRegExp(cleanPostcode)}\\b`);
+  const hasPostcode = cleanParts.some((part) => postcodePattern.test(part));
+  if (hasPostcode) {
+    return formatMapAddressText(cleanParts.join(", "));
+  }
+
+  const cityIndex = cleanCity
+    ? cleanParts.findIndex((part) => new RegExp(`\\b${escapeMapRegExp(cleanCity)}\\b`, "i").test(part))
+    : -1;
+
+  if (cityIndex >= 0) {
+    cleanParts[cityIndex] = `${cleanPostcode} ${cleanParts[cityIndex]}`;
+  } else {
+    cleanParts.push(cleanPostcode);
+  }
+
+  return formatMapAddressText(cleanParts.join(", "));
+}
+
+function formatMapboxPlaceName(feature = {}) {
+  const placeName = String(feature.place_name || "");
+  const context = Array.isArray(feature.context) ? feature.context : [];
+  const postcode = context.find((item) => String(item.id || "").startsWith("postcode"))?.text || "";
+  const city =
+    context.find((item) => String(item.id || "").startsWith("place"))?.text ||
+    context.find((item) => String(item.id || "").startsWith("district"))?.text ||
+    "";
+
+  if (!postcode || !placeName) {
+    return formatMapAddressText(placeName);
+  }
+
+  return formatMapAddressWithPostcode(placeName.split(","), postcode, city);
+}
+
+function ApplicantAddressMap({ address, addressError, latitude, locationError, longitude, onLocationChange }) {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const markerRef = useRef(null);
   const popupRef = useRef(null);
   const debounceRef = useRef(null);
   const selectedAddressRef = useRef("");
+  const [mapAddress, setMapAddress] = useState(address || "");
   const [mapMode, setMapMode] = useState("2d");
   const [mapStyle, setMapStyle] = useState("street");
   const [mapMessage, setMapMessage] = useState("");
+  const [loadingAddress, setLoadingAddress] = useState(false);
   const [searching, setSearching] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
 
@@ -747,7 +803,13 @@ function ApplicantAddressMap({ address, latitude, longitude, onLocationChange })
   };
   const currentLongitude = Number(longitude) || defaultLongitude;
   const currentLatitude = Number(latitude) || defaultLatitude;
-  const addressQuery = [address, "Malaysia"].filter(Boolean).join(", ");
+  const addressQuery = [mapAddress, "Malaysia"].filter(Boolean).join(", ");
+
+  useEffect(() => {
+    if (address !== mapAddress) {
+      setMapAddress(address || "");
+    }
+  }, [address, mapAddress]);
 
   const updateMarkerPosition = useCallback((nextLongitude, nextLatitude, flyTo = true) => {
     const fixedLongitude = Number(nextLongitude.toFixed(6));
@@ -767,28 +829,56 @@ function ApplicantAddressMap({ address, latitude, longitude, onLocationChange })
     onLocationChange({ latitude: fixedLatitude, longitude: fixedLongitude });
   }, [onLocationChange]);
 
+  const pushLocationChange = useCallback((nextAddress, nextLatitude, nextLongitude) => {
+    onLocationChange({
+      address: formatMapAddressText(nextAddress),
+      latitude: nextLatitude,
+      longitude: nextLongitude,
+    });
+  }, [onLocationChange]);
+
   const reverseGeocode = useCallback(async (nextLongitude, nextLatitude) => {
     try {
-      setMapMessage("Mengemas kini alamat daripada lokasi map...");
+      setLoadingAddress(true);
 
       const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${nextLongitude},${nextLatitude}.json` +
-          `?access_token=${MAPBOX_TOKEN}&country=my&language=ms&limit=1`,
+        `https://nominatim.openstreetmap.org/reverse` +
+          `?lat=${nextLatitude}&lon=${nextLongitude}` +
+          `&format=json&addressdetails=1&zoom=18`,
+        {
+          headers: { "Accept-Language": "ms", "User-Agent": "PortalKerjayaDBKU/1.0" },
+        },
       );
       const data = await response.json();
-      const nextAddress = data?.features?.[0]?.place_name || "";
-      selectedAddressRef.current = nextAddress;
 
-      onLocationChange({
-        ...(nextAddress ? { address: nextAddress } : {}),
-        latitude: nextLatitude,
-        longitude: nextLongitude,
-      });
+      const addr = data?.address || {};
+      const buildingName =
+        data?.name ||
+        addr.building ||
+        addr.amenity ||
+        addr.shop ||
+        addr.office ||
+        addr.tourism ||
+        "";
+      const road = addr.road || addr.pedestrian || addr.footway || "";
+      const suburb = addr.suburb || addr.neighbourhood || addr.quarter || "";
+      const city = addr.city || addr.town || addr.village || addr.county || "";
+      const state = addr.state || "";
+      const postcode = addr.postcode || "";
+      const nextAddress =
+        formatMapAddressWithPostcode([buildingName, road, suburb, city, state, "Malaysia"], postcode, city) ||
+        formatMapAddressText(data?.display_name);
+
+      setMapAddress(nextAddress);
+      selectedAddressRef.current = nextAddress;
+      pushLocationChange(nextAddress, nextLatitude, nextLongitude);
       setMapMessage(nextAddress ? "Alamat dikemas kini daripada map." : "Lokasi dikemas kini.");
     } catch {
       setMapMessage("Lokasi dikemas kini, tetapi alamat tidak dapat dicari secara automatik.");
+    } finally {
+      setLoadingAddress(false);
     }
-  }, [onLocationChange]);
+  }, [pushLocationChange]);
 
   const searchAddressOnMap = useCallback(async () => {
     const cleanQuery = addressQuery.trim();
@@ -805,14 +895,21 @@ function ApplicantAddressMap({ address, latitude, longitude, onLocationChange })
 
     try {
       setMapMessage("Mencari alamat pada map...");
+      setSearching(true);
 
-      const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(cleanQuery)}.json` +
-          `?access_token=${MAPBOX_TOKEN}&country=my&language=ms&limit=8&proximity=110.334028,1.586684`,
-      );
-      const data = await response.json();
-      const feature = data?.features?.[0];
-      const center = feature?.center;
+      const nominatimResults = await fetchNominatimAddressResults(cleanQuery);
+      let results = nominatimResults;
+
+      if (results.length === 0) {
+        results = await fetchMapboxAddressResults(`${cleanQuery}, Kuching, Sarawak, Malaysia`);
+      }
+
+      if (results.length === 0) {
+        results = await fetchMapboxAddressResults(`${cleanQuery}, Malaysia`);
+      }
+
+      const place = results[0];
+      const center = place?.center;
 
       if (!center) {
         setMapMessage("Alamat tidak dijumpai pada map. Cuba lengkapkan alamat.");
@@ -821,19 +918,64 @@ function ApplicantAddressMap({ address, latitude, longitude, onLocationChange })
 
       updateMarkerPosition(center[0], center[1]);
       setSuggestions([]);
-      if (feature?.place_name) {
-        selectedAddressRef.current = feature.place_name;
-        onLocationChange({
-          address: feature.place_name,
-          latitude: Number(center[1].toFixed(6)),
-          longitude: Number(center[0].toFixed(6)),
-        });
-      }
+      setMapAddress(place.placeName);
+      selectedAddressRef.current = place.placeName;
+      pushLocationChange(place.placeName, Number(center[1].toFixed(6)), Number(center[0].toFixed(6)));
       setMapMessage("Lokasi alamat dijumpai pada map.");
     } catch {
       setMapMessage("Carian map tidak berjaya. Sila cuba lagi.");
+    } finally {
+      setSearching(false);
     }
-  }, [addressQuery, onLocationChange, updateMarkerPosition]);
+  }, [addressQuery, pushLocationChange, updateMarkerPosition]);
+
+  async function fetchMapboxAddressResults(keyword) {
+    const response = await fetch(
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(keyword)}.json` +
+        `?access_token=${MAPBOX_TOKEN}&country=my&language=ms&limit=8&proximity=110.334028,1.586684`,
+    );
+    const data = await response.json();
+
+    return (data?.features || [])
+      .map((feature) => ({
+        center: feature.center || feature.geometry?.coordinates,
+        id: feature.id,
+        placeName: formatMapboxPlaceName(feature),
+        title: formatMapAddressText(feature.text || feature.place_name?.split(",")[0] || "Lokasi"),
+      }))
+      .filter((place) => Array.isArray(place.center) && place.placeName);
+  }
+
+  async function fetchNominatimAddressResults(keyword) {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/search` +
+        `?q=${encodeURIComponent(keyword)}` +
+        `&format=json&addressdetails=1&limit=8&countrycodes=my&viewbox=109.7,2.2,111.2,0.8&bounded=0`,
+      {
+        headers: { "Accept-Language": "ms", "User-Agent": "PortalKerjayaDBKU/1.0" },
+      },
+    );
+    const data = await response.json();
+
+    return data.map((item) => {
+      const addr = item.address || {};
+      const buildingName = addr.building || addr.amenity || addr.shop || addr.office || addr.tourism || "";
+      const road = addr.road || addr.pedestrian || addr.footway || "";
+      const suburb = addr.suburb || addr.neighbourhood || addr.quarter || "";
+      const city = addr.city || addr.town || addr.village || addr.county || "";
+      const state = addr.state || "";
+      const postcode = addr.postcode || "";
+      const shortLabel = buildingName || road || item.name || item.display_name?.split(",")[0] || "Lokasi";
+      const fullLabel = formatMapAddressWithPostcode([buildingName, road, suburb, city, state, "Malaysia"], postcode, city);
+
+      return {
+        center: [parseFloat(item.lon), parseFloat(item.lat)],
+        id: item.place_id,
+        placeName: formatMapAddressText(fullLabel || item.display_name),
+        title: formatMapAddressText(shortLabel),
+      };
+    }).filter((place) => Array.isArray(place.center) && place.placeName);
+  }
 
   const fetchAddressSuggestions = useCallback(async (keyword) => {
     const cleanKeyword = keyword.trim();
@@ -846,17 +988,15 @@ function ApplicantAddressMap({ address, latitude, longitude, onLocationChange })
     try {
       setSearching(true);
 
-      const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(cleanKeyword)}.json` +
-          `?access_token=${MAPBOX_TOKEN}&country=my&language=ms&limit=8&proximity=110.334028,1.586684`,
-      );
-      const data = await response.json();
-      const places = (data?.features || []).map((feature) => ({
-        center: feature.center || feature.geometry?.coordinates,
-        id: feature.id,
-        placeName: feature.place_name || "",
-        title: feature.text || feature.place_name?.split(",")[0] || "Lokasi",
-      })).filter((place) => Array.isArray(place.center) && place.placeName);
+      let places = await fetchNominatimAddressResults(cleanKeyword);
+
+      if (places.length === 0) {
+        places = await fetchMapboxAddressResults(`${cleanKeyword}, Kuching, Sarawak, Malaysia`);
+      }
+
+      if (places.length === 0) {
+        places = await fetchMapboxAddressResults(`${cleanKeyword}, Malaysia`);
+      }
 
       setSuggestions(places);
     } catch {
@@ -879,11 +1019,8 @@ function ApplicantAddressMap({ address, latitude, longitude, onLocationChange })
       zoom: 16,
     });
 
-    onLocationChange({
-      address: place.placeName,
-      latitude: fixedLatitude,
-      longitude: fixedLongitude,
-    });
+    pushLocationChange(place.placeName, fixedLatitude, fixedLongitude);
+    setMapAddress(place.placeName);
     selectedAddressRef.current = place.placeName;
     setSuggestions([]);
     setMapMessage("Lokasi alamat dipilih pada map.");
@@ -939,18 +1076,18 @@ function ApplicantAddressMap({ address, latitude, longitude, onLocationChange })
 
     window.clearTimeout(debounceRef.current);
 
-    if (selectedAddressRef.current && address === selectedAddressRef.current) {
+    if (selectedAddressRef.current && mapAddress === selectedAddressRef.current) {
       setSuggestions([]);
       return undefined;
     }
 
     selectedAddressRef.current = "";
     debounceRef.current = window.setTimeout(() => {
-      fetchAddressSuggestions(address || "");
+      fetchAddressSuggestions(mapAddress || "");
     }, 350);
 
     return () => window.clearTimeout(debounceRef.current);
-  }, [address, fetchAddressSuggestions]);
+  }, [fetchAddressSuggestions, mapAddress]);
 
   const applyMapMode = (nextMode) => {
     setMapMode(nextMode);
@@ -966,6 +1103,23 @@ function ApplicantAddressMap({ address, latitude, longitude, onLocationChange })
     mapRef.current?.setStyle(mapStyles[nextStyle]);
   };
 
+  const focusLocation = () => {
+    mapRef.current?.flyTo({
+      bearing: mapMode === "3d" ? -25 : 0,
+      center: [currentLongitude, currentLatitude],
+      duration: 900,
+      pitch: mapMode === "3d" ? 60 : 0,
+      zoom: 17,
+    });
+  };
+
+  const handleMapAddressChange = (event) => {
+    const nextAddress = formatMapAddressText(event.target.value);
+
+    setMapAddress(nextAddress);
+    pushLocationChange(nextAddress, currentLatitude, currentLongitude);
+  };
+
   if (!MAPBOX_TOKEN) {
     return (
       <div className="personal-address-map personal-address-map-empty">
@@ -976,37 +1130,62 @@ function ApplicantAddressMap({ address, latitude, longitude, onLocationChange })
   }
 
   return (
-    <div className="personal-address-map">
-      <div className="personal-address-map-head">
-        <div>
-          <strong>Map Lokasi</strong>
-          <span>Pilih cadangan alamat, klik map atau gerakkan pin untuk tetapkan lokasi.</span>
+    <div className="personal-address-location">
+      <div className={`personal-address-search ${addressError ? "has-error" : ""}`}>
+        <label htmlFor="personal-map-address">Alamat*</label>
+        <div className="personal-address-search-box">
+          <textarea
+            id="personal-map-address"
+            value={mapAddress}
+            rows={4}
+            placeholder="Cari alamat atau masukkan lokasi"
+            onChange={handleMapAddressChange}
+          />
+          {(suggestions.length > 0 || searching) ? (
+            <div className="personal-address-suggestions">
+              {searching ? <span>Mencari cadangan alamat...</span> : null}
+              {!searching && suggestions.map((place) => (
+                <button type="button" key={place.id} onClick={() => selectSuggestion(place)}>
+                  <strong>{place.title}</strong>
+                  <span>{place.placeName}</span>
+                </button>
+              ))}
+            </div>
+          ) : null}
         </div>
-        <div className="personal-address-map-actions">
-          <button type="button" onClick={searchAddressOnMap}>Cari Alamat</button>
-          <button type="button" className={mapMode === "2d" ? "active" : ""} onClick={() => applyMapMode("2d")}>2D</button>
-          <button type="button" className={mapMode === "3d" ? "active" : ""} onClick={() => applyMapMode("3d")}>3D</button>
-          <button type="button" className={mapStyle === "street" ? "active" : ""} onClick={() => applyMapStyle("street")}>Jalan</button>
-          <button type="button" className={mapStyle === "satellite" ? "active" : ""} onClick={() => applyMapStyle("satellite")}>Satelit</button>
-        </div>
+        {addressError ? <small className="personal-field-error">{addressError}</small> : null}
       </div>
-      {(suggestions.length > 0 || searching) ? (
-        <div className="personal-address-suggestions">
-          {searching ? <span>Mencari cadangan alamat...</span> : null}
-          {!searching && suggestions.map((place) => (
-            <button type="button" key={place.id} onClick={() => selectSuggestion(place)}>
-              <strong>{place.title}</strong>
-              <span>{place.placeName}</span>
-            </button>
-          ))}
+      <div className="personal-address-map">
+        <div className="personal-address-map-head">
+          <div>
+            <strong>Map Lokasi</strong>
+            <span>Pilih cadangan alamat, klik map atau gerakkan pin untuk tetapkan lokasi.</span>
+          </div>
+          <div className="personal-address-map-actions">
+            <button type="button" onClick={focusLocation}>Fokus</button>
+            <button type="button" onClick={searchAddressOnMap}>Cari Alamat</button>
+            <button type="button" className={mapMode === "2d" ? "active" : ""} onClick={() => applyMapMode("2d")}>2D</button>
+            <button type="button" className={mapMode === "3d" ? "active" : ""} onClick={() => applyMapMode("3d")}>3D</button>
+            <button type="button" className={mapStyle === "street" ? "active" : ""} onClick={() => applyMapStyle("street")}>Jalan</button>
+            <button type="button" className={mapStyle === "satellite" ? "active" : ""} onClick={() => applyMapStyle("satellite")}>Satelit</button>
+            <button type="button" className={mapStyle === "outdoor" ? "active" : ""} onClick={() => applyMapStyle("outdoor")}>Luar</button>
+          </div>
         </div>
-      ) : null}
-      <div ref={mapContainerRef} className="personal-address-map-canvas" />
-      <div className="personal-address-map-coordinates">
-        <span>Latitud: {currentLatitude.toFixed(6)}</span>
-        <span>Longitud: {currentLongitude.toFixed(6)}</span>
+        <div ref={mapContainerRef} className="personal-address-map-canvas" />
+        <div className="personal-address-map-coordinates">
+          <label>
+            Latitud*
+            <input type="text" value={currentLatitude.toFixed(6)} readOnly />
+          </label>
+          <label>
+            Longitud*
+            <input type="text" value={currentLongitude.toFixed(6)} readOnly />
+          </label>
+        </div>
+        {locationError ? <small className="personal-field-error">{locationError}</small> : null}
+        {loadingAddress ? <small>Mengemas kini alamat daripada map...</small> : null}
+        {mapMessage ? <small>{mapMessage}</small> : null}
       </div>
-      {mapMessage ? <small>{mapMessage}</small> : null}
     </div>
   );
 }
@@ -1979,18 +2158,18 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
         </ProfileFormRow>
 
         <ProfileFormRow label="Alamat">
-          <PersonalField label="Alamat" error={validationErrors.address}>
-            <textarea value={formValues.address} rows={4} onChange={updateField("address")} />
-          </PersonalField>
           <ApplicantAddressMap
             address={formValues.address}
+            addressError={validationErrors.address}
             latitude={formValues.latitude}
+            locationError={
+              validationErrors.latitude || validationErrors.longitude
+                ? "Sila pilih lokasi alamat pada map."
+                : ""
+            }
             longitude={formValues.longitude}
             onLocationChange={updateAddressMapLocation}
           />
-          {validationErrors.latitude || validationErrors.longitude ? (
-            <small className="personal-field-error">Sila pilih lokasi alamat pada map.</small>
-          ) : null}
         </ProfileFormRow>
 
         <ProfileFormRow label="Butiran Hubungan">
