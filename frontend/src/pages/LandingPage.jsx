@@ -62,12 +62,6 @@ export default function LandingPage() {
   const { latestRoles, stats } = useMemo(() => {
     const activeVacancies = vacancies.filter((vacancy) => vacancy.is_open ?? vacancy.status === "open");
     const jobVacancies = activeVacancies.filter((vacancy) => vacancy.vacancy_type === "job");
-    const internshipVacancies = activeVacancies.filter((vacancy) => vacancy.vacancy_type === "internship");
-    const departments = new Set(
-      jobVacancies
-        .map((vacancy) => vacancy.division || vacancy.department)
-        .filter(Boolean),
-    );
     const latest = [...activeVacancies]
       .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
       .slice(0, 3)
@@ -81,10 +75,10 @@ export default function LandingPage() {
     return {
       latestRoles: latest,
       stats: [
-        [String(activeVacancies.length), "Kekosongan Aktif"],
-        [String(departments.size), "Jabatan DBKU"],
-        [String(internshipVacancies.length), "Program Latihan Industri"],
-        ["Aktif", "Permohonan Dalam Talian"],
+        [String(jobVacancies.length), "Kekosongan Aktif"],
+        ["23", "Jabatan DBKU"],
+        ["Terbuka", "Program Latihan Industri"],
+        ["100%", "Permohonan Dalam Talian"],
       ],
     };
   }, [vacancies]);
