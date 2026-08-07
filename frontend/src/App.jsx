@@ -4,6 +4,7 @@ import LandingPage from "./pages/LandingPage";
 import InternshipInfoPage from "./pages/InternshipInfoPage";
 import JobMarketplacePage from "./pages/JobMarketplacePage";
 import ApplicantLoginPage from "./pages/applicant/ApplicantLoginPage";
+import ApplicantDashboardPage from "./pages/applicant/ApplicantDashboardPage";
 import ApplicantJobSearchPage from "./pages/applicant/ApplicantJobSearchPage";
 import ApplicantInternshipApplicationPage from "./pages/applicant/ApplicantInternshipApplicationPage";
 import ApplicantPortalListPage from "./pages/applicant/ApplicantPortalListPage";
@@ -210,6 +211,7 @@ export default function App() {
         <Route path="/jobs" element={<JobMarketplacePage />} />
         <Route path="/internships" element={<InternshipInfoPage />} />
         <Route path="/login" element={<ApplicantLoginPage />} />
+        <Route path="/profile/dashboard" element={<ApplicantDashboardPage />} />
         <Route path="/profile/jobs" element={<ApplicantJobSearchPage />} />
         <Route path="/profile/internships" element={<ApplicantJobSearchPage />} />
         <Route path="/profile/internship-application" element={<ApplicantInternshipApplicationPage />} />

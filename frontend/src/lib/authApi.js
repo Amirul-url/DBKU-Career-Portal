@@ -200,7 +200,7 @@ export function dashboardPathForRole(role) {
     return "/admin/dashboard";
   }
 
-  return "/profile/personal";
+  return "/profile/dashboard";
 }
 
 export function dashboardPathForUser(user) {

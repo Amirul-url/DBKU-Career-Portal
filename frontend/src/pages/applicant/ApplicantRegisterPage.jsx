@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { registerApplicant } from "../../lib/authApi";
+import { dashboardPathForRole, registerApplicant, saveAuthSession } from "../../lib/authApi";
 import { ApplicantAuthLayout, AuthField, PasswordField } from "./ApplicantAuthShared";
 
 function RegisterForm() {
@@ -35,10 +35,9 @@ function RegisterForm() {
 
     setIsSubmitting(true);
     try {
-      await registerApplicant(formData);
-      navigate("/login", {
-        state: { message: "Akaun berjaya didaftarkan. Sila log masuk menggunakan emel dan kata laluan anda." },
-      });
+      const data = await registerApplicant(formData);
+      saveAuthSession(data);
+      navigate(dashboardPathForRole(data.user?.role), { replace: true });
     } catch (error) {
       setStatus({ type: "error", message: error.message });
     } finally {

@@ -4885,6 +4885,173 @@ body:has(.applicant-profile-page) {
   font-size: 24px;
 }
 
+.applicant-dashboard-guide {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 22px;
+  margin-top: 28px;
+  border: 1px solid #c9f5de;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 26px 28px;
+}
+
+.applicant-dashboard-guide h2,
+.applicant-dashboard-guide p {
+  margin: 0;
+}
+
+.applicant-dashboard-guide h2 {
+  margin-top: 14px;
+  color: var(--profile-ink);
+  font-size: 26px;
+}
+
+.applicant-dashboard-guide p {
+  max-width: 760px;
+  margin-top: 8px;
+  color: #52615a;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.dashboard-guide-icon {
+  display: inline-flex;
+  width: 54px;
+  height: 54px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--profile-pale);
+  color: var(--profile-green);
+}
+
+.dashboard-guide-icon .app-svg-icon {
+  font-size: 28px;
+}
+
+.applicant-dashboard-guide a,
+.applicant-dashboard-grid a {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 18px;
+  border-radius: 8px;
+  background: var(--profile-green);
+  padding: 0 16px;
+  color: #ffffff;
+  font-weight: 900;
+}
+
+.applicant-dashboard-guide aside {
+  display: grid;
+  align-content: center;
+  gap: 8px;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 20px;
+}
+
+.applicant-dashboard-guide aside strong {
+  color: var(--profile-green);
+  font-size: 38px;
+  line-height: 1;
+}
+
+.applicant-dashboard-guide aside span {
+  color: #52615a;
+  font-weight: 800;
+}
+
+.dashboard-progress-track {
+  overflow: hidden;
+  height: 10px;
+  border-radius: 999px;
+  background: #d8eee2;
+}
+
+.dashboard-progress-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--profile-green);
+}
+
+.applicant-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.applicant-dashboard-grid article,
+.applicant-dashboard-checklist {
+  border: 1px solid #c9f5de;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 22px;
+}
+
+.applicant-dashboard-grid article > span {
+  display: inline-flex;
+  width: 42px;
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--profile-pale);
+  color: var(--profile-green);
+}
+
+.applicant-dashboard-grid article strong {
+  display: block;
+  margin-top: 14px;
+  color: var(--profile-ink);
+  font-size: 18px;
+}
+
+.applicant-dashboard-grid article p {
+  margin: 7px 0 0;
+  color: #52615a;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.applicant-dashboard-checklist {
+  margin-top: 18px;
+}
+
+.applicant-dashboard-checklist h2 {
+  margin: 0;
+  color: var(--profile-ink);
+  font-size: 20px;
+}
+
+.applicant-dashboard-checklist div {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.applicant-dashboard-checklist span {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 9px;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 0 12px;
+  color: #52615a;
+  font-weight: 800;
+}
+
+.applicant-dashboard-checklist span.complete {
+  background: var(--profile-pale);
+  color: var(--profile-green);
+}
+
 .applicant-list-status,
 .applicant-list-error,
 .applicant-list-empty,
@@ -5282,6 +5449,12 @@ body:has(.applicant-profile-page) {
 }
 
 @media (max-width: 760px) {
+  .applicant-dashboard-guide,
+  .applicant-dashboard-grid,
+  .applicant-dashboard-checklist div {
+    grid-template-columns: 1fr;
+  }
+
   .applicant-table-toolbar,
   .applicant-table-pagination {
     align-items: stretch;
