@@ -166,8 +166,6 @@ function ApplicationList({ applications, loading }) {
             <tr>
               <th>Bil.</th>
               <th>Permohonan</th>
-              <th>Bahagian</th>
-              <th>No. rujukan</th>
               <th>Tarikh</th>
               <th>Status</th>
               <th>Tindakan</th>
@@ -181,11 +179,7 @@ function ApplicationList({ applications, loading }) {
                 return (
                   <tr key={application.id}>
                     <td>{(currentPage - 1) * APPLICATIONS_PER_PAGE + index + 1}</td>
-                    <td>
-                      <strong>{vacancy.title || "Jawatan DBKU"}</strong>
-                    </td>
-                    <td>{vacancy.department || vacancy.division || "Dewan Bandaraya Kuching Utara"}</td>
-                    <td>{application.reference_no || "-"}</td>
+                    <td>{vacancy.title || "Jawatan DBKU"}</td>
                     <td>{formatDate(getApplicationDate(application))}</td>
                     <td>
                       <span className={`applicant-status-pill ${status}`}>
@@ -204,7 +198,7 @@ function ApplicationList({ applications, loading }) {
               })
             ) : (
               <tr>
-                <td className="applicant-table-empty" colSpan="7">Tiada permohonan untuk status ini.</td>
+                <td className="applicant-table-empty" colSpan="5">Tiada permohonan untuk status ini.</td>
               </tr>
             )}
           </tbody>

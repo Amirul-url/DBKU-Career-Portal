@@ -5049,13 +5049,14 @@ body:has(.applicant-profile-page) {
 
 .applicant-applications-table {
   width: 100%;
-  min-width: 900px;
+  min-width: 720px;
   border-collapse: collapse;
+  border: 1px solid #cfe6d8;
 }
 
 .applicant-applications-table th,
 .applicant-applications-table td {
-  border-bottom: 1px solid #d8eee2;
+  border: 1px solid #cfe6d8;
   padding: 14px 18px;
   text-align: left;
   vertical-align: middle;
@@ -5065,26 +5066,15 @@ body:has(.applicant-profile-page) {
   background: #f8fafc;
   color: #52615a;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 800;
+  text-align: center;
   text-transform: uppercase;
 }
 
 .applicant-applications-table td {
   color: var(--profile-ink);
   font-size: 14px;
-  font-weight: 600;
-}
-
-.applicant-applications-table td strong {
-  display: block;
-  color: var(--profile-ink);
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.35;
-}
-
-.applicant-applications-table tr:last-child td {
-  border-bottom: 0;
+  font-weight: 400;
 }
 
 .applicant-table-action {
