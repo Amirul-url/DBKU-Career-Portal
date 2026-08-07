@@ -28,23 +28,47 @@ const infoTabs = [
   "Maklumat E-Portfolio",
 ];
 
+const malaysiaStateOptions = [
+  "Johor",
+  "Kedah",
+  "Kelantan",
+  "Melaka",
+  "Negeri Sembilan",
+  "Pahang",
+  "Perak",
+  "Perlis",
+  "Pulau Pinang",
+  "Sabah",
+  "Sarawak",
+  "Selangor",
+  "Terengganu",
+  "WP Kuala Lumpur",
+  "WP Labuan",
+  "WP Putrajaya",
+];
+
+const malaysiaDistrictGroups = {
+  Johor: ["Batu Pahat", "Johor Bahru", "Kluang", "Kota Tinggi", "Kulai", "Mersing", "Muar", "Pontian", "Segamat", "Tangkak"],
+  Kedah: ["Baling", "Bandar Baharu", "Kota Setar", "Kuala Muda", "Kubang Pasu", "Kulim", "Langkawi", "Padang Terap", "Pendang", "Pokok Sena", "Sik", "Yan"],
+  Kelantan: ["Bachok", "Gua Musang", "Jeli", "Kota Bharu", "Kuala Krai", "Lojing", "Machang", "Pasir Mas", "Pasir Puteh", "Tanah Merah", "Tumpat"],
+  Melaka: ["Alor Gajah", "Jasin", "Melaka Tengah"],
+  "Negeri Sembilan": ["Jelebu", "Jempol", "Kuala Pilah", "Port Dickson", "Rembau", "Seremban", "Tampin"],
+  Pahang: ["Bentong", "Bera", "Cameron Highlands", "Jerantut", "Kuantan", "Lipis", "Maran", "Pekan", "Raub", "Rompin", "Temerloh"],
+  Perak: ["Bagan Datuk", "Batang Padang", "Hilir Perak", "Hulu Perak", "Kampar", "Kerian", "Kinta", "Kuala Kangsar", "Larut Matang dan Selama", "Manjung", "Muallim", "Perak Tengah"],
+  Perlis: ["Perlis"],
+  "Pulau Pinang": ["Barat Daya", "Seberang Perai Selatan", "Seberang Perai Tengah", "Seberang Perai Utara", "Timur Laut"],
+  Sabah: ["Beaufort", "Beluran", "Kalabakan", "Keningau", "Kinabatangan", "Kota Belud", "Kota Kinabalu", "Kota Marudu", "Kuala Penyu", "Kudat", "Kunak", "Lahad Datu", "Nabawan", "Papar", "Penampang", "Pitas", "Putatan", "Ranau", "Sandakan", "Semporna", "Sipitang", "Tambunan", "Tawau", "Telupid", "Tenom", "Tongod", "Tuaran"],
+  Sarawak: ["Bahagian Betong", "Bahagian Bintulu", "Bahagian Kapit", "Bahagian Kuching", "Bahagian Limbang", "Bahagian Miri", "Bahagian Mukah", "Bahagian Samarahan", "Bahagian Sarikei", "Bahagian Serian", "Bahagian Sibu", "Bahagian Sri Aman"],
+  Selangor: ["Gombak", "Hulu Langat", "Hulu Selangor", "Klang", "Kuala Langat", "Kuala Selangor", "Petaling", "Sabak Bernam", "Sepang"],
+  Terengganu: ["Besut", "Dungun", "Hulu Terengganu", "Kemaman", "Kuala Nerus", "Kuala Terengganu", "Marang", "Setiu"],
+  "WP Kuala Lumpur": ["Kuala Lumpur"],
+  "WP Labuan": ["Labuan"],
+  "WP Putrajaya": ["Putrajaya"],
+};
+
 const selectOptions = {
-  addressCountry: ["Malaysia", "Brunei", "Indonesia", "Singapura", "Lain-lain"],
-  district: [
-    "Bahagian Kuching",
-    "Bahagian Samarahan",
-    "Bahagian Serian",
-    "Bahagian Sri Aman",
-    "Bahagian Betong",
-    "Bahagian Sarikei",
-    "Bahagian Sibu",
-    "Bahagian Kapit",
-    "Bahagian Mukah",
-    "Bahagian Bintulu",
-    "Bahagian Miri",
-    "Bahagian Limbang",
-    "Lain-lain",
-  ],
+  addressCountry: ["Malaysia"],
+  districtGroups: malaysiaDistrictGroups,
   citizenship: ["Warganegara", "Bukan Warganegara"],
   citizenshipCountry: ["Malaysia", "Brunei", "Indonesia", "Lain-lain"],
   ethnicity: ["Melanau", "Melayu", "Iban", "Bidayuh", "Cina", "Lain-lain"],
@@ -74,7 +98,7 @@ const selectOptions = {
     "Tajaan Majikan",
     "Lain-lain",
   ],
-  state: ["Sarawak", "Sabah", "Johor", "Kedah", "Kelantan", "Melaka", "Negeri Sembilan", "Pahang", "Perak", "Perlis", "Pulau Pinang", "Selangor", "Terengganu", "WP Kuala Lumpur"],
+  state: malaysiaStateOptions,
   qualification: [
     "SPM",
     "STPM",
@@ -111,7 +135,7 @@ const valueAliases = {
     "BAHAGIAN LIMBANG": "Bahagian Limbang",
     "LAIN-LAIN": "Lain-lain",
   },
-  address1State: { SARAWAK: "Sarawak", SABAH: "Sabah", JOHOR: "Johor", KEDAH: "Kedah", KELANTAN: "Kelantan", MELAKA: "Melaka", "NEGERI SEMBILAN": "Negeri Sembilan", PAHANG: "Pahang", PERAK: "Perak", PERLIS: "Perlis", "PULAU PINANG": "Pulau Pinang", SELANGOR: "Selangor", TERENGGANU: "Terengganu", "WP KUALA LUMPUR": "WP Kuala Lumpur" },
+  address1State: { SARAWAK: "Sarawak", SABAH: "Sabah", JOHOR: "Johor", KEDAH: "Kedah", KELANTAN: "Kelantan", MELAKA: "Melaka", "NEGERI SEMBILAN": "Negeri Sembilan", PAHANG: "Pahang", PERAK: "Perak", PERLIS: "Perlis", "PULAU PINANG": "Pulau Pinang", SELANGOR: "Selangor", TERENGGANU: "Terengganu", "WP KUALA LUMPUR": "WP Kuala Lumpur", "WP LABUAN": "WP Labuan", "WP PUTRAJAYA": "WP Putrajaya" },
   citizenship: { WARGANEGARA: "Warganegara", "BUKAN WARGANEGARA": "Bukan Warganegara" },
   citizenshipCountry: { MALAYSIA: "Malaysia", BRUNEI: "Brunei", INDONESIA: "Indonesia", "LAIN-LAIN": "Lain-lain" },
   ethnicity: { MELANAU: "Melanau", MELAYU: "Melayu", IBAN: "Iban", BIDAYUH: "Bidayuh", CINA: "Cina", "LAIN-LAIN": "Lain-lain" },
@@ -120,8 +144,8 @@ const valueAliases = {
   nativeStatus: { BUMIPUTERA: "Bumiputera", "BUKAN BUMIPUTERA": "Bukan Bumiputera" },
   religion: { MUSLIM: "Islam", CHRISTIAN: "Kristian", BUDDHIST: "Buddha", HINDU: "Hindu", "LAIN-LAIN": "Lain-lain" },
   sponsorship: { BIASISWA: "Biasiswa Korporat / GLC", SENDIRI: "Sendiri" },
-  stateOfBirth: { SARAWAK: "Sarawak", SABAH: "Sabah", JOHOR: "Johor", KEDAH: "Kedah", KELANTAN: "Kelantan", MELAKA: "Melaka", "NEGERI SEMBILAN": "Negeri Sembilan", PAHANG: "Pahang", PERAK: "Perak", PERLIS: "Perlis", "PULAU PINANG": "Pulau Pinang", SELANGOR: "Selangor", TERENGGANU: "Terengganu", "WP KUALA LUMPUR": "WP Kuala Lumpur" },
-  residenceState: { SARAWAK: "Sarawak", SABAH: "Sabah", JOHOR: "Johor", KEDAH: "Kedah", KELANTAN: "Kelantan", MELAKA: "Melaka", "NEGERI SEMBILAN": "Negeri Sembilan", PAHANG: "Pahang", PERAK: "Perak", PERLIS: "Perlis", "PULAU PINANG": "Pulau Pinang", SELANGOR: "Selangor", TERENGGANU: "Terengganu", "WP KUALA LUMPUR": "WP Kuala Lumpur" },
+  stateOfBirth: { SARAWAK: "Sarawak", SABAH: "Sabah", JOHOR: "Johor", KEDAH: "Kedah", KELANTAN: "Kelantan", MELAKA: "Melaka", "NEGERI SEMBILAN": "Negeri Sembilan", PAHANG: "Pahang", PERAK: "Perak", PERLIS: "Perlis", "PULAU PINANG": "Pulau Pinang", SELANGOR: "Selangor", TERENGGANU: "Terengganu", "WP KUALA LUMPUR": "WP Kuala Lumpur", "WP LABUAN": "WP Labuan", "WP PUTRAJAYA": "WP Putrajaya" },
+  residenceState: { SARAWAK: "Sarawak", SABAH: "Sabah", JOHOR: "Johor", KEDAH: "Kedah", KELANTAN: "Kelantan", MELAKA: "Melaka", "NEGERI SEMBILAN": "Negeri Sembilan", PAHANG: "Pahang", PERAK: "Perak", PERLIS: "Perlis", "PULAU PINANG": "Pulau Pinang", SELANGOR: "Selangor", TERENGGANU: "Terengganu", "WP KUALA LUMPUR": "WP Kuala Lumpur", "WP LABUAN": "WP Labuan", "WP PUTRAJAYA": "WP Putrajaya" },
   qualification: { MATRICULATION: "Matrikulasi", DIPLOMA: "Diploma", FOUNDATION: "Asasi", DEGREE: "Ijazah Sarjana Muda", MASTER: "Ijazah Sarjana", PHD: "PhD / Doktor Falsafah" },
 };
 
@@ -317,7 +341,16 @@ export default function ApplicantInternshipApplicationPage() {
                       <label>Poskod<input value={studentInfo.address1Postcode} onChange={updateStudentInfo("address1Postcode")} /></label>
                       <label className="wide">Bandar<input value={studentInfo.address1City} onChange={updateStudentInfo("address1City")} /></label>
                       <label>Negeri<select value={studentInfo.address1State} onChange={updateStudentInfo("address1State")}><option value="">Pilih negeri</option>{selectOptions.state.map((option) => <option key={option}>{option}</option>)}</select></label>
-                      <label>Daerah<select value={studentInfo.address1District} onChange={updateStudentInfo("address1District")}><option value="">Pilih daerah</option>{selectOptions.district.map((option) => <option key={option}>{option}</option>)}</select></label>
+                      <label>Daerah
+                        <select value={studentInfo.address1District} onChange={updateStudentInfo("address1District")}>
+                          <option value="">Pilih daerah</option>
+                          {Object.entries(selectOptions.districtGroups).map(([state, districts]) => (
+                            <optgroup key={state} label={state}>
+                              {districts.map((option) => <option key={`${state}-${option}`} value={option}>{option}</option>)}
+                            </optgroup>
+                          ))}
+                        </select>
+                      </label>
                       <label>Negara<select value={studentInfo.address1Country} onChange={updateStudentInfo("address1Country")}><option value="">Pilih negara</option>{selectOptions.addressCountry.map((option) => <option key={option}>{option}</option>)}</select></label>
                       <label>No. Telefon<input value={studentInfo.address1Phone} onChange={updateStudentInfo("address1Phone")} /></label>
                     </div>
