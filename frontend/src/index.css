@@ -7080,6 +7080,55 @@ body:has(.applicant-profile-page) {
   color: #ffffff;
 }
 
+.personal-address-suggestions {
+  display: grid;
+  max-height: 230px;
+  overflow-y: auto;
+  border: 1px solid #d9e8df;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.personal-address-suggestions > span {
+  color: #41554d;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 12px 14px;
+}
+
+.personal-address-suggestions button {
+  display: grid;
+  gap: 4px;
+  border: 0;
+  border-bottom: 1px solid #edf6f1;
+  background: #ffffff;
+  color: var(--profile-ink);
+  padding: 11px 14px;
+  text-align: left;
+}
+
+.personal-address-suggestions button:last-child {
+  border-bottom: 0;
+}
+
+.personal-address-suggestions button:hover,
+.personal-address-suggestions button:focus {
+  background: var(--profile-pale);
+  outline: 0;
+}
+
+.personal-address-suggestions strong {
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.personal-address-suggestions button span {
+  color: #41554d;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
 .personal-address-map-canvas {
   width: 100%;
   height: 360px;

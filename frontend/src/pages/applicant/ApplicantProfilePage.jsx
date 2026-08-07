@@ -725,14 +725,18 @@ function PersonalSelect({ disabled = false, onChange, options, placeholder, sear
   );
 }
 
-function ApplicantAddressMap({ address, city, latitude, longitude, onLocationChange, postcode, state }) {
+function ApplicantAddressMap({ address, latitude, longitude, onLocationChange }) {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const markerRef = useRef(null);
   const popupRef = useRef(null);
+  const debounceRef = useRef(null);
+  const selectedAddressRef = useRef("");
   const [mapMode, setMapMode] = useState("2d");
   const [mapStyle, setMapStyle] = useState("street");
   const [mapMessage, setMapMessage] = useState("");
+  const [searching, setSearching] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
 
   const defaultLongitude = 110.334028;
   const defaultLatitude = 1.586684;
@@ -743,16 +747,7 @@ function ApplicantAddressMap({ address, city, latitude, longitude, onLocationCha
   };
   const currentLongitude = Number(longitude) || defaultLongitude;
   const currentLatitude = Number(latitude) || defaultLatitude;
-  const addressQuery = [address, postcode, city, state, "Malaysia"].filter(Boolean).join(", ");
-
-  if (!MAPBOX_TOKEN) {
-    return (
-      <div className="personal-address-map personal-address-map-empty">
-        <strong>Map Lokasi</strong>
-        <span>Token Mapbox belum ditetapkan.</span>
-      </div>
-    );
-  }
+  const addressQuery = [address, "Malaysia"].filter(Boolean).join(", ");
 
   const updateMarkerPosition = useCallback((nextLongitude, nextLatitude, flyTo = true) => {
     const fixedLongitude = Number(nextLongitude.toFixed(6));
@@ -782,6 +777,7 @@ function ApplicantAddressMap({ address, city, latitude, longitude, onLocationCha
       );
       const data = await response.json();
       const nextAddress = data?.features?.[0]?.place_name || "";
+      selectedAddressRef.current = nextAddress;
 
       onLocationChange({
         ...(nextAddress ? { address: nextAddress } : {}),
@@ -797,6 +793,11 @@ function ApplicantAddressMap({ address, city, latitude, longitude, onLocationCha
   const searchAddressOnMap = useCallback(async () => {
     const cleanQuery = addressQuery.trim();
 
+    if (!MAPBOX_TOKEN) {
+      setMapMessage("Token Mapbox belum ditetapkan.");
+      return;
+    }
+
     if (!cleanQuery) {
       setMapMessage("Sila isi alamat dahulu sebelum cari pada map.");
       return;
@@ -807,10 +808,11 @@ function ApplicantAddressMap({ address, city, latitude, longitude, onLocationCha
 
       const response = await fetch(
         `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(cleanQuery)}.json` +
-          `?access_token=${MAPBOX_TOKEN}&country=my&language=ms&limit=1&proximity=110.334028,1.586684`,
+          `?access_token=${MAPBOX_TOKEN}&country=my&language=ms&limit=8&proximity=110.334028,1.586684`,
       );
       const data = await response.json();
-      const center = data?.features?.[0]?.center;
+      const feature = data?.features?.[0];
+      const center = feature?.center;
 
       if (!center) {
         setMapMessage("Alamat tidak dijumpai pada map. Cuba lengkapkan alamat.");
@@ -818,14 +820,77 @@ function ApplicantAddressMap({ address, city, latitude, longitude, onLocationCha
       }
 
       updateMarkerPosition(center[0], center[1]);
+      setSuggestions([]);
+      if (feature?.place_name) {
+        selectedAddressRef.current = feature.place_name;
+        onLocationChange({
+          address: feature.place_name,
+          latitude: Number(center[1].toFixed(6)),
+          longitude: Number(center[0].toFixed(6)),
+        });
+      }
       setMapMessage("Lokasi alamat dijumpai pada map.");
     } catch {
       setMapMessage("Carian map tidak berjaya. Sila cuba lagi.");
     }
-  }, [addressQuery, updateMarkerPosition]);
+  }, [addressQuery, onLocationChange, updateMarkerPosition]);
+
+  const fetchAddressSuggestions = useCallback(async (keyword) => {
+    const cleanKeyword = keyword.trim();
+
+    if (!MAPBOX_TOKEN || !cleanKeyword || cleanKeyword.length < 3) {
+      setSuggestions([]);
+      return;
+    }
+
+    try {
+      setSearching(true);
+
+      const response = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(cleanKeyword)}.json` +
+          `?access_token=${MAPBOX_TOKEN}&country=my&language=ms&limit=8&proximity=110.334028,1.586684`,
+      );
+      const data = await response.json();
+      const places = (data?.features || []).map((feature) => ({
+        center: feature.center || feature.geometry?.coordinates,
+        id: feature.id,
+        placeName: feature.place_name || "",
+        title: feature.text || feature.place_name?.split(",")[0] || "Lokasi",
+      })).filter((place) => Array.isArray(place.center) && place.placeName);
+
+      setSuggestions(places);
+    } catch {
+      setSuggestions([]);
+    } finally {
+      setSearching(false);
+    }
+  }, []);
+
+  const selectSuggestion = (place) => {
+    const [selectedLongitude, selectedLatitude] = place.center;
+    const fixedLongitude = Number(selectedLongitude.toFixed(6));
+    const fixedLatitude = Number(selectedLatitude.toFixed(6));
+
+    markerRef.current?.setLngLat([fixedLongitude, fixedLatitude]);
+    mapRef.current?.flyTo({
+      center: [fixedLongitude, fixedLatitude],
+      duration: 700,
+      essential: true,
+      zoom: 16,
+    });
+
+    onLocationChange({
+      address: place.placeName,
+      latitude: fixedLatitude,
+      longitude: fixedLongitude,
+    });
+    selectedAddressRef.current = place.placeName;
+    setSuggestions([]);
+    setMapMessage("Lokasi alamat dipilih pada map.");
+  };
 
   useEffect(() => {
-    if (!mapContainerRef.current || mapRef.current) return undefined;
+    if (!MAPBOX_TOKEN || !mapContainerRef.current || mapRef.current) return undefined;
 
     popupRef.current = new mapboxgl.Popup({ closeButton: false, offset: 24 }).setText("Portal Kerjaya DBKU");
 
@@ -869,6 +934,24 @@ function ApplicantAddressMap({ address, city, latitude, longitude, onLocationCha
     mapRef.current?.setCenter([currentLongitude, currentLatitude]);
   }, [currentLatitude, currentLongitude]);
 
+  useEffect(() => {
+    if (!MAPBOX_TOKEN) return undefined;
+
+    window.clearTimeout(debounceRef.current);
+
+    if (selectedAddressRef.current && address === selectedAddressRef.current) {
+      setSuggestions([]);
+      return undefined;
+    }
+
+    selectedAddressRef.current = "";
+    debounceRef.current = window.setTimeout(() => {
+      fetchAddressSuggestions(address || "");
+    }, 350);
+
+    return () => window.clearTimeout(debounceRef.current);
+  }, [address, fetchAddressSuggestions]);
+
   const applyMapMode = (nextMode) => {
     setMapMode(nextMode);
     mapRef.current?.easeTo({
@@ -883,12 +966,21 @@ function ApplicantAddressMap({ address, city, latitude, longitude, onLocationCha
     mapRef.current?.setStyle(mapStyles[nextStyle]);
   };
 
+  if (!MAPBOX_TOKEN) {
+    return (
+      <div className="personal-address-map personal-address-map-empty">
+        <strong>Map Lokasi</strong>
+        <span>Token Mapbox belum ditetapkan.</span>
+      </div>
+    );
+  }
+
   return (
     <div className="personal-address-map">
       <div className="personal-address-map-head">
         <div>
           <strong>Map Lokasi</strong>
-          <span>Klik atau gerakkan pin untuk tetapkan lokasi alamat.</span>
+          <span>Pilih cadangan alamat, klik map atau gerakkan pin untuk tetapkan lokasi.</span>
         </div>
         <div className="personal-address-map-actions">
           <button type="button" onClick={searchAddressOnMap}>Cari Alamat</button>
@@ -898,6 +990,17 @@ function ApplicantAddressMap({ address, city, latitude, longitude, onLocationCha
           <button type="button" className={mapStyle === "satellite" ? "active" : ""} onClick={() => applyMapStyle("satellite")}>Satelit</button>
         </div>
       </div>
+      {(suggestions.length > 0 || searching) ? (
+        <div className="personal-address-suggestions">
+          {searching ? <span>Mencari cadangan alamat...</span> : null}
+          {!searching && suggestions.map((place) => (
+            <button type="button" key={place.id} onClick={() => selectSuggestion(place)}>
+              <strong>{place.title}</strong>
+              <span>{place.placeName}</span>
+            </button>
+          ))}
+        </div>
+      ) : null}
       <div ref={mapContainerRef} className="personal-address-map-canvas" />
       <div className="personal-address-map-coordinates">
         <span>Latitud: {currentLatitude.toFixed(6)}</span>
@@ -1487,23 +1590,6 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
     }));
   };
 
-  const updateState = (event) => {
-    setFormValues((current) => ({
-      ...current,
-      state: event.target.value,
-      city: "",
-      postcode: "",
-    }));
-  };
-
-  const updateCity = (event) => {
-    setFormValues((current) => ({
-      ...current,
-      city: event.target.value,
-      postcode: "",
-    }));
-  };
-
   const updateAddressMapLocation = useCallback((location) => {
     setFormValues((current) => ({
       ...current,
@@ -1667,10 +1753,9 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
       ["gender", formValues.gender],
       ["hasHealthIssue", formValues.hasHealthIssue],
       ["hasDisability", formValues.hasDisability],
-      ["state", formValues.state],
-      ["city", formValues.city],
-      ["postcode", formValues.postcode],
       ["address", formValues.address],
+      ["latitude", formValues.latitude],
+      ["longitude", formValues.longitude],
       ["email", formEmail],
       ["primaryPhone", formValues.primaryPhone],
       ["careerObjective", formValues.careerObjective],
@@ -1757,10 +1842,6 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
       handleSave();
     }
   }, [handleSave, saveRequestKey]);
-
-  const cityOptions = formValues.state ? toSelectOptions(getCities(formValues.state)) : [];
-  const postcodeOptions =
-    formValues.state && formValues.city ? toSelectOptions(getPostcodes(formValues.state, formValues.city)) : [];
 
   return (
     <div className="personal-edit-panel" aria-label="Kemaskini maklumat peribadi">
@@ -1898,45 +1979,18 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
         </ProfileFormRow>
 
         <ProfileFormRow label="Alamat">
-          <PersonalField label="Negeri" error={validationErrors.state}>
-            <PersonalSelect
-              value={formValues.state}
-              placeholder="Pilih negeri"
-              searchable
-              onChange={updateState}
-              options={stateOptions}
-            />
-          </PersonalField>
-          <PersonalField label="Bandar" error={validationErrors.city}>
-            <PersonalSelect
-              value={formValues.city}
-              placeholder={formValues.state ? "Pilih bandar" : "Pilih negeri dahulu"}
-              searchable
-              onChange={updateCity}
-              options={cityOptions}
-            />
-          </PersonalField>
-          <PersonalField label="Poskod" error={validationErrors.postcode}>
-            <PersonalSelect
-              value={formValues.postcode}
-              placeholder={formValues.city ? "Pilih poskod" : "Pilih bandar dahulu"}
-              searchable
-              onChange={updateField("postcode")}
-              options={postcodeOptions}
-            />
-          </PersonalField>
           <PersonalField label="Alamat" error={validationErrors.address}>
             <textarea value={formValues.address} rows={4} onChange={updateField("address")} />
           </PersonalField>
           <ApplicantAddressMap
             address={formValues.address}
-            city={formValues.city}
             latitude={formValues.latitude}
             longitude={formValues.longitude}
             onLocationChange={updateAddressMapLocation}
-            postcode={formValues.postcode}
-            state={formValues.state}
           />
+          {validationErrors.latitude || validationErrors.longitude ? (
+            <small className="personal-field-error">Sila pilih lokasi alamat pada map.</small>
+          ) : null}
         </ProfileFormRow>
 
         <ProfileFormRow label="Butiran Hubungan">
