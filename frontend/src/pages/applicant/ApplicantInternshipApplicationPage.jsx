@@ -35,7 +35,6 @@ const selectOptions = {
   gender: ["Lelaki", "Perempuan"],
   nativeStatus: ["Bumiputera", "Bukan Bumiputera"],
   religion: ["Islam", "Kristian", "Buddha", "Hindu", "Lain-lain"],
-  schoolType: ["Sekolah Menengah Kebangsaan", "Sekolah Menengah Teknik", "Lain-lain"],
   sponsorship: ["PTPTN", "Biasiswa", "Sendiri"],
   state: ["Sarawak", "Sabah", "Johor", "Kedah", "Kelantan", "Melaka", "Negeri Sembilan", "Pahang", "Perak", "Perlis", "Pulau Pinang", "Selangor", "Terengganu", "WP Kuala Lumpur"],
   qualification: ["STPM", "Matrikulasi", "Diploma", "Asasi", "Ijazah"],
@@ -51,7 +50,6 @@ const valueAliases = {
   maritalStatus: { SINGLE: "Bujang", MARRIED: "Berkahwin" },
   nativeStatus: { BUMIPUTERA: "Bumiputera", "BUKAN BUMIPUTERA": "Bukan Bumiputera" },
   religion: { MUSLIM: "Islam", CHRISTIAN: "Kristian", BUDDHIST: "Buddha", HINDU: "Hindu", "LAIN-LAIN": "Lain-lain" },
-  schoolType: { "SEKOLAH MENENGAH KEBANGSAAN": "Sekolah Menengah Kebangsaan", "SEKOLAH MENENGAH TEKNIK": "Sekolah Menengah Teknik", "LAIN-LAIN": "Lain-lain" },
   sponsorship: { BIASISWA: "Biasiswa", SENDIRI: "Sendiri" },
   stateOfBirth: { SARAWAK: "Sarawak", SABAH: "Sabah", JOHOR: "Johor", KEDAH: "Kedah", KELANTAN: "Kelantan", MELAKA: "Melaka", "NEGERI SEMBILAN": "Negeri Sembilan", PAHANG: "Pahang", PERAK: "Perak", PERLIS: "Perlis", "PULAU PINANG": "Pulau Pinang", SELANGOR: "Selangor", TERENGGANU: "Terengganu", "WP KUALA LUMPUR": "WP Kuala Lumpur" },
   residenceState: { SARAWAK: "Sarawak", SABAH: "Sabah", JOHOR: "Johor", KEDAH: "Kedah", KELANTAN: "Kelantan", MELAKA: "Melaka", "NEGERI SEMBILAN": "Negeri Sembilan", PAHANG: "Pahang", PERAK: "Perak", PERLIS: "Perlis", "PULAU PINANG": "Pulau Pinang", SELANGOR: "Selangor", TERENGGANU: "Terengganu", "WP KUALA LUMPUR": "WP Kuala Lumpur" },
@@ -72,7 +70,6 @@ const getDefaultStudentInfo = () => ({
   phone: "",
   religion: "",
   residenceState: "",
-  schoolType: "",
   sponsorship: "",
   stateOfBirth: "",
   umsEmail: "",
@@ -252,7 +249,6 @@ export default function ApplicantInternshipApplicationPage() {
                       <label>Negeri Kelahiran<select value={studentInfo.stateOfBirth} onChange={updateStudentInfo("stateOfBirth")}>{selectOptions.state.map((option) => <option key={option}>{option}</option>)}</select></label>
                       <label>Negeri Kediaman<select value={studentInfo.residenceState} onChange={updateStudentInfo("residenceState")}>{selectOptions.state.map((option) => <option key={option}>{option}</option>)}</select></label>
                       <label>Tarikh Lahir<input type="date" value={studentInfo.dateOfBirth} onChange={updateStudentInfo("dateOfBirth")} /></label>
-                      <label>Jenis Sekolah Menengah<select value={studentInfo.schoolType} onChange={updateStudentInfo("schoolType")}><option value="">Pilih jenis sekolah</option>{selectOptions.schoolType.map((option) => <option key={option}>{option}</option>)}</select></label>
                       <label>Tajaan<select value={studentInfo.sponsorship} onChange={updateStudentInfo("sponsorship")}><option value="">Pilih tajaan</option>{selectOptions.sponsorship.map((option) => <option key={option}>{option}</option>)}</select></label>
                       <label>Kelayakan Kemasukan<select value={studentInfo.qualification} onChange={updateStudentInfo("qualification")}><option value="">Pilih kelayakan</option>{selectOptions.qualification.map((option) => <option key={option}>{option}</option>)}</select></label>
                       <label>No. Telefon<input value={studentInfo.phone} onChange={updateStudentInfo("phone")} /></label>
