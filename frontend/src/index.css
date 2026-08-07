@@ -7018,6 +7018,83 @@ body:has(.applicant-profile-page) {
   accent-color: var(--profile-green);
 }
 
+.personal-address-map {
+  display: grid;
+  gap: 12px;
+  overflow: hidden;
+  border: 1px solid #bfe7cf;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 14px;
+}
+
+.personal-address-map-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.personal-address-map-head strong,
+.personal-address-map-head span {
+  display: block;
+}
+
+.personal-address-map-head strong {
+  color: var(--profile-ink);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.personal-address-map-head span,
+.personal-address-map small,
+.personal-address-map-coordinates {
+  color: #41554d;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.personal-address-map-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.personal-address-map-actions button {
+  min-height: 32px;
+  border: 1px solid #bfe7cf;
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--profile-green);
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.personal-address-map-actions button:hover,
+.personal-address-map-actions button.active {
+  border-color: var(--profile-green);
+  background: var(--profile-green);
+  color: #ffffff;
+}
+
+.personal-address-map-canvas {
+  width: 100%;
+  height: 360px;
+  overflow: hidden;
+  border: 1px solid #d9e8df;
+  border-radius: 8px;
+  background: var(--profile-pale);
+}
+
+.personal-address-map-coordinates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
 .experience-form .personal-form-row {
   grid-template-columns: 220px minmax(0, 1fr);
   gap: 44px;
