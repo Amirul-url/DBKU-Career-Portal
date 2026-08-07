@@ -39,6 +39,7 @@ const defaultPersonalDetails = {
   address: "",
   primaryPhone: "",
   secondaryPhone: "",
+  careerObjective: "",
   resumeFile: "",
   videoResumeFile: "",
   linkedIn: "",
@@ -424,6 +425,7 @@ function normalizePersonalProfile(profile, displayName, email) {
     details: {
       ...defaults.details,
       ...(profile?.details || {}),
+      careerObjective: profile?.details?.careerObjective || profile?.careerObjective || "",
       resumeFile: resumeFileUrl ? profile?.details?.resumeFile || getFileNameFromUrl(resumeFileUrl) : "",
       videoResumeFile: videoResumeFileUrl ? profile?.details?.videoResumeFile || getFileNameFromUrl(videoResumeFileUrl) : "",
     },
@@ -1471,6 +1473,7 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
       ["address", formValues.address],
       ["email", formEmail],
       ["primaryPhone", formValues.primaryPhone],
+      ["careerObjective", formValues.careerObjective],
     ];
 
     requiredFields.forEach(([field, value]) => {
@@ -1744,6 +1747,16 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
               placeholder="Contoh. 0123456789"
               value={formValues.secondaryPhone}
               onChange={updateField("secondaryPhone")}
+            />
+          </PersonalField>
+        </ProfileFormRow>
+
+        <ProfileFormRow label="Matlamat Kerjaya">
+          <PersonalField label="Matlamat kerjaya" error={validationErrors.careerObjective}>
+            <textarea
+              value={formValues.careerObjective}
+              rows={8}
+              onChange={updateField("careerObjective")}
             />
           </PersonalField>
         </ProfileFormRow>
@@ -2502,6 +2515,7 @@ export default function ApplicantProfilePage() {
   const email = user?.email || "Belum dikemaskini";
   const [personalProfile, setPersonalProfile] = useState(() => {
     const savedProfile = getSavedDraft(user, "personal") || getSavedPersonalProfile(user);
+    const savedPreferences = getSavedDraft(user, "job-preferences") || getSavedJobPreferences(user);
     const profilePhotoUrl = savedProfile?.profilePhotoUrl || user?.profile_photo_url || "";
     const resumeFileUrl = savedProfile?.resumeFileUrl || user?.resume_file_url || "";
     const videoResumeFileUrl = savedProfile?.videoResumeFileUrl || user?.video_resume_file_url || "";
@@ -2511,6 +2525,7 @@ export default function ApplicantProfilePage() {
         ...savedProfile,
         details: {
           ...(savedProfile?.details || {}),
+          careerObjective: savedProfile?.details?.careerObjective || savedPreferences?.careerObjective || "",
           resumeFile: savedProfile?.details?.resumeFile || getFileNameFromUrl(resumeFileUrl),
           videoResumeFile: savedProfile?.details?.videoResumeFile || getFileNameFromUrl(videoResumeFileUrl),
         },
@@ -2539,7 +2554,10 @@ export default function ApplicantProfilePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           personal: personalProfile,
-          job_preferences: jobPreferences,
+          job_preferences: {
+            ...jobPreferences,
+            careerObjective: personalProfile.details?.careerObjective || "",
+          },
           experience: experienceProfile,
           academic: academicProfile,
           skills: skillsProfile,
@@ -2591,11 +2609,6 @@ export default function ApplicantProfilePage() {
 
   const handlePersonalEditToggle = () => {
     if (editingSection !== "personal") {
-      if (editingSection === "jobPreferences" && isJobPreferencesDraftDirty) {
-        setIsJobPreferencesCloseDialogOpen(true);
-        return;
-      }
-
       setEditingSection("personal");
       return;
     }
@@ -2820,24 +2833,6 @@ export default function ApplicantProfilePage() {
                       videoUrl={personalProfile.videoResumeFileUrl}
                     />
                   </div>
-                )}
-              </ProfileCard>
-
-              <ProfileCard
-                id="profile-section-job-preferences"
-                isEditing={editingSection === "jobPreferences"}
-                title="Pilihan Pekerjaan"
-                onEdit={handleJobPreferencesEditToggle}
-              >
-                {editingSection === "jobPreferences" ? (
-                  <JobPreferencesForm
-                    onDraftChange={handleJobPreferencesDraftChange}
-                    preferencesData={jobPreferences}
-                    onSave={handleSaveJobPreferences}
-                    saveRequestKey={jobPreferencesSaveRequestKey}
-                  />
-                ) : (
-                  <JobPreferencesSummary preferences={jobPreferences} />
                 )}
               </ProfileCard>
 

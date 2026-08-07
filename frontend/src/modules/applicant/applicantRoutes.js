@@ -5,7 +5,6 @@ export const APPLICANT_ROUTES = {
   experience: "/profile/experience",
   internshipApplication: "/profile/internship-application",
   internships: "/profile/internships",
-  jobPreferences: "/profile/job-preferences",
   jobs: "/profile/jobs",
   personal: "/profile/personal",
   profile: "/profile",
@@ -15,7 +14,6 @@ export const APPLICANT_ROUTES = {
 
 const applicantSectionRoutes = [
   { sectionId: "profile-section-personal", to: APPLICANT_ROUTES.personal },
-  { sectionId: "profile-section-job-preferences", to: APPLICANT_ROUTES.jobPreferences },
   { sectionId: "profile-section-experience", to: APPLICANT_ROUTES.experience },
   { sectionId: "profile-section-academic", to: APPLICANT_ROUTES.academic },
   { sectionId: "profile-section-skills", to: APPLICANT_ROUTES.skills },
@@ -27,7 +25,7 @@ export const applicantSidebarNavItems = [
   { icon: "assignment", label: "Permohonan Saya", to: APPLICANT_ROUTES.applications },
   { icon: "bookmark", label: "Senarai Simpan", to: APPLICANT_ROUTES.saved },
   {
-    activePaths: [APPLICANT_ROUTES.personal, APPLICANT_ROUTES.jobPreferences, APPLICANT_ROUTES.experience, APPLICANT_ROUTES.academic, APPLICANT_ROUTES.skills],
+    activePaths: [APPLICANT_ROUTES.personal, APPLICANT_ROUTES.experience, APPLICANT_ROUTES.academic, APPLICANT_ROUTES.skills],
     icon: "person",
     label: "Profil",
     sectionId: "profile-section-personal",
