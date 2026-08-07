@@ -16,6 +16,7 @@ const statusLabels = {
 };
 
 const getInternshipDraftStorageKey = (user) => `dbku_internship_student_info_manual_${user?.id || user?.email || "guest"}`;
+const APPLICATIONS_PER_PAGE = 5;
 
 function formatDate(value) {
   if (!value) return "-";
@@ -24,6 +25,10 @@ function formatDate(value) {
     month: "long",
     year: "numeric",
   });
+}
+
+function getApplicationDate(application) {
+  return application.submitted_at || application.created_at || "";
 }
 
 function getInternshipDraftApplication(user) {
@@ -75,6 +80,41 @@ function EmptyState({ actionLabel, actionTo, icon, message, title }) {
 }
 
 function ApplicationList({ applications, loading }) {
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [sortOrder, setSortOrder] = useState("desc");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const statusOptions = useMemo(() => {
+    const statuses = new Set(applications.map((application) => application.status || "draft"));
+    return Array.from(statuses);
+  }, [applications]);
+
+  const filteredApplications = useMemo(() => {
+    return applications
+      .filter((application) => statusFilter === "all" || (application.status || "draft") === statusFilter)
+      .sort((firstApplication, secondApplication) => {
+        const firstTime = new Date(getApplicationDate(firstApplication)).getTime() || 0;
+        const secondTime = new Date(getApplicationDate(secondApplication)).getTime() || 0;
+        return sortOrder === "asc" ? firstTime - secondTime : secondTime - firstTime;
+      });
+  }, [applications, sortOrder, statusFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredApplications.length / APPLICATIONS_PER_PAGE));
+  const paginatedApplications = useMemo(() => {
+    const startIndex = (currentPage - 1) * APPLICATIONS_PER_PAGE;
+    return filteredApplications.slice(startIndex, startIndex + APPLICATIONS_PER_PAGE);
+  }, [currentPage, filteredApplications]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [sortOrder, statusFilter, applications.length]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
   if (loading) {
     return <p className="applicant-list-status">Memuatkan permohonan...</p>;
   }
@@ -92,37 +132,109 @@ function ApplicationList({ applications, loading }) {
   }
 
   return (
-    <div className="applicant-list-grid">
-      {applications.map((application) => {
-        const vacancy = application.vacancy_detail || {};
-        return (
-          <article className="applicant-list-card" key={application.id}>
-            <div>
-              <span className={`applicant-status-pill ${application.status || "draft"}`}>
-                {statusLabels[application.status] || application.status || "Draf"}
-              </span>
-              <h2>{vacancy.title || "Jawatan DBKU"}</h2>
-              <p>{vacancy.department || vacancy.division || "Dewan Bandaraya Kuching Utara"}</p>
-            </div>
-            <dl>
-              <div>
-                <dt>No. rujukan</dt>
-                <dd>{application.reference_no || "-"}</dd>
-              </div>
-              <div>
-                <dt>Tarikh hantar</dt>
-                <dd>{formatDate(application.submitted_at || application.created_at)}</dd>
-              </div>
-              {application.isLocalDraft ? (
-                <div className="applicant-list-card-actions">
-                  <Link to={APPLICANT_ROUTES.internshipApplication}>Teruskan</Link>
-                </div>
-              ) : null}
-            </dl>
-          </article>
-        );
-      })}
-    </div>
+    <section className="applicant-applications-table-card">
+      <div className="applicant-table-toolbar">
+        <div>
+          <h2>Senarai permohonan</h2>
+          <p>Papar 5 permohonan setiap halaman.</p>
+        </div>
+        <div className="applicant-table-controls">
+          <label>
+            <span>Status</span>
+            <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+              <option value="all">Semua status</option>
+              {statusOptions.map((status) => (
+                <option key={status} value={status}>
+                  {statusLabels[status] || status}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>Susun tarikh</span>
+            <select value={sortOrder} onChange={(event) => setSortOrder(event.target.value)}>
+              <option value="desc">Menurun</option>
+              <option value="asc">Menaik</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div className="applicant-applications-table-wrap">
+        <table className="applicant-applications-table">
+          <thead>
+            <tr>
+              <th>Bil.</th>
+              <th>Permohonan</th>
+              <th>Bahagian</th>
+              <th>No. rujukan</th>
+              <th>Tarikh</th>
+              <th>Status</th>
+              <th>Tindakan</th>
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedApplications.length ? (
+              paginatedApplications.map((application, index) => {
+                const vacancy = application.vacancy_detail || {};
+                const status = application.status || "draft";
+                return (
+                  <tr key={application.id}>
+                    <td>{(currentPage - 1) * APPLICATIONS_PER_PAGE + index + 1}</td>
+                    <td>
+                      <strong>{vacancy.title || "Jawatan DBKU"}</strong>
+                    </td>
+                    <td>{vacancy.department || vacancy.division || "Dewan Bandaraya Kuching Utara"}</td>
+                    <td>{application.reference_no || "-"}</td>
+                    <td>{formatDate(getApplicationDate(application))}</td>
+                    <td>
+                      <span className={`applicant-status-pill ${status}`}>
+                        {statusLabels[status] || status}
+                      </span>
+                    </td>
+                    <td>
+                      {application.isLocalDraft ? (
+                        <Link className="applicant-table-action" to={APPLICANT_ROUTES.internshipApplication}>Teruskan</Link>
+                      ) : (
+                        <span className="applicant-table-no-action">-</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td className="applicant-table-empty" colSpan="7">Tiada permohonan untuk status ini.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="applicant-table-pagination">
+        <span>
+          Halaman {currentPage} daripada {totalPages}
+        </span>
+        <div>
+          <button
+            type="button"
+            onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+            disabled={currentPage === 1}
+            aria-label="Halaman sebelumnya"
+          >
+            &lt;
+          </button>
+          <button
+            type="button"
+            onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+            disabled={currentPage === totalPages}
+            aria-label="Halaman seterusnya"
+          >
+            &gt;
+          </button>
+        </div>
+      </div>
+    </section>
   );
 }
 

@@ -4978,6 +4978,174 @@ body:has(.applicant-profile-page) {
   margin-top: 28px;
 }
 
+.applicant-applications-table-card {
+  margin-top: 28px;
+  overflow: hidden;
+  border: 1px solid #c9f5de;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.applicant-table-toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  border-bottom: 1px solid #d8eee2;
+  padding: 22px 24px 18px;
+}
+
+.applicant-table-toolbar h2,
+.applicant-table-toolbar p {
+  margin: 0;
+}
+
+.applicant-table-toolbar h2 {
+  color: var(--profile-ink);
+  font-size: 22px;
+}
+
+.applicant-table-toolbar p {
+  margin-top: 5px;
+  color: #52615a;
+  font-weight: 700;
+}
+
+.applicant-table-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.applicant-table-controls label {
+  display: grid;
+  gap: 6px;
+  min-width: 180px;
+  color: #52615a;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.applicant-table-controls select {
+  min-height: 42px;
+  border: 1px solid #bfd8cb;
+  border-radius: 7px;
+  background: #ffffff;
+  padding: 0 12px;
+  color: var(--profile-ink);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  text-transform: none;
+}
+
+.applicant-applications-table-wrap {
+  overflow-x: auto;
+}
+
+.applicant-applications-table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: collapse;
+}
+
+.applicant-applications-table th,
+.applicant-applications-table td {
+  border-bottom: 1px solid #d8eee2;
+  padding: 16px 18px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.applicant-applications-table th {
+  background: #f8fafc;
+  color: #52615a;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.applicant-applications-table td {
+  color: var(--profile-ink);
+  font-weight: 800;
+}
+
+.applicant-applications-table td strong {
+  display: block;
+  color: var(--profile-ink);
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.applicant-applications-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.applicant-table-action {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  background: var(--profile-green);
+  padding: 0 13px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.applicant-table-no-action {
+  color: #789083;
+}
+
+.applicant-table-empty {
+  color: #52615a;
+  text-align: center;
+}
+
+.applicant-table-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border-top: 1px solid #d8eee2;
+  padding: 16px 24px;
+  color: #52615a;
+  font-weight: 800;
+}
+
+.applicant-table-pagination div {
+  display: flex;
+  gap: 8px;
+}
+
+.applicant-table-pagination button {
+  display: inline-flex;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #bfd8cb;
+  border-radius: 7px;
+  background: #ffffff;
+  color: var(--profile-green);
+  font: inherit;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.applicant-table-pagination button:not(:disabled) {
+  cursor: pointer;
+}
+
+.applicant-table-pagination button:disabled {
+  cursor: not-allowed;
+  opacity: .45;
+}
+
 .applicant-list-card {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(260px, .45fr);
@@ -5119,6 +5287,21 @@ body:has(.applicant-profile-page) {
 }
 
 @media (max-width: 760px) {
+  .applicant-table-toolbar,
+  .applicant-table-pagination {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .applicant-table-controls,
+  .applicant-table-pagination div {
+    justify-content: flex-start;
+  }
+
+  .applicant-table-controls label {
+    min-width: min(100%, 240px);
+  }
+
   .applicant-list-card,
   .applicant-list-card.saved-vacancy-card {
     grid-template-columns: 1fr;
