@@ -44,10 +44,7 @@ export default function ApplicantDashboardPage() {
       <div className="profile-main-area">
         <ProfileContentHeader displayName={displayName} email={email} photoUrl={user.profile_photo_url} />
         <main className="profile-shell applicant-dashboard-shell">
-          <div className="profile-heading">
-            <span className="applicant-page-icon">
-              <Icon>dashboard</Icon>
-            </span>
+          <div className="profile-heading applicant-dashboard-heading">
             <h1>Papan Pemuka</h1>
             <p>Pantau profil, permohonan dan peluang kerjaya anda dalam satu paparan.</p>
           </div>

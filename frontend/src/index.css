@@ -4870,6 +4870,10 @@ body:has(.applicant-profile-page) {
   grid-column: 2;
 }
 
+.applicant-dashboard-heading {
+  display: block;
+}
+
 .applicant-page-icon {
   display: inline-flex;
   width: 44px;
