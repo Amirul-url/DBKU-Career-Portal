@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getStoredUser } from "../../lib/authApi";
 import { APPLICANT_ROUTES } from "../../modules/applicant/applicantRoutes";
+import { useApplicantSidebarState } from "../../modules/applicant/useApplicantSidebarState";
 import { Icon } from "./ApplicantAuthShared";
 import { ProfileContentHeader, ProfileSidebar } from "./ApplicantProfilePage";
 
@@ -19,7 +20,7 @@ function getProfileChecklist(user) {
 export default function ApplicantDashboardPage() {
   const navigate = useNavigate();
   const [user] = useState(() => getStoredUser());
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, toggleSidebar] = useApplicantSidebarState();
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
   const email = user?.email || "Belum dikemaskini";
   const checklist = useMemo(() => getProfileChecklist(user), [user]);
@@ -40,7 +41,7 @@ export default function ApplicantDashboardPage() {
 
   return (
     <div className={`applicant-profile-page ${sidebarOpen ? "sidebar-open" : "sidebar-collapsed"}`}>
-      <ProfileSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen((current) => !current)} />
+      <ProfileSidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
       <div className="profile-main-area">
         <ProfileContentHeader displayName={displayName} email={email} photoUrl={user.profile_photo_url} />
         <main className="profile-shell applicant-dashboard-shell">

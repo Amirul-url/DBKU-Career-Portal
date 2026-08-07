@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getStoredUser } from "../../lib/authApi";
+import { useApplicantSidebarState } from "../../modules/applicant/useApplicantSidebarState";
 import { Icon } from "./ApplicantAuthShared";
 import { ProfileContentHeader, ProfileSidebar } from "./ApplicantProfilePage";
 
@@ -261,7 +262,7 @@ export default function ApplicantInternshipApplicationPage() {
   const navigate = useNavigate();
   const user = getStoredUser();
   const savedDraft = loadStudentInfoDraft(user);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, toggleSidebar] = useApplicantSidebarState();
   const [activeInfoTab, setActiveInfoTab] = useState("Maklumat Peribadi");
   const [notice, setNotice] = useState("");
   const [noticeStatus, setNoticeStatus] = useState("success");
@@ -393,7 +394,7 @@ export default function ApplicantInternshipApplicationPage() {
 
   return (
     <div className={`applicant-profile-page ${sidebarOpen ? "sidebar-open" : "sidebar-collapsed"}`}>
-      <ProfileSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen((current) => !current)} />
+      <ProfileSidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
       <div className="profile-main-area">
         <ProfileContentHeader displayName={displayName} email={email} photoUrl={user.profile_photo_url} />
         <main className="profile-shell internship-application-shell">

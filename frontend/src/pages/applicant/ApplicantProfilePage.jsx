@@ -3,6 +3,7 @@ import { getCities, getPostcodes, getStates } from "malaysia-postcodes";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { apiRequest, clearAuthSession, fetchAuthenticatedBlob, getStoredUser, recordLogoutActivity, updateCurrentUser } from "../../lib/authApi";
 import { applicantSidebarNavItems, getApplicantSectionId } from "../../modules/applicant/applicantRoutes";
+import { useApplicantSidebarState } from "../../modules/applicant/useApplicantSidebarState";
 import { Icon } from "./ApplicantAuthShared";
 
 const emptyProfileCards = [
@@ -2493,7 +2494,7 @@ export default function ApplicantProfilePage() {
   const location = useLocation();
   const navigate = useNavigate();
   const user = getStoredUser();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, toggleSidebar] = useApplicantSidebarState();
   const [editingSection, setEditingSection] = useState(null);
   const [isPersonalCloseDialogOpen, setIsPersonalCloseDialogOpen] = useState(false);
   const [isJobPreferencesCloseDialogOpen, setIsJobPreferencesCloseDialogOpen] = useState(false);
@@ -2787,7 +2788,7 @@ export default function ApplicantProfilePage() {
 
   return (
     <div className={`applicant-profile-page ${sidebarOpen ? "sidebar-open" : "sidebar-collapsed"}`}>
-      <ProfileSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen((current) => !current)} />
+      <ProfileSidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
       <div className="profile-main-area">
         <ProfileContentHeader
           displayName={profileDisplayName}

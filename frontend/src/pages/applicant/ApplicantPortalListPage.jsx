@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { apiRequest, getStoredUser } from "../../lib/authApi";
 import { APPLICANT_ROUTES } from "../../modules/applicant/applicantRoutes";
 import { getSavedVacancies, removeSavedVacancy } from "../../modules/applicant/savedVacancies";
+import { useApplicantSidebarState } from "../../modules/applicant/useApplicantSidebarState";
 import { Icon } from "./ApplicantAuthShared";
 import { ProfileContentHeader, ProfileSidebar } from "./ApplicantProfilePage";
 
@@ -368,7 +369,7 @@ function getApplicationRows(data) {
 export default function ApplicantPortalListPage({ page }) {
   const navigate = useNavigate();
   const [user] = useState(() => getStoredUser());
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, toggleSidebar] = useApplicantSidebarState();
   const [applications, setApplications] = useState([]);
   const [savedVacancies, setSavedVacancies] = useState(() => getSavedVacancies(user));
   const [loading, setLoading] = useState(page === "applications");
@@ -457,7 +458,7 @@ export default function ApplicantPortalListPage({ page }) {
 
   return (
     <div className={`applicant-profile-page ${sidebarOpen ? "sidebar-open" : "sidebar-collapsed"}`}>
-      <ProfileSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen((current) => !current)} />
+      <ProfileSidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
       <div className="profile-main-area">
         <ProfileContentHeader displayName={displayName} email={email} photoUrl={user.profile_photo_url} />
         <main className="profile-shell applicant-list-shell">
