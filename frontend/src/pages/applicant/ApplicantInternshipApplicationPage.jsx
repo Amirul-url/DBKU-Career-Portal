@@ -51,6 +51,7 @@ export default function ApplicantInternshipApplicationPage() {
   const user = getStoredUser();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [notice, setNotice] = useState("");
+  const [passportPhoto, setPassportPhoto] = useState(null);
   const [studentInfo, setStudentInfo] = useState({
     citizenship: "WARGANEGARA",
     citizenshipCountry: "MALAYSIA",
@@ -86,6 +87,12 @@ export default function ApplicantInternshipApplicationPage() {
     }
   }, [navigate, user]);
 
+  useEffect(() => () => {
+    if (passportPhoto?.previewUrl) {
+      URL.revokeObjectURL(passportPhoto.previewUrl);
+    }
+  }, [passportPhoto]);
+
   if (!user || user.role !== "applicant") {
     return null;
   }
@@ -93,6 +100,18 @@ export default function ApplicantInternshipApplicationPage() {
   const updateStudentInfo = (field) => (event) => {
     setNotice("");
     setStudentInfo((current) => ({ ...current, [field]: event.target.value }));
+  };
+
+  const updatePassportPhoto = (event) => {
+    const file = event.target.files?.[0];
+    setNotice("");
+    setPassportPhoto((current) => {
+      if (current?.previewUrl) {
+        URL.revokeObjectURL(current.previewUrl);
+      }
+
+      return file ? { name: file.name, previewUrl: URL.createObjectURL(file) } : null;
+    });
   };
 
   const handleUpdate = (event) => {
@@ -162,8 +181,19 @@ export default function ApplicantInternshipApplicationPage() {
                     </div>
 
                     <aside className="student-info-photo-card">
-                      {user.profile_photo_url ? <img src={user.profile_photo_url} alt={displayName} /> : <div>{displayName.slice(0, 1).toUpperCase()}</div>}
-                      <p><strong>Note</strong> Sila gunakan gambar profil rasmi untuk permohonan latihan industri.</p>
+                      <label className="student-passport-upload">
+                        {passportPhoto?.previewUrl ? (
+                          <img src={passportPhoto.previewUrl} alt="Gambar passport pelajar" />
+                        ) : (
+                          <span>
+                            <Icon>upload_file</Icon>
+                            Muat naik gambar passport
+                          </span>
+                        )}
+                        <input accept=".jpg" type="file" onChange={updatePassportPhoto} />
+                      </label>
+                      {passportPhoto?.name ? <small>{passportPhoto.name}</small> : null}
+                      <p><strong>Note</strong> Sila pastikan gambar yang dimuatnaik adalah dalam format .jpg (3.5 cm x 5.0 cm)</p>
                     </aside>
                   </div>
 
