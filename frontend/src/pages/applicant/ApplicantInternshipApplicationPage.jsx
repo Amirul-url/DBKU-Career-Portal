@@ -193,6 +193,37 @@ const getDefaultStudentInfo = () => ({
   qualification: "",
 });
 
+const requiredPersonalFields = [
+  ["name", "Nama"],
+  ["icNo", "No. Kad Pengenalan"],
+  ["gender", "Jantina"],
+  ["ethnicity", "Etnik"],
+  ["nativeStatus", "Status Bumiputera"],
+  ["citizenship", "Status Kewarganegaraan Malaysia"],
+  ["citizenshipCountry", "Negara Kewarganegaraan"],
+  ["religion", "Agama"],
+  ["maritalStatus", "Status Perkahwinan"],
+  ["stateOfBirth", "Negeri Kelahiran"],
+  ["residenceState", "Negeri Kediaman"],
+  ["dateOfBirth", "Tarikh Lahir"],
+  ["sponsorship", "Tajaan"],
+  ["qualification", "Kelayakan Kemasukan"],
+  ["phone", "No. Telefon"],
+  ["email", "Alamat E-mel"],
+];
+
+const getRequiredAddressFields = (prefix) => [
+  [`${prefix}Line1`, "Alamat 1"],
+  [`${prefix}Line2`, "Alamat 2"],
+  [`${prefix}Line3`, "Alamat 3"],
+  [`${prefix}Postcode`, "Poskod"],
+  [`${prefix}City`, "Bandar"],
+  [`${prefix}State`, "Negeri"],
+  [`${prefix}District`, "Daerah"],
+  [`${prefix}Country`, "Negara"],
+  [`${prefix}Phone`, "No. Telefon"],
+];
+
 function normalizeStudentInfoDraft(studentInfo = {}) {
   return Object.fromEntries(
     Object.entries(studentInfo).map(([field, value]) => [field, valueAliases[field]?.[value] || value]),
@@ -233,6 +264,7 @@ export default function ApplicantInternshipApplicationPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeInfoTab, setActiveInfoTab] = useState("Maklumat Peribadi");
   const [notice, setNotice] = useState("");
+  const [noticeStatus, setNoticeStatus] = useState("success");
   const [passportPhoto, setPassportPhoto] = useState(() => savedDraft?.passportPhoto || null);
   const passportPhotoInputRef = useRef(null);
   const [studentInfo, setStudentInfo] = useState(() => ({
@@ -303,6 +335,23 @@ export default function ApplicantInternshipApplicationPage() {
 
   const handleUpdate = (event) => {
     event.preventDefault();
+
+    const requiredFields = activeInfoTab === "Alamat 1"
+      ? getRequiredAddressFields("address1")
+      : activeInfoTab === "Alamat 2"
+        ? getRequiredAddressFields("address2")
+        : requiredPersonalFields;
+    const missingFields = requiredFields
+      .filter(([field]) => !String(studentInfo[field] || "").trim())
+      .map(([, label]) => label);
+
+    if (missingFields.length) {
+      setNoticeStatus("error");
+      setNotice(`Sila lengkapkan field berikut: ${missingFields.join(", ")}.`);
+      return;
+    }
+
+    setNoticeStatus("success");
     setNotice(`${activeInfoTab} telah dikemas kini untuk draf permohonan latihan industri.`);
   };
 
@@ -379,7 +428,7 @@ export default function ApplicantInternshipApplicationPage() {
 
                 <form className="student-info-form" onSubmit={handleUpdate}>
                   <h2>{formTitle}</h2>
-                  {notice ? <p className="student-info-notice">{notice}</p> : null}
+                  {notice ? <p className={`student-info-notice ${noticeStatus}`}>{notice}</p> : null}
 
                   {isAddressTab ? (
                     renderAddressFields(activeInfoTab === "Alamat 1" ? "address1" : "address2")

@@ -5608,14 +5608,22 @@ body:has(.applicant-profile-page) {
 
 .student-info-notice {
   width: fit-content;
+  max-width: 100%;
   margin: 0 0 16px;
   border: 1px solid #bbf7d0;
-  border-radius: 999px;
+  border-radius: 10px;
   background: #f0fdf4;
   color: #087942;
   padding: 8px 12px;
   font-size: 12px;
   font-weight: 800;
+  line-height: 1.45;
+}
+
+.student-info-notice.error {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
 }
 
 .student-info-layout {
