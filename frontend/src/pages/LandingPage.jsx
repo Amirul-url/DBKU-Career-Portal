@@ -75,10 +75,10 @@ export default function LandingPage() {
     return {
       latestRoles: latest,
       stats: [
-        [String(jobVacancies.length), "Kekosongan Aktif"],
-        ["23", "Jabatan DBKU"],
-        ["1", "Program Latihan Industri Terbuka"],
-        ["100%", "Permohonan Dalam Talian"],
+        { label: "Kekosongan Aktif", value: String(jobVacancies.length) },
+        { label: "Jabatan DBKU", value: "23" },
+        { label: "Latihan Industri", value: "Sepanjang Tahun", variant: "text" },
+        { label: "Permohonan Dalam Talian", value: "100%" },
       ],
     };
   }, [vacancies]);
@@ -191,9 +191,9 @@ export default function LandingPage() {
         </section>
 
         <section className="corporate-stats" aria-label="Ringkasan portal">
-          {stats.map(([value, label]) => (
+          {stats.map(({ label, value, variant }) => (
             <div key={label}>
-              <strong>{value}</strong>
+              <strong className={variant === "text" ? "text-value" : ""}>{value}</strong>
               <span>{label}</span>
             </div>
           ))}

@@ -1136,6 +1136,13 @@ a {
   line-height: 1.1;
 }
 
+.corporate-stats strong.text-value {
+  max-width: 220px;
+  font-size: 21px;
+  line-height: 1.2;
+  text-align: center;
+}
+
 .corporate-stats span {
   margin-top: 7px;
   color: #63736b;
