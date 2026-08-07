@@ -112,100 +112,14 @@ function saveStudentInfoDraft(user, payload) {
   }
 }
 
-function SearchableSelect({ label, onChange, options, placeholder, value }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [search, setSearch] = useState("");
-  const typedValue = search.trim();
-  const normalizedSearch = typedValue.toLowerCase();
-  const filteredOptions = options.filter((option) => option.toLowerCase().includes(normalizedSearch));
-  const hasExactMatch = options.some((option) => option.toLowerCase() === normalizedSearch);
-
-  const commitValue = (nextValue) => {
-    onChange(nextValue);
-    setIsOpen(false);
-    setSearch("");
-  };
-
-  return (
-    <label className="student-search-select-label">{label}
-      <div
-        className={`student-search-select ${isOpen ? "open" : ""}`}
-        onBlur={(event) => {
-          if (!event.currentTarget.contains(event.relatedTarget)) {
-            setIsOpen(false);
-            setSearch("");
-          }
-        }}
-      >
-        <button
-          className={`student-search-select-trigger ${value ? "" : "placeholder"}`}
-          type="button"
-          onClick={() => {
-            setIsOpen((current) => !current);
-            setSearch("");
-          }}
-        >
-          <span>{value || placeholder}</span>
-          <Icon>expand_more</Icon>
-        </button>
-        {isOpen ? (
-          <div className="student-search-select-menu">
-            <div className="student-search-select-search">
-              <input
-                autoFocus
-                placeholder={`Cari ${label.toLowerCase()}`}
-                type="search"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" && typedValue) {
-                    event.preventDefault();
-                    commitValue(typedValue);
-                  } else if (event.key === "Escape") {
-                    setIsOpen(false);
-                    setSearch("");
-                  }
-                }}
-              />
-              <Icon>search</Icon>
-            </div>
-            <div className="student-search-select-options">
-              {filteredOptions.map((option) => (
-                <button
-                  className={value === option ? "selected" : ""}
-                  key={option}
-                  type="button"
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => commitValue(option)}
-                >
-                  {option}
-                </button>
-              ))}
-              {typedValue && !hasExactMatch ? (
-                <button
-                  className="custom-option"
-                  type="button"
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => commitValue(typedValue)}
-                >
-                  Guna "{typedValue}"
-                </button>
-              ) : null}
-              {!filteredOptions.length && !typedValue ? <p>Tiada pilihan ditemui</p> : null}
-            </div>
-          </div>
-        ) : null}
-      </div>
-    </label>
-  );
-}
-
 export default function ApplicantInternshipApplicationPage() {
   const navigate = useNavigate();
   const user = getStoredUser();
   const savedDraft = loadStudentInfoDraft(user);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [notice, setNotice] = useState("");
+  const [maritalStatusOpen, setMaritalStatusOpen] = useState(false);
+  const [maritalStatusSearch, setMaritalStatusSearch] = useState("");
   const [passportPhoto, setPassportPhoto] = useState(() => savedDraft?.passportPhoto || null);
   const passportPhotoInputRef = useRef(null);
   const [studentInfo, setStudentInfo] = useState(() => ({
@@ -242,11 +156,6 @@ export default function ApplicantInternshipApplicationPage() {
     setStudentInfo((current) => ({ ...current, [field]: event.target.value }));
   };
 
-  const updateStudentInfoValue = (field) => (value) => {
-    setNotice("");
-    setStudentInfo((current) => ({ ...current, [field]: value }));
-  };
-
   const updatePassportPhoto = (event) => {
     const file = event.target.files?.[0];
     if (!file) {
@@ -277,6 +186,15 @@ export default function ApplicantInternshipApplicationPage() {
   const handleUpdate = (event) => {
     event.preventDefault();
     setNotice("Maklumat asas pelajar telah dikemas kini untuk draf permohonan latihan industri.");
+  };
+
+  const filteredMaritalStatusOptions = maritalStatusOptions.filter((option) => option.toLowerCase().includes(maritalStatusSearch.trim().toLowerCase()));
+
+  const selectMaritalStatus = (option) => {
+    setNotice("");
+    setStudentInfo((current) => ({ ...current, maritalStatus: option }));
+    setMaritalStatusOpen(false);
+    setMaritalStatusSearch("");
   };
 
   return (
@@ -315,19 +233,71 @@ export default function ApplicantInternshipApplicationPage() {
                     <div className="student-info-fields">
                       <label className="wide">Nama<input value={studentInfo.name} onChange={updateStudentInfo("name")} /></label>
                       <label>No. Kad Pengenalan<input value={studentInfo.icNo} onChange={updateStudentInfo("icNo")} /></label>
-                      <SearchableSelect label="Jantina" onChange={updateStudentInfoValue("gender")} options={selectOptions.gender} placeholder="Pilih jantina" value={studentInfo.gender} />
-                      <SearchableSelect label="Etnik" onChange={updateStudentInfoValue("ethnicity")} options={selectOptions.ethnicity} placeholder="Pilih etnik" value={studentInfo.ethnicity} />
-                      <SearchableSelect label="Status Bumiputera" onChange={updateStudentInfoValue("nativeStatus")} options={selectOptions.nativeStatus} placeholder="Pilih status" value={studentInfo.nativeStatus} />
-                      <SearchableSelect label="Status Kewarganegaraan Malaysia" onChange={updateStudentInfoValue("citizenship")} options={selectOptions.citizenship} placeholder="Pilih status kewarganegaraan" value={studentInfo.citizenship} />
-                      <SearchableSelect label="Negara Kewarganegaraan" onChange={updateStudentInfoValue("citizenshipCountry")} options={selectOptions.citizenshipCountry} placeholder="Pilih negara" value={studentInfo.citizenshipCountry} />
-                      <SearchableSelect label="Agama" onChange={updateStudentInfoValue("religion")} options={selectOptions.religion} placeholder="Pilih agama" value={studentInfo.religion} />
-                      <SearchableSelect label="Status Perkahwinan" onChange={updateStudentInfoValue("maritalStatus")} options={maritalStatusOptions} placeholder="Pilih status perkahwinan" value={studentInfo.maritalStatus} />
-                      <SearchableSelect label="Negeri Kelahiran" onChange={updateStudentInfoValue("stateOfBirth")} options={selectOptions.state} placeholder="Pilih negeri kelahiran" value={studentInfo.stateOfBirth} />
-                      <SearchableSelect label="Negeri Kediaman" onChange={updateStudentInfoValue("residenceState")} options={selectOptions.state} placeholder="Pilih negeri kediaman" value={studentInfo.residenceState} />
+                      <label>Jantina<select value={studentInfo.gender} onChange={updateStudentInfo("gender")}><option value="">Pilih jantina</option>{selectOptions.gender.map((option) => <option key={option}>{option}</option>)}</select></label>
+                      <label>Etnik<select value={studentInfo.ethnicity} onChange={updateStudentInfo("ethnicity")}><option value="">Pilih etnik</option>{selectOptions.ethnicity.map((option) => <option key={option}>{option}</option>)}</select></label>
+                      <label>Status Bumiputera<select value={studentInfo.nativeStatus} onChange={updateStudentInfo("nativeStatus")}><option value="">Pilih status</option>{selectOptions.nativeStatus.map((option) => <option key={option}>{option}</option>)}</select></label>
+                      <label>Status Kewarganegaraan Malaysia<select value={studentInfo.citizenship} onChange={updateStudentInfo("citizenship")}>{selectOptions.citizenship.map((option) => <option key={option}>{option}</option>)}</select></label>
+                      <label>Negara Kewarganegaraan<select value={studentInfo.citizenshipCountry} onChange={updateStudentInfo("citizenshipCountry")}>{selectOptions.citizenshipCountry.map((option) => <option key={option}>{option}</option>)}</select></label>
+                      <label>Agama<select value={studentInfo.religion} onChange={updateStudentInfo("religion")}><option value="">Pilih agama</option>{selectOptions.religion.map((option) => <option key={option}>{option}</option>)}</select></label>
+                      <label className="student-search-select-label">Status Perkahwinan
+                        <div
+                          className={`student-search-select ${maritalStatusOpen ? "open" : ""}`}
+                          onBlur={(event) => {
+                            if (!event.currentTarget.contains(event.relatedTarget)) {
+                              setMaritalStatusOpen(false);
+                            }
+                          }}
+                        >
+                          <button
+                            className="student-search-select-trigger"
+                            type="button"
+                            onClick={() => {
+                              setMaritalStatusOpen((current) => !current);
+                              setMaritalStatusSearch("");
+                            }}
+                          >
+                            <span>{studentInfo.maritalStatus || "Pilih status perkahwinan"}</span>
+                            <Icon>expand_more</Icon>
+                          </button>
+                          {maritalStatusOpen ? (
+                            <div className="student-search-select-menu">
+                              <div className="student-search-select-search">
+                                <input
+                                  autoFocus
+                                  placeholder="Cari status"
+                                  type="search"
+                                  value={maritalStatusSearch}
+                                  onChange={(event) => setMaritalStatusSearch(event.target.value)}
+                                />
+                                <Icon>search</Icon>
+                              </div>
+                              <div className="student-search-select-options">
+                                {filteredMaritalStatusOptions.length ? (
+                                  filteredMaritalStatusOptions.map((option) => (
+                                    <button
+                                      className={studentInfo.maritalStatus === option ? "selected" : ""}
+                                      key={option}
+                                      type="button"
+                                      onMouseDown={(event) => event.preventDefault()}
+                                      onClick={() => selectMaritalStatus(option)}
+                                    >
+                                      {option}
+                                    </button>
+                                  ))
+                                ) : (
+                                  <p>Tiada pilihan ditemui</p>
+                                )}
+                              </div>
+                            </div>
+                          ) : null}
+                        </div>
+                      </label>
+                      <label>Negeri Kelahiran<select value={studentInfo.stateOfBirth} onChange={updateStudentInfo("stateOfBirth")}>{selectOptions.state.map((option) => <option key={option}>{option}</option>)}</select></label>
+                      <label>Negeri Kediaman<select value={studentInfo.residenceState} onChange={updateStudentInfo("residenceState")}>{selectOptions.state.map((option) => <option key={option}>{option}</option>)}</select></label>
                       <label>Tarikh Lahir<input type="date" value={studentInfo.dateOfBirth} onChange={updateStudentInfo("dateOfBirth")} /></label>
-                      <SearchableSelect label="Jenis Sekolah Menengah" onChange={updateStudentInfoValue("schoolType")} options={selectOptions.schoolType} placeholder="Pilih jenis sekolah" value={studentInfo.schoolType} />
-                      <SearchableSelect label="Tajaan" onChange={updateStudentInfoValue("sponsorship")} options={selectOptions.sponsorship} placeholder="Pilih tajaan" value={studentInfo.sponsorship} />
-                      <SearchableSelect label="Kelayakan Kemasukan" onChange={updateStudentInfoValue("qualification")} options={selectOptions.qualification} placeholder="Pilih kelayakan" value={studentInfo.qualification} />
+                      <label>Jenis Sekolah Menengah<select value={studentInfo.schoolType} onChange={updateStudentInfo("schoolType")}><option value="">Pilih jenis sekolah</option>{selectOptions.schoolType.map((option) => <option key={option}>{option}</option>)}</select></label>
+                      <label>Tajaan<select value={studentInfo.sponsorship} onChange={updateStudentInfo("sponsorship")}><option value="">Pilih tajaan</option>{selectOptions.sponsorship.map((option) => <option key={option}>{option}</option>)}</select></label>
+                      <label>Kelayakan Kemasukan<select value={studentInfo.qualification} onChange={updateStudentInfo("qualification")}><option value="">Pilih kelayakan</option>{selectOptions.qualification.map((option) => <option key={option}>{option}</option>)}</select></label>
                       <label>No. Telefon<input value={studentInfo.phone} onChange={updateStudentInfo("phone")} /></label>
                       <label className="wide">Alamat E-mel UMS<input type="email" value={studentInfo.umsEmail} onChange={updateStudentInfo("umsEmail")} /></label>
                       <label className="wide">Alamat E-mel<input type="email" value={studentInfo.email} onChange={updateStudentInfo("email")} /></label>
