@@ -5722,14 +5722,26 @@ body:has(.applicant-profile-page) {
 
 .student-passport-upload span {
   display: grid;
-  gap: 8px;
+  gap: 6px;
   place-items: center;
   padding: 18px;
   color: #13844a;
-  font-size: 12px;
-  font-weight: 850;
   line-height: 1.35;
   text-align: center;
+}
+
+.student-passport-upload b {
+  max-width: 92px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.student-passport-upload span small {
+  max-width: 100px;
+  color: #64736b;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.25;
 }
 
 .student-passport-upload .material-symbols-outlined {
@@ -5743,7 +5755,7 @@ body:has(.applicant-profile-page) {
   opacity: 0;
 }
 
-.student-info-photo-card small {
+.student-info-photo-card > small {
   max-width: 220px;
   color: #52615a;
   font-size: 12px;
