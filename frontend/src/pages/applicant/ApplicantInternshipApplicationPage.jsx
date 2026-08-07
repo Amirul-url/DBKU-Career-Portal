@@ -231,7 +231,7 @@ export default function ApplicantInternshipApplicationPage() {
                     <div className="student-info-fields">
                       <label>No. Matrik<input value={studentInfo.matricNo} onChange={updateStudentInfo("matricNo")} /></label>
                       <label className="wide">Nama<input value={studentInfo.name} onChange={updateStudentInfo("name")} /></label>
-                      <label>No. Kad Pengenalan<input value={studentInfo.icNo} onChange={updateStudentInfo("icNo")} /></label>
+                      <label>Nombor Kad Pengenalan<input value={studentInfo.icNo} onChange={updateStudentInfo("icNo")} /></label>
                       <label>Jantina<select value={studentInfo.gender} onChange={updateStudentInfo("gender")}><option value="">Pilih jantina</option>{selectOptions.gender.map((option) => <option key={option}>{option}</option>)}</select></label>
                       <label>Etnik<select value={studentInfo.ethnicity} onChange={updateStudentInfo("ethnicity")}><option value="">Pilih etnik</option>{selectOptions.ethnicity.map((option) => <option key={option}>{option}</option>)}</select></label>
                       <label>Status Bumiputera<select value={studentInfo.nativeStatus} onChange={updateStudentInfo("nativeStatus")}><option value="">Pilih status</option>{selectOptions.nativeStatus.map((option) => <option key={option}>{option}</option>)}</select></label>
