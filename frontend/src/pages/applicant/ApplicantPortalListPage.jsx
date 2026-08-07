@@ -15,6 +15,8 @@ const statusLabels = {
   withdrawn: "Ditarik balik",
 };
 
+const getInternshipDraftStorageKey = (user) => `dbku_internship_student_info_manual_${user?.id || user?.email || "guest"}`;
+
 function formatDate(value) {
   if (!value) return "-";
   return new Date(value).toLocaleDateString("ms-MY", {
@@ -22,6 +24,41 @@ function formatDate(value) {
     month: "long",
     year: "numeric",
   });
+}
+
+function getInternshipDraftApplication(user) {
+  if (typeof window === "undefined" || !user) return null;
+
+  try {
+    const saved = window.localStorage.getItem(getInternshipDraftStorageKey(user));
+    if (!saved) return null;
+
+    const draft = JSON.parse(saved);
+    return {
+      id: "internship-draft",
+      isLocalDraft: true,
+      reference_no: "DRAF-LI",
+      status: "draft",
+      submitted_at: null,
+      created_at: draft.savedAt || new Date().toISOString(),
+      vacancy_detail: {
+        department: "Latihan Industri",
+        title: "Permohonan Latihan Industri DBKU",
+        vacancy_type: "internship",
+      },
+    };
+  } catch {
+    return null;
+  }
+}
+
+function isInternshipApplication(application) {
+  const vacancy = application.vacancy_detail || application.vacancy || {};
+  return application.vacancy_type === "internship"
+    || application.type === "internship"
+    || vacancy.vacancy_type === "internship"
+    || vacancy.type === "Latihan Industri"
+    || vacancy.category === "Latihan Industri";
 }
 
 function EmptyState({ actionLabel, actionTo, icon, message, title }) {
@@ -76,6 +113,11 @@ function ApplicationList({ applications, loading }) {
                 <dt>Tarikh hantar</dt>
                 <dd>{formatDate(application.submitted_at || application.created_at)}</dd>
               </div>
+              {application.isLocalDraft ? (
+                <div className="applicant-list-card-actions">
+                  <Link to={APPLICANT_ROUTES.internshipApplication}>Teruskan</Link>
+                </div>
+              ) : null}
             </dl>
           </article>
         );
@@ -228,6 +270,16 @@ export default function ApplicantPortalListPage({ page }) {
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
   const email = user?.email || "Belum dikemaskini";
   const isApplicationsPage = page === "applications";
+  const localDraftApplication = useMemo(
+    () => (isApplicationsPage ? getInternshipDraftApplication(user) : null),
+    [isApplicationsPage, user],
+  );
+  const displayApplications = useMemo(() => {
+    if (!isApplicationsPage || !localDraftApplication) return applications;
+
+    const hasInternshipApplication = applications.some(isInternshipApplication);
+    return hasInternshipApplication ? applications : [localDraftApplication, ...applications];
+  }, [applications, isApplicationsPage, localDraftApplication]);
 
   const loadApplications = useCallback(() => {
     if (!user || user.role !== "applicant" || !isApplicationsPage) return undefined;
@@ -317,7 +369,7 @@ export default function ApplicantPortalListPage({ page }) {
               <button type="button" onClick={loadApplications}>Cuba semula</button>
             </section>
           ) : isApplicationsPage ? (
-            <ApplicationList applications={applications} loading={loading} />
+            <ApplicationList applications={displayApplications} loading={loading} />
           ) : (
             <SavedVacancyList vacancies={savedVacancies} onRemove={handleRemoveSavedVacancy} />
           )}

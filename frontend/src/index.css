@@ -5043,6 +5043,11 @@ body:has(.applicant-profile-page) {
   color: #1769aa;
 }
 
+.applicant-status-pill.draft {
+  background: #fef3c7;
+  color: #92400e;
+}
+
 .applicant-status-pill.shortlisted {
   background: #dcfce7;
   color: #087a42;
@@ -5057,6 +5062,24 @@ body:has(.applicant-profile-page) {
 .applicant-status-pill.saved {
   background: #dcfce7;
   color: #087a42;
+}
+
+.applicant-list-card-actions {
+  display: flex;
+  align-items: center;
+}
+
+.applicant-list-card-actions a {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  background: var(--profile-green);
+  padding: 0 13px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 900;
 }
 
 .saved-vacancy-actions {
