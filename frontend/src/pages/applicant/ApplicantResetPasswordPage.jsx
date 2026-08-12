@@ -7,7 +7,9 @@ export default function ApplicantResetPasswordPage() {
   const navigate = useNavigate();
   const params = new URLSearchParams(window.location.search);
   const [formData, setFormData] = useState({
+    method: params.get("method") || "email",
     email: params.get("email") || "",
+    phone_number: params.get("phone_number") || "",
     otp: params.get("otp") || "",
     password: "",
     password2: "",

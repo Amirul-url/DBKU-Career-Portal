@@ -3632,6 +3632,42 @@ body:has(.auth-page) {
   color: #bbf7d0;
 }
 
+.split-method-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.split-method-grid button {
+  display: grid;
+  gap: 4px;
+  min-height: 82px;
+  border: 1px solid rgba(209, 250, 229, 0.14);
+  border-radius: 12px;
+  background: rgba(248, 250, 252, 0.05);
+  padding: 12px;
+  color: rgba(248, 250, 252, 0.68);
+  text-align: left;
+}
+
+.split-method-grid button.active {
+  border-color: rgba(134, 239, 172, 0.58);
+  background: rgba(20, 83, 45, 0.28);
+  color: #dcfce7;
+}
+
+.split-method-grid strong {
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.split-method-grid span {
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
 .split-helper-box {
   max-width: none;
   margin: 0;

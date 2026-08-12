@@ -58,11 +58,14 @@ function OtpInput({ value, onChange, disabled = false }) {
 
 export default function ApplicantForgotPasswordPage() {
   const navigate = useNavigate();
+  const [method, setMethod] = useState("email");
   const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState("email");
   const [status, setStatus] = useState({ type: "", message: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const identifierLabel = method === "email" ? email.trim().toLowerCase() : phoneNumber.trim();
 
   const sendOtp = async (event) => {
     event.preventDefault();
@@ -70,10 +73,10 @@ export default function ApplicantForgotPasswordPage() {
     setIsSubmitting(true);
 
     try {
-      await requestPasswordResetOtp({ email });
+      await requestPasswordResetOtp({ method, email, phone_number: phoneNumber });
       setOtp("");
       setStep("otp");
-      setStatus({ type: "success", message: "OTP telah dihantar ke emel berdaftar anda." });
+      setStatus({ type: "success", message: method === "email" ? "OTP telah dihantar ke emel berdaftar anda." : "OTP telah dihantar ke WhatsApp berdaftar anda." });
     } catch (error) {
       setStatus({ type: "error", message: error.message });
     } finally {
@@ -87,8 +90,13 @@ export default function ApplicantForgotPasswordPage() {
     setIsSubmitting(true);
 
     try {
-      await verifyPasswordResetOtp({ email, otp });
-      const params = new URLSearchParams({ email: email.trim().toLowerCase(), otp });
+      await verifyPasswordResetOtp({ method, email, phone_number: phoneNumber, otp });
+      const params = new URLSearchParams({ method, otp });
+      if (method === "email") {
+        params.set("email", email.trim().toLowerCase());
+      } else {
+        params.set("phone_number", phoneNumber.trim());
+      }
       navigate(`/reset-password?${params.toString()}`);
     } catch (error) {
       setStatus({ type: "error", message: error.message });
@@ -102,31 +110,74 @@ export default function ApplicantForgotPasswordPage() {
       <section className="split-form-panel" aria-labelledby="forgot-password-title">
         <span className="split-eyebrow">Pemulihan Akaun</span>
         <h1 id="forgot-password-title">Lupa Kata Laluan</h1>
-        <p>Masukkan emel berdaftar untuk menerima OTP tetapan semula kata laluan.</p>
+        <p>Masukkan emel atau nombor WhatsApp berdaftar untuk menerima OTP tetapan semula kata laluan.</p>
 
         <div className="split-steps" aria-label="Langkah pemulihan akaun">
-          <span className={step === "email" ? "active" : "done"}>Emel</span>
+          <span className={step === "email" ? "active" : "done"}>{method === "email" ? "Emel" : "WhatsApp"}</span>
           <span className={step === "otp" ? "active" : ""}>OTP</span>
           <span>Kata Laluan</span>
         </div>
 
         {step === "email" ? (
           <form className="split-form" autoComplete="off" onSubmit={sendOtp}>
-            <AuthField icon="mail" label="Emel Berdaftar" required>
-              <input
-                type="email"
-                inputMode="email"
-                value={email}
-                placeholder="cth. example@example.com"
-                autoComplete="off"
-                autoCorrect="off"
-                autoCapitalize="off"
-                spellCheck="false"
-                disabled={isSubmitting}
-                onChange={(event) => setEmail(event.target.value)}
-                required
-              />
+            <AuthField icon={method === "email" ? "mail" : "phone"} label={method === "email" ? "Emel Berdaftar" : "Nombor WhatsApp Berdaftar"} required>
+              {method === "email" ? (
+                <input
+                  type="email"
+                  inputMode="email"
+                  value={email}
+                  placeholder="cth. example@example.com"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck="false"
+                  disabled={isSubmitting}
+                  onChange={(event) => setEmail(event.target.value)}
+                  required
+                />
+              ) : (
+                <input
+                  type="tel"
+                  inputMode="tel"
+                  value={phoneNumber}
+                  placeholder="cth. 60123456789"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck="false"
+                  disabled={isSubmitting}
+                  onChange={(event) => setPhoneNumber(event.target.value)}
+                  required
+                />
+              )}
             </AuthField>
+
+            <div className="split-method-grid" aria-label="Kaedah penerimaan OTP">
+              <button
+                type="button"
+                className={method === "email" ? "active" : ""}
+                disabled={isSubmitting}
+                onClick={() => {
+                  setMethod("email");
+                  setStatus({ type: "", message: "" });
+                }}
+              >
+                <strong>Emel</strong>
+                <span>Hantar OTP ke emel berdaftar.</span>
+              </button>
+              <button
+                type="button"
+                className={method === "whatsapp" ? "active" : ""}
+                disabled={isSubmitting}
+                onClick={() => {
+                  setMethod("whatsapp");
+                  setStatus({ type: "", message: "" });
+                }}
+              >
+                <strong>WhatsApp</strong>
+                <span>Hantar OTP ke nombor telefon berdaftar.</span>
+              </button>
+            </div>
 
             {status.message ? (
               <p className={`split-alert ${status.type}`} role={status.type === "error" ? "alert" : "status"}>
@@ -140,7 +191,7 @@ export default function ApplicantForgotPasswordPage() {
           </form>
         ) : (
           <form className="split-form" autoComplete="off" onSubmit={verifyOtp}>
-            <p className="split-helper-box">OTP 6 digit telah dihantar ke {email.trim().toLowerCase()}.</p>
+            <p className="split-helper-box">OTP 6 digit telah dihantar ke {identifierLabel}.</p>
             <label className="split-field">
               <span>OTP</span>
               <OtpInput value={otp} onChange={setOtp} disabled={isSubmitting} />
@@ -156,7 +207,7 @@ export default function ApplicantForgotPasswordPage() {
               {isSubmitting ? "Menyemak..." : "Sahkan OTP"}
             </button>
             <button type="button" className="split-secondary-action" disabled={isSubmitting} onClick={() => setStep("email")}>
-              Tukar Emel
+              Tukar {method === "email" ? "Emel" : "WhatsApp"}
             </button>
           </form>
         )}

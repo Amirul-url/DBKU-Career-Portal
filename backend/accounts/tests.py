@@ -89,6 +89,7 @@ class PasswordResetTests(APITestCase):
         self.user = User.objects.create_user(
             username="reset@example.com",
             email="reset@example.com",
+            mobile_number="60123456789",
             password="OldPassword123!",
             role="applicant",
         )
@@ -127,3 +128,16 @@ class PasswordResetTests(APITestCase):
         self.assertEqual(reset_response.status_code, 200)
         self.user.refresh_from_db()
         self.assertTrue(self.user.check_password("NewPassword123!"))
+
+    @override_settings(WHATSAPP_ENABLED=True)
+    @patch("accounts.views.send_password_reset_whatsapp")
+    def test_forgot_password_can_send_otp_by_whatsapp(self, mock_send_whatsapp):
+        response = self.client.post(
+            "/api/auth/forgot-password/send-otp/",
+            {"method": "whatsapp", "phone_number": "+60 12-345 6789"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        mock_send_whatsapp.assert_called_once()
+        self.assertEqual(mock_send_whatsapp.call_args.args[0], "60123456789")

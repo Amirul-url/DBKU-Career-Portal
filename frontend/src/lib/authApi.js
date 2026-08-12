@@ -193,22 +193,28 @@ export function loginApplicant({ email, password }) {
   });
 }
 
-export function requestPasswordResetOtp({ email }) {
+export function requestPasswordResetOtp({ method = "email", email = "", phone_number = "" }) {
   return authRequest("/auth/forgot-password/send-otp/", {
+    method,
     email: email.trim().toLowerCase(),
+    phone_number: phone_number.trim(),
   });
 }
 
-export function verifyPasswordResetOtp({ email, otp }) {
+export function verifyPasswordResetOtp({ method = "email", email = "", phone_number = "", otp }) {
   return authRequest("/auth/forgot-password/verify-otp/", {
+    method,
     email: email.trim().toLowerCase(),
+    phone_number: phone_number.trim(),
     otp,
   });
 }
 
-export function submitPasswordReset({ email, otp, password, password2 }) {
+export function submitPasswordReset({ method = "email", email = "", phone_number = "", otp, password, password2 }) {
   return authRequest("/auth/reset-password/submit/", {
+    method,
     email: email.trim().toLowerCase(),
+    phone_number: phone_number.trim(),
     otp,
     password,
     password2,

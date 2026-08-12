@@ -159,10 +159,15 @@ FRONTEND_URL = os.getenv("FRONTEND_URL", "").rstrip("/")
 NOTIFICATION_SIDE_EFFECTS_ENABLED = env_bool("NOTIFICATION_SIDE_EFFECTS_ENABLED", "False")
 NOTIFICATION_EMAIL_ENABLED = env_bool("NOTIFICATION_EMAIL_ENABLED", "False")
 WHATSAPP_ENABLED = env_bool("WHATSAPP_ENABLED", "False")
+WHATSAPP_PROVIDER = os.getenv("WHATSAPP_PROVIDER", "evolution").strip()
 BREVO_API_KEY = os.getenv("BREVO_API_KEY", "").strip()
 BREVO_SENDER_NAME = os.getenv("BREVO_SENDER_NAME", "DBKU Career Portal").strip()
 BREVO_SENDER_EMAIL = os.getenv("BREVO_SENDER_EMAIL", "").strip()
 BREVO_TIMEOUT_SECONDS = int(os.getenv("BREVO_TIMEOUT_SECONDS", "10"))
+EVOLUTION_API_URL = os.getenv("EVOLUTION_API_URL", "").strip()
+EVOLUTION_API_KEY = os.getenv("EVOLUTION_API_KEY", "").strip()
+EVOLUTION_INSTANCE_NAME = os.getenv("EVOLUTION_INSTANCE_NAME", "").strip()
+EVOLUTION_API_TIMEOUT = int(os.getenv("EVOLUTION_API_TIMEOUT", "15"))
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "accounts.User"

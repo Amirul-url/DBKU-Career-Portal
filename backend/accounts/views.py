@@ -11,7 +11,7 @@ from django.db import DatabaseError
 from django.db.models import Q
 
 from .models import AccountActivity, ApplicantProfileData, LoginSession, User
-from .otp_delivery import OTPDeliveryError, send_password_reset_email
+from .otp_delivery import OTPDeliveryError, send_password_reset_email, send_password_reset_whatsapp
 from .serializers import AccountActivitySerializer, ForgotPasswordSendSerializer, ForgotPasswordVerifySerializer, InternalHrmAccountSerializer, LoginSerializer, RegisterSerializer, ResetPasswordSerializer, SuperAdminAccountSerializer, UserSerializer
 from .services import build_auth_response
 from .session_services import close_login_session, close_open_login_sessions
@@ -59,7 +59,10 @@ def forgot_password_send_otp_view(request):
     cache.set(serializer.cache_key, otp, timeout=600)
 
     try:
-        send_password_reset_email(serializer.validated_data["user"], otp)
+        if serializer.validated_data["method"] == "whatsapp":
+            send_password_reset_whatsapp(serializer.validated_data["phone_number"], otp)
+        else:
+            send_password_reset_email(serializer.validated_data["user"], otp)
     except OTPDeliveryError as exc:
         cache.delete(serializer.cache_key)
         return Response({"detail": str(exc)}, status=status.HTTP_502_BAD_GATEWAY)

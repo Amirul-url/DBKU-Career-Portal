@@ -4,7 +4,7 @@ from django.core.cache import cache
 from rest_framework import serializers
 
 from .models import AccountActivity
-from .otp_delivery import password_reset_cache_key
+from .otp_delivery import normalize_phone_number, password_reset_cache_key
 
 User = get_user_model()
 
@@ -345,57 +345,112 @@ def resolve_password_reset_user(email):
     return normalized_email, user
 
 
+def resolve_password_reset_identity(attrs):
+    method = attrs.get("method") or ForgotPasswordSendSerializer.METHOD_EMAIL
+    if method == ForgotPasswordSendSerializer.METHOD_EMAIL:
+        email, user = resolve_password_reset_user(attrs.get("email"))
+        return {
+            "method": method,
+            "email": email,
+            "user": user,
+            "identifier": email,
+        }
+
+    phone_number = normalize_phone_number(attrs.get("phone_number"))
+    if not phone_number:
+        raise serializers.ValidationError({"phone_number": "Nombor WhatsApp diperlukan."})
+
+    user = next(
+        (
+            candidate
+            for candidate in User.objects.exclude(mobile_number="")
+            if normalize_phone_number(candidate.mobile_number) == phone_number
+        ),
+        None,
+    )
+    if not user:
+        raise serializers.ValidationError({"phone_number": "Tiada akaun ditemui untuk nombor WhatsApp ini."})
+    if not user.is_active:
+        raise serializers.ValidationError({"phone_number": "Akaun ini tidak aktif."})
+
+    return {
+        "method": method,
+        "phone_number": phone_number,
+        "email": user.email,
+        "user": user,
+        "identifier": phone_number,
+    }
+
+
 class ForgotPasswordSendSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+    METHOD_EMAIL = "email"
+    METHOD_WHATSAPP = "whatsapp"
+
+    method = serializers.ChoiceField(
+        choices=[METHOD_EMAIL, METHOD_WHATSAPP],
+        default=METHOD_EMAIL,
+        required=False,
+    )
+    email = serializers.EmailField(required=False, allow_blank=True)
+    phone_number = serializers.CharField(max_length=30, required=False, allow_blank=True)
 
     def validate(self, attrs):
-        email, user = resolve_password_reset_user(attrs.get("email"))
-        attrs["email"] = email
-        attrs["user"] = user
+        attrs.update(resolve_password_reset_identity(attrs))
         return attrs
 
     @property
     def cache_key(self):
-        return password_reset_cache_key(self.validated_data["email"])
+        return password_reset_cache_key(
+            self.validated_data["method"],
+            self.validated_data["identifier"],
+        )
 
 
 class ForgotPasswordVerifySerializer(serializers.Serializer):
-    email = serializers.EmailField()
+    method = serializers.ChoiceField(
+        choices=[ForgotPasswordSendSerializer.METHOD_EMAIL, ForgotPasswordSendSerializer.METHOD_WHATSAPP],
+        default=ForgotPasswordSendSerializer.METHOD_EMAIL,
+        required=False,
+    )
+    email = serializers.EmailField(required=False, allow_blank=True)
+    phone_number = serializers.CharField(max_length=30, required=False, allow_blank=True)
     otp = serializers.CharField(min_length=6, max_length=6)
 
     def validate(self, attrs):
-        email, user = resolve_password_reset_user(attrs.get("email"))
-        expected = cache.get(password_reset_cache_key(email))
+        attrs.update(resolve_password_reset_identity(attrs))
+        expected = cache.get(password_reset_cache_key(attrs["method"], attrs["identifier"]))
         if not expected or expected != attrs.get("otp"):
             raise serializers.ValidationError({"otp": "OTP tidak sah atau telah tamat tempoh."})
 
-        attrs["email"] = email
-        attrs["user"] = user
         return attrs
 
 
 class ResetPasswordSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+    method = serializers.ChoiceField(
+        choices=[ForgotPasswordSendSerializer.METHOD_EMAIL, ForgotPasswordSendSerializer.METHOD_WHATSAPP],
+        default=ForgotPasswordSendSerializer.METHOD_EMAIL,
+        required=False,
+    )
+    email = serializers.EmailField(required=False, allow_blank=True)
+    phone_number = serializers.CharField(max_length=30, required=False, allow_blank=True)
     otp = serializers.CharField(min_length=6, max_length=6)
     password = serializers.CharField(write_only=True, min_length=8)
     password2 = serializers.CharField(write_only=True, min_length=8)
 
     def validate(self, attrs):
-        email, user = resolve_password_reset_user(attrs.get("email"))
-        expected = cache.get(password_reset_cache_key(email))
+        attrs.update(resolve_password_reset_identity(attrs))
+        expected = cache.get(password_reset_cache_key(attrs["method"], attrs["identifier"]))
         if not expected or expected != attrs.get("otp"):
             raise serializers.ValidationError({"otp": "OTP tidak sah atau telah tamat tempoh."})
         if attrs["password"] != attrs["password2"]:
             raise serializers.ValidationError({"password2": "Kata laluan tidak sepadan."})
 
-        validate_password(attrs["password"], user)
-        attrs["email"] = email
-        attrs["user"] = user
+        validate_password(attrs["password"], attrs["user"])
         return attrs
 
     def save(self):
         user = self.validated_data["user"]
         user.set_password(self.validated_data["password"])
         user.save(update_fields=["password"])
-        cache.delete(password_reset_cache_key(self.validated_data["email"]))
+        cache.delete(password_reset_cache_key(self.validated_data["method"], self.validated_data["identifier"]))
         return user
