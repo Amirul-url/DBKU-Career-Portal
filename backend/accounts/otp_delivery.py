@@ -25,8 +25,9 @@ def build_password_reset_otp_message(otp):
     return {
         "subject": "OTP Tetapan Semula Kata Laluan Portal Kerjaya DBKU",
         "text": (
-            "Kod OTP tetapan semula kata laluan Portal Kerjaya DBKU anda ialah "
-            f"{otp}. Kod ini akan tamat tempoh dalam 10 minit."
+            "Kod OTP anda untuk menetapkan semula kata laluan Portal Kerjaya DBKU ialah "
+            f"{otp}. Kod ini sah selama 10 minit. "
+            "Jika anda tidak membuat permintaan ini, sila abaikan emel ini."
         ),
     }
 
