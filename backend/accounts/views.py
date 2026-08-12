@@ -1,3 +1,6 @@
+import secrets
+
+from django.core.cache import cache
 from rest_framework import permissions, status
 from rest_framework.decorators import api_view, authentication_classes, parser_classes, permission_classes
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
@@ -8,7 +11,8 @@ from django.db import DatabaseError
 from django.db.models import Q
 
 from .models import AccountActivity, ApplicantProfileData, LoginSession, User
-from .serializers import AccountActivitySerializer, InternalHrmAccountSerializer, LoginSerializer, RegisterSerializer, SuperAdminAccountSerializer, UserSerializer
+from .otp_delivery import OTPDeliveryError, send_password_reset_email
+from .serializers import AccountActivitySerializer, ForgotPasswordSendSerializer, ForgotPasswordVerifySerializer, InternalHrmAccountSerializer, LoginSerializer, RegisterSerializer, ResetPasswordSerializer, SuperAdminAccountSerializer, UserSerializer
 from .services import build_auth_response
 from .session_services import close_login_session, close_open_login_sessions
 
@@ -43,6 +47,43 @@ def login_view(request):
     user.save(update_fields=["last_login"])
     safe_record_activity(user, "login")
     return Response(build_auth_response(user, request, login_session))
+
+
+@api_view(["POST"])
+@authentication_classes([])
+@permission_classes([permissions.AllowAny])
+def forgot_password_send_otp_view(request):
+    serializer = ForgotPasswordSendSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    otp = f"{secrets.randbelow(1000000):06d}"
+    cache.set(serializer.cache_key, otp, timeout=600)
+
+    try:
+        send_password_reset_email(serializer.validated_data["user"], otp)
+    except OTPDeliveryError as exc:
+        cache.delete(serializer.cache_key)
+        return Response({"detail": str(exc)}, status=status.HTTP_502_BAD_GATEWAY)
+
+    return Response({"message": "OTP berjaya dihantar ke emel berdaftar."})
+
+
+@api_view(["POST"])
+@authentication_classes([])
+@permission_classes([permissions.AllowAny])
+def forgot_password_verify_otp_view(request):
+    serializer = ForgotPasswordVerifySerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    return Response({"message": "OTP berjaya disahkan.", "redirect_url": "/reset-password"})
+
+
+@api_view(["POST"])
+@authentication_classes([])
+@permission_classes([permissions.AllowAny])
+def reset_password_submit_view(request):
+    serializer = ResetPasswordSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response({"message": "Kata laluan berjaya ditetapkan semula."})
 
 
 @api_view(["POST"])

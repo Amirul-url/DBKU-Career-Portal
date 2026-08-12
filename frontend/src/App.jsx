@@ -3,7 +3,9 @@ import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-
 import LandingPage from "./pages/LandingPage";
 import InternshipInfoPage from "./pages/InternshipInfoPage";
 import JobMarketplacePage from "./pages/JobMarketplacePage";
+import ApplicantForgotPasswordPage from "./pages/applicant/ApplicantForgotPasswordPage";
 import ApplicantLoginPage from "./pages/applicant/ApplicantLoginPage";
+import ApplicantResetPasswordPage from "./pages/applicant/ApplicantResetPasswordPage";
 import ApplicantDashboardPage from "./pages/applicant/ApplicantDashboardPage";
 import ApplicantJobSearchPage from "./pages/applicant/ApplicantJobSearchPage";
 import ApplicantInternshipApplicationPage from "./pages/applicant/ApplicantInternshipApplicationPage";
@@ -211,6 +213,8 @@ export default function App() {
         <Route path="/jobs" element={<JobMarketplacePage />} />
         <Route path="/internships" element={<InternshipInfoPage />} />
         <Route path="/login" element={<ApplicantLoginPage />} />
+        <Route path="/forgot-password" element={<ApplicantForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ApplicantResetPasswordPage />} />
         <Route path="/profile/dashboard" element={<ApplicantDashboardPage />} />
         <Route path="/profile/jobs" element={<ApplicantJobSearchPage />} />
         <Route path="/profile/internships" element={<ApplicantJobSearchPage />} />

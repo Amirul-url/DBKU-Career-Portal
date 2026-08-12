@@ -79,7 +79,7 @@ function LoginForm() {
         />
 
         <div className="split-options">
-          <a href="#forgot-password">Lupa kata laluan?</a>
+          <Link to="/forgot-password">Lupa kata laluan?</Link>
         </div>
 
         {status.message ? (

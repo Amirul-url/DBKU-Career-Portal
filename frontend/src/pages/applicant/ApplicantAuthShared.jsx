@@ -196,20 +196,29 @@ export function PasswordField({
 
 function PromoPanel({ mode }) {
   const isLogin = mode === "login";
+  const isRecovery = mode === "forgot";
 
   return (
     <aside className="split-promo-panel" aria-label="Pertukaran akaun">
-      <span className="split-promo-pill">{isLogin ? "Portal Kerjaya DBKU" : "Selamat Kembali"}</span>
-      <h2>{isLogin ? "Baru di portal ini?" : "Sudah mempunyai akaun?"}</h2>
+      <span className="split-promo-pill">{isLogin ? "Portal Kerjaya DBKU" : isRecovery ? "Keselamatan Akaun" : "Selamat Kembali"}</span>
+      <h2>{isLogin ? "Baru di portal ini?" : isRecovery ? "Ingat semula kata laluan?" : "Sudah mempunyai akaun?"}</h2>
       <p>
         {isLogin
           ? "Daftar akaun untuk memohon kerja kosong dan latihan industri DBKU secara dalam talian."
+          : isRecovery
+          ? "Log masuk semula jika anda masih mempunyai akses kepada akaun berdaftar."
           : "Log masuk semula untuk menyambung permohonan dan membaca makluman terkini."}
       </p>
       <Link to={isLogin ? "/register" : "/login"} className="split-ghost-action">
         {isLogin ? "Daftar Sekarang" : "Log Masuk"}
       </Link>
-      <em>{isLogin ? "Semua permohonan bermula dengan profil yang lengkap." : "Maklumat yang tepat membantu proses semakan berjalan lancar."}</em>
+      <em>
+        {isLogin
+          ? "Semua permohonan bermula dengan profil yang lengkap."
+          : isRecovery
+          ? "OTP hanya sah untuk tempoh yang terhad."
+          : "Maklumat yang tepat membantu proses semakan berjalan lancar."}
+      </em>
       <div className="split-promo-circle" aria-hidden="true" />
     </aside>
   );

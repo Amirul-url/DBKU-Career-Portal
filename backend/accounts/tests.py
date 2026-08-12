@@ -1,5 +1,7 @@
 from datetime import timedelta
+from unittest.mock import patch
 
+from django.core.cache import cache
 from django.test import override_settings
 from django.utils import timezone
 from rest_framework.test import APITestCase
@@ -79,3 +81,49 @@ class LoginSessionTests(APITestCase):
         stale_session.refresh_from_db()
         self.assertEqual(stale_session.logout_at, stale_login_at + timedelta(hours=1))
         self.assertEqual(stale_session.duration_seconds, 3600)
+
+
+class PasswordResetTests(APITestCase):
+    def setUp(self):
+        cache.clear()
+        self.user = User.objects.create_user(
+            username="reset@example.com",
+            email="reset@example.com",
+            password="OldPassword123!",
+            role="applicant",
+        )
+
+    @override_settings(NOTIFICATION_EMAIL_ENABLED=True)
+    @patch("accounts.views.send_password_reset_email")
+    def test_forgot_password_sends_and_verifies_otp_then_resets_password(self, mock_send_email):
+        send_response = self.client.post(
+            "/api/auth/forgot-password/send-otp/",
+            {"email": "reset@example.com"},
+            format="json",
+        )
+
+        self.assertEqual(send_response.status_code, 200)
+        mock_send_email.assert_called_once()
+        otp = mock_send_email.call_args.args[1]
+
+        verify_response = self.client.post(
+            "/api/auth/forgot-password/verify-otp/",
+            {"email": "reset@example.com", "otp": otp},
+            format="json",
+        )
+        self.assertEqual(verify_response.status_code, 200)
+
+        reset_response = self.client.post(
+            "/api/auth/reset-password/submit/",
+            {
+                "email": "reset@example.com",
+                "otp": otp,
+                "password": "NewPassword123!",
+                "password2": "NewPassword123!",
+            },
+            format="json",
+        )
+
+        self.assertEqual(reset_response.status_code, 200)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password("NewPassword123!"))

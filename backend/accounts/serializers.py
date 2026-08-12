@@ -1,8 +1,10 @@
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.password_validation import validate_password
+from django.core.cache import cache
 from rest_framework import serializers
 
 from .models import AccountActivity
+from .otp_delivery import password_reset_cache_key
 
 User = get_user_model()
 
@@ -327,3 +329,73 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError("Akaun ini tidak aktif.")
         attrs["user"] = user
         return attrs
+
+
+def resolve_password_reset_user(email):
+    normalized_email = (email or "").strip().lower()
+    if not normalized_email:
+        raise serializers.ValidationError({"email": "Emel diperlukan."})
+
+    user = User.objects.filter(email__iexact=normalized_email).first()
+    if not user:
+        raise serializers.ValidationError({"email": "Tiada akaun ditemui untuk emel ini."})
+    if not user.is_active:
+        raise serializers.ValidationError({"email": "Akaun ini tidak aktif."})
+
+    return normalized_email, user
+
+
+class ForgotPasswordSendSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate(self, attrs):
+        email, user = resolve_password_reset_user(attrs.get("email"))
+        attrs["email"] = email
+        attrs["user"] = user
+        return attrs
+
+    @property
+    def cache_key(self):
+        return password_reset_cache_key(self.validated_data["email"])
+
+
+class ForgotPasswordVerifySerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    otp = serializers.CharField(min_length=6, max_length=6)
+
+    def validate(self, attrs):
+        email, user = resolve_password_reset_user(attrs.get("email"))
+        expected = cache.get(password_reset_cache_key(email))
+        if not expected or expected != attrs.get("otp"):
+            raise serializers.ValidationError({"otp": "OTP tidak sah atau telah tamat tempoh."})
+
+        attrs["email"] = email
+        attrs["user"] = user
+        return attrs
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    otp = serializers.CharField(min_length=6, max_length=6)
+    password = serializers.CharField(write_only=True, min_length=8)
+    password2 = serializers.CharField(write_only=True, min_length=8)
+
+    def validate(self, attrs):
+        email, user = resolve_password_reset_user(attrs.get("email"))
+        expected = cache.get(password_reset_cache_key(email))
+        if not expected or expected != attrs.get("otp"):
+            raise serializers.ValidationError({"otp": "OTP tidak sah atau telah tamat tempoh."})
+        if attrs["password"] != attrs["password2"]:
+            raise serializers.ValidationError({"password2": "Kata laluan tidak sepadan."})
+
+        validate_password(attrs["password"], user)
+        attrs["email"] = email
+        attrs["user"] = user
+        return attrs
+
+    def save(self):
+        user = self.validated_data["user"]
+        user.set_password(self.validated_data["password"])
+        user.save(update_fields=["password"])
+        cache.delete(password_reset_cache_key(self.validated_data["email"]))
+        return user

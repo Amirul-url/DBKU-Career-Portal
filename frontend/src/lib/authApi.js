@@ -70,6 +70,8 @@ export async function apiRequest(path, options = {}) {
   const isPublicAuthRequest =
     path.startsWith("/auth/login/") ||
     path.startsWith("/auth/register/") ||
+    path.startsWith("/auth/forgot-password/") ||
+    path.startsWith("/auth/reset-password/") ||
     path.startsWith("/token/");
 
   const makeRequest = (token) => {
@@ -188,6 +190,28 @@ export function loginApplicant({ email, password }) {
   return authRequest("/auth/login/", {
     email: email.trim().toLowerCase(),
     password,
+  });
+}
+
+export function requestPasswordResetOtp({ email }) {
+  return authRequest("/auth/forgot-password/send-otp/", {
+    email: email.trim().toLowerCase(),
+  });
+}
+
+export function verifyPasswordResetOtp({ email, otp }) {
+  return authRequest("/auth/forgot-password/verify-otp/", {
+    email: email.trim().toLowerCase(),
+    otp,
+  });
+}
+
+export function submitPasswordReset({ email, otp, password, password2 }) {
+  return authRequest("/auth/reset-password/submit/", {
+    email: email.trim().toLowerCase(),
+    otp,
+    password,
+    password2,
   });
 }
 
