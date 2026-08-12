@@ -76,7 +76,7 @@ export default function ApplicantForgotPasswordPage() {
       await requestPasswordResetOtp({ method, email, phone_number: phoneNumber });
       setOtp("");
       setStep("otp");
-      setStatus({ type: "success", message: method === "email" ? "OTP telah dihantar ke emel berdaftar anda." : "OTP telah dihantar ke WhatsApp berdaftar anda." });
+      setStatus({ type: "", message: "" });
     } catch (error) {
       setStatus({ type: "error", message: error.message });
     } finally {
