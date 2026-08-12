@@ -16,13 +16,11 @@ class EmailDeliveryError(RuntimeError):
     pass
 
 
-def _build_html_content(title, message):
-    safe_title = escape(title)
+def _build_html_content(_title, message):
     safe_message = escape(message).replace("\n", "<br>")
     return f"""
     <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.55;">
-      <h2 style="margin: 0 0 12px; color: #16A34A;">{safe_title}</h2>
-      <p style="margin: 0;">{safe_message}</p>
+      <p style="margin: 0; font-size: 15px;">{safe_message}</p>
     </div>
     """.strip()
 
