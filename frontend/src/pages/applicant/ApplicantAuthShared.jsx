@@ -202,7 +202,7 @@ function PromoPanel({ mode }) {
 
   return (
     <aside className="split-promo-panel" aria-label="Pertukaran akaun">
-      <span className="split-promo-pill">{isLogin ? "Portal Kerjaya DBKU" : isRecovery ? "Keselamatan Akaun" : "Selamat Kembali"}</span>
+      <span className="split-promo-pill">{isLogin ? "Portal Kerjaya DBKU" : isRecovery ? "Keselamatan Akaun" : "Selamat Datang"}</span>
       <h2>{isLogin ? "Baru di portal ini?" : isRecovery ? "Ingat semula kata laluan?" : "Sudah mempunyai akaun?"}</h2>
       <p>
         {isLogin

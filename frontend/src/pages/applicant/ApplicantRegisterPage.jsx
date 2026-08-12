@@ -47,7 +47,6 @@ function RegisterForm() {
 
   return (
     <section className="split-form-panel" aria-labelledby="register-title">
-      <span className="split-eyebrow">Pendaftaran Calon</span>
       <h1 id="register-title">Daftar Akaun</h1>
       <p>Cipta akaun menggunakan emel aktif supaya notifikasi permohonan mudah diterima.</p>
 

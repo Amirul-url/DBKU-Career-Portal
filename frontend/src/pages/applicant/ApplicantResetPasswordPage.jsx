@@ -46,7 +46,6 @@ export default function ApplicantResetPasswordPage() {
   return (
     <ApplicantAuthLayout mode="forgot">
       <section className="split-form-panel" aria-labelledby="reset-password-title">
-        <span className="split-eyebrow">Pemulihan Akaun</span>
         <h1 id="reset-password-title">Tetapkan Kata Laluan</h1>
         <p>Cipta kata laluan baharu untuk akaun Portal Kerjaya DBKU anda.</p>
 

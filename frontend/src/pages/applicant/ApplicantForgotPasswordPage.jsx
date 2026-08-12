@@ -108,7 +108,6 @@ export default function ApplicantForgotPasswordPage() {
   return (
     <ApplicantAuthLayout mode="forgot">
       <section className="split-form-panel" aria-labelledby="forgot-password-title">
-        <span className="split-eyebrow">Pemulihan Akaun</span>
         <h1 id="forgot-password-title">Lupa Kata Laluan</h1>
         <p>Masukkan emel atau nombor WhatsApp berdaftar untuk menerima OTP tetapan semula kata laluan.</p>
 

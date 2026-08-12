@@ -43,7 +43,6 @@ function LoginForm() {
 
   return (
     <section className="split-form-panel" aria-labelledby="login-title">
-      <span className="split-eyebrow">Portal Pemohon</span>
       <h1 id="login-title">Log Masuk</h1>
       <p>Masuk menggunakan emel berdaftar untuk menyemak permohonan dan makluman kerjaya DBKU.</p>
 
