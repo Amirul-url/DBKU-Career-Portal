@@ -13,7 +13,7 @@ from django.db.models import Q
 from .models import AccountActivity, ApplicantProfileData, LoginSession, User
 from .otp_delivery import OTPDeliveryError, send_password_reset_email, send_password_reset_whatsapp
 from .serializers import AccountActivitySerializer, ForgotPasswordSendSerializer, ForgotPasswordVerifySerializer, InternalHrmAccountSerializer, LoginSerializer, RegisterSerializer, ResetPasswordSerializer, SuperAdminAccountSerializer, UserSerializer
-from .services import build_auth_response
+from .services import build_auth_response, notify_applicant_registration_success
 from .session_services import close_login_session, close_open_login_sessions
 
 
@@ -30,6 +30,7 @@ def register_view(request):
     serializer = RegisterSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     user = serializer.save()
+    notify_applicant_registration_success(user)
     return Response(build_auth_response(user, request), status=status.HTTP_201_CREATED)
 
 

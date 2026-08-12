@@ -141,3 +141,26 @@ class PasswordResetTests(APITestCase):
         self.assertEqual(response.status_code, 200)
         mock_send_whatsapp.assert_called_once()
         self.assertEqual(mock_send_whatsapp.call_args.args[0], "60123456789")
+
+
+class ApplicantRegistrationNotificationTests(APITestCase):
+    @override_settings(NOTIFICATION_SIDE_EFFECTS_ENABLED=True, FRONTEND_URL="https://portal-kerjaya.example.test")
+    @patch("accounts.services.create_notification")
+    def test_register_sends_formal_registration_notification(self, mock_create_notification):
+        response = self.client.post(
+            "/api/auth/register/",
+            {
+                "full_name": "ALI BIN ABU",
+                "email": "ali@example.com",
+                "password": "Password123!",
+                "password2": "Password123!",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        mock_create_notification.assert_called_once()
+        call_kwargs = mock_create_notification.call_args.kwargs
+        self.assertEqual(call_kwargs["title"], "Pendaftaran Akaun Portal Kerjaya DBKU Berjaya")
+        self.assertIn("Tahniah, akaun Portal Kerjaya DBKU anda telah berjaya didaftarkan.", call_kwargs["message"])
+        self.assertIn("Pautan log masuk: https://portal-kerjaya.example.test/login", call_kwargs["message"])
