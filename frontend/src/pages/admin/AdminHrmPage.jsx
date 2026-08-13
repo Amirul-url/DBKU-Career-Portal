@@ -1,9 +1,8 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Navigate, NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   apiRequest,
   clearAuthSession,
-  fetchAuthenticatedBlob,
   getStoredUser,
   recordLogoutActivity,
 } from "../../lib/authApi";
@@ -179,7 +178,6 @@ export default function AdminHrmPage() {
   const [jobActionSaving, setJobActionSaving] = useState(false);
   const [jobDeleteTarget, setJobDeleteTarget] = useState(null);
   const [jobStatusFilter, setJobStatusFilter] = useState("all");
-  const documentBlobUrls = useRef([]);
   const routeState = getAdminRouteState(location.pathname);
   const [jobForm, setJobForm] = useState(() => createEmptyJobForm(routeState.vacancyType || "job"));
   const panel = routeState.panel || "dashboard";
@@ -212,12 +210,6 @@ export default function AdminHrmPage() {
     const timeoutId = window.setTimeout(() => setNotice(""), 5000);
     return () => window.clearTimeout(timeoutId);
   }, [notice]);
-  useEffect(
-    () => () => {
-      documentBlobUrls.current.forEach((url) => URL.revokeObjectURL(url));
-    },
-    [],
-  );
   useEffect(() => {
     setJobStatusFilter("all");
   }, [activeVacancyType]);
@@ -293,28 +285,6 @@ export default function AdminHrmPage() {
     setSelectedJob(null);
     setJobActionForm({});
     setJobActionSaving(false);
-  };
-  const openJobDocument = async (event, job) => {
-    const documentUrl = job?.official_document_view_url || job?.official_document;
-    if (!documentUrl) return;
-    event.preventDefault();
-    const previewWindow = window.open("", "_blank");
-
-    try {
-      const blob = await fetchAuthenticatedBlob(documentUrl);
-      const objectUrl = URL.createObjectURL(blob);
-      documentBlobUrls.current.push(objectUrl);
-      if (previewWindow) {
-        previewWindow.opener = null;
-        previewWindow.location.href = objectUrl;
-      } else {
-        const opened = window.open(objectUrl, "_blank", "noopener,noreferrer");
-        if (!opened) window.location.href = objectUrl;
-      }
-    } catch (error) {
-      previewWindow?.close();
-      setNotice(error.message || "Dokumen tidak dapat dibuka. Sila cuba lagi.");
-    }
   };
   const saveJobEdit = async (event) => {
     event.preventDefault();
@@ -958,7 +928,6 @@ export default function AdminHrmPage() {
             mode={jobModalMode}
             onChange={(field, value) => setJobActionForm((current) => ({ ...current, [field]: value }))}
             onClose={closeJobModal}
-            onDocumentOpen={openJobDocument}
             onSave={saveJobEdit}
             saving={jobActionSaving}
           />
@@ -1124,7 +1093,7 @@ function JobManagementTable({ jobs, applications, emptyMessage = "", itemLabel =
     </>
   );
 }
-function JobActionModal({ form, job, mode, onChange, onClose, onDocumentOpen, onSave, saving }) {
+function JobActionModal({ form, job, mode, onChange, onClose, onSave, saving }) {
   const isEdit = mode === "edit";
   const isOpen = job.is_open ?? job.status === "open";
 
@@ -1167,7 +1136,7 @@ function JobActionModal({ form, job, mode, onChange, onClose, onDocumentOpen, on
             <div className="market-detail-document">
               <span>Untuk mengetahui lebih lanjut, sila klik di sini:</span>
               {job.official_document ? (
-                <a href={job.official_document_view_url || job.official_document} onClick={(event) => onDocumentOpen(event, job)} rel="noreferrer">
+                <a href={job.official_document_view_url || job.official_document} target="_blank" rel="noreferrer">
                   Muat turun dokumen
                 </a>
               ) : (
