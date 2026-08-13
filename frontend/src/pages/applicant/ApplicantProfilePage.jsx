@@ -3,7 +3,7 @@ import { getCities, getPostcodes, getStates } from "malaysia-postcodes";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
-import { apiRequest, clearAuthSession, fetchAuthenticatedBlob, getStoredUser, recordLogoutActivity, resolveMediaUrl, updateCurrentUser } from "../../lib/authApi";
+import { apiRequest, clearAuthSession, fetchAuthenticatedBlob, getCurrentUser, getStoredUser, recordLogoutActivity, resolveMediaUrl, updateCurrentUser } from "../../lib/authApi";
 import { countryCallingCodes, defaultCountryCallingCode } from "../../lib/countryCallingCodes";
 import { applicantSidebarNavItems, getApplicantSectionId } from "../../modules/applicant/applicantRoutes";
 import { useApplicantSidebarState } from "../../modules/applicant/useApplicantSidebarState";
@@ -3104,7 +3104,7 @@ function SkillsSummary({ data }) {
 export default function ApplicantProfilePage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const user = getStoredUser();
+  const [user, setUser] = useState(() => getStoredUser());
   const [sidebarOpen, toggleSidebar] = useApplicantSidebarState();
   const [editingSection, setEditingSection] = useState(null);
   const [isPersonalCloseDialogOpen, setIsPersonalCloseDialogOpen] = useState(false);
@@ -3157,6 +3157,10 @@ export default function ApplicantProfilePage() {
   const [skillsProfile, setSkillsProfile] = useState(() => getSavedSkills(user));
   const profileDisplayName = personalProfile.displayName || displayName;
   const profileEmail = personalProfile.email || email;
+  const profilePhotoDisplayUrl =
+    personalProfile.profilePhotoPreviewUrl ||
+    personalProfile.profilePhotoUrl ||
+    resolveMediaUrl(user?.profile_photo_url || "");
 
   useEffect(() => {
     if (!user || user.role !== "applicant") return undefined;
@@ -3191,6 +3195,7 @@ export default function ApplicantProfilePage() {
     }
 
     setPersonalProfile(savedProfile);
+    setUser(getStoredUser());
     clearDraft(user, "personal");
     setEditingSection(null);
     setIsPersonalDraftDirty(false);
@@ -3384,6 +3389,48 @@ export default function ApplicantProfilePage() {
   }, [navigate, user]);
 
   useEffect(() => {
+    if (!user || user.role !== "applicant") {
+      return undefined;
+    }
+
+    let isMounted = true;
+
+    getCurrentUser()
+      .then((freshUser) => {
+        if (!isMounted) return;
+        setUser(freshUser);
+        setPersonalProfile((current) => {
+          const freshPhotoUrl = resolveMediaUrl(freshUser.profile_photo_url || "");
+          const freshResumeUrl = resolveMediaUrl(freshUser.resume_file_url || "");
+          const freshVideoResumeUrl = resolveMediaUrl(freshUser.video_resume_file_url || "");
+
+          return normalizePersonalProfile(
+            {
+              ...current,
+              details: {
+                ...(current.details || {}),
+                resumeFile: current.details?.resumeFile || getFileNameFromUrl(freshResumeUrl),
+                videoResumeFile: current.details?.videoResumeFile || getFileNameFromUrl(freshVideoResumeUrl),
+              },
+              profilePhotoFileName: current.profilePhotoFileName || getFileNameFromUrl(freshPhotoUrl),
+              profilePhotoUrl: current.profilePhotoUrl || freshPhotoUrl,
+              resumeFileUrl: current.resumeFileUrl || freshResumeUrl,
+              videoResumeFileUrl: current.videoResumeFileUrl || freshVideoResumeUrl,
+            },
+            freshUser.full_name || freshUser.first_name || displayName,
+            freshUser.email || email,
+            freshUser,
+          );
+        });
+      })
+      .catch(() => null);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [displayName, email, user?.id, user?.role]);
+
+  useEffect(() => {
     const sectionId = getApplicantSectionId(location.pathname);
     if (!sectionId) return undefined;
 
@@ -3405,7 +3452,7 @@ export default function ApplicantProfilePage() {
         <ProfileContentHeader
           displayName={profileDisplayName}
           email={profileEmail}
-          photoUrl={personalProfile.profilePhotoPreviewUrl}
+          photoUrl={profilePhotoDisplayUrl}
         />
         <main className="profile-shell">
           <div className="profile-heading">
@@ -3431,8 +3478,8 @@ export default function ApplicantProfilePage() {
                 ) : (
                   <div className="profile-personal-row">
                     <div className="profile-avatar" aria-hidden="true">
-                      {personalProfile.profilePhotoPreviewUrl ? (
-                        <img src={personalProfile.profilePhotoPreviewUrl} alt="" />
+                      {profilePhotoDisplayUrl ? (
+                        <img src={profilePhotoDisplayUrl} alt="" />
                       ) : (
                         profileDisplayName.charAt(0)
                       )}

@@ -346,3 +346,10 @@ export function updateCurrentUser(formData) {
     return user;
   });
 }
+
+export function getCurrentUser() {
+  return apiRequest("/auth/me/").then((user) => {
+    saveStoredUser(user);
+    return user;
+  });
+}
