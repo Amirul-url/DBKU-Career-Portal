@@ -7143,8 +7143,8 @@ body:has(.applicant-profile-page) {
 .personal-field.has-error .personal-select-button,
 .personal-radio-group.has-error,
 .personal-date-group.has-error input {
-  border-color: var(--profile-green);
-  box-shadow: 0 0 0 3px var(--profile-pale);
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
 }
 
 .personal-field input:disabled {
@@ -7165,7 +7165,7 @@ body:has(.applicant-profile-page) {
 }
 
 .personal-field-error {
-  color: var(--profile-green);
+  color: #dc2626;
   font-size: 12px;
   font-weight: 900;
 }
@@ -7456,7 +7456,7 @@ body:has(.applicant-profile-page) {
 }
 
 .personal-address-search textarea {
-  min-height: 116px;
+  min-height: 72px;
   resize: vertical;
 }
 
@@ -7472,8 +7472,8 @@ body:has(.applicant-profile-page) {
 }
 
 .personal-address-search.has-error textarea {
-  border-color: var(--profile-green);
-  box-shadow: 0 0 0 3px var(--profile-pale);
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
 }
 
 .personal-address-map-head {
@@ -7505,12 +7505,14 @@ body:has(.applicant-profile-page) {
 
 .personal-address-map-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: flex-end;
   gap: 8px;
+  white-space: nowrap;
 }
 
 .personal-address-map-actions button {
+  flex: 0 0 auto;
   min-height: 32px;
   border: 1px solid #bfe7cf;
   border-radius: 999px;
@@ -8156,8 +8158,8 @@ body:has(.applicant-profile-page) {
 }
 
 .job-title-autocomplete.has-error .job-search-input {
-  border-color: var(--profile-green);
-  box-shadow: 0 0 0 3px var(--profile-pale);
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
 }
 
 .job-title-suggestions {
@@ -8321,8 +8323,8 @@ body:has(.applicant-profile-page) {
 }
 
 .job-multi-select.has-error .personal-select-button {
-  border-color: var(--profile-green);
-  box-shadow: 0 0 0 3px var(--profile-pale);
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
 }
 
 .job-multi-select-menu {

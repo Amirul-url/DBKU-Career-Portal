@@ -1137,8 +1137,8 @@ function ApplicantAddressMap({ address, addressError, latitude, locationError, l
           <textarea
             id="personal-map-address"
             value={mapAddress}
-            rows={4}
-            placeholder="Cari alamat atau masukkan lokasi"
+            rows={2}
+            placeholder="Masukkan alamat"
             onChange={handleMapAddressChange}
           />
           {(suggestions.length > 0 || searching) ? (
@@ -1163,7 +1163,6 @@ function ApplicantAddressMap({ address, addressError, latitude, locationError, l
           </div>
           <div className="personal-address-map-actions">
             <button type="button" onClick={focusLocation}>Fokus</button>
-            <button type="button" onClick={searchAddressOnMap}>Cari Alamat</button>
             <button type="button" className={mapMode === "2d" ? "active" : ""} onClick={() => applyMapMode("2d")}>2D</button>
             <button type="button" className={mapMode === "3d" ? "active" : ""} onClick={() => applyMapMode("3d")}>3D</button>
             <button type="button" className={mapStyle === "street" ? "active" : ""} onClick={() => applyMapStyle("street")}>Jalan</button>
