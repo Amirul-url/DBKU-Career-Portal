@@ -3817,7 +3817,7 @@ body:has(.auth-page) {
 }
 
 .register-split-form .split-submit {
-  margin-top: 10px;
+  margin-top: 20px;
 }
 
 .split-alert {
@@ -4124,6 +4124,10 @@ body:has(.auth-page) {
 
   .register-split-form .split-input {
     min-height: 42px;
+  }
+
+  .register-split-form .split-submit {
+    margin-top: 14px;
   }
 
   .split-submit {
