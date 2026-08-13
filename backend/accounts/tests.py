@@ -210,6 +210,12 @@ class SuperAdminApplicantManagementTests(APITestCase):
             password="Password123!",
             role="superadmin",
         )
+        self.admin = User.objects.create_user(
+            username="admin@example.com",
+            email="admin@example.com",
+            password="Password123!",
+            role="admin",
+        )
         self.applicant = User.objects.create_user(
             username="delete-me@example.com",
             email="delete-me@example.com",
@@ -224,3 +230,21 @@ class SuperAdminApplicantManagementTests(APITestCase):
 
         self.assertEqual(response.status_code, 204)
         self.assertFalse(User.objects.filter(id=self.applicant.id).exists())
+
+    def test_admin_can_list_and_view_applicants(self):
+        self.client.force_authenticate(user=self.admin)
+
+        list_response = self.client.get("/api/auth/applicants/")
+        detail_response = self.client.get(f"/api/auth/applicants/{self.applicant.id}/profile/")
+
+        self.assertEqual(list_response.status_code, 200)
+        self.assertEqual(detail_response.status_code, 200)
+        self.assertEqual(detail_response.data["applicant"]["id"], self.applicant.id)
+
+    def test_admin_cannot_delete_applicant(self):
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.delete(f"/api/auth/applicants/{self.applicant.id}/profile/")
+
+        self.assertEqual(response.status_code, 403)
+        self.assertTrue(User.objects.filter(id=self.applicant.id).exists())

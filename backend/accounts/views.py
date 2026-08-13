@@ -144,6 +144,7 @@ def internal_hrm_account_view(request):
 
 
 PROFILE_SECTIONS = ("personal", "job_preferences", "experience", "academic", "skills")
+APPLICANT_VIEWER_ROLES = {"admin", "superadmin"}
 
 
 def profile_payload(profile):
@@ -169,8 +170,8 @@ def applicant_profile_data_view(request):
 
 @api_view(["GET"])
 def superadmin_applicants_view(request):
-    if request.user.role != "superadmin":
-        return Response({"detail": "Akses Super Admin diperlukan."}, status=status.HTTP_403_FORBIDDEN)
+    if getattr(request.user, "role", None) not in APPLICANT_VIEWER_ROLES:
+        return Response({"detail": "Akses pentadbir diperlukan."}, status=status.HTTP_403_FORBIDDEN)
 
     query = request.query_params.get("q", "").strip()
     applicants = User.objects.filter(role="applicant").order_by("first_name", "email")
@@ -186,7 +187,11 @@ def superadmin_applicants_view(request):
 
 @api_view(["GET", "DELETE"])
 def superadmin_applicant_profile_view(request, user_id):
-    if getattr(request.user, "role", None) != "superadmin":
+    user_role = getattr(request.user, "role", None)
+    if user_role not in APPLICANT_VIEWER_ROLES:
+        return Response({"detail": "Akses pentadbir diperlukan."}, status=status.HTTP_403_FORBIDDEN)
+
+    if request.method == "DELETE" and user_role != "superadmin":
         return Response({"detail": "Akses Super Admin diperlukan."}, status=status.HTTP_403_FORBIDDEN)
 
     applicant = User.objects.filter(id=user_id, role="applicant").first()
