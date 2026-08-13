@@ -839,21 +839,47 @@ export default function ApplicantInternshipApplicationPage() {
   );
 
   const renderAcademicFields = () => (
-    <div className="student-info-fields compact">
-      <label className="wide">Institusi Pengajian<InstitutionSearchSelect value={studentInfo.institution} onChange={(value) => updateStudentValue("institution", value)} /></label>
-      <label className="wide">Program / Kursus<input value={studentInfo.program} onChange={updateStudentInfo("program")} /></label>
-      <label>Tahap Pengajian
-        <select value={studentInfo.academicLevel} onChange={updateStudentInfo("academicLevel")}>
-          <option value="">Sila pilih</option>
-          {academicLevelOptions.map((option) => <option key={option}>{option}</option>)}
-        </select>
-      </label>
-      <label>Tahun Pengajian<input placeholder="Contoh: Tahun 3" value={studentInfo.currentYear} onChange={updateStudentInfo("currentYear")} /></label>
-      <label>Semester<input placeholder="Contoh: Semester 5" value={studentInfo.semester} onChange={updateStudentInfo("semester")} /></label>
-      <label>CGPA / Keputusan Terkini<input placeholder="Contoh: 3.45" value={studentInfo.cgpa} onChange={updateStudentInfo("cgpa")} /></label>
-      <label className="wide">Nama Penyelia / Penyelaras Universiti <em>(tidak wajib)</em><input value={studentInfo.supervisorName} onChange={updateStudentInfo("supervisorName")} /></label>
-      <label>Emel Penyelia <em>(tidak wajib)</em><input type="email" value={studentInfo.supervisorEmail} onChange={updateStudentInfo("supervisorEmail")} /></label>
-      <label>No. Telefon Penyelia <em>(tidak wajib)</em><input inputMode="numeric" pattern="[0-9]*" value={studentInfo.supervisorPhone} onChange={updateNumericStudentInfo("supervisorPhone")} /></label>
+    <div className="student-personal-table-wrap">
+      <table className="student-personal-table">
+        <tbody>
+          {renderPersonalRow(
+            "Institusi Pengajian",
+            <InstitutionSearchSelect value={studentInfo.institution} onChange={(value) => updateStudentValue("institution", value)} />,
+          )}
+          {renderPersonalRow("Program / Kursus", <input required value={studentInfo.program} onChange={updateStudentInfo("program")} />)}
+          {renderPersonalRow(
+            "Tahap Pengajian",
+            <select required value={studentInfo.academicLevel} onChange={updateStudentInfo("academicLevel")}>
+              <option value="">Sila pilih</option>
+              {academicLevelOptions.map((option) => <option key={option}>{option}</option>)}
+            </select>,
+          )}
+          {renderPersonalRow("Tahun Pengajian", <input required placeholder="Contoh: Tahun 3" value={studentInfo.currentYear} onChange={updateStudentInfo("currentYear")} />)}
+          {renderPersonalRow("Semester", <input required placeholder="Contoh: Semester 5" value={studentInfo.semester} onChange={updateStudentInfo("semester")} />)}
+          {renderPersonalRow("CGPA / Keputusan Terkini", <input required placeholder="Contoh: 3.45" value={studentInfo.cgpa} onChange={updateStudentInfo("cgpa")} />)}
+          {renderPersonalRow(
+            <>
+              Nama Penyelia / Penyelaras Universiti
+              <em>(tidak wajib)</em>
+            </>,
+            <input value={studentInfo.supervisorName} onChange={updateStudentInfo("supervisorName")} />,
+          )}
+          {renderPersonalRow(
+            <>
+              Emel Penyelia
+              <em>(tidak wajib)</em>
+            </>,
+            <input type="email" value={studentInfo.supervisorEmail} onChange={updateStudentInfo("supervisorEmail")} />,
+          )}
+          {renderPersonalRow(
+            <>
+              No. Telefon Penyelia
+              <em>(tidak wajib)</em>
+            </>,
+            <input inputMode="numeric" pattern="[0-9]*" value={studentInfo.supervisorPhone} onChange={updateNumericStudentInfo("supervisorPhone")} />,
+          )}
+        </tbody>
+      </table>
     </div>
   );
 

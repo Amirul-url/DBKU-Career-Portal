@@ -6455,6 +6455,15 @@ body:has(.applicant-profile-page) {
   font-weight: 500;
 }
 
+.student-personal-table th em {
+  display: block;
+  margin-top: 4px;
+  color: #64736b;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+}
+
 .student-personal-table td {
   padding: 8px;
 }
@@ -6645,6 +6654,11 @@ body:has(.applicant-profile-page) {
   font-weight: 400;
   outline: 0;
   text-align: left;
+}
+
+.student-personal-table .student-search-select-trigger {
+  min-height: 36px;
+  border-radius: 4px;
 }
 
 .student-search-select-trigger span {
