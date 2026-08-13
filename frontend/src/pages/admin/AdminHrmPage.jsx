@@ -545,7 +545,7 @@ export default function AdminHrmPage() {
             <>
               <div className="hrm-heading">
                 <div>
-                  <h1>{isInternshipForm ? "Siarkan jawatan latihan industri baharu" : "Siarkan jawatan DBKU baharu"}</h1>
+                  <h1 className="text-3xl font-black text-slate-950">{isInternshipForm ? "Siarkan jawatan latihan industri baharu" : "Siarkan jawatan DBKU baharu"}</h1>
                   <p>Masukkan ringkasan penting. Maklumat penuh disediakan melalui dokumen rasmi untuk dimuat turun pemohon.</p>
                 </div>
               </div>
@@ -565,7 +565,7 @@ export default function AdminHrmPage() {
             <>
               <div className="hrm-heading">
                 <div>
-                  <h1>Ringkasan pengambilan</h1>
+                  <h1 className="text-3xl font-black text-slate-950">Ringkasan pengambilan</h1>
                   <p>
                     Pantau prestasi jawatan DBKU dan latihan industri dalam satu paparan.
                   </p>
@@ -640,7 +640,7 @@ export default function AdminHrmPage() {
             <>
               <div className="hrm-heading">
                 <div>
-                  <h1>Siarkan peluang baharu</h1>
+                  <h1 className="text-3xl font-black text-slate-950">Siarkan peluang baharu</h1>
                   <p>
                     Gunakan template rasmi DBKU untuk menyusun iklan jawatan
                     dengan lengkap.
@@ -877,7 +877,7 @@ export default function AdminHrmPage() {
             <>
               <div className="hrm-heading">
                 <div>
-                  <h1>Senarai {activeOpportunityLabel}</h1>
+                  <h1 className="text-3xl font-black text-slate-950">Senarai {activeOpportunityLabel}</h1>
                   <p>Semak semua iklan {activeOpportunityLabel.toLowerCase()} yang telah disiarkan.</p>
                 </div>
                 <button
@@ -930,7 +930,7 @@ export default function AdminHrmPage() {
             <>
               <div className="hrm-heading">
                 <div>
-                  <h1>Permohonan {activeOpportunityLabel}</h1>
+                  <h1 className="text-3xl font-black text-slate-950">Permohonan {activeOpportunityLabel}</h1>
                   <p>
                     Pilih calon yang memenuhi keperluan {activeOpportunityLabel.toLowerCase()} dengan lebih cepat.
                   </p>
