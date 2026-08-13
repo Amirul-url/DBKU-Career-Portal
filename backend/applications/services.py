@@ -1,12 +1,27 @@
+import logging
+
+from django.conf import settings
 from django.utils import timezone
 
+from accounts.otp_delivery import OTPDeliveryError, send_whatsapp_message
 from notifications.services import create_notification
 
 from .models import CandidateApplication
 
 
+logger = logging.getLogger(__name__)
+
+
 class InvalidApplicationStatus(ValueError):
     pass
+
+
+def build_application_submitted_message(application):
+    return (
+        f"Permohonan latihan industri anda telah berjaya dihantar. "
+        f"No. rujukan: {application.reference_no}. "
+        "Sila semak status permohonan melalui Portal Kerjaya DBKU."
+    )
 
 
 def create_draft_notification(application):
@@ -22,12 +37,18 @@ def submit_application(application):
     application.status = "submitted"
     application.submitted_at = application.submitted_at or timezone.now()
     application.save(update_fields=["status", "submitted_at", "updated_at"])
+    message = build_application_submitted_message(application)
     create_notification(
         user=application.applicant,
-        title="Permohonan dihantar",
-        message=f"Permohonan {application.reference_no} telah dihantar.",
+        title="Permohonan Latihan Industri Berjaya Dihantar",
+        message=message,
         application=application,
     )
+    if application.applicant.mobile_number and getattr(settings, "WHATSAPP_ENABLED", False):
+        try:
+            send_whatsapp_message(application.applicant.mobile_number, message)
+        except OTPDeliveryError:
+            logger.exception("Unable to send application submission WhatsApp for application %s", application.pk)
     return application
 
 
