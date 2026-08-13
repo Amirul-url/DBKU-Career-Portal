@@ -200,7 +200,7 @@ const documentFields = [
     accept: ".pdf,application/pdf",
     field: "resumeFile",
     hint: "PDF",
-    label: "Resume",
+    label: "CV",
   },
   {
     accept: ".jpg,.jpeg,.png,image/jpeg,image/png",
@@ -260,7 +260,7 @@ const requiredFieldsByTab = {
   "Dokumen Sokongan": [
     ["universityLetterFile", "Surat rasmi daripada institusi / kolej / universiti"],
     ["transcriptFile", "Transkrip akademik terkini"],
-    ["resumeFile", "Resume"],
+    ["resumeFile", "CV"],
     ["passportPhotoFile", "1 keping gambar berukuran passport"],
     ["bankAccountFile", "1 salinan muka depan akaun bank"],
   ],
