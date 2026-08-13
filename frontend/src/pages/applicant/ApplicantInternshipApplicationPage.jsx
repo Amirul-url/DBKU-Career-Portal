@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getStoredUser } from "../../lib/authApi";
 import { countryCallingCodes, defaultCountryCallingCode } from "../../lib/countryCallingCodes";
+import { APPLICANT_ROUTES } from "../../modules/applicant/applicantRoutes";
 import { useApplicantSidebarState } from "../../modules/applicant/useApplicantSidebarState";
 import { Icon } from "./ApplicantAuthShared";
 import { ApplicantAddressMap, ProfileContentHeader, ProfileSidebar } from "./ApplicantProfilePage";
@@ -541,6 +542,10 @@ export default function ApplicantInternshipApplicationPage() {
     setActiveInfoTab(tab);
   };
 
+  const exitApplicationForm = () => {
+    navigate(APPLICANT_ROUTES.internships);
+  };
+
   const textInput = (field, props = {}) => (
     <input required value={studentInfo[field]} onChange={updateStudentInfo(field)} {...props} />
   );
@@ -671,6 +676,10 @@ export default function ApplicantInternshipApplicationPage() {
           <section className="student-info-panel" aria-label="Maklumat permohonan latihan industri">
             <header className="student-info-titlebar">
               <h1>Permohonan Latihan Industri</h1>
+              <button className="student-info-back" type="button" onClick={exitApplicationForm}>
+                <Icon>arrow_back</Icon>
+                Kembali
+              </button>
             </header>
 
             <div className="student-info-workspace">

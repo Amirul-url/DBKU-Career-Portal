@@ -6235,6 +6235,8 @@ body:has(.applicant-profile-page) {
   display: flex;
   min-height: 52px;
   align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   background: var(--student-pale);
   padding: 0 18px;
 }
@@ -6902,6 +6904,33 @@ body:has(.applicant-profile-page) {
   color: var(--student-ink);
   font-size: 14px;
   font-weight: 850;
+}
+
+.student-info-back {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid #bdebd1;
+  border-radius: 7px;
+  background: #ffffff;
+  color: var(--student-green);
+  padding: 0 12px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.student-info-back:hover,
+.student-info-back:focus-visible {
+  border-color: var(--student-green);
+  background: #f0fdf4;
+  outline: 0;
+}
+
+.student-info-back .material-symbols-outlined {
+  font-size: 17px;
 }
 
 .student-document-card span {
