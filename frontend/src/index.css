@@ -6974,6 +6974,27 @@ body:has(.applicant-profile-page) {
   gap: 8px;
 }
 
+.student-document-table-cell {
+  display: grid;
+  gap: 10px;
+}
+
+.student-document-upload-input {
+  display: none;
+}
+
+.student-document-table-cell span {
+  overflow-wrap: anywhere;
+  color: #64736b;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.student-document-table-cell span.uploaded {
+  color: #166534;
+}
+
 .student-document-actions button {
   display: inline-flex;
   min-height: 34px;

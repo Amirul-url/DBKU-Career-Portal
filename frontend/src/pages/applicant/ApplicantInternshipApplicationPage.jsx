@@ -186,21 +186,33 @@ const institutionOptions = [
 const documentFields = [
   {
     accept: ".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    field: "resumeFile",
-    hint: "PDF, DOC atau DOCX",
-    label: "Resume",
-  },
-  {
-    accept: ".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     field: "universityLetterFile",
-    hint: "Surat rasmi universiti / surat penempatan",
-    label: "Surat Permohonan Universiti",
+    hint: "PDF, DOC atau DOCX",
+    label: "Surat rasmi daripada institusi / kolej / universiti",
   },
   {
     accept: ".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png",
     field: "transcriptFile",
     hint: "PDF, JPG atau PNG",
-    label: "Transkrip / Keputusan Terkini",
+    label: "Transkrip akademik terkini",
+  },
+  {
+    accept: ".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    field: "resumeFile",
+    hint: "PDF, DOC atau DOCX",
+    label: "Resume",
+  },
+  {
+    accept: ".jpg,.jpeg,.png,image/jpeg,image/png",
+    field: "passportPhotoFile",
+    hint: "JPG atau PNG",
+    label: "1 keping gambar berukuran passport",
+  },
+  {
+    accept: ".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png",
+    field: "bankAccountFile",
+    hint: "PDF, JPG atau PNG",
+    label: "1 salinan muka depan akaun bank",
   },
 ];
 
@@ -210,6 +222,7 @@ const getDefaultStudentInfo = () => ({
   age: "",
   birthDate: "",
   birthPlace: "",
+  bankAccountFile: "",
   citizenship: "",
   cgpa: "",
   currentYear: "",
@@ -223,6 +236,7 @@ const getDefaultStudentInfo = () => ({
   maritalStatus: "",
   motherBirthState: "",
   name: "",
+  passportPhotoFile: "",
   phone: "",
   program: "",
   race: "",
@@ -244,9 +258,11 @@ const getDefaultStudentInfo = () => ({
 
 const requiredFieldsByTab = {
   "Dokumen Sokongan": [
+    ["universityLetterFile", "Surat rasmi daripada institusi / kolej / universiti"],
+    ["transcriptFile", "Transkrip akademik terkini"],
     ["resumeFile", "Resume"],
-    ["universityLetterFile", "Surat Permohonan Universiti"],
-    ["transcriptFile", "Transkrip / Keputusan Terkini"],
+    ["passportPhotoFile", "1 keping gambar berukuran passport"],
+    ["bankAccountFile", "1 salinan muka depan akaun bank"],
   ],
   "Maklumat Akademik": [
     ["institution", "Institusi Pengajian"],
@@ -881,34 +897,38 @@ export default function ApplicantInternshipApplicationPage() {
   );
 
   const renderDocumentFields = () => (
-    <div className="student-document-grid">
-      {documentFields.map((document) => (
-        <section className="student-document-card" key={document.field}>
-          <input
-            ref={(element) => {
-              documentInputRefs.current[document.field] = element;
-            }}
-            accept={document.accept}
-            type="file"
-            onChange={updateDocument(document.field)}
-          />
-          <div>
-            <Icon>{studentInfo[document.field] ? "task" : "upload_file"}</Icon>
-            <strong>{document.label}</strong>
-            <span>{studentInfo[document.field] || document.hint}</span>
-          </div>
-          <div className="student-document-actions">
-            <button type="button" onClick={() => documentInputRefs.current[document.field]?.click()}>
-              <Icon>upload_file</Icon>
-              Muat Naik
-            </button>
-            <button disabled={!studentInfo[document.field]} type="button" onClick={() => clearDocument(document.field)}>
-              <Icon>delete</Icon>
-              Padam
-            </button>
-          </div>
-        </section>
-      ))}
+    <div className="student-personal-table-wrap">
+      <table className="student-personal-table">
+        <tbody>
+          {documentFields.map((document) => renderPersonalRow(
+            document.label,
+            <div className="student-document-table-cell">
+              <input
+                ref={(element) => {
+                  documentInputRefs.current[document.field] = element;
+                }}
+                accept={document.accept}
+                className="student-document-upload-input"
+                type="file"
+                onChange={updateDocument(document.field)}
+              />
+              <span className={studentInfo[document.field] ? "uploaded" : ""}>
+                {studentInfo[document.field] || document.hint}
+              </span>
+              <div className="student-document-actions">
+                <button type="button" onClick={() => documentInputRefs.current[document.field]?.click()}>
+                  <Icon>upload_file</Icon>
+                  Muat Naik
+                </button>
+                <button disabled={!studentInfo[document.field]} type="button" onClick={() => clearDocument(document.field)}>
+                  <Icon>delete</Icon>
+                  Padam
+                </button>
+              </div>
+            </div>,
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 
