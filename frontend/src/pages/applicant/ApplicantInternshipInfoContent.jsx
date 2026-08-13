@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { getStoredUser } from "../../lib/authApi";
 import { APPLICANT_ROUTES } from "../../modules/applicant/applicantRoutes";
 
 const fieldOptions = [
@@ -29,7 +30,28 @@ function Icon({ children, className = "" }) {
   );
 }
 
+const getInternshipDraftStorageKey = (user) => `dbku_internship_student_info_manual_${user?.id || user?.email || "guest"}`;
+
+function hasInternshipDraft(user) {
+  if (typeof window === "undefined" || !user) {
+    return false;
+  }
+
+  try {
+    const saved = window.localStorage.getItem(getInternshipDraftStorageKey(user));
+    if (!saved) return false;
+
+    const draft = JSON.parse(saved);
+    return Boolean(draft?.studentInfo);
+  } catch {
+    return false;
+  }
+}
+
 export default function ApplicantInternshipInfoContent() {
+  const user = getStoredUser();
+  const hasDraft = hasInternshipDraft(user);
+
   return (
     <main className="applicant-internship-page">
       <section className="internship-hero" aria-label="Peluang latihan industri">
@@ -122,11 +144,15 @@ export default function ApplicantInternshipInfoContent() {
 
           <div className="internship-cta-panel">
             <div>
-              <strong>Bersedia untuk hantar permohonan?</strong>
-              <p>Lengkapkan profil sebelum membuat permohonan latihan industri.</p>
+              <strong>{hasDraft ? "Draf permohonan belum lengkap." : "Bersedia untuk hantar permohonan?"}</strong>
+              <p>
+                {hasDraft
+                  ? "Sambung isi draf latihan industri anda dari bahagian yang belum lengkap."
+                  : "Lengkapkan profil sebelum membuat permohonan latihan industri."}
+              </p>
             </div>
             <Link to={APPLICANT_ROUTES.internshipApplication}>
-              Mohon Latihan Industri
+              {hasDraft ? "Teruskan Draf" : "Mohon Latihan Industri"}
               <Icon>arrow_forward</Icon>
             </Link>
           </div>

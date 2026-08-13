@@ -375,17 +375,30 @@ function saveStudentInfoDraft(user, payload) {
   }
 }
 
+function isTabComplete(tab, studentInfo) {
+  const requiredFields = requiredFieldsByTab[tab] || [];
+  const hasRequiredFields = requiredFields.every(([field]) => String(studentInfo[field] || "").trim());
+  const hasRequiredLocation = tab !== personalInfoTab || (studentInfo.latitude && studentInfo.longitude);
+
+  return hasRequiredFields && hasRequiredLocation;
+}
+
+function getFirstIncompleteTab(studentInfo) {
+  return infoTabs.find((tab) => !isTabComplete(tab, studentInfo)) || personalInfoTab;
+}
+
 export default function ApplicantInternshipApplicationPage() {
   const navigate = useNavigate();
   const user = getStoredUser();
   const savedDraft = loadStudentInfoDraft(user);
+  const initialStudentInfo = normalizeStudentInfoDraft(savedDraft?.studentInfo || {}, user);
   const [sidebarOpen, toggleSidebar] = useApplicantSidebarState();
-  const [activeInfoTab, setActiveInfoTab] = useState(personalInfoTab);
+  const [activeInfoTab, setActiveInfoTab] = useState(() => getFirstIncompleteTab(initialStudentInfo));
   const [notice, setNotice] = useState("");
   const [noticeStatus, setNoticeStatus] = useState("success");
   const [validationErrors, setValidationErrors] = useState({});
   const documentInputRefs = useRef({});
-  const [studentInfo, setStudentInfo] = useState(() => normalizeStudentInfoDraft(savedDraft?.studentInfo || {}, user));
+  const [studentInfo, setStudentInfo] = useState(() => initialStudentInfo);
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
   const email = user?.email || "Belum dikemaskini";
 
