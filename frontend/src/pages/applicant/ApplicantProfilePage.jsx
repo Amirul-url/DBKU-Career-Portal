@@ -1878,6 +1878,18 @@ function ProfileDownloadLinks({ resumeUrl, videoUrl }) {
   );
 }
 
+function blockReadOnlyInteraction(event) {
+  event.preventDefault();
+  event.stopPropagation();
+}
+
+const readOnlySurfaceHandlers = {
+  onClickCapture: blockReadOnlyInteraction,
+  onKeyDownCapture: blockReadOnlyInteraction,
+  onMouseDownCapture: blockReadOnlyInteraction,
+  onPointerDownCapture: blockReadOnlyInteraction,
+};
+
 export function ApplicantProfileReadOnlyCards({ applicant, profile }) {
   const [openSection, setOpenSection] = useState(null);
   const personalProfile = normalizePersonalProfile(
@@ -1919,7 +1931,7 @@ export function ApplicantProfileReadOnlyCards({ applicant, profile }) {
 
       <ProfileCard id="profile-section-experience-readonly" title="Pengalaman" isEditing={openSection === "experience"} onEdit={() => toggleSection("experience")} {...readOnlyActionProps}>
         {openSection === "experience" ? (
-          <div className="readonly-form-surface">
+          <div className="readonly-form-surface" {...readOnlySurfaceHandlers}>
             <ExperienceForm data={experienceProfile} onDraftChange={() => {}} onSave={() => {}} />
           </div>
         ) : (
@@ -1929,7 +1941,7 @@ export function ApplicantProfileReadOnlyCards({ applicant, profile }) {
 
       <ProfileCard id="profile-section-academic-readonly" title="Akademik" isEditing={openSection === "academic"} onEdit={() => toggleSection("academic")} {...readOnlyActionProps}>
         {openSection === "academic" ? (
-          <div className="readonly-form-surface">
+          <div className="readonly-form-surface" {...readOnlySurfaceHandlers}>
             <AcademicForm data={academicProfile} onDraftChange={() => {}} onSave={() => {}} />
           </div>
         ) : (
@@ -1939,7 +1951,7 @@ export function ApplicantProfileReadOnlyCards({ applicant, profile }) {
 
       <ProfileCard id="profile-section-skills-readonly" title="Kemahiran" isEditing={openSection === "skills"} onEdit={() => toggleSection("skills")} {...readOnlyActionProps}>
         {openSection === "skills" ? (
-          <div className="readonly-form-surface">
+          <div className="readonly-form-surface" {...readOnlySurfaceHandlers}>
             <SkillsForm data={skillsProfile} onDraftChange={() => {}} onSave={() => {}} />
           </div>
         ) : (
