@@ -193,14 +193,14 @@ function ApplicantSkillsMirror({ data, isOpen, onToggle }) {
 function ApplicantProfileModal({ data, onClose }) {
   if (!data) return null;
   const name = data.profile.personal?.displayName || data.applicant.full_name || data.applicant.first_name || "Pemohon";
-  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-5"><section className="flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden rounded-xl bg-slate-50 shadow-2xl" role="dialog" aria-modal="true" aria-label={`Profil ${name}`}><header className="flex items-center justify-between border-b border-slate-200 bg-white px-7 py-5"><div><h2 className="text-2xl font-bold text-slate-950">Profil Pemohon</h2><p className="mt-1 text-sm font-semibold text-slate-500">{name}</p></div><button className="rounded-md p-2 text-slate-500 hover:bg-slate-100" onClick={onClose} type="button" aria-label="Tutup"><Icon>close</Icon></button></header><div className="overflow-y-auto p-7"><ApplicantProfileReadOnlyCards applicant={data.applicant} profile={data.profile} /></div></section></div>;
+  return <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/45 p-5"><section className="flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden rounded-xl bg-slate-50 shadow-2xl" role="dialog" aria-modal="true" aria-label={`Profil ${name}`}><header className="flex items-center justify-between border-b border-slate-200 bg-white px-7 py-5"><div><h2 className="text-2xl font-bold text-slate-950">Profil Pemohon</h2><p className="mt-1 text-sm font-semibold text-slate-500">{name}</p></div><button className="rounded-md p-2 text-slate-500 hover:bg-slate-100" onClick={onClose} type="button" aria-label="Tutup"><Icon>close</Icon></button></header><div className="overflow-y-auto p-7"><ApplicantProfileReadOnlyCards applicant={data.applicant} profile={data.profile} /></div></section></div>;
 }
 
 function ApplicantDeleteModal({ applicant, deleting, onCancel, onConfirm }) {
   if (!applicant) return null;
   const name = applicant.full_name || applicant.first_name || applicant.email || "pemohon ini";
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-5" role="presentation">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/45 p-5" role="presentation">
       <section className="w-full max-w-lg overflow-hidden rounded-xl bg-white shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="applicant-delete-title">
         <header className="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5">
           <div>

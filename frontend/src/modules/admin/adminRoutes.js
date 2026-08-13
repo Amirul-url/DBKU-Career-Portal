@@ -16,7 +16,7 @@ export const ADMIN_ROUTES = {
 export const adminNavItems = [
   { icon: "dashboard", label: "Papan Pemuka", panel: "dashboard", to: ADMIN_ROUTES.dashboard },
   { kind: "section", label: "PEMOHON" },
-  { icon: "group", label: "Pemohon", panel: "applicants", to: ADMIN_ROUTES.applicants },
+  { icon: "group", label: "Akaun Pemohon", panel: "applicants", to: ADMIN_ROUTES.applicants },
   { kind: "section", label: "JAWATAN DBKU" },
   { icon: "add_circle", label: "Tambah Jawatan DBKU", panel: "create", to: ADMIN_ROUTES.create.job, vacancyType: "job" },
   { icon: "work_history", label: "Urus Jawatan DBKU", panel: "manage", to: ADMIN_ROUTES.manage.job, vacancyType: "job" },
