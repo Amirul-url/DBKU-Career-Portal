@@ -227,7 +227,10 @@ const getRequiredAddressFields = (prefix) => [
 
 function normalizeStudentInfoDraft(studentInfo = {}) {
   return Object.fromEntries(
-    Object.entries(studentInfo).map(([field, value]) => [field, valueAliases[field]?.[value] || value]),
+    Object.entries(studentInfo).map(([field, value]) => [
+      field,
+      field === "name" ? String(value || "").toUpperCase() : valueAliases[field]?.[value] || value,
+    ]),
   );
 }
 
@@ -300,6 +303,11 @@ export default function ApplicantInternshipApplicationPage() {
   const updateStudentInfo = (field) => (event) => {
     setNotice("");
     setStudentInfo((current) => ({ ...current, [field]: event.target.value }));
+  };
+
+  const updateStudentName = (event) => {
+    setNotice("");
+    setStudentInfo((current) => ({ ...current, name: event.target.value.toUpperCase() }));
   };
 
   const updateNumericStudentInfo = (field) => (event) => {
@@ -415,7 +423,7 @@ export default function ApplicantInternshipApplicationPage() {
 
               <div className="student-info-content">
                 <nav className="student-info-tabs" aria-label="Bahagian maklumat pelajar">
-                  {infoTabs.map((tab, index) => (
+                  {infoTabs.map((tab) => (
                     <button
                       className={activeInfoTab === tab ? "active" : ""}
                       key={tab}
@@ -436,7 +444,7 @@ export default function ApplicantInternshipApplicationPage() {
                   ) : (
                     <div className="student-info-layout">
                       <div className="student-info-fields">
-                        <label className="wide">Nama<input value={studentInfo.name} onChange={updateStudentInfo("name")} /></label>
+                        <label className="wide">Nama<input value={studentInfo.name} onChange={updateStudentName} /></label>
                         <label>No. Kad Pengenalan<input inputMode="numeric" pattern="[0-9]*" value={studentInfo.icNo} onChange={updateNumericStudentInfo("icNo")} /></label>
                         <label className="student-plain-select-label">Jantina
                           <select value={studentInfo.gender} onChange={updateStudentInfo("gender")}>
