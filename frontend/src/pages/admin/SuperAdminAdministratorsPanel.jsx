@@ -88,7 +88,7 @@ function AdminAccountModal({ account, config, error, form, mode, onChange, onClo
                   <label className="inline-flex items-center gap-2"><input type="checkbox" checked={form.notify_email} onChange={(event) => onChange("notify_email", event.target.checked)} />E-mel</label>
                 </div>
               </div>
-              <span className="hidden md:block" aria-hidden="true" />
+              {!config.hasDepartment ? <span className="hidden md:block" aria-hidden="true" /> : null}
               <label className={labelClass}>
                 Kata Laluan
                 <input className={inputClass} value={form.password} onChange={(event) => onChange("password", event.target.value)} placeholder={isEdit ? "Kosongkan jika tidak mahu tukar" : "Masukkan kata laluan"} type="password" required={!isEdit} />
