@@ -3817,7 +3817,7 @@ body:has(.auth-page) {
 }
 
 .register-split-form .split-submit {
-  margin-top: 20px;
+  margin-top: 34px;
 }
 
 .split-alert {
@@ -4127,7 +4127,7 @@ body:has(.auth-page) {
   }
 
   .register-split-form .split-submit {
-    margin-top: 14px;
+    margin-top: 24px;
   }
 
   .split-submit {
