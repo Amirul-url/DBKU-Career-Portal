@@ -954,7 +954,7 @@ export function ApplicantAddressMap({ address, addressError, latitude, locationE
   const popupRef = useRef(null);
   const debounceRef = useRef(null);
   const selectedAddressRef = useRef("");
-  const [mapAddress, setMapAddress] = useState(address || "");
+  const [mapAddress, setMapAddress] = useState(() => formatMapAddressText(address));
   const [mapMode, setMapMode] = useState("2d");
   const [mapStyle, setMapStyle] = useState("street");
   const [mapMessage, setMapMessage] = useState("");
@@ -974,8 +974,9 @@ export function ApplicantAddressMap({ address, addressError, latitude, locationE
   const addressQuery = [mapAddress, "Malaysia"].filter(Boolean).join(", ");
 
   useEffect(() => {
-    if (address !== mapAddress) {
-      setMapAddress(address || "");
+    const nextAddress = formatMapAddressText(address);
+    if (nextAddress !== mapAddress) {
+      setMapAddress(nextAddress);
     }
   }, [address, mapAddress]);
 
