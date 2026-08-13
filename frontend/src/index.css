@@ -7231,6 +7231,46 @@ body:has(.applicant-profile-page) {
   overflow-wrap: anywhere;
 }
 
+.student-readonly-split {
+  display: grid;
+  gap: 10px;
+}
+
+.student-readonly-split.two {
+  grid-template-columns: 150px minmax(0, 1fr);
+}
+
+.student-readonly-split.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.student-readonly-split label {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+}
+
+.student-readonly-split span {
+  color: #43564c;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.student-readonly-split strong {
+  display: flex;
+  min-height: 36px;
+  align-items: center;
+  border: 1px solid #d7eadf;
+  border-radius: 4px;
+  background: #f8fafc;
+  color: #1f2937;
+  padding: 7px 9px;
+  font-size: 13px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
 .student-readonly-panel .student-info-tabs {
   margin-bottom: 22px;
 }
@@ -7238,7 +7278,9 @@ body:has(.applicant-profile-page) {
 @media (max-width: 1100px) {
   .student-info-layout,
   .student-document-grid,
-  .student-readonly-summary {
+  .student-readonly-summary,
+  .student-readonly-split.two,
+  .student-readonly-split.three {
     grid-template-columns: 1fr;
   }
 

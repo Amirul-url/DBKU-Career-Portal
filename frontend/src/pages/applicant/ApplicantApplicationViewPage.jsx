@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { apiRequest, getStoredUser } from "../../lib/authApi";
+import { countryCallingCodes, defaultCountryCallingCode } from "../../lib/countryCallingCodes";
 import { APPLICANT_ROUTES } from "../../modules/applicant/applicantRoutes";
 import { useApplicantSidebarState } from "../../modules/applicant/useApplicantSidebarState";
 import { Icon } from "./ApplicantAuthShared";
@@ -58,8 +59,13 @@ const academicRows = [
   ["cgpa", "CGPA / Keputusan Terkini"],
   ["supervisorName", "Nama Penyelaras Program"],
   ["supervisorEmail", "Emel Penyelaras Program"],
-  ["supervisorPhone", "No. Telefon Penyelaras Program"],
 ];
+
+const countriesByLongestCode = [...countryCallingCodes].sort(
+  (first, second) =>
+    second.code.replace(/\D/g, "").length - first.code.replace(/\D/g, "").length ||
+    first.name.localeCompare(second.name),
+);
 
 function formatDate(value) {
   if (!value) return "-";
@@ -74,19 +80,119 @@ function getApplicationDate(application) {
   return application?.submitted_at || application?.created_at || "";
 }
 
+function formatReferenceNo(application) {
+  const referenceNo = String(application?.reference_no || "").trim();
+  if (!referenceNo) return "-";
+  if (referenceNo.startsWith("PK.")) return referenceNo;
+
+  const legacyMatch = referenceNo.match(/^DBKU-CAR-(\d+)$/i);
+  if (!legacyMatch) return referenceNo;
+
+  const applicationDate = new Date(getApplicationDate(application));
+  const year = Number.isNaN(applicationDate.getTime()) ? new Date().getFullYear() : applicationDate.getFullYear();
+  const sequence = Number.parseInt(legacyMatch[1], 10);
+  return `PK.${year}-${String(sequence || 1).padStart(4, "0").slice(-4)}`;
+}
+
+function splitPhoneNumber(value) {
+  const digits = String(value || "").replace(/\D/g, "");
+  if (!digits) {
+    return { countryCode: "", localNumber: "" };
+  }
+
+  const matchedCountry = countriesByLongestCode.find((country) => {
+    const countryDigits = country.code.replace(/\D/g, "");
+    return digits.startsWith(countryDigits) && digits.length > countryDigits.length;
+  });
+
+  const country = matchedCountry || defaultCountryCallingCode;
+  const countryDigits = country.code.replace(/\D/g, "");
+  const localNumber = matchedCountry ? digits.slice(countryDigits.length) : digits.replace(/^0+/, "");
+  return {
+    countryCode: country.code,
+    localNumber,
+  };
+}
+
+function splitDateParts(value) {
+  const cleanValue = String(value || "").trim();
+  const isoMatch = cleanValue.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (isoMatch) {
+    return { day: isoMatch[3], month: isoMatch[2], year: isoMatch[1] };
+  }
+
+  const date = new Date(cleanValue);
+  if (Number.isNaN(date.getTime())) {
+    return { day: "", month: "", year: "" };
+  }
+
+  return {
+    day: String(date.getDate()).padStart(2, "0"),
+    month: String(date.getMonth() + 1).padStart(2, "0"),
+    year: String(date.getFullYear()),
+  };
+}
+
 function displayValue(value) {
   const cleanValue = String(value || "").trim();
   return cleanValue || "-";
 }
 
-function renderReadOnlyRow(key, label, value, className = "") {
+function renderReadOnlyContentRow(key, label, content, className = "") {
   return (
     <tr className={className} key={key}>
       <th scope="row">{label}</th>
-      <td>
-        <span className="student-readonly-value">{displayValue(value)}</span>
-      </td>
+      <td>{content}</td>
     </tr>
+  );
+}
+
+function renderReadOnlyRow(key, label, value, className = "") {
+  return renderReadOnlyContentRow(
+    key,
+    label,
+    <span className="student-readonly-value">{displayValue(value)}</span>,
+    className,
+  );
+}
+
+function renderPhoneRow(key, label, value) {
+  const phone = splitPhoneNumber(value);
+  return renderReadOnlyContentRow(
+    key,
+    label,
+    <div className="student-readonly-split two">
+      <label>
+        <span>Kod Negara</span>
+        <strong>{displayValue(phone.countryCode)}</strong>
+      </label>
+      <label>
+        <span>No. Telefon</span>
+        <strong>{displayValue(phone.localNumber)}</strong>
+      </label>
+    </div>,
+  );
+}
+
+function renderDateOfBirthRow(value) {
+  const dateParts = splitDateParts(value);
+  return renderReadOnlyContentRow(
+    "birthDate",
+    "Tarikh Lahir",
+    <div className="student-readonly-split three">
+      <label>
+        <span>Hari</span>
+        <strong>{displayValue(dateParts.day)}</strong>
+      </label>
+      <label>
+        <span>Bulan</span>
+        <strong>{displayValue(dateParts.month)}</strong>
+      </label>
+      <label>
+        <span>Tahun</span>
+        <strong>{displayValue(dateParts.year)}</strong>
+      </label>
+    </div>,
   );
 }
 
@@ -154,7 +260,8 @@ export default function ApplicantApplicationViewPage() {
     <div className="student-personal-table-wrap">
       <table className="student-personal-table student-readonly-table">
         <tbody>
-          {personalRows.slice(0, 3).map(([field, label]) => renderReadOnlyRow(field, label, studentInfo[field]))}
+          {personalRows.slice(0, 2).map(([field, label]) => renderReadOnlyRow(field, label, studentInfo[field]))}
+          {renderPhoneRow("phone", "No. Telefon Bimbit/ Telefon Rumah", studentInfo.phone)}
           <tr className="map-row">
             <th scope="row">Alamat Surat Menyurat</th>
             <td>
@@ -167,7 +274,9 @@ export default function ApplicantApplicationViewPage() {
               />
             </td>
           </tr>
-          {personalRows.slice(3).map(([field, label]) => renderReadOnlyRow(field, label, studentInfo[field]))}
+          {personalRows.slice(3, 5).map(([field, label]) => renderReadOnlyRow(field, label, studentInfo[field]))}
+          {renderDateOfBirthRow(studentInfo.birthDate)}
+          {personalRows.slice(6).map(([field, label]) => renderReadOnlyRow(field, label, studentInfo[field]))}
         </tbody>
       </table>
     </div>
@@ -178,6 +287,7 @@ export default function ApplicantApplicationViewPage() {
       <table className="student-personal-table student-readonly-table">
         <tbody>
           {academicRows.map(([field, label]) => renderReadOnlyRow(field, label, studentInfo[field]))}
+          {renderPhoneRow("supervisorPhone", "No. Telefon Penyelaras Program", studentInfo.supervisorPhone)}
         </tbody>
       </table>
     </div>
@@ -225,7 +335,7 @@ export default function ApplicantApplicationViewPage() {
                     <section className="student-readonly-summary" aria-label="Ringkasan permohonan">
                       <div>
                         <span>No. Rujukan</span>
-                        <strong>{application.reference_no || "-"}</strong>
+                        <strong>{formatReferenceNo(application)}</strong>
                       </div>
                       <div>
                         <span>Permohonan</span>
