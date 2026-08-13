@@ -9,6 +9,7 @@ import ApplicantResetPasswordPage from "./pages/applicant/ApplicantResetPassword
 import ApplicantDashboardPage from "./pages/applicant/ApplicantDashboardPage";
 import ApplicantJobSearchPage from "./pages/applicant/ApplicantJobSearchPage";
 import ApplicantInternshipApplicationPage from "./pages/applicant/ApplicantInternshipApplicationPage";
+import ApplicantApplicationViewPage from "./pages/applicant/ApplicantApplicationViewPage";
 import ApplicantPortalListPage from "./pages/applicant/ApplicantPortalListPage";
 import ApplicantProfilePage from "./pages/applicant/ApplicantProfilePage";
 import ApplicantRegisterPage from "./pages/applicant/ApplicantRegisterPage";
@@ -220,6 +221,7 @@ export default function App() {
         <Route path="/profile/internships" element={<ApplicantJobSearchPage />} />
         <Route path="/profile/internship-application" element={<ApplicantInternshipApplicationPage />} />
         <Route path="/profile/applications" element={<ApplicantPortalListPage page="applications" />} />
+        <Route path="/profile/applications/:applicationId" element={<ApplicantApplicationViewPage />} />
         <Route path="/profile/saved" element={<ApplicantPortalListPage page="saved" />} />
         <Route path="/profile" element={<Navigate to="/profile/personal" replace />} />
         <Route path="/profile/:section" element={<ApplicantProfilePage />} />

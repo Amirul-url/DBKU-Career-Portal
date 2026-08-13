@@ -84,7 +84,6 @@ function ApplicationList({ applications, loading }) {
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortOrder, setSortOrder] = useState("desc");
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedApplication, setSelectedApplication] = useState(null);
 
   const statusOptions = useMemo(() => {
     const statuses = new Set(applications.map((application) => application.status || "draft"));
@@ -195,9 +194,9 @@ function ApplicationList({ applications, loading }) {
                       {application.isLocalDraft ? (
                         <Link className="applicant-table-action" to={APPLICANT_ROUTES.internshipApplication}>Teruskan</Link>
                       ) : (
-                        <button className="applicant-table-action" type="button" onClick={() => setSelectedApplication(application)}>
+                        <Link className="applicant-table-action" to={APPLICANT_ROUTES.applicationView(application.id)}>
                           Lihat
-                        </button>
+                        </Link>
                       )}
                     </td>
                   </tr>
@@ -235,60 +234,7 @@ function ApplicationList({ applications, loading }) {
           </button>
         </div>
       </div>
-      {selectedApplication ? (
-        <ApplicationDetailDialog application={selectedApplication} onClose={() => setSelectedApplication(null)} />
-      ) : null}
     </section>
-  );
-}
-
-function ApplicationDetailDialog({ application, onClose }) {
-  const vacancy = application.vacancy_detail || {};
-  const status = application.status || "draft";
-
-  return (
-    <div className="applicant-application-dialog-backdrop" role="presentation">
-      <section
-        aria-labelledby="applicant-application-dialog-title"
-        aria-modal="true"
-        className="applicant-application-dialog"
-        role="dialog"
-      >
-        <header>
-          <h2 id="applicant-application-dialog-title">Butiran Permohonan</h2>
-          <button type="button" onClick={onClose} aria-label="Tutup butiran permohonan">
-            <Icon>close</Icon>
-          </button>
-        </header>
-        <dl>
-          <div>
-            <dt>No. Rujukan</dt>
-            <dd>{application.reference_no || "-"}</dd>
-          </div>
-          <div>
-            <dt>Permohonan</dt>
-            <dd>{vacancy.title || "Permohonan DBKU"}</dd>
-          </div>
-          <div>
-            <dt>Tarikh</dt>
-            <dd>{formatDate(getApplicationDate(application))}</dd>
-          </div>
-          <div>
-            <dt>Status</dt>
-            <dd>
-              <span className={`applicant-status-pill ${status}`}>
-                {statusLabels[status] || status}
-              </span>
-            </dd>
-          </div>
-          <div>
-            <dt>Catatan</dt>
-            <dd>{application.latest_remark || "-"}</dd>
-          </div>
-        </dl>
-        <button className="applicant-application-dialog-ok" type="button" onClick={onClose}>OK</button>
-      </section>
-    </div>
   );
 }
 

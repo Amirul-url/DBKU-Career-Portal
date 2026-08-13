@@ -1,6 +1,7 @@
 export const APPLICANT_ROUTES = {
   academic: "/profile/academic",
   applications: "/profile/applications",
+  applicationView: (id) => `/profile/applications/${id}`,
   dashboard: "/profile/dashboard",
   experience: "/profile/experience",
   internshipApplication: "/profile/internship-application",
