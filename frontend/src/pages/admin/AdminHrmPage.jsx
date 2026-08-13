@@ -457,7 +457,7 @@ export default function AdminHrmPage() {
               )
             ) : (
               <NavLink
-                className={({ isActive }) => `flex w-full items-center rounded-md py-3 text-left text-[14px] font-semibold ${isSidebarOpen ? "gap-4 px-4" : "justify-center px-0"} ${isActive ? "bg-emerald-50 text-slate-950" : "text-slate-950"}`}
+                className={({ isActive }) => `flex w-full items-center rounded-md py-3 text-left text-[14px] font-bold ${isSidebarOpen ? "gap-4 px-4" : "justify-center px-0"} ${isActive ? "bg-emerald-50 text-slate-950" : "text-slate-950"}`}
                 end
                 key={`${item.label}-${index}`}
                 onClick={() => {
@@ -545,7 +545,6 @@ export default function AdminHrmPage() {
             <>
               <div className="hrm-heading">
                 <div>
-                  <span className="hrm-eyebrow">{isInternshipForm ? "TAMBAH JAWATAN LATIHAN INDUSTRI" : "TAMBAH JAWATAN DBKU"}</span>
                   <h1>{isInternshipForm ? "Siarkan jawatan latihan industri baharu" : "Siarkan jawatan DBKU baharu"}</h1>
                   <p>Masukkan ringkasan penting. Maklumat penuh disediakan melalui dokumen rasmi untuk dimuat turun pemohon.</p>
                 </div>
@@ -641,7 +640,6 @@ export default function AdminHrmPage() {
             <>
               <div className="hrm-heading">
                 <div>
-                  <span className="hrm-eyebrow">JAWATAN & LATIHAN</span>
                   <h1>Siarkan peluang baharu</h1>
                   <p>
                     Gunakan template rasmi DBKU untuk menyusun iklan jawatan
@@ -879,7 +877,6 @@ export default function AdminHrmPage() {
             <>
               <div className="hrm-heading">
                 <div>
-                  <span className="hrm-eyebrow">URUS JAWATAN</span>
                   <h1>Senarai {activeOpportunityLabel}</h1>
                   <p>Semak semua iklan {activeOpportunityLabel.toLowerCase()} yang telah disiarkan.</p>
                 </div>
@@ -933,7 +930,6 @@ export default function AdminHrmPage() {
             <>
               <div className="hrm-heading">
                 <div>
-                  <span className="hrm-eyebrow">PENGURUSAN PERMOHONAN</span>
                   <h1>Permohonan {activeOpportunityLabel}</h1>
                   <p>
                     Pilih calon yang memenuhi keperluan {activeOpportunityLabel.toLowerCase()} dengan lebih cepat.
