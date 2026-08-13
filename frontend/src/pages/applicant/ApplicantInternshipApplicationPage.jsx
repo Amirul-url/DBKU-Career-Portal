@@ -52,6 +52,137 @@ const countriesByLongestCode = [...countryCallingCodes].sort(
     first.name.localeCompare(second.name),
 );
 
+const institutionOptions = [
+  "Universiti Malaya (UM)",
+  "Universiti Sains Malaysia (USM)",
+  "Universiti Kebangsaan Malaysia (UKM)",
+  "Universiti Putra Malaysia (UPM)",
+  "Universiti Teknologi Malaysia (UTM)",
+  "Universiti Islam Antarabangsa Malaysia (UIAM / IIUM)",
+  "Universiti Malaysia Sarawak (UNIMAS)",
+  "Universiti Malaysia Sabah (UMS)",
+  "Universiti Sains Islam Malaysia (USIM)",
+  "Universiti Teknologi MARA (UiTM)",
+  "Universiti Sultan Zainal Abidin (UniSZA)",
+  "Universiti Utara Malaysia (UUM)",
+  "Universiti Pendidikan Sultan Idris (UPSI)",
+  "Universiti Malaysia Terengganu (UMT)",
+  "Universiti Malaysia Kelantan (UMK)",
+  "Universiti Pertahanan Nasional Malaysia (UPNM)",
+  "Universiti Tun Hussein Onn Malaysia (UTHM)",
+  "Universiti Teknikal Malaysia Melaka (UTeM)",
+  "Universiti Malaysia Perlis (UniMAP)",
+  "Universiti Malaysia Pahang Al-Sultan Abdullah (UMPSA)",
+  "Politeknik Ungku Omar",
+  "Politeknik Sultan Salahuddin Abdul Aziz Shah",
+  "Politeknik Ibrahim Sultan",
+  "Politeknik Sultan Azlan Shah",
+  "Politeknik Sultan Haji Ahmad Shah",
+  "Politeknik Kota Bharu",
+  "Politeknik Kuching Sarawak",
+  "Politeknik Port Dickson",
+  "Politeknik Kota Kinabalu",
+  "Politeknik Seberang Perai",
+  "Politeknik Melaka",
+  "Politeknik Kuala Terengganu",
+  "Politeknik Merlimau",
+  "Politeknik Sultan Mizan Zainal Abidin",
+  "Politeknik Tuanku Sultanah Bahiyah",
+  "Politeknik Sultan Abdul Halim Mu'adzam Shah",
+  "Politeknik Tuanku Syed Sirajuddin",
+  "Politeknik Muadzam Shah",
+  "Politeknik Mukah",
+  "Politeknik Balik Pulau",
+  "Politeknik Jeli",
+  "Politeknik Nilai",
+  "Politeknik Banting",
+  "Politeknik Mersing",
+  "Politeknik Hulu Terengganu",
+  "Politeknik Sandakan",
+  "Politeknik METrO Kuala Lumpur",
+  "Politeknik METrO Johor Bahru",
+  "Politeknik METrO Betong",
+  "Politeknik METrO Kuantan",
+  "Politeknik METrO Tasek Gelugor",
+  "Kolej Profesional MARA",
+  "Kolej Poly-Tech MARA (KPTM)",
+  "German-Malaysian Institute (GMI)",
+  "Malaysia-Japan International Institute of Technology (MJIIT)",
+  "AIMST University",
+  "Albukhary International University (AIU)",
+  "Al-Madinah International University (MEDIU)",
+  "Al-Sultan Abdullah Ahmad Shah Quranic University of Pahang (UniPSAS)",
+  "Asia e University (AeU)",
+  "Asia Metropolitan University (AMU)",
+  "Asia Pacific University of Technology and Innovation (APU)",
+  "Asia School of Business (ASB)",
+  "Binary University of Management & Entrepreneurship",
+  "City University Malaysia",
+  "Curtin University Malaysia",
+  "DRB-HICOM University of Automotive Malaysia",
+  "Heriot-Watt University Malaysia",
+  "HELP University",
+  "IMU University",
+  "INCEIF University",
+  "Infrastructure University Kuala Lumpur (IUKL)",
+  "INTI International University",
+  "International University of Malaya-Wales (IUMW)",
+  "KPJ Healthcare University",
+  "Kuala Lumpur University of Science and Technology (KLUST)",
+  "Limkokwing University of Creative Technology",
+  "Lincoln University College",
+  "MAHSA University",
+  "Malaysia University of Science and Technology (MUST)",
+  "Management and Science University (MSU)",
+  "Manipal University College Malaysia (MUCM)",
+  "Monash University Malaysia",
+  "Multimedia University (MMU)",
+  "Newcastle University Medicine Malaysia (NUMed)",
+  "Nilai University",
+  "Open University Malaysia (OUM)",
+  "Perdana University",
+  "Petronas University of Technology (UTP)",
+  "Quest International University (QIU)",
+  "Raffles University",
+  "RCSI & UCD Malaysia Campus (RUMC)",
+  "SEGi University",
+  "Sunway University",
+  "Swinburne University of Technology Sarawak Campus",
+  "Taylor's University",
+  "Tunku Abdul Rahman University of Management and Technology (TAR UMT)",
+  "Universiti Tunku Abdul Rahman (UTAR)",
+  "Tun Abdul Razak University (UNIRAZAK)",
+  "UCSI University",
+  "UNITAR International University",
+  "Universiti Kuala Lumpur (UniKL)",
+  "University of Cyberjaya",
+  "University of Nottingham Malaysia",
+  "University of Reading Malaysia",
+  "University of Southampton Malaysia",
+  "Wawasan Open University (WOU)",
+  "Xiamen University Malaysia",
+  "BERJAYA University College",
+  "Brickfields Asia College (BAC)",
+  "First City University College",
+  "Han Chiang University College of Communication",
+  "i-CATS University College",
+  "International University College of Technology Twintech (IUCTT)",
+  "KDU University College / UOW Malaysia",
+  "Kolej Universiti Islam Antarabangsa Selangor / Universiti Islam Selangor (UIS)",
+  "Kolej Universiti Islam Melaka (KUIM)",
+  "Kolej Universiti Poly-Tech MARA (KUPTM)",
+  "Kolej Universiti Tunku Abdul Rahman",
+  "Linton University College",
+  "Methodist College Kuala Lumpur (MCKL)",
+  "New Era University College",
+  "Peninsula College",
+  "Southern University College",
+  "Sunway College",
+  "Tunku Abdul Rahman University College",
+  "UOW Malaysia KDU",
+  "Lain-lain / Institusi tidak tersenarai",
+].sort((first, second) => first.localeCompare(second));
+
 const documentFields = [
   {
     accept: ".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -332,6 +463,76 @@ function InternshipPhoneInput({ onChange, value }) {
   );
 }
 
+function InstitutionSearchSelect({ onChange, value }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const filteredInstitutions = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase();
+    if (!query) return institutionOptions;
+
+    return institutionOptions.filter((institution) => institution.toLowerCase().includes(query));
+  }, [searchTerm]);
+
+  function chooseInstitution(institution) {
+    setIsOpen(false);
+    setSearchTerm("");
+    onChange(institution);
+  }
+
+  return (
+    <div
+      className={`student-search-select ${isOpen ? "open" : ""}`}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+          setIsOpen(false);
+          setSearchTerm("");
+        }
+      }}
+    >
+      <button
+        type="button"
+        className="student-search-select-trigger"
+        aria-expanded={isOpen}
+        aria-label="Pilih institusi pengajian"
+        onClick={() => setIsOpen((open) => !open)}
+      >
+        <span>{value || "Sila pilih institusi"}</span>
+        <Icon>expand_more</Icon>
+      </button>
+      {isOpen ? (
+        <div className="student-search-select-menu">
+          <div className="student-search-select-search">
+            <input
+              type="search"
+              value={searchTerm}
+              placeholder="Cari institusi awam atau swasta"
+              autoComplete="off"
+              onChange={(event) => setSearchTerm(event.target.value)}
+            />
+            <Icon>search</Icon>
+          </div>
+          <div className="student-search-select-options">
+            {filteredInstitutions.length ? (
+              filteredInstitutions.map((institution) => (
+                <button
+                  type="button"
+                  key={institution}
+                  className={value === institution ? "selected" : ""}
+                  onClick={() => chooseInstitution(institution)}
+                >
+                  {institution}
+                </button>
+              ))
+            ) : (
+              <p>Tiada institusi dijumpai.</p>
+            )}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function normalizeStudentInfoDraft(studentInfo = {}, user = null) {
   const defaults = getDefaultStudentInfo();
   const birthDate = studentInfo.birthDate || studentInfo.dateOfBirth || "";
@@ -431,6 +632,16 @@ export default function ApplicantInternshipApplicationPage() {
       return next;
     });
     setStudentInfo((current) => ({ ...current, [field]: event.target.value }));
+  };
+
+  const updateStudentValue = (field, value) => {
+    setNotice("");
+    setValidationErrors((current) => {
+      if (!current[field]) return current;
+      const { [field]: _field, ...next } = current;
+      return next;
+    });
+    setStudentInfo((current) => ({ ...current, [field]: value }));
   };
 
   const updateStudentName = (event) => {
@@ -629,7 +840,7 @@ export default function ApplicantInternshipApplicationPage() {
 
   const renderAcademicFields = () => (
     <div className="student-info-fields compact">
-      <label className="wide">Institusi Pengajian<input value={studentInfo.institution} onChange={updateStudentInfo("institution")} /></label>
+      <label className="wide">Institusi Pengajian<InstitutionSearchSelect value={studentInfo.institution} onChange={(value) => updateStudentValue("institution", value)} /></label>
       <label className="wide">Program / Kursus<input value={studentInfo.program} onChange={updateStudentInfo("program")} /></label>
       <label>Tahap Pengajian
         <select value={studentInfo.academicLevel} onChange={updateStudentInfo("academicLevel")}>

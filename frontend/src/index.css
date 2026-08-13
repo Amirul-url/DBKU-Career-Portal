@@ -6646,6 +6646,13 @@ body:has(.applicant-profile-page) {
   text-align: left;
 }
 
+.student-search-select-trigger span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .student-search-select.open .student-search-select-trigger,
 .student-search-select-trigger:focus {
   border-color: var(--student-green);
@@ -6709,8 +6716,13 @@ body:has(.applicant-profile-page) {
   text-align: left;
 }
 
-.student-search-select-options button:hover,
 .student-search-select-options button.selected {
+  background: var(--student-pale);
+  color: var(--student-ink);
+}
+
+.student-search-select-options button:hover,
+.student-search-select-options button:focus {
   background: var(--student-green);
   color: #ffffff;
 }
