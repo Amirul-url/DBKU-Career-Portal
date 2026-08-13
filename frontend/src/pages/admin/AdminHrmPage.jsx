@@ -540,7 +540,7 @@ export default function AdminHrmPage() {
               <button onClick={() => setNotice("")}>×</button>
             </div>
           )}
-          {panel === "applicants" && <SuperAdminApplicantsPanel allowDelete={false} />}
+          {panel === "applicants" && <SuperAdminApplicantsPanel allowDelete={false} compact />}
           {panel === "create" && (
             <>
               <div className="hrm-heading">
