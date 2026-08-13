@@ -232,6 +232,7 @@ export default function ApplicantInternshipApplicationPage() {
   const [activeInfoTab, setActiveInfoTab] = useState(personalInfoTab);
   const [notice, setNotice] = useState("");
   const [noticeStatus, setNoticeStatus] = useState("success");
+  const [validationErrors, setValidationErrors] = useState({});
   const documentInputRefs = useRef({});
   const [studentInfo, setStudentInfo] = useState(() => normalizeStudentInfoDraft(savedDraft?.studentInfo || {}, user));
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
@@ -260,11 +261,21 @@ export default function ApplicantInternshipApplicationPage() {
 
   const updateStudentInfo = (field) => (event) => {
     setNotice("");
+    setValidationErrors((current) => {
+      if (!current[field]) return current;
+      const { [field]: _field, ...next } = current;
+      return next;
+    });
     setStudentInfo((current) => ({ ...current, [field]: event.target.value }));
   };
 
   const updateStudentName = (event) => {
     setNotice("");
+    setValidationErrors((current) => {
+      if (!current.name) return current;
+      const { name: _name, ...next } = current;
+      return next;
+    });
     setStudentInfo((current) => ({ ...current, name: event.target.value.toUpperCase() }));
   };
 
@@ -272,21 +283,43 @@ export default function ApplicantInternshipApplicationPage() {
     const birthDate = event.target.value;
 
     setNotice("");
+    setValidationErrors((current) => {
+      const next = { ...current };
+      delete next.birthDate;
+      delete next.age;
+      return next;
+    });
     setStudentInfo((current) => ({ ...current, birthDate, age: calculateAge(birthDate) }));
   };
 
   const updateNumericStudentInfo = (field) => (event) => {
     setNotice("");
+    setValidationErrors((current) => {
+      if (!current[field]) return current;
+      const { [field]: _field, ...next } = current;
+      return next;
+    });
     setStudentInfo((current) => ({ ...current, [field]: event.target.value.replace(/\D/g, "") }));
   };
 
   const updateDecimalStudentInfo = (field) => (event) => {
     setNotice("");
+    setValidationErrors((current) => {
+      if (!current[field]) return current;
+      const { [field]: _field, ...next } = current;
+      return next;
+    });
     setStudentInfo((current) => ({ ...current, [field]: event.target.value.replace(/[^0-9.]/g, "") }));
   };
 
   const updateAddressMapLocation = (location) => {
     setNotice("");
+    setValidationErrors((current) => {
+      const next = { ...current };
+      delete next.address;
+      delete next.location;
+      return next;
+    });
     setStudentInfo((current) => ({
       ...current,
       address: location.address ?? current.address,
@@ -320,6 +353,18 @@ export default function ApplicantInternshipApplicationPage() {
     const missingFields = requiredFieldsByTab[activeInfoTab]
       .filter(([field]) => !String(studentInfo[field] || "").trim())
       .map(([, label]) => label);
+    const errors = Object.fromEntries(
+      requiredFieldsByTab[activeInfoTab]
+        .filter(([field]) => !String(studentInfo[field] || "").trim())
+        .map(([field]) => [field, "Wajib diisi."]),
+    );
+
+    if (activeInfoTab === personalInfoTab && (!studentInfo.latitude || !studentInfo.longitude)) {
+      missingFields.push("Lokasi alamat pada map");
+      errors.location = "Sila pilih lokasi alamat pada map.";
+    }
+
+    setValidationErrors(errors);
 
     if (missingFields.length) {
       setNoticeStatus("error");
@@ -337,11 +382,11 @@ export default function ApplicantInternshipApplicationPage() {
   };
 
   const textInput = (field, props = {}) => (
-    <input value={studentInfo[field]} onChange={updateStudentInfo(field)} {...props} />
+    <input required value={studentInfo[field]} onChange={updateStudentInfo(field)} {...props} />
   );
 
   const selectInput = (field, options) => (
-    <select value={studentInfo[field]} onChange={updateStudentInfo(field)}>
+    <select required value={studentInfo[field]} onChange={updateStudentInfo(field)}>
       <option value="">Sila pilih</option>
       {options.map((option) => <option key={option}>{option}</option>)}
     </select>
@@ -358,22 +403,24 @@ export default function ApplicantInternshipApplicationPage() {
     <div className="student-personal-table-wrap">
       <table className="student-personal-table">
         <tbody>
-          {renderPersonalRow("Nama", <input value={studentInfo.name} onChange={updateStudentName} />)}
-          {renderPersonalRow("No. Kad Pengenalan Baru", <input inputMode="numeric" maxLength={12} pattern="[0-9]*" value={studentInfo.icNo} onChange={updateNumericStudentInfo("icNo")} />)}
-          {renderPersonalRow("No. Telefon Bimbit/ Telefon Rumah", <input inputMode="numeric" pattern="[0-9]*" value={studentInfo.phone} onChange={updateNumericStudentInfo("phone")} />)}
+          {renderPersonalRow("Nama", <input required value={studentInfo.name} onChange={updateStudentName} />)}
+          {renderPersonalRow("No. Kad Pengenalan Baru", <input required inputMode="numeric" maxLength={12} pattern="[0-9]*" value={studentInfo.icNo} onChange={updateNumericStudentInfo("icNo")} />)}
+          {renderPersonalRow("No. Telefon Bimbit/ Telefon Rumah", <input required inputMode="numeric" pattern="[0-9]*" value={studentInfo.phone} onChange={updateNumericStudentInfo("phone")} />)}
           {renderPersonalRow(
             "Alamat Surat Menyurat",
             <ApplicantAddressMap
               address={studentInfo.address}
+              addressError={validationErrors.address}
               latitude={studentInfo.latitude}
+              locationError={validationErrors.location}
               longitude={studentInfo.longitude}
               onLocationChange={updateAddressMapLocation}
             />,
             "map-row",
           )}
-          {renderPersonalRow("Alamat Emel", <input type="email" value={studentInfo.email} onChange={updateStudentInfo("email")} />)}
-          {renderPersonalRow("Umur", <input inputMode="numeric" pattern="[0-9]*" value={studentInfo.age} onChange={updateNumericStudentInfo("age")} />)}
-          {renderPersonalRow("Tarikh Lahir", <input type="date" value={studentInfo.birthDate} onChange={updateBirthDate} />)}
+          {renderPersonalRow("Alamat Emel", <input required type="email" value={studentInfo.email} onChange={updateStudentInfo("email")} />)}
+          {renderPersonalRow("Umur", <input required inputMode="numeric" pattern="[0-9]*" value={studentInfo.age} onChange={updateNumericStudentInfo("age")} />)}
+          {renderPersonalRow("Tarikh Lahir", <input required type="date" value={studentInfo.birthDate} onChange={updateBirthDate} />)}
           {renderPersonalRow("Tempat Lahir", textInput("birthPlace"))}
           {renderPersonalRow(
             <>
@@ -393,8 +440,8 @@ export default function ApplicantInternshipApplicationPage() {
           {renderPersonalRow("Agama", selectInput("religion", religionOptions))}
           {renderPersonalRow("Kewarganegaraan", selectInput("citizenship", citizenshipOptions))}
           {renderPersonalRow("Taraf Perkahwinan", selectInput("maritalStatus", maritalStatusOptions))}
-          {renderPersonalRow("Tinggi", <input inputMode="decimal" placeholder="cm" value={studentInfo.height} onChange={updateDecimalStudentInfo("height")} />)}
-          {renderPersonalRow("Berat", <input inputMode="decimal" placeholder="kg" value={studentInfo.weight} onChange={updateDecimalStudentInfo("weight")} />)}
+          {renderPersonalRow("Tinggi", <input required inputMode="decimal" placeholder="cm" value={studentInfo.height} onChange={updateDecimalStudentInfo("height")} />)}
+          {renderPersonalRow("Berat", <input required inputMode="decimal" placeholder="kg" value={studentInfo.weight} onChange={updateDecimalStudentInfo("weight")} />)}
           {renderPersonalRow("Kelainan Upaya (Ya/ Tidak)", selectInput("disability", yesNoOptions))}
           {renderPersonalRow("Lesen Memandu", selectInput("drivingLicense", drivingLicenseOptions))}
         </tbody>
