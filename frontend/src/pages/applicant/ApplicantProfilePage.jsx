@@ -932,7 +932,7 @@ function formatMapboxPlaceName(feature = {}) {
   return formatMapAddressWithPostcode(placeName.split(","), postcode, city);
 }
 
-function ApplicantAddressMap({ address, addressError, latitude, locationError, longitude, onLocationChange }) {
+function ApplicantAddressMap({ address, addressError, latitude, locationError, longitude, onLocationChange, readOnly = false }) {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const markerRef = useRef(null);
@@ -979,16 +979,20 @@ function ApplicantAddressMap({ address, addressError, latitude, locationError, l
       });
     }
 
-    onLocationChange({ latitude: fixedLatitude, longitude: fixedLongitude });
-  }, [onLocationChange]);
+    if (!readOnly) {
+      onLocationChange({ latitude: fixedLatitude, longitude: fixedLongitude });
+    }
+  }, [onLocationChange, readOnly]);
 
   const pushLocationChange = useCallback((nextAddress, nextLatitude, nextLongitude) => {
+    if (readOnly) return;
+
     onLocationChange({
       address: formatMapAddressText(nextAddress),
       latitude: nextLatitude,
       longitude: nextLongitude,
     });
-  }, [onLocationChange]);
+  }, [onLocationChange, readOnly]);
 
   const reverseGeocode = useCallback(async (nextLongitude, nextLatitude) => {
     try {
@@ -1195,22 +1199,24 @@ function ApplicantAddressMap({ address, addressError, latitude, locationError, l
     mapRef.current = map;
     map.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), "top-right");
 
-    markerRef.current = new mapboxgl.Marker({ color: "#16a34a", draggable: true })
+    markerRef.current = new mapboxgl.Marker({ color: "#16a34a", draggable: !readOnly })
       .setLngLat([currentLongitude, currentLatitude])
       .setPopup(popupRef.current)
       .addTo(map);
 
-    markerRef.current.on("dragend", () => {
-      const position = markerRef.current.getLngLat();
-      const fixedLongitude = Number(position.lng.toFixed(6));
-      const fixedLatitude = Number(position.lat.toFixed(6));
-      reverseGeocode(fixedLongitude, fixedLatitude);
-    });
+    if (!readOnly) {
+      markerRef.current.on("dragend", () => {
+        const position = markerRef.current.getLngLat();
+        const fixedLongitude = Number(position.lng.toFixed(6));
+        const fixedLatitude = Number(position.lat.toFixed(6));
+        reverseGeocode(fixedLongitude, fixedLatitude);
+      });
 
-    map.on("click", (event) => {
-      updateMarkerPosition(event.lngLat.lng, event.lngLat.lat, false);
-      reverseGeocode(Number(event.lngLat.lng.toFixed(6)), Number(event.lngLat.lat.toFixed(6)));
-    });
+      map.on("click", (event) => {
+        updateMarkerPosition(event.lngLat.lng, event.lngLat.lat, false);
+        reverseGeocode(Number(event.lngLat.lng.toFixed(6)), Number(event.lngLat.lat.toFixed(6)));
+      });
+    }
 
     return () => {
       map.remove();
@@ -1225,7 +1231,7 @@ function ApplicantAddressMap({ address, addressError, latitude, locationError, l
   }, [currentLatitude, currentLongitude]);
 
   useEffect(() => {
-    if (!MAPBOX_TOKEN) return undefined;
+    if (!MAPBOX_TOKEN || readOnly) return undefined;
 
     window.clearTimeout(debounceRef.current);
 
@@ -1240,7 +1246,7 @@ function ApplicantAddressMap({ address, addressError, latitude, locationError, l
     }, 350);
 
     return () => window.clearTimeout(debounceRef.current);
-  }, [fetchAddressSuggestions, mapAddress]);
+  }, [fetchAddressSuggestions, mapAddress, readOnly]);
 
   const applyMapMode = (nextMode) => {
     setMapMode(nextMode);
@@ -1267,6 +1273,8 @@ function ApplicantAddressMap({ address, addressError, latitude, locationError, l
   };
 
   const handleMapAddressChange = (event) => {
+    if (readOnly) return;
+
     const nextAddress = formatMapAddressText(event.target.value);
 
     setMapAddress(nextAddress);
@@ -1293,8 +1301,9 @@ function ApplicantAddressMap({ address, addressError, latitude, locationError, l
             rows={2}
             placeholder="Masukkan alamat"
             onChange={handleMapAddressChange}
+            readOnly={readOnly}
           />
-          {(suggestions.length > 0 || searching) ? (
+          {!readOnly && (suggestions.length > 0 || searching) ? (
             <div className="personal-address-suggestions">
               {searching ? <span>Mencari cadangan alamat...</span> : null}
               {!searching && suggestions.map((place) => (
@@ -1312,7 +1321,7 @@ function ApplicantAddressMap({ address, addressError, latitude, locationError, l
         <div className="personal-address-map-head">
           <div>
             <strong>Map Lokasi</strong>
-            <span>Pilih cadangan alamat, klik map atau gerakkan pin untuk tetapkan lokasi.</span>
+            <span>{readOnly ? "Paparan lokasi pemohon." : "Pilih cadangan alamat, klik map atau gerakkan pin untuk tetapkan lokasi."}</span>
           </div>
           <div className="personal-address-map-actions">
             <button type="button" onClick={focusLocation}>Fokus</button>
@@ -1761,7 +1770,7 @@ export function ApplicantPersonalReadOnlyView({ applicant, profile }) {
   const videoResumeUrl = resolveMediaUrl(personal.videoResumeFileUrl || applicant.video_resume_file_url);
   const value = (item) => item || "-";
   const field = (label, item, wide = false) => <PersonalField label={label} noIndicator><input readOnly value={value(item)} className={wide ? "" : ""} /></PersonalField>;
-  return <div className="personal-edit-panel"><div className="personal-edit-form"><ProfileFormRow label="Foto Profil"><div className="personal-photo-upload"><div className="personal-photo-preview">{photo ? <img src={photo} alt="" /> : name.charAt(0)}</div><div><strong>Foto profil pemohon</strong><p>Paparan baca sahaja.</p></div></div></ProfileFormRow><ProfileFormRow label="Maklumat Peribadi">{field("Nama Penuh", name)}{field("Nombor Kad Pengenalan", details.identificationNumber || applicant.mykad_number)}<div className="personal-date-group"><span>Tarikh Lahir</span><div><label>Hari<input readOnly value={value(details.birthDay)} /></label><label>Bulan<input readOnly value={value(details.birthMonth)} /></label><label>Tahun<input readOnly value={value(details.birthYear)} /></label></div></div>{field("Bangsa", details.race)}<fieldset className="personal-radio-group"><legend>Kewarganegaraan</legend><div>{citizenshipOptions.map((item) => <label key={item}><input type="radio" checked={details.citizenship === item} readOnly />{item}</label>)}</div></fieldset><fieldset className="personal-radio-group"><legend>Jantina</legend><div>{["Perempuan", "Lelaki"].map((item) => <label key={item}><input type="radio" checked={details.gender === item} readOnly />{item}</label>)}</div></fieldset></ProfileFormRow><ProfileFormRow label="Aksesibiliti dan Kesihatan"><div className="personal-helper-copy">Maklumat kesihatan pemohon adalah sulit.</div><fieldset className="personal-radio-group"><legend>Adakah anda mempunyai sebarang masalah kesihatan?</legend><div>{["Ya", "Tidak"].map((item) => <label key={item}><input type="radio" checked={details.hasHealthIssue === item} readOnly />{item}</label>)}</div></fieldset><fieldset className="personal-radio-group"><legend>Adakah anda mempunyai sebarang ketidakupayaan?</legend><div>{["Ya", "Tidak"].map((item) => <label key={item}><input type="radio" checked={details.hasDisability === item} readOnly />{item}</label>)}</div></fieldset></ProfileFormRow><ProfileFormRow label="Alamat">{field("Negeri", details.state)}{field("Bandar", details.city)}{field("Poskod", details.postcode)}<PersonalField label="Alamat" noIndicator><textarea readOnly value={value(details.address || applicant.address)} /></PersonalField></ProfileFormRow><ProfileFormRow label="Butiran Hubungan">{field("Alamat E-mel", email)}{field("Nombor Telefon Bimbit Utama", details.primaryPhone || applicant.mobile_number)}{field("Nombor Telefon Bimbit Lain", details.secondaryPhone)}</ProfileFormRow><ProfileFormRow label="Resume"><div className="personal-profile-tip"><header><span><Icon>emoji_objects</Icon></span><strong>Tingkatkan ketampakan profil anda.</strong></header><p>Resume dan video resume pemohon tersedia untuk semakan.</p></div><div className="personal-button-row">{resumeUrl ? <a className="personal-primary-button" href={resumeUrl} target="_blank" rel="noreferrer">Muat Turun Resume</a> : null}{videoResumeUrl ? <a className="personal-primary-button" href={videoResumeUrl} target="_blank" rel="noreferrer">Muat Turun Video Resume</a> : null}</div>{field("LinkedIn", details.linkedIn)}</ProfileFormRow></div></div>;
+  return <div className="personal-edit-panel"><div className="personal-edit-form"><ProfileFormRow label="Foto Profil"><div className="personal-photo-upload"><div className="personal-photo-preview">{photo ? <img src={photo} alt="" /> : name.charAt(0)}</div><div><strong>Foto profil pemohon</strong><p>Paparan baca sahaja.</p></div></div></ProfileFormRow><ProfileFormRow label="Maklumat Peribadi">{field("Nama Penuh", name)}{field("Nombor Kad Pengenalan", details.identificationNumber || applicant.mykad_number)}<div className="personal-date-group"><span>Tarikh Lahir</span><div><label>Hari<input readOnly value={value(details.birthDay)} /></label><label>Bulan<input readOnly value={value(details.birthMonth)} /></label><label>Tahun<input readOnly value={value(details.birthYear)} /></label></div></div>{field("Bangsa", details.race)}<fieldset className="personal-radio-group"><legend>Kewarganegaraan</legend><div>{citizenshipOptions.map((item) => <label key={item}><input type="radio" checked={details.citizenship === item} readOnly />{item}</label>)}</div></fieldset><fieldset className="personal-radio-group"><legend>Jantina</legend><div>{["Perempuan", "Lelaki"].map((item) => <label key={item}><input type="radio" checked={details.gender === item} readOnly />{item}</label>)}</div></fieldset></ProfileFormRow><ProfileFormRow label="Aksesibiliti dan Kesihatan"><div className="personal-helper-copy">Maklumat kesihatan pemohon adalah sulit.</div><fieldset className="personal-radio-group"><legend>Adakah anda mempunyai sebarang masalah kesihatan?</legend><div>{["Ya", "Tidak"].map((item) => <label key={item}><input type="radio" checked={details.hasHealthIssue === item} readOnly />{item}</label>)}</div></fieldset><fieldset className="personal-radio-group"><legend>Adakah anda mempunyai sebarang ketidakupayaan?</legend><div>{["Ya", "Tidak"].map((item) => <label key={item}><input type="radio" checked={details.hasDisability === item} readOnly />{item}</label>)}</div></fieldset></ProfileFormRow><ProfileFormRow label="Alamat"><ApplicantAddressMap address={details.address || applicant.address} latitude={details.latitude} longitude={details.longitude} onLocationChange={() => {}} readOnly /></ProfileFormRow><ProfileFormRow label="Butiran Hubungan">{field("Alamat E-mel", email)}{field("Nombor Telefon Bimbit Utama", details.primaryPhone || applicant.mobile_number)}{field("Nombor Telefon Bimbit Lain", details.secondaryPhone)}</ProfileFormRow><ProfileFormRow label="Resume"><div className="personal-profile-tip"><header><span><Icon>emoji_objects</Icon></span><strong>Tingkatkan ketampakan profil anda.</strong></header><p>Resume dan video resume pemohon tersedia untuk semakan.</p></div><div className="personal-button-row">{resumeUrl ? <a className="personal-primary-button" href={resumeUrl} target="_blank" rel="noreferrer">Muat Turun Resume</a> : null}{videoResumeUrl ? <a className="personal-primary-button" href={videoResumeUrl} target="_blank" rel="noreferrer">Muat Turun Video Resume</a> : null}</div>{field("LinkedIn", details.linkedIn)}</ProfileFormRow></div></div>;
 }
 
 export function ProfileSidebar({ isOpen, onToggle }) {
@@ -3000,7 +3009,7 @@ function ExperienceForm({ data, onDraftChange, onSave }) {
   );
 }
 
-function ExperienceSummary({ data }) {
+export function ExperienceSummary({ data }) {
   if (!data.records.length) {
     return <div className="profile-empty-row"><span><Icon>history</Icon></span><p>Tambah pengalaman kerja, latihan industri atau projek berkaitan.</p></div>;
   }
@@ -3153,7 +3162,7 @@ function AcademicForm({ data, onDraftChange, onSave }) {
   );
 }
 
-function AcademicSummary({ data }) {
+export function AcademicSummary({ data }) {
   if (!data.records.length) return <div className="profile-empty-row"><span><Icon>school</Icon></span><p>Masukkan kelayakan akademik supaya permohonan lebih lengkap.</p></div>;
   return <div className="job-preference-card-list academic-summary-list">{data.records.map((record, index) => <article className="job-preference-card academic-summary-card" key={record.id}><span className="experience-summary-index">Akademik {index + 1}</span><strong>{record.institution || "Institusi belum diisi"}</strong>{record.level ? <span>{record.level}</span> : null}{record.fieldOfStudy ? <span>{record.fieldOfStudy}</span> : null}{record.specialization ? <span>{record.specialization}</span> : null}{record.result ? <span>{record.result}</span> : null}</article>)}</div>;
 }
@@ -3167,7 +3176,7 @@ function SkillsForm({ data, onDraftChange, onSave }) {
   return <div className="skills-layout"><strong className="skills-layout-label">Set Kemahiran</strong><div className="skills-form"><strong>Set kemahiran yang dipilih<span>*</span></strong><p>Anda boleh menambah lebih banyak kemahiran melalui pilihan pekerjaan, pengalaman kerja, atau dengan menambahkan kemahiran berkaitan di bawah.</p><PersonalField label="Kemahiran Berkaitan"><SkillAutocomplete selectedSkills={profile.skills} onToggle={(skill) => toggle("skills", skill)} /><small>Anda boleh membuat penambahan kemahiran yang anda miliki secara manual.</small></PersonalField>{profile.skills.length ? <div className="job-selected-list"><strong>Kemahiran Anda ({profile.skills.length})</strong><div>{profile.skills.map((skill) => <button type="button" key={skill} onClick={() => toggle("skills", skill)}><span>{skill}</span><Icon>cancel</Icon></button>)}</div></div> : null}<PersonalField label="Kemahiran MS Office" optional><PersonalMultiSelect value={profile.microsoftOffice} placeholder="Pilih satu atau lebih" selectedLabel="Kemahiran MS Office Ditambah" options={microsoftOfficeOptions} onChange={(values) => setProfile((current) => ({ ...current, microsoftOffice: values }))} /></PersonalField><PersonalField label="Lesen Memandu" optional><PersonalMultiSelect value={profile.licences} placeholder="Pilih satu atau lebih" selectedLabel="Lesen Memandu Ditambah" options={drivingLicenceOptions} onChange={(values) => setProfile((current) => ({ ...current, licences: values }))} /></PersonalField><div className="skills-language-section"><strong>Sila tambah bahasa<span>*</span></strong>{profile.languages.map((language, index) => <article key={language.id}><strong>Bahasa {index + 1}</strong><PersonalField label="Bahasa"><PersonalSelect value={language.name} placeholder="Pilih bahasa" options={languageOptions} onChange={(event) => setProfile((current) => ({ ...current, languages: current.languages.map((item) => item.id === language.id ? { ...item, name: event.target.value } : item) }))} /></PersonalField>{[["reading", "Tahap Pembacaan"], ["speaking", "Tahap Percakapan"], ["writing", "Tahap Penulisan"]].map(([field, label]) => <PersonalField key={field} label={label}><PersonalSelect value={language[field]} placeholder="Pilih tahap" options={languageLevelOptions} onChange={(event) => setProfile((current) => ({ ...current, languages: current.languages.map((item) => item.id === language.id ? { ...item, [field]: event.target.value } : item) }))} /></PersonalField>)}<button type="button" className="personal-outline-button" onClick={() => setProfile((current) => ({ ...current, languages: current.languages.filter((item) => item.id !== language.id) }))}>Padam</button></article>)}<button type="button" className="personal-add-reference" onClick={addLanguage}><Icon>add_circle</Icon> Tambah Bahasa Lain</button></div><div className="personal-submit-row"><button type="button" className="personal-save-button" onClick={() => onSave(profile)}><Icon>save</Icon>Simpan Profil Saya</button></div></div></div>;
 }
 
-function SkillsSummary({ data }) {
+export function SkillsSummary({ data }) {
   const profile = normalizeSkillsProfile(data);
   const [showAll, setShowAll] = useState(false);
   if (!profile.skills.length) return <div className="profile-empty-row"><span><Icon>psychology</Icon></span><p>Senaraikan kemahiran teknikal, bahasa dan sijil profesional anda.</p></div>;
