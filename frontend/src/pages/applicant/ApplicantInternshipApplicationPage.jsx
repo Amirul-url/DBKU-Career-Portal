@@ -596,6 +596,18 @@ function saveStudentInfoDraft(user, payload) {
   }
 }
 
+function clearStudentInfoDraft(user) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    window.localStorage.removeItem(getDraftStorageKey(user));
+  } catch {
+    // Ignore storage cleanup failures; the submitted application remains in the backend.
+  }
+}
+
 function isTabComplete(tab, studentInfo) {
   const requiredFields = requiredFieldsByTab[tab] || [];
   const hasRequiredFields = requiredFields.every(([field]) => String(studentInfo[field] || "").trim());
@@ -912,6 +924,7 @@ export default function ApplicantInternshipApplicationPage() {
 
       setNoticeStatus("success");
       setNotice(`Permohonan ${submittedApplication.reference_no} telah dihantar kepada HRM.`);
+      clearStudentInfoDraft(user);
       setSubmittedReferenceNo(submittedApplication.reference_no || "");
     } catch (error) {
       setNoticeStatus("error");

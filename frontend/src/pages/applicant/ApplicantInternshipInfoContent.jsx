@@ -1,5 +1,6 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getStoredUser } from "../../lib/authApi";
+import { apiRequest, getStoredUser } from "../../lib/authApi";
 import { APPLICANT_ROUTES } from "../../modules/applicant/applicantRoutes";
 
 const fieldOptions = [
@@ -16,10 +17,9 @@ const fieldOptions = [
 const requiredDocuments = [
   "Surat rasmi daripada institusi / kolej / universiti",
   "Transkrip akademik terkini",
-  "Resume",
+  "Curriculum Vitae (CV)",
   "1 keping gambar berukuran passport",
   "1 salinan muka depan akaun bank",
-  "Buku log",
 ];
 
 function Icon({ children, className = "" }) {
@@ -48,9 +48,67 @@ function hasInternshipDraft(user) {
   }
 }
 
+function isInternshipApplication(application) {
+  const vacancy = application?.vacancy_detail || application?.vacancy || {};
+  return application?.vacancy_type === "internship"
+    || application?.type === "internship"
+    || vacancy.vacancy_type === "internship"
+    || vacancy.type === "Latihan Industri"
+    || vacancy.category === "Latihan Industri";
+}
+
+function getApplicationRows(data) {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.results)) return data.results;
+  return [];
+}
+
 export default function ApplicantInternshipInfoContent() {
   const user = getStoredUser();
+  const userId = user?.id || user?.email || "";
+  const userRole = user?.role;
   const hasDraft = hasInternshipDraft(user);
+  const [hasSubmittedInternshipApplication, setHasSubmittedInternshipApplication] = useState(false);
+
+  useEffect(() => {
+    if (!userId || userRole !== "applicant") {
+      return undefined;
+    }
+
+    let isMounted = true;
+    apiRequest("/applications/?type=internship")
+      .then((data) => {
+        if (!isMounted) return;
+        const applications = getApplicationRows(data);
+        setHasSubmittedInternshipApplication(applications.some((application) =>
+          isInternshipApplication(application) && application.status !== "draft",
+        ));
+      })
+      .catch(() => {
+        if (isMounted) setHasSubmittedInternshipApplication(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [userId, userRole]);
+
+  const ctaTitle = hasSubmittedInternshipApplication
+    ? "Permohonan latihan industri telah dihantar."
+    : hasDraft
+      ? "Draf permohonan belum lengkap."
+      : "Bersedia untuk hantar permohonan?";
+  const ctaDescription = hasSubmittedInternshipApplication
+    ? "Semak status permohonan anda melalui menu Permohonan Saya."
+    : hasDraft
+      ? "Sambung isi draf latihan industri anda dari bahagian yang belum lengkap."
+      : "Lengkapkan profil sebelum membuat permohonan latihan industri.";
+  const ctaTo = hasSubmittedInternshipApplication ? APPLICANT_ROUTES.applications : APPLICANT_ROUTES.internshipApplication;
+  const ctaLabel = hasSubmittedInternshipApplication
+    ? "Lihat Permohonan"
+    : hasDraft
+      ? "Teruskan Draf"
+      : "Mohon Latihan Industri";
 
   return (
     <main className="applicant-internship-page">
@@ -144,15 +202,11 @@ export default function ApplicantInternshipInfoContent() {
 
           <div className="internship-cta-panel">
             <div>
-              <strong>{hasDraft ? "Draf permohonan belum lengkap." : "Bersedia untuk hantar permohonan?"}</strong>
-              <p>
-                {hasDraft
-                  ? "Sambung isi draf latihan industri anda dari bahagian yang belum lengkap."
-                  : "Lengkapkan profil sebelum membuat permohonan latihan industri."}
-              </p>
+              <strong>{ctaTitle}</strong>
+              <p>{ctaDescription}</p>
             </div>
-            <Link to={APPLICANT_ROUTES.internshipApplication}>
-              {hasDraft ? "Teruskan Draf" : "Mohon Latihan Industri"}
+            <Link to={ctaTo}>
+              {ctaLabel}
               <Icon>arrow_forward</Icon>
             </Link>
           </div>
