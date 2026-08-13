@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getStoredUser } from "../../lib/authApi";
+import { countryCallingCodes, defaultCountryCallingCode } from "../../lib/countryCallingCodes";
 import { useApplicantSidebarState } from "../../modules/applicant/useApplicantSidebarState";
 import { Icon } from "./ApplicantAuthShared";
 import { ApplicantAddressMap, ProfileContentHeader, ProfileSidebar } from "./ApplicantProfilePage";
@@ -44,6 +45,11 @@ const citizenshipOptions = ["Warganegara", "Bukan Warganegara", "Penduduk Tetap"
 const maritalStatusOptions = ["Bujang", "Berkahwin", "Duda", "Janda"];
 const yesNoOptions = ["Ya", "Tidak"];
 const drivingLicenseOptions = ["Tiada", "B2", "B", "D", "DA", "E", "GDL", "PSV", "Lain-lain"];
+const countriesByLongestCode = [...countryCallingCodes].sort(
+  (first, second) =>
+    second.code.replace(/\D/g, "").length - first.code.replace(/\D/g, "").length ||
+    first.name.localeCompare(second.name),
+);
 
 const documentFields = [
   {
@@ -141,6 +147,46 @@ const requiredFieldsByTab = {
 
 const getDraftStorageKey = (user) => `dbku_internship_student_info_manual_${user?.id || user?.email || "guest"}`;
 
+function getCountryKey(country) {
+  return `${country.iso}-${country.code}`;
+}
+
+function splitPhoneNumber(value) {
+  const digits = String(value || "").replace(/\D/g, "");
+  const matchedCountry = countriesByLongestCode.find((country) => {
+    const countryDigits = country.code.replace(/\D/g, "");
+    return digits.startsWith(countryDigits);
+  });
+
+  if (matchedCountry) {
+    return {
+      country: matchedCountry,
+      localNumber: digits.slice(matchedCountry.code.replace(/\D/g, "").length),
+    };
+  }
+
+  return { country: defaultCountryCallingCode, localNumber: digits.replace(/^0+/, "") };
+}
+
+function combinePhoneNumber(countryCode, localNumber) {
+  const cleanLocalNumber = String(localNumber || "").replace(/\D/g, "").replace(/^0+/, "");
+  if (!cleanLocalNumber) return "";
+  return `${String(countryCode || "").replace(/\D/g, "")}${cleanLocalNumber}`;
+}
+
+function dedupeAddressText(value) {
+  const parts = String(value || "")
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean);
+  const cleanParts = parts.filter((part, index) => {
+    if (index === 0) return true;
+    return part.toLowerCase() !== parts[index - 1].toLowerCase();
+  });
+
+  return cleanParts.join(", ");
+}
+
 function calculateAge(dateValue) {
   if (!dateValue) {
     return "";
@@ -166,10 +212,10 @@ function calculateAge(dateValue) {
 
 function compactAddress(studentInfo = {}) {
   if (studentInfo.address) {
-    return studentInfo.address;
+    return dedupeAddressText(studentInfo.address);
   }
 
-  return [
+  return dedupeAddressText([
     studentInfo.address1Line1,
     studentInfo.address1Line2,
     studentInfo.address1Line3,
@@ -178,7 +224,111 @@ function compactAddress(studentInfo = {}) {
     studentInfo.address1State,
   ]
     .filter(Boolean)
-    .join(", ");
+    .join(", "));
+}
+
+function InternshipPhoneInput({ onChange, value }) {
+  const initialPhone = splitPhoneNumber(value);
+  const [selectedCountry, setSelectedCountry] = useState(initialPhone.country);
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const countryDigits = selectedCountry.code.replace(/\D/g, "");
+  const valueDigits = String(value || "").replace(/\D/g, "");
+  const localNumber =
+    countryDigits && valueDigits.startsWith(countryDigits)
+      ? valueDigits.slice(countryDigits.length)
+      : splitPhoneNumber(value).localNumber;
+  const filteredCountries = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase();
+    if (!query) return countryCallingCodes;
+
+    const queryDigits = query.replace(/\D/g, "");
+    return countryCallingCodes.filter((country) => {
+      const countryDigitsForSearch = country.code.replace(/\D/g, "");
+      return (
+        country.name.toLowerCase().includes(query) ||
+        country.iso.toLowerCase().includes(query) ||
+        country.code.includes(query) ||
+        (queryDigits && countryDigitsForSearch.includes(queryDigits))
+      );
+    });
+  }, [searchTerm]);
+
+  function updatePhone(nextCountry, nextLocalNumber) {
+    setSelectedCountry(nextCountry);
+    onChange(combinePhoneNumber(nextCountry.code, nextLocalNumber));
+  }
+
+  function chooseCountry(nextCountry) {
+    setSearchTerm("");
+    setIsOpen(false);
+    updatePhone(nextCountry, localNumber);
+  }
+
+  return (
+    <div
+      className="student-phone-grid"
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+          setIsOpen(false);
+          setSearchTerm("");
+        }
+      }}
+    >
+      <div className="student-phone-country">
+        <button
+          type="button"
+          className="student-phone-code"
+          aria-label="Pilih kod negara telefon"
+          aria-expanded={isOpen}
+          onClick={() => setIsOpen((open) => !open)}
+        >
+          <span>{selectedCountry.code}</span>
+          <Icon>expand_more</Icon>
+        </button>
+        {isOpen ? (
+          <div className="student-phone-menu" role="listbox" aria-label="Senarai kod negara">
+            <input
+              type="search"
+              className="student-phone-search"
+              value={searchTerm}
+              placeholder="Cari negara atau kod"
+              autoComplete="off"
+              onChange={(event) => setSearchTerm(event.target.value)}
+            />
+            <div className="student-phone-options">
+              {filteredCountries.length ? (
+                filteredCountries.map((country) => (
+                  <button
+                    type="button"
+                    key={getCountryKey(country)}
+                    className={getCountryKey(country) === getCountryKey(selectedCountry) ? "active" : ""}
+                    role="option"
+                    aria-selected={getCountryKey(country) === getCountryKey(selectedCountry)}
+                    onClick={() => chooseCountry(country)}
+                  >
+                    <span>{country.name}</span>
+                    <strong>{country.code}</strong>
+                  </button>
+                ))
+              ) : (
+                <div className="student-phone-empty">Tiada kod negara dijumpai.</div>
+              )}
+            </div>
+          </div>
+        ) : null}
+      </div>
+      <input
+        required
+        type="tel"
+        inputMode="tel"
+        value={localNumber}
+        placeholder="cth. 175151829"
+        autoComplete="off"
+        onChange={(event) => updatePhone(selectedCountry, event.target.value)}
+      />
+    </div>
+  );
 }
 
 function normalizeStudentInfoDraft(studentInfo = {}, user = null) {
@@ -302,6 +452,16 @@ export default function ApplicantInternshipApplicationPage() {
     setStudentInfo((current) => ({ ...current, [field]: event.target.value.replace(/\D/g, "") }));
   };
 
+  const updatePhoneNumber = (nextPhoneNumber) => {
+    setNotice("");
+    setValidationErrors((current) => {
+      if (!current.phone) return current;
+      const { phone: _phone, ...next } = current;
+      return next;
+    });
+    setStudentInfo((current) => ({ ...current, phone: nextPhoneNumber }));
+  };
+
   const updateDecimalStudentInfo = (field) => (event) => {
     setNotice("");
     setValidationErrors((current) => {
@@ -322,7 +482,7 @@ export default function ApplicantInternshipApplicationPage() {
     });
     setStudentInfo((current) => ({
       ...current,
-      address: location.address ?? current.address,
+      address: location.address ? dedupeAddressText(location.address) : current.address,
       latitude: location.latitude ?? current.latitude,
       longitude: location.longitude ?? current.longitude,
     }));
@@ -405,7 +565,7 @@ export default function ApplicantInternshipApplicationPage() {
         <tbody>
           {renderPersonalRow("Nama", <input required value={studentInfo.name} onChange={updateStudentName} />)}
           {renderPersonalRow("No. Kad Pengenalan Baru", <input required inputMode="numeric" maxLength={12} pattern="[0-9]*" value={studentInfo.icNo} onChange={updateNumericStudentInfo("icNo")} />)}
-          {renderPersonalRow("No. Telefon Bimbit/ Telefon Rumah", <input required inputMode="numeric" pattern="[0-9]*" value={studentInfo.phone} onChange={updateNumericStudentInfo("phone")} />)}
+          {renderPersonalRow("No. Telefon Bimbit/ Telefon Rumah", <InternshipPhoneInput value={studentInfo.phone} onChange={updatePhoneNumber} />)}
           {renderPersonalRow(
             "Alamat Surat Menyurat",
             <ApplicantAddressMap

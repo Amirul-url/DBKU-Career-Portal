@@ -6489,6 +6489,125 @@ body:has(.applicant-profile-page) {
   gap: 8px;
 }
 
+.student-phone-grid {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: 130px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.student-phone-country {
+  position: relative;
+  min-width: 0;
+}
+
+.student-phone-code {
+  display: inline-flex;
+  width: 100%;
+  min-height: 36px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 1px solid #cfded6;
+  border-radius: 4px;
+  background: #ffffff;
+  color: #334155;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0 9px;
+}
+
+.student-phone-code:focus-visible {
+  border-color: var(--student-green);
+  box-shadow: 0 0 0 3px rgba(134, 239, 172, .35);
+  outline: 0;
+}
+
+.student-phone-code .material-symbols-outlined {
+  color: var(--student-green);
+  font-size: 18px;
+}
+
+.student-phone-menu {
+  position: absolute;
+  z-index: 45;
+  top: calc(100% + 6px);
+  left: 0;
+  width: min(340px, calc(100vw - 48px));
+  overflow: hidden;
+  border: 1px solid #d9e8df;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 18px 34px rgba(17, 24, 39, .12);
+}
+
+.student-phone-search {
+  width: 100%;
+  min-height: 42px;
+  border: 0;
+  border-bottom: 1px solid #d9e8df;
+  border-radius: 0;
+  background: #ffffff;
+  color: #334155;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  outline: 0;
+  padding: 0 12px;
+}
+
+.student-phone-options {
+  display: grid;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+.student-phone-options button {
+  display: grid;
+  width: 100%;
+  min-height: 40px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 0 10px;
+  text-align: left;
+}
+
+.student-phone-options button:hover,
+.student-phone-options button.active {
+  background: var(--student-pale);
+}
+
+.student-phone-options button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.student-phone-options button strong {
+  color: var(--student-green);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.student-phone-empty {
+  padding: 12px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .student-personal-table .personal-address-location {
   gap: 12px;
 }

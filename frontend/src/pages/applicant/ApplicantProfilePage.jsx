@@ -885,7 +885,16 @@ function PersonalSelect({ disabled = false, onChange, options, placeholder, sear
 }
 
 function formatMapAddressText(value) {
-  return String(value || "").trim().replace(/\s+/g, " ");
+  const parts = String(value || "")
+    .split(",")
+    .map((part) => part.trim().replace(/\s+/g, " "))
+    .filter(Boolean);
+  const cleanParts = parts.filter((part, index) => {
+    if (index === 0) return true;
+    return part.toLowerCase() !== parts[index - 1].toLowerCase();
+  });
+
+  return cleanParts.join(", ");
 }
 
 function escapeMapRegExp(value) {
