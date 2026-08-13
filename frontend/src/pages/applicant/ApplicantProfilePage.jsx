@@ -1892,13 +1892,34 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
 
   const updateDisplayName = (event) => {
     setFormDisplayName(formatApplicantName(event.target.value));
+    setValidationErrors((current) => {
+      if (!current.displayName) return current;
+      const { displayName: _displayName, ...next } = current;
+      return next;
+    });
   };
 
   const updateField = (field) => (event) => {
+    const value = event.target.value;
     setFormValues((current) => ({
       ...current,
-      [field]: event.target.value,
+      [field]: value,
     }));
+    setValidationErrors((current) => {
+      if (!current[field] || !String(value || "").trim()) return current;
+      const { [field]: _field, ...next } = current;
+      return next;
+    });
+  };
+
+  const updateEmail = (event) => {
+    const value = event.target.value;
+    setFormEmail(value);
+    setValidationErrors((current) => {
+      if (!current.email || !String(value || "").trim()) return current;
+      const { email: _email, ...next } = current;
+      return next;
+    });
   };
 
   const updateAddressMapLocation = useCallback((location) => {
@@ -1908,6 +1929,13 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
       latitude: location.latitude,
       longitude: location.longitude,
     }));
+    setValidationErrors((current) => {
+      const next = { ...current };
+      if (location.address) delete next.address;
+      if (location.latitude) delete next.latitude;
+      if (location.longitude) delete next.longitude;
+      return next;
+    });
   }, []);
 
   const handleIdentificationNumberChange = (event) => {
@@ -1919,6 +1947,14 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
       identificationNumber,
       ...birthDate,
     }));
+    setValidationErrors((current) => {
+      const next = { ...current };
+      if (identificationNumber) delete next.identificationNumber;
+      if (birthDate.birthDay) delete next.birthDay;
+      if (birthDate.birthMonth) delete next.birthMonth;
+      if (birthDate.birthYear) delete next.birthYear;
+      return next;
+    });
   };
 
   const handlePhotoUpload = (event) => {
@@ -2148,6 +2184,15 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
   }, [getCurrentDraft, onDraftChange, profileData]);
 
   useEffect(() => {
+    if (!String(formValues.primaryPhone || "").trim()) return;
+    setValidationErrors((current) => {
+      if (!current.primaryPhone) return current;
+      const { primaryPhone: _primaryPhone, ...next } = current;
+      return next;
+    });
+  }, [formValues.primaryPhone]);
+
+  useEffect(() => {
     if (saveRequestKey > 0 && saveRequestKey !== handledSaveRequestRef.current) {
       handledSaveRequestRef.current = saveRequestKey;
       handleSave();
@@ -2310,7 +2355,7 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
             error={validationErrors.email}
             info="Alamat e-mel ini digunakan untuk log masuk dan makluman permohonan anda."
           >
-            <input type="email" value={formEmail} onChange={(event) => setFormEmail(event.target.value)} />
+            <input type="email" value={formEmail} onChange={updateEmail} />
           </PersonalField>
           <PersonalField label="Nombor Telefon Bimbit Utama" error={validationErrors.primaryPhone}>
             <ProfilePhoneInput value={formValues.primaryPhone} onChange={updateField("primaryPhone")} />
