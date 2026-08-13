@@ -144,7 +144,7 @@ class PasswordResetTests(APITestCase):
 
 
 class ApplicantRegistrationNotificationTests(APITestCase):
-    @override_settings(NOTIFICATION_SIDE_EFFECTS_ENABLED=True)
+    @override_settings(NOTIFICATION_SIDE_EFFECTS_ENABLED=True, FRONTEND_URL="https://portal-kerjaya.example.test")
     @patch("accounts.services.create_notification")
     def test_register_sends_formal_registration_notification(self, mock_create_notification):
         response = self.client.post(
@@ -167,11 +167,13 @@ class ApplicantRegistrationNotificationTests(APITestCase):
         self.assertEqual(call_kwargs["title"], "Pendaftaran Akaun Berjaya")
         self.assertEqual(
             call_kwargs["message"],
-            "Salam sejahtera. Akaun Portal Kerjaya DBKU anda telah berjaya didaftarkan. "
-            "Sila log masuk untuk melengkapkan profil dan membuat permohonan. Terima kasih.",
+            "Akaun Portal Kerjaya DBKU anda telah berjaya didaftarkan.\n\n"
+            "Sila log masuk ke Portal Kerjaya DBKU untuk melengkapkan profil anda dan membuat permohonan jawatan yang bersesuaian.\n\n"
+            "Pautan log masuk: https://portal-kerjaya.example.test/login\n\n"
+            "Terima kasih.",
         )
 
-    @override_settings(NOTIFICATION_SIDE_EFFECTS_ENABLED=True, WHATSAPP_ENABLED=True)
+    @override_settings(NOTIFICATION_SIDE_EFFECTS_ENABLED=True, WHATSAPP_ENABLED=True, FRONTEND_URL="https://portal-kerjaya.example.test")
     @patch("accounts.services.create_notification")
     @patch("accounts.services.send_whatsapp_message")
     def test_register_sends_formal_registration_whatsapp(self, mock_send_whatsapp, mock_create_notification):
@@ -193,6 +195,32 @@ class ApplicantRegistrationNotificationTests(APITestCase):
         self.assertEqual(mock_send_whatsapp.call_args.args[0], "60132223333")
         self.assertEqual(
             mock_send_whatsapp.call_args.args[1],
-            "Salam sejahtera. Akaun Portal Kerjaya DBKU anda telah berjaya didaftarkan. "
-            "Sila log masuk untuk melengkapkan profil dan membuat permohonan. Terima kasih.",
+            "Akaun Portal Kerjaya DBKU anda telah berjaya didaftarkan.\n\n"
+            "Sila log masuk ke Portal Kerjaya DBKU untuk melengkapkan profil anda dan membuat permohonan jawatan yang bersesuaian.\n\n"
+            "Pautan log masuk: https://portal-kerjaya.example.test/login\n\n"
+            "Terima kasih.",
         )
+
+
+class SuperAdminApplicantManagementTests(APITestCase):
+    def setUp(self):
+        self.superadmin = User.objects.create_user(
+            username="superadmin@example.com",
+            email="superadmin@example.com",
+            password="Password123!",
+            role="superadmin",
+        )
+        self.applicant = User.objects.create_user(
+            username="delete-me@example.com",
+            email="delete-me@example.com",
+            password="Password123!",
+            role="applicant",
+        )
+
+    def test_superadmin_can_delete_applicant(self):
+        self.client.force_authenticate(user=self.superadmin)
+
+        response = self.client.delete(f"/api/auth/applicants/{self.applicant.id}/profile/")
+
+        self.assertEqual(response.status_code, 204)
+        self.assertFalse(User.objects.filter(id=self.applicant.id).exists())

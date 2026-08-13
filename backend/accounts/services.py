@@ -23,12 +23,19 @@ def build_auth_response(user, request=None, login_session=None):
 
 
 def build_applicant_registration_success_message(user):
+    frontend_url = (settings.FRONTEND_URL or "").rstrip("/")
+    login_url = f"{frontend_url}/login" if frontend_url else ""
+    lines = [
+        "Akaun Portal Kerjaya DBKU anda telah berjaya didaftarkan.",
+        "",
+        "Sila log masuk ke Portal Kerjaya DBKU untuk melengkapkan profil anda dan membuat permohonan jawatan yang bersesuaian.",
+    ]
+    if login_url:
+        lines.extend(["", f"Pautan log masuk: {login_url}"])
+    lines.extend(["", "Terima kasih."])
     return {
         "title": "Pendaftaran Akaun Berjaya",
-        "message": (
-            "Salam sejahtera. Akaun Portal Kerjaya DBKU anda telah berjaya didaftarkan. "
-            "Sila log masuk untuk melengkapkan profil dan membuat permohonan. Terima kasih."
-        ),
+        "message": "\n".join(lines),
     }
 
 

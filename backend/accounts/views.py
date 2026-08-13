@@ -184,14 +184,18 @@ def superadmin_applicants_view(request):
     return Response(UserSerializer(applicants, many=True, context={"request": request}).data)
 
 
-@api_view(["GET"])
+@api_view(["GET", "DELETE"])
 def superadmin_applicant_profile_view(request, user_id):
-    if request.user.role != "superadmin":
+    if getattr(request.user, "role", None) != "superadmin":
         return Response({"detail": "Akses Super Admin diperlukan."}, status=status.HTTP_403_FORBIDDEN)
 
     applicant = User.objects.filter(id=user_id, role="applicant").first()
     if not applicant:
         return Response({"detail": "Pemohon tidak ditemui."}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == "DELETE":
+        applicant.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     profile, _created = ApplicantProfileData.objects.get_or_create(user=applicant)
     return Response({"applicant": UserSerializer(applicant, context={"request": request}).data, "profile": profile_payload(profile)})
 
