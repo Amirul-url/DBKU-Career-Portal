@@ -3633,32 +3633,75 @@ body:has(.auth-page) {
 }
 
 .split-steps {
+  counter-reset: recovery-step;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  gap: 14px;
   width: 100%;
   max-width: 520px;
   margin-top: 22px;
+  position: relative;
+}
+
+.split-steps::before {
+  position: absolute;
+  top: 16px;
+  left: 16%;
+  right: 16%;
+  height: 2px;
+  background: rgba(209, 250, 229, 0.16);
+  content: "";
 }
 
 .split-steps span {
+  counter-increment: recovery-step;
+  position: relative;
+  z-index: 1;
   display: inline-flex;
-  min-height: 34px;
+  min-height: 52px;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(209, 250, 229, 0.14);
-  border-radius: 999px;
-  background: rgba(248, 250, 252, 0.05);
-  color: rgba(248, 250, 252, 0.58);
+  flex-direction: column;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+  color: rgba(248, 250, 252, 0.52);
+  font-size: 12px;
+  font-weight: 900;
+  text-align: center;
+}
+
+.split-steps span::before {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(209, 250, 229, 0.22);
+  border-radius: 50%;
+  background: #202a36;
+  color: rgba(248, 250, 252, 0.62);
+  content: counter(recovery-step);
   font-size: 12px;
   font-weight: 900;
 }
 
 .split-steps span.active,
 .split-steps span.done {
-  border-color: rgba(134, 239, 172, 0.42);
-  background: rgba(20, 83, 45, 0.34);
   color: #bbf7d0;
+}
+
+.split-steps span.active::before {
+  border-color: rgba(134, 239, 172, 0.82);
+  background: var(--split-green);
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.14);
+  color: #ffffff;
+}
+
+.split-steps span.done::before {
+  border-color: rgba(134, 239, 172, 0.42);
+  background: rgba(20, 83, 45, 0.74);
+  color: #dcfce7;
 }
 
 .split-method-grid {
