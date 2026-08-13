@@ -6832,6 +6832,17 @@ body:has(.applicant-profile-page) {
   pointer-events: none;
 }
 
+.applicant-profile-readonly-cards {
+  --profile-green: #16a34a;
+  --profile-green-bright: #22c55e;
+  --profile-mint: #86efac;
+  --profile-pale: #d1fae5;
+  --profile-header-surface: #ffffff;
+  --profile-surface: #f8fafc;
+  --profile-ink: #111827;
+  color: var(--profile-ink);
+}
+
 .applicant-profile-readonly-cards .readonly-form-surface :is(input, textarea) {
   cursor: default;
 }
