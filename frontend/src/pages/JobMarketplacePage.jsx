@@ -161,9 +161,7 @@ export function JobMarketplaceContent({ actionTarget = "/login", embedded = fals
       : "Tiada jawatan kosong disiarkan buat masa ini";
   const emptyStateMessage = opportunities.length && hasActiveFilter
     ? "Sila ubah kata kunci carian atau pilihan tapisan untuk melihat peluang lain."
-    : isInternshipPage
-      ? "Pentadbir belum menyiarkan peluang latihan industri. Sila semak semula dari semasa ke semasa."
-      : "Pentadbir belum menyiarkan jawatan kosong. Sila semak semula dari semasa ke semasa.";
+    : "";
   useEffect(() => {
     setSaveNotice("");
   }, [selectedOpportunity?.id]);
@@ -259,7 +257,9 @@ export function JobMarketplaceContent({ actionTarget = "/login", embedded = fals
               <Icon>{isInternshipPage ? "school" : "work"}</Icon>
             </span>
             <h2>{loading ? "Memuatkan senarai peluang" : error ? "Senarai tidak dapat dimuatkan" : emptyStateTitle}</h2>
-            <p>{loading ? "Sila tunggu sebentar sementara maklumat dimuatkan." : error || emptyStateMessage}</p>
+            {loading || error || emptyStateMessage ? (
+              <p>{loading ? "Sila tunggu sebentar sementara maklumat dimuatkan." : error || emptyStateMessage}</p>
+            ) : null}
           </section>
         ) : (
         <section className="market-layout" id="jobs">
