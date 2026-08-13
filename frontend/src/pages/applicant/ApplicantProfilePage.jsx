@@ -3,7 +3,7 @@ import { getCities, getPostcodes, getStates } from "malaysia-postcodes";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
-import { apiRequest, clearAuthSession, fetchAuthenticatedBlob, getCurrentUser, getStoredUser, recordLogoutActivity, resolveMediaUrl, updateCurrentUser } from "../../lib/authApi";
+import { apiRequest, clearAuthSession, getCurrentUser, getStoredUser, recordLogoutActivity, resolveMediaUrl, updateCurrentUser } from "../../lib/authApi";
 import { countryCallingCodes, defaultCountryCallingCode } from "../../lib/countryCallingCodes";
 import { applicantSidebarNavItems, getApplicantSectionId } from "../../modules/applicant/applicantRoutes";
 import { useApplicantSidebarState } from "../../modules/applicant/useApplicantSidebarState";
@@ -1839,53 +1839,24 @@ function ProfileCard({ children, id, isEditing = false, onEdit, title }) {
 }
 
 function ProfileDownloadLinks({ resumeUrl, videoUrl }) {
-  const [openingFile, setOpeningFile] = useState("");
-  const [openError, setOpenError] = useState("");
-
   if (!resumeUrl && !videoUrl) {
     return null;
-  }
-
-  async function openBlobInNewTab(url, fileType) {
-    const newTab = window.open("about:blank", "_blank");
-
-    if (!newTab) {
-      setOpenError("Tab baru tidak dapat dibuka. Sila benarkan pop-up untuk portal ini.");
-      return;
-    }
-
-    newTab.opener = null;
-    setOpenError("");
-    setOpeningFile(fileType);
-
-    try {
-      const blob = await fetchAuthenticatedBlob(url);
-      const blobUrl = URL.createObjectURL(blob);
-      newTab.location.href = blobUrl;
-      window.setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
-    } catch (error) {
-      newTab.close();
-      setOpenError(error.message || "Fail tidak dapat dibuka. Sila cuba lagi.");
-    } finally {
-      setOpeningFile("");
-    }
   }
 
   return (
     <div className="profile-download-links" aria-label="Fail profil">
       {resumeUrl ? (
-        <button type="button" onClick={() => openBlobInNewTab(resumeUrl, "resume")} disabled={openingFile === "resume"}>
+        <a href={resolveMediaUrl(resumeUrl)} target="_blank" rel="noreferrer">
           <Icon>description</Icon>
-          <span>{openingFile === "resume" ? "Membuka Resume..." : "Muat Turun Resume (PDF)"}</span>
-        </button>
+          <span>Muat Turun Resume (PDF)</span>
+        </a>
       ) : null}
       {videoUrl ? (
-        <button type="button" onClick={() => openBlobInNewTab(videoUrl, "video")} disabled={openingFile === "video"}>
+        <a href={resolveMediaUrl(videoUrl)} target="_blank" rel="noreferrer">
           <Icon>movie</Icon>
-          <span>{openingFile === "video" ? "Membuka Video..." : "Muat Turun Video (MP4)"}</span>
-        </button>
+          <span>Muat Turun Video (MP4)</span>
+        </a>
       ) : null}
-      {openError ? <small>{openError}</small> : null}
     </div>
   );
 }
