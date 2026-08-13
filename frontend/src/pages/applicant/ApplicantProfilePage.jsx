@@ -1838,15 +1838,15 @@ export function ProfileSidebar({ isOpen, onToggle }) {
   );
 }
 
-function ProfileCard({ children, id, isEditing = false, onEdit, title }) {
+function ProfileCard({ actionIcon = "edit", actionLabel = "Kemaskini", children, closeLabel = "Tutup", id, isEditing = false, onEdit, title }) {
   return (
     <section className={`profile-content-card ${isEditing ? "is-editing" : ""}`} id={id}>
       <header>
         <h2>{title}</h2>
         {onEdit ? (
           <button type="button" className={isEditing ? "profile-close-edit-button" : "profile-edit-button"} onClick={onEdit}>
-            {isEditing ? null : <Icon>edit</Icon>}
-            {isEditing ? "Tutup" : "Kemaskini"}
+            {isEditing ? null : <Icon>{actionIcon}</Icon>}
+            {isEditing ? closeLabel : actionLabel}
           </button>
         ) : null}
       </header>
@@ -1879,6 +1879,7 @@ function ProfileDownloadLinks({ resumeUrl, videoUrl }) {
 }
 
 export function ApplicantProfileReadOnlyCards({ applicant, profile }) {
+  const [openSection, setOpenSection] = useState(null);
   const personalProfile = normalizePersonalProfile(
     profile?.personal || {},
     applicant?.full_name || applicant?.first_name || "Pemohon",
@@ -1888,23 +1889,62 @@ export function ApplicantProfileReadOnlyCards({ applicant, profile }) {
   const experienceProfile = { ...defaultExperienceProfile, ...(profile?.experience || {}), records: Array.isArray(profile?.experience?.records) ? profile.experience.records : [] };
   const academicProfile = { ...defaultAcademicProfile, ...(profile?.academic || {}), records: Array.isArray(profile?.academic?.records) ? profile.academic.records : [] };
   const skillsProfile = normalizeSkillsProfile(profile?.skills || {});
+  const profileDisplayName = personalProfile.displayName || applicant?.full_name || applicant?.first_name || "Pemohon";
+  const profileEmail = personalProfile.email || applicant?.email || "";
+  const profilePhotoDisplayUrl = resolveMediaUrl(personalProfile.profilePhotoPreviewUrl || personalProfile.profilePhotoUrl || applicant?.profile_photo_url || "");
+  const toggleSection = (section) => setOpenSection((current) => current === section ? null : section);
+  const readOnlyActionProps = { actionIcon: "visibility", actionLabel: "Lihat Butiran", closeLabel: "Tutup" };
 
   return (
     <div className="profile-content applicant-profile-readonly-cards">
-      <ProfileCard id="profile-section-personal-readonly" title="Maklumat Peribadi">
-        <ApplicantPersonalReadOnlyView applicant={applicant} profile={{ ...profile, personal: personalProfile }} />
+      <ProfileCard id="profile-section-personal-readonly" title="Maklumat Peribadi" isEditing={openSection === "personal"} onEdit={() => toggleSection("personal")} {...readOnlyActionProps}>
+        {openSection === "personal" ? (
+          <ApplicantPersonalReadOnlyView applicant={applicant} profile={{ ...profile, personal: personalProfile }} />
+        ) : (
+          <div className="profile-personal-row">
+            <div className="profile-avatar" aria-hidden="true">
+              {profilePhotoDisplayUrl ? <img src={profilePhotoDisplayUrl} alt="" /> : profileDisplayName.charAt(0)}
+            </div>
+            <div className="profile-personal-copy">
+              <h3>{profileDisplayName}</h3>
+              <p>{profileEmail}</p>
+            </div>
+            <ProfileDownloadLinks
+              resumeUrl={personalProfile.resumeFileUrl}
+              videoUrl={personalProfile.videoResumeFileUrl}
+            />
+          </div>
+        )}
       </ProfileCard>
 
-      <ProfileCard id="profile-section-experience-readonly" title="Pengalaman">
-        <ExperienceSummary data={experienceProfile} />
+      <ProfileCard id="profile-section-experience-readonly" title="Pengalaman" isEditing={openSection === "experience"} onEdit={() => toggleSection("experience")} {...readOnlyActionProps}>
+        {openSection === "experience" ? (
+          <div className="readonly-form-surface">
+            <ExperienceForm data={experienceProfile} onDraftChange={() => {}} onSave={() => {}} />
+          </div>
+        ) : (
+          <ExperienceSummary data={experienceProfile} />
+        )}
       </ProfileCard>
 
-      <ProfileCard id="profile-section-academic-readonly" title="Akademik">
-        <AcademicSummary data={academicProfile} />
+      <ProfileCard id="profile-section-academic-readonly" title="Akademik" isEditing={openSection === "academic"} onEdit={() => toggleSection("academic")} {...readOnlyActionProps}>
+        {openSection === "academic" ? (
+          <div className="readonly-form-surface">
+            <AcademicForm data={academicProfile} onDraftChange={() => {}} onSave={() => {}} />
+          </div>
+        ) : (
+          <AcademicSummary data={academicProfile} />
+        )}
       </ProfileCard>
 
-      <ProfileCard id="profile-section-skills-readonly" title="Kemahiran">
-        <SkillsSummary data={skillsProfile} />
+      <ProfileCard id="profile-section-skills-readonly" title="Kemahiran" isEditing={openSection === "skills"} onEdit={() => toggleSection("skills")} {...readOnlyActionProps}>
+        {openSection === "skills" ? (
+          <div className="readonly-form-surface">
+            <SkillsForm data={skillsProfile} onDraftChange={() => {}} onSave={() => {}} />
+          </div>
+        ) : (
+          <SkillsSummary data={skillsProfile} />
+        )}
       </ProfileCard>
     </div>
   );

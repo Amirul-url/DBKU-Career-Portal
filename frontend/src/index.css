@@ -6828,6 +6828,18 @@ body:has(.applicant-profile-page) {
   color: var(--profile-green);
 }
 
+.applicant-profile-readonly-cards .readonly-form-surface :is(input, textarea, button) {
+  pointer-events: none;
+}
+
+.applicant-profile-readonly-cards .readonly-form-surface :is(input, textarea) {
+  cursor: default;
+}
+
+.applicant-profile-readonly-cards .readonly-form-surface :is(.personal-submit-row, .personal-add-reference, .personal-outline-button, .job-preference-edit-actions, .academic-subject-add-button, .academic-subject-remove-button) {
+  display: none;
+}
+
 .profile-avatar {
   width: 76px;
   height: 76px;
