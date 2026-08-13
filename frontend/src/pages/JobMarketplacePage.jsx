@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { apiRequest, fetchAuthenticatedBlob, getStoredUser } from "../lib/authApi";
+import { apiRequest, getStoredUser } from "../lib/authApi";
 import { getSavedVacancies, removeSavedVacancy, upsertSavedVacancy } from "../modules/applicant/savedVacancies";
 
 const dateLabel = (value) =>
@@ -13,21 +13,6 @@ const dateLabel = (value) =>
     : "Tidak dinyatakan";
 const listItems = (value) =>
   value ? value.split("\n").filter(Boolean) : ["Rujuk dokumen rasmi untuk butiran lanjut."];
-const fileNameFromUrl = (url) => {
-  const fallback = "Dokumen rasmi DBKU.pdf";
-  if (!url) return fallback;
-
-  try {
-    const pathname = new URL(url, window.location.origin).pathname;
-    return decodeURIComponent(pathname.split("/").pop() || fallback);
-  } catch {
-    return fallback;
-  }
-};
-const normalizedDocumentName = (name) =>
-  (name || "Dokumen rasmi DBKU.pdf")
-    .replace(/_[a-z0-9]{7,}(?=\.[^.]+$)/i, "")
-    .replaceAll("_", " ");
 const dbkuDivisionCodes = {
   "Bahagian Audit Dalaman": "AUD",
   "Bahagian Projek Khas & Fasiliti Awam": "SPF",
@@ -109,7 +94,6 @@ function OpportunityCard({ opportunity, selected, onSelect }) {
 
 export function JobMarketplaceContent({ actionTarget = "/login", embedded = false, vacancyType: vacancyTypeProp } = {}) {
   const [searchParams] = useSearchParams();
-  const documentBlobUrls = useRef([]);
   const vacancyType = vacancyTypeProp || (searchParams.get("type") === "internship" ? "internship" : "job");
   const isInternshipPage = vacancyType === "internship";
   const [opportunities, setOpportunities] = useState([]);
@@ -134,9 +118,6 @@ export function JobMarketplaceContent({ actionTarget = "/login", embedded = fals
       .catch(() => setError("Senarai jawatan tidak dapat dimuatkan buat masa ini."))
       .finally(() => setLoading(false));
   }, [vacancyType]);
-  useEffect(() => () => {
-    documentBlobUrls.current.forEach((url) => URL.revokeObjectURL(url));
-  }, []);
   useEffect(() => {
     setSavedVacancies(getSavedVacancies(user));
   }, [user]);
@@ -182,52 +163,6 @@ export function JobMarketplaceContent({ actionTarget = "/login", embedded = fals
     setSavedVacancies(nextSavedVacancies);
     setSaveNotice(selectedOpportunitySaved ? "Jawatan dikeluarkan daripada senarai simpan." : "Jawatan disimpan.");
   };
-  const handleDocumentOpen = async (event) => {
-    const documentUrl = selectedOpportunity?.official_document_view_url || selectedOpportunity?.official_document;
-    if (!documentUrl) return;
-
-    event.preventDefault();
-
-    try {
-      const blob = await fetchAuthenticatedBlob(documentUrl);
-      const documentName = normalizedDocumentName(selectedOpportunity?.official_document_name || fileNameFromUrl(documentUrl));
-      const pdfBlob = blob.type === "application/pdf" ? blob : new Blob([blob], { type: "application/pdf" });
-      const objectUrl = URL.createObjectURL(pdfBlob);
-      const previousTitle = document.title;
-      documentBlobUrls.current.push(objectUrl);
-      const printFrame = document.createElement("iframe");
-      printFrame.title = documentName;
-      printFrame.style.cssText = "position:fixed;width:0;height:0;border:0;visibility:hidden;";
-      let isCleanedUp = false;
-      const cleanup = () => {
-        if (isCleanedUp) return;
-        isCleanedUp = true;
-        document.title = previousTitle;
-        URL.revokeObjectURL(objectUrl);
-        documentBlobUrls.current = documentBlobUrls.current.filter((url) => url !== objectUrl);
-        printFrame.remove();
-      };
-      printFrame.addEventListener("load", () => {
-        window.setTimeout(() => {
-          const frameWindow = printFrame.contentWindow;
-          if (!frameWindow) return cleanup();
-          document.title = documentName;
-          window.addEventListener("afterprint", cleanup, { once: true });
-          frameWindow.addEventListener("afterprint", cleanup, { once: true });
-          frameWindow.focus();
-          frameWindow.print();
-          window.setTimeout(() => {
-            document.title = previousTitle;
-          }, 0);
-        }, 600);
-      }, { once: true });
-      document.body.appendChild(printFrame);
-      printFrame.src = objectUrl;
-    } catch {
-      window.alert("Dokumen tidak dapat dimuatkan. Sila cuba lagi.");
-    }
-  };
-
   return (
       <main className={`market-shell market-reference-shell ${embedded ? "applicant-market-shell" : ""}`}>
         <section className="market-search-panel" aria-label="Cari peluang">
@@ -326,7 +261,7 @@ export function JobMarketplaceContent({ actionTarget = "/login", embedded = fals
                 {selectedOpportunity.official_document && (
                   <a
                     href={selectedOpportunity.official_document_view_url || selectedOpportunity.official_document}
-                    onClick={handleDocumentOpen}
+                    target="_blank"
                     rel="noreferrer"
                   >
                     Muat turun dokumen
