@@ -9,6 +9,45 @@ const TOKEN_STORAGE_KEYS = {
 
 let refreshTokenPromise = null;
 
+export function resolveMediaUrl(value) {
+  if (!value || typeof value !== "string") {
+    return "";
+  }
+
+  if (value.startsWith("blob:") || value.startsWith("data:")) {
+    return value;
+  }
+
+  try {
+    const apiUrl = new URL(API_BASE_URL, window.location.origin);
+
+    if (/^https?:\/\//i.test(value)) {
+      const mediaUrl = new URL(value);
+      if (apiUrl.protocol === "https:" && mediaUrl.protocol === "http:" && mediaUrl.host === apiUrl.host) {
+        mediaUrl.protocol = "https:";
+      }
+      return mediaUrl.toString();
+    }
+
+    return new URL(value.startsWith("/") ? value : `/${value}`, apiUrl.origin).toString();
+  } catch {
+    return value;
+  }
+}
+
+function normalizeUserMediaUrls(user) {
+  if (!user || typeof user !== "object") {
+    return user;
+  }
+
+  return {
+    ...user,
+    profile_photo_url: resolveMediaUrl(user.profile_photo_url),
+    resume_file_url: resolveMediaUrl(user.resume_file_url),
+    video_resume_file_url: resolveMediaUrl(user.video_resume_file_url),
+  };
+}
+
 function getMessageFromPayload(payload) {
   if (!payload) {
     return "Permintaan tidak berjaya. Sila cuba lagi.";
@@ -109,7 +148,7 @@ export async function apiRequest(path, options = {}) {
 export function saveAuthSession(data) {
   localStorage.setItem(TOKEN_STORAGE_KEYS.access, data.access);
   localStorage.setItem(TOKEN_STORAGE_KEYS.refresh, data.refresh);
-  localStorage.setItem(TOKEN_STORAGE_KEYS.user, JSON.stringify(data.user));
+  localStorage.setItem(TOKEN_STORAGE_KEYS.user, JSON.stringify(normalizeUserMediaUrls(data.user)));
   if (data.login_session_id) {
     localStorage.setItem(TOKEN_STORAGE_KEYS.session, String(data.login_session_id));
   } else {
@@ -119,7 +158,7 @@ export function saveAuthSession(data) {
 }
 
 export function saveStoredUser(user) {
-  localStorage.setItem(TOKEN_STORAGE_KEYS.user, JSON.stringify(user));
+  localStorage.setItem(TOKEN_STORAGE_KEYS.user, JSON.stringify(normalizeUserMediaUrls(user)));
 }
 
 export function getStoredUser() {
@@ -129,7 +168,7 @@ export function getStoredUser() {
   }
 
   try {
-    return JSON.parse(storedUser);
+    return normalizeUserMediaUrls(JSON.parse(storedUser));
   } catch {
     return null;
   }
@@ -153,8 +192,9 @@ export function recordLogoutActivity() {
 }
 
 export async function fetchAuthenticatedBlob(url) {
+  const resolvedUrl = resolveMediaUrl(url);
   const makeRequest = (accessToken) =>
-    fetch(url, {
+    fetch(resolvedUrl, {
       headers: {
         ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       },

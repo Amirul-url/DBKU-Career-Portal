@@ -3,7 +3,7 @@ import { getCities, getPostcodes, getStates } from "malaysia-postcodes";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
-import { apiRequest, clearAuthSession, fetchAuthenticatedBlob, getStoredUser, recordLogoutActivity, updateCurrentUser } from "../../lib/authApi";
+import { apiRequest, clearAuthSession, fetchAuthenticatedBlob, getStoredUser, recordLogoutActivity, resolveMediaUrl, updateCurrentUser } from "../../lib/authApi";
 import { countryCallingCodes, defaultCountryCallingCode } from "../../lib/countryCallingCodes";
 import { applicantSidebarNavItems, getApplicantSectionId } from "../../modules/applicant/applicantRoutes";
 import { useApplicantSidebarState } from "../../modules/applicant/useApplicantSidebarState";
@@ -237,11 +237,11 @@ function getFileNameFromUrl(url) {
 function getPersistentProfilePhotoUrl(profile) {
   const profilePhotoUrl = profile?.profilePhotoUrl || "";
 
-  return profilePhotoUrl && !profilePhotoUrl.startsWith("blob:") ? profilePhotoUrl : "";
+  return profilePhotoUrl && !profilePhotoUrl.startsWith("blob:") ? resolveMediaUrl(profilePhotoUrl) : "";
 }
 
 function getPersistentDocumentUrl(url) {
-  return url && !url.startsWith("blob:") ? url : "";
+  return url && !url.startsWith("blob:") ? resolveMediaUrl(url) : "";
 }
 
 function getPersonalProfileStorageKey(user) {
@@ -569,9 +569,9 @@ async function savePersonalProfile(user, profile) {
   }
 
   const updatedUser = await updateCurrentUser(formData);
-  const profilePhotoUrl = updatedUser.profile_photo_url || "";
-  const resumeFileUrl = updatedUser.resume_file_url || "";
-  const videoResumeFileUrl = updatedUser.video_resume_file_url || "";
+  const profilePhotoUrl = resolveMediaUrl(updatedUser.profile_photo_url);
+  const resumeFileUrl = resolveMediaUrl(updatedUser.resume_file_url);
+  const videoResumeFileUrl = resolveMediaUrl(updatedUser.video_resume_file_url);
   const serializableProfile = {
     ...profile,
     profilePhotoUrl,
@@ -1690,7 +1690,8 @@ function ChoicePillGroup({ error, label, multiple = false, onChange, options, op
 export function ProfileContentHeader({ displayName, email, photoUrl, leading = null }) {
   const navigate = useNavigate();
   const profileInitial = displayName?.charAt(0) || email?.charAt(0) || "P";
-  const profileChip = photoUrl ? <img src={photoUrl} alt="" /> : profileInitial;
+  const resolvedPhotoUrl = resolveMediaUrl(photoUrl);
+  const profileChip = resolvedPhotoUrl ? <img src={resolvedPhotoUrl} alt="" /> : profileInitial;
 
   const handleLogout = async () => {
     await recordLogoutActivity();
@@ -1737,10 +1738,12 @@ export function ProfileContentHeader({ displayName, email, photoUrl, leading = n
 export function ApplicantPersonalReadOnlyView({ applicant, profile }) {
   const personal = profile?.personal || {}; const details = personal.details || {};
   const name = personal.displayName || applicant.full_name || applicant.first_name || "Pemohon";
-  const email = personal.email || applicant.email; const photo = personal.profilePhotoUrl || applicant.profile_photo_url;
+  const email = personal.email || applicant.email; const photo = resolveMediaUrl(personal.profilePhotoUrl || applicant.profile_photo_url);
+  const resumeUrl = resolveMediaUrl(personal.resumeFileUrl || applicant.resume_file_url);
+  const videoResumeUrl = resolveMediaUrl(personal.videoResumeFileUrl || applicant.video_resume_file_url);
   const value = (item) => item || "-";
   const field = (label, item, wide = false) => <PersonalField label={label} noIndicator><input readOnly value={value(item)} className={wide ? "" : ""} /></PersonalField>;
-  return <div className="personal-edit-panel"><div className="personal-edit-form"><ProfileFormRow label="Foto Profil"><div className="personal-photo-upload"><div className="personal-photo-preview">{photo ? <img src={photo} alt="" /> : name.charAt(0)}</div><div><strong>Foto profil pemohon</strong><p>Paparan baca sahaja.</p></div></div></ProfileFormRow><ProfileFormRow label="Maklumat Peribadi">{field("Nama Penuh", name)}{field("Nombor Kad Pengenalan", details.identificationNumber || applicant.mykad_number)}<div className="personal-date-group"><span>Tarikh Lahir</span><div><label>Hari<input readOnly value={value(details.birthDay)} /></label><label>Bulan<input readOnly value={value(details.birthMonth)} /></label><label>Tahun<input readOnly value={value(details.birthYear)} /></label></div></div>{field("Bangsa", details.race)}<fieldset className="personal-radio-group"><legend>Kewarganegaraan</legend><div>{citizenshipOptions.map((item) => <label key={item}><input type="radio" checked={details.citizenship === item} readOnly />{item}</label>)}</div></fieldset><fieldset className="personal-radio-group"><legend>Jantina</legend><div>{["Perempuan", "Lelaki"].map((item) => <label key={item}><input type="radio" checked={details.gender === item} readOnly />{item}</label>)}</div></fieldset></ProfileFormRow><ProfileFormRow label="Aksesibiliti dan Kesihatan"><div className="personal-helper-copy">Maklumat kesihatan pemohon adalah sulit.</div><fieldset className="personal-radio-group"><legend>Adakah anda mempunyai sebarang masalah kesihatan?</legend><div>{["Ya", "Tidak"].map((item) => <label key={item}><input type="radio" checked={details.hasHealthIssue === item} readOnly />{item}</label>)}</div></fieldset><fieldset className="personal-radio-group"><legend>Adakah anda mempunyai sebarang ketidakupayaan?</legend><div>{["Ya", "Tidak"].map((item) => <label key={item}><input type="radio" checked={details.hasDisability === item} readOnly />{item}</label>)}</div></fieldset></ProfileFormRow><ProfileFormRow label="Alamat">{field("Negeri", details.state)}{field("Bandar", details.city)}{field("Poskod", details.postcode)}<PersonalField label="Alamat" noIndicator><textarea readOnly value={value(details.address || applicant.address)} /></PersonalField></ProfileFormRow><ProfileFormRow label="Butiran Hubungan">{field("Alamat E-mel", email)}{field("Nombor Telefon Bimbit Utama", details.primaryPhone || applicant.mobile_number)}{field("Nombor Telefon Bimbit Lain", details.secondaryPhone)}</ProfileFormRow><ProfileFormRow label="Resume"><div className="personal-profile-tip"><header><span><Icon>emoji_objects</Icon></span><strong>Tingkatkan ketampakan profil anda.</strong></header><p>Resume dan video resume pemohon tersedia untuk semakan.</p></div><div className="personal-button-row">{personal.resumeFileUrl || applicant.resume_file_url ? <a className="personal-primary-button" href={personal.resumeFileUrl || applicant.resume_file_url} target="_blank" rel="noreferrer">Muat Turun Resume</a> : null}{personal.videoResumeFileUrl || applicant.video_resume_file_url ? <a className="personal-primary-button" href={personal.videoResumeFileUrl || applicant.video_resume_file_url} target="_blank" rel="noreferrer">Muat Turun Video Resume</a> : null}</div>{field("LinkedIn", details.linkedIn)}</ProfileFormRow></div></div>;
+  return <div className="personal-edit-panel"><div className="personal-edit-form"><ProfileFormRow label="Foto Profil"><div className="personal-photo-upload"><div className="personal-photo-preview">{photo ? <img src={photo} alt="" /> : name.charAt(0)}</div><div><strong>Foto profil pemohon</strong><p>Paparan baca sahaja.</p></div></div></ProfileFormRow><ProfileFormRow label="Maklumat Peribadi">{field("Nama Penuh", name)}{field("Nombor Kad Pengenalan", details.identificationNumber || applicant.mykad_number)}<div className="personal-date-group"><span>Tarikh Lahir</span><div><label>Hari<input readOnly value={value(details.birthDay)} /></label><label>Bulan<input readOnly value={value(details.birthMonth)} /></label><label>Tahun<input readOnly value={value(details.birthYear)} /></label></div></div>{field("Bangsa", details.race)}<fieldset className="personal-radio-group"><legend>Kewarganegaraan</legend><div>{citizenshipOptions.map((item) => <label key={item}><input type="radio" checked={details.citizenship === item} readOnly />{item}</label>)}</div></fieldset><fieldset className="personal-radio-group"><legend>Jantina</legend><div>{["Perempuan", "Lelaki"].map((item) => <label key={item}><input type="radio" checked={details.gender === item} readOnly />{item}</label>)}</div></fieldset></ProfileFormRow><ProfileFormRow label="Aksesibiliti dan Kesihatan"><div className="personal-helper-copy">Maklumat kesihatan pemohon adalah sulit.</div><fieldset className="personal-radio-group"><legend>Adakah anda mempunyai sebarang masalah kesihatan?</legend><div>{["Ya", "Tidak"].map((item) => <label key={item}><input type="radio" checked={details.hasHealthIssue === item} readOnly />{item}</label>)}</div></fieldset><fieldset className="personal-radio-group"><legend>Adakah anda mempunyai sebarang ketidakupayaan?</legend><div>{["Ya", "Tidak"].map((item) => <label key={item}><input type="radio" checked={details.hasDisability === item} readOnly />{item}</label>)}</div></fieldset></ProfileFormRow><ProfileFormRow label="Alamat">{field("Negeri", details.state)}{field("Bandar", details.city)}{field("Poskod", details.postcode)}<PersonalField label="Alamat" noIndicator><textarea readOnly value={value(details.address || applicant.address)} /></PersonalField></ProfileFormRow><ProfileFormRow label="Butiran Hubungan">{field("Alamat E-mel", email)}{field("Nombor Telefon Bimbit Utama", details.primaryPhone || applicant.mobile_number)}{field("Nombor Telefon Bimbit Lain", details.secondaryPhone)}</ProfileFormRow><ProfileFormRow label="Resume"><div className="personal-profile-tip"><header><span><Icon>emoji_objects</Icon></span><strong>Tingkatkan ketampakan profil anda.</strong></header><p>Resume dan video resume pemohon tersedia untuk semakan.</p></div><div className="personal-button-row">{resumeUrl ? <a className="personal-primary-button" href={resumeUrl} target="_blank" rel="noreferrer">Muat Turun Resume</a> : null}{videoResumeUrl ? <a className="personal-primary-button" href={videoResumeUrl} target="_blank" rel="noreferrer">Muat Turun Video Resume</a> : null}</div>{field("LinkedIn", details.linkedIn)}</ProfileFormRow></div></div>;
 }
 
 export function ProfileSidebar({ isOpen, onToggle }) {
@@ -3125,9 +3128,9 @@ export default function ApplicantProfilePage() {
   const [personalProfile, setPersonalProfile] = useState(() => {
     const savedProfile = getSavedDraft(user, "personal") || getSavedPersonalProfile(user);
     const savedPreferences = getSavedDraft(user, "job-preferences") || getSavedJobPreferences(user);
-    const profilePhotoUrl = savedProfile?.profilePhotoUrl || user?.profile_photo_url || "";
-    const resumeFileUrl = savedProfile?.resumeFileUrl || user?.resume_file_url || "";
-    const videoResumeFileUrl = savedProfile?.videoResumeFileUrl || user?.video_resume_file_url || "";
+    const profilePhotoUrl = resolveMediaUrl(savedProfile?.profilePhotoUrl || user?.profile_photo_url || "");
+    const resumeFileUrl = resolveMediaUrl(savedProfile?.resumeFileUrl || user?.resume_file_url || "");
+    const videoResumeFileUrl = resolveMediaUrl(savedProfile?.videoResumeFileUrl || user?.video_resume_file_url || "");
 
     return normalizePersonalProfile(
       {
