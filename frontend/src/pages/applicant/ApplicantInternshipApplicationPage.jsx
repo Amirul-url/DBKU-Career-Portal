@@ -543,7 +543,7 @@ export default function ApplicantInternshipApplicationPage() {
   };
 
   const exitApplicationForm = () => {
-    navigate(APPLICANT_ROUTES.internships);
+    navigate(APPLICANT_ROUTES.applications);
   };
 
   const textInput = (field, props = {}) => (
