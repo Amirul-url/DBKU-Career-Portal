@@ -177,10 +177,11 @@ export async function fetchAuthenticatedBlob(url) {
   return response.blob();
 }
 
-export function registerApplicant({ fullName, email, password, password2 }) {
+export function registerApplicant({ fullName, email, phoneNumber, password, password2 }) {
   return authRequest("/auth/register/", {
     full_name: fullName.trim().toUpperCase(),
     email: email.trim().toLowerCase(),
+    mobile_number: phoneNumber.trim(),
     password,
     password2,
   });

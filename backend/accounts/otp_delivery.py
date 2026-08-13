@@ -49,6 +49,10 @@ def send_password_reset_email(user, otp):
 
 
 def send_password_reset_whatsapp(phone_number, otp):
+    send_whatsapp_message(phone_number, build_password_reset_otp_message(otp)["text"])
+
+
+def send_whatsapp_message(phone_number, text):
     if not getattr(settings, "WHATSAPP_ENABLED", False):
         raise OTPDeliveryError("Penghantaran WhatsApp belum diaktifkan.")
     if getattr(settings, "WHATSAPP_PROVIDER", "evolution") != "evolution":
@@ -64,7 +68,7 @@ def send_password_reset_whatsapp(phone_number, otp):
     payload = json.dumps(
         {
             "number": normalize_phone_number(phone_number),
-            "text": build_password_reset_otp_message(otp)["text"],
+            "text": text,
         }
     ).encode("utf-8")
 
@@ -81,6 +85,6 @@ def send_password_reset_whatsapp(phone_number, otp):
     try:
         with request.urlopen(api_request, timeout=getattr(settings, "EVOLUTION_API_TIMEOUT", 15)) as response:
             if response.status >= 400:
-                raise OTPDeliveryError("Evolution API menolak permintaan OTP WhatsApp.")
+                raise OTPDeliveryError("Evolution API menolak permintaan WhatsApp.")
     except (error.HTTPError, error.URLError, TimeoutError) as exc:
-        raise OTPDeliveryError(f"OTP WhatsApp tidak dapat dihantar: {exc}") from exc
+        raise OTPDeliveryError(f"Mesej WhatsApp tidak dapat dihantar: {exc}") from exc

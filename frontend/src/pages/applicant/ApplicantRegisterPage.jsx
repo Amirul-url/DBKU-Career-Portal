@@ -9,6 +9,7 @@ function RegisterForm() {
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
+    phoneNumber: "",
     password: "",
     password2: "",
   });
@@ -75,6 +76,24 @@ function RegisterForm() {
             data-field="email"
             value={formData.email}
             placeholder="cth. example@example.com"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck="false"
+            disabled={isSubmitting}
+            onChange={handleChange}
+            required
+          />
+        </AuthField>
+
+        <AuthField icon="phone" label="Nombor WhatsApp" required>
+          <input
+            type="tel"
+            inputMode="tel"
+            name="applicantRegisterPhone"
+            data-field="phoneNumber"
+            value={formData.phoneNumber}
+            placeholder="cth. 60123456789"
             autoComplete="off"
             autoCorrect="off"
             autoCapitalize="off"

@@ -5,6 +5,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from notifications.services import create_notification
 
+from .otp_delivery import OTPDeliveryError, send_whatsapp_message
 from .serializers import UserSerializer
 
 
@@ -35,7 +36,7 @@ def build_applicant_registration_success_message(user):
     lines.extend(
         [
             "",
-            "Jika anda tidak membuat pendaftaran ini, sila abaikan emel ini atau hubungi pihak DBKU untuk semakan lanjut.",
+            "Jika anda tidak membuat pendaftaran ini, sila abaikan mesej ini atau hubungi pihak DBKU untuk semakan lanjut.",
             "",
             "Terima kasih.",
             "Portal Kerjaya DBKU",
@@ -53,11 +54,19 @@ def notify_applicant_registration_success(user):
 
     notification = build_applicant_registration_success_message(user)
     try:
-        return create_notification(
+        created_notification = create_notification(
             user=user,
             title=notification["title"],
             message=notification["message"],
         )
     except Exception:
         logger.exception("Unable to create applicant registration notification for user %s", user.pk)
-        return None
+        created_notification = None
+
+    if user.mobile_number and getattr(settings, "WHATSAPP_ENABLED", False):
+        try:
+            send_whatsapp_message(user.mobile_number, notification["message"])
+        except OTPDeliveryError:
+            logger.exception("Unable to send applicant registration WhatsApp for user %s", user.pk)
+
+    return created_notification

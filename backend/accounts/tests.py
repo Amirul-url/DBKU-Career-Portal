@@ -152,6 +152,7 @@ class ApplicantRegistrationNotificationTests(APITestCase):
             {
                 "full_name": "ALI BIN ABU",
                 "email": "ali@example.com",
+                "mobile_number": "60122223333",
                 "password": "Password123!",
                 "password2": "Password123!",
             },
@@ -164,3 +165,25 @@ class ApplicantRegistrationNotificationTests(APITestCase):
         self.assertEqual(call_kwargs["title"], "Pendaftaran Akaun Portal Kerjaya DBKU Berjaya")
         self.assertIn("Tahniah, akaun Portal Kerjaya DBKU anda telah berjaya didaftarkan.", call_kwargs["message"])
         self.assertIn("Pautan log masuk: https://portal-kerjaya.example.test/login", call_kwargs["message"])
+
+    @override_settings(NOTIFICATION_SIDE_EFFECTS_ENABLED=True, WHATSAPP_ENABLED=True)
+    @patch("accounts.services.create_notification")
+    @patch("accounts.services.send_whatsapp_message")
+    def test_register_sends_formal_registration_whatsapp(self, mock_send_whatsapp, mock_create_notification):
+        response = self.client.post(
+            "/api/auth/register/",
+            {
+                "full_name": "SITI BINTI ABU",
+                "email": "siti@example.com",
+                "mobile_number": "+60 13-222 3333",
+                "password": "Password123!",
+                "password2": "Password123!",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        mock_create_notification.assert_called_once()
+        mock_send_whatsapp.assert_called_once()
+        self.assertEqual(mock_send_whatsapp.call_args.args[0], "60132223333")
+        self.assertIn("Tahniah, akaun Portal Kerjaya DBKU anda telah berjaya didaftarkan.", mock_send_whatsapp.call_args.args[1])

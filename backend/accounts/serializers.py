@@ -145,6 +145,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(write_only=True, required=False, allow_blank=False)
     username = serializers.CharField(required=False)
     email = serializers.EmailField(required=True)
+    mobile_number = serializers.CharField(required=True, allow_blank=False, max_length=30)
     password = serializers.CharField(write_only=True, min_length=8)
     password2 = serializers.CharField(write_only=True, min_length=8)
 
@@ -165,11 +166,17 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         email = attrs["email"].strip().lower()
+        mobile_number = normalize_phone_number(attrs.get("mobile_number"))
         attrs["email"] = email
         attrs["username"] = email
+        attrs["mobile_number"] = mobile_number
 
         if User.objects.filter(username__iexact=email).exists() or User.objects.filter(email__iexact=email).exists():
             raise serializers.ValidationError({"email": "Emel ini sudah didaftarkan."})
+        if not mobile_number:
+            raise serializers.ValidationError({"mobile_number": "Nombor WhatsApp diperlukan."})
+        if any(normalize_phone_number(user.mobile_number) == mobile_number for user in User.objects.exclude(mobile_number="")):
+            raise serializers.ValidationError({"mobile_number": "Nombor WhatsApp ini sudah didaftarkan."})
         if attrs["password"] != attrs["password2"]:
             raise serializers.ValidationError({"password2": "Kata laluan tidak sepadan."})
         validate_password(attrs["password"])
