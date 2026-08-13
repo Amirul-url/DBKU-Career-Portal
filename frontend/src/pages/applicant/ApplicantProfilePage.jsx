@@ -953,8 +953,8 @@ export function ApplicantAddressMap({ address, addressError, latitude, locationE
   const markerRef = useRef(null);
   const popupRef = useRef(null);
   const debounceRef = useRef(null);
-  const selectedAddressRef = useRef("");
   const [mapAddress, setMapAddress] = useState(() => formatMapAddressText(address));
+  const selectedAddressRef = useRef(formatMapAddressText(address));
   const [mapMode, setMapMode] = useState("2d");
   const [mapStyle, setMapStyle] = useState("street");
   const [mapMessage, setMapMessage] = useState("");
@@ -977,6 +977,8 @@ export function ApplicantAddressMap({ address, addressError, latitude, locationE
     const nextAddress = formatMapAddressText(address);
     if (nextAddress !== mapAddress) {
       setMapAddress(nextAddress);
+      selectedAddressRef.current = nextAddress;
+      setSuggestions([]);
     }
   }, [address, mapAddress]);
 
