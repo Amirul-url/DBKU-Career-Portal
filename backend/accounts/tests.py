@@ -144,7 +144,7 @@ class PasswordResetTests(APITestCase):
 
 
 class ApplicantRegistrationNotificationTests(APITestCase):
-    @override_settings(NOTIFICATION_SIDE_EFFECTS_ENABLED=True, FRONTEND_URL="https://portal-kerjaya.example.test")
+    @override_settings(NOTIFICATION_SIDE_EFFECTS_ENABLED=True)
     @patch("accounts.services.create_notification")
     def test_register_sends_formal_registration_notification(self, mock_create_notification):
         response = self.client.post(
@@ -160,11 +160,16 @@ class ApplicantRegistrationNotificationTests(APITestCase):
         )
 
         self.assertEqual(response.status_code, 201)
+        self.assertNotIn("access", response.data)
+        self.assertEqual(response.data["message"], "Pendaftaran akaun berjaya. Sila log masuk untuk meneruskan.")
         mock_create_notification.assert_called_once()
         call_kwargs = mock_create_notification.call_args.kwargs
-        self.assertEqual(call_kwargs["title"], "Pendaftaran Akaun Portal Kerjaya DBKU Berjaya")
-        self.assertIn("Tahniah, akaun Portal Kerjaya DBKU anda telah berjaya didaftarkan.", call_kwargs["message"])
-        self.assertIn("Pautan log masuk: https://portal-kerjaya.example.test/login", call_kwargs["message"])
+        self.assertEqual(call_kwargs["title"], "Pendaftaran Akaun Berjaya")
+        self.assertEqual(
+            call_kwargs["message"],
+            "Salam sejahtera. Akaun Portal Kerjaya DBKU anda telah berjaya didaftarkan. "
+            "Sila log masuk untuk melengkapkan profil dan membuat permohonan. Terima kasih.",
+        )
 
     @override_settings(NOTIFICATION_SIDE_EFFECTS_ENABLED=True, WHATSAPP_ENABLED=True)
     @patch("accounts.services.create_notification")
@@ -186,4 +191,8 @@ class ApplicantRegistrationNotificationTests(APITestCase):
         mock_create_notification.assert_called_once()
         mock_send_whatsapp.assert_called_once()
         self.assertEqual(mock_send_whatsapp.call_args.args[0], "60132223333")
-        self.assertIn("Tahniah, akaun Portal Kerjaya DBKU anda telah berjaya didaftarkan.", mock_send_whatsapp.call_args.args[1])
+        self.assertEqual(
+            mock_send_whatsapp.call_args.args[1],
+            "Salam sejahtera. Akaun Portal Kerjaya DBKU anda telah berjaya didaftarkan. "
+            "Sila log masuk untuk melengkapkan profil dan membuat permohonan. Terima kasih.",
+        )

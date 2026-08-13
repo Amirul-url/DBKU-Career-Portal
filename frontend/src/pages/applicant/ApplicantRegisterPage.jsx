@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { dashboardPathForRole, registerApplicant, saveAuthSession } from "../../lib/authApi";
+import { registerApplicant } from "../../lib/authApi";
 import { countryCallingCodes, defaultCountryCallingCode } from "../../lib/countryCallingCodes";
 import { ApplicantAuthLayout, AuthField, PasswordField } from "./ApplicantAuthShared";
 
@@ -179,9 +179,11 @@ function RegisterForm() {
 
     setIsSubmitting(true);
     try {
-      const data = await registerApplicant(formData);
-      saveAuthSession(data);
-      navigate(dashboardPathForRole(data.user?.role), { replace: true });
+      await registerApplicant(formData);
+      navigate("/login", {
+        replace: true,
+        state: { message: "Pendaftaran akaun berjaya. Sila log masuk untuk meneruskan." },
+      });
     } catch (error) {
       setStatus({ type: "error", message: error.message });
     } finally {

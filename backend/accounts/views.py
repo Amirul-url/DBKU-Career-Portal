@@ -31,7 +31,7 @@ def register_view(request):
     serializer.is_valid(raise_exception=True)
     user = serializer.save()
     notify_applicant_registration_success(user)
-    return Response(build_auth_response(user, request), status=status.HTTP_201_CREATED)
+    return Response({"message": "Pendaftaran akaun berjaya. Sila log masuk untuk meneruskan."}, status=status.HTTP_201_CREATED)
 
 
 @api_view(["POST"])
