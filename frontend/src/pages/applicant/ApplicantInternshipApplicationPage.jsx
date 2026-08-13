@@ -233,6 +233,8 @@ const getDefaultStudentInfo = () => ({
   supervisorEmail: "",
   supervisorName: "",
   supervisorPhone: "",
+  totalSemesters: "",
+  totalStudyYears: "",
   transcriptFile: "",
   universityLetterFile: "",
   weight: "",
@@ -250,8 +252,10 @@ const requiredFieldsByTab = {
     ["institution", "Institusi Pengajian"],
     ["program", "Program / Kursus"],
     ["academicLevel", "Tahap Pengajian"],
-    ["currentYear", "Tahun Pengajian"],
-    ["semester", "Semester"],
+    ["totalStudyYears", "Jumlah Tahun Pengajian"],
+    ["totalSemesters", "Jumlah Semester"],
+    ["currentYear", "Tahun Pengajian Terkini"],
+    ["semester", "Semester Terkini"],
     ["cgpa", "CGPA / Keputusan Terkini"],
   ],
   [personalInfoTab]: [
@@ -854,29 +858,22 @@ export default function ApplicantInternshipApplicationPage() {
               {academicLevelOptions.map((option) => <option key={option}>{option}</option>)}
             </select>,
           )}
-          {renderPersonalRow("Tahun Pengajian", <input required placeholder="Contoh: Tahun 3" value={studentInfo.currentYear} onChange={updateStudentInfo("currentYear")} />)}
-          {renderPersonalRow("Semester", <input required placeholder="Contoh: Semester 5" value={studentInfo.semester} onChange={updateStudentInfo("semester")} />)}
+          {renderPersonalRow("Jumlah Tahun Pengajian", <input required inputMode="numeric" pattern="[0-9]*" placeholder="Contoh: 4" value={studentInfo.totalStudyYears} onChange={updateNumericStudentInfo("totalStudyYears")} />)}
+          {renderPersonalRow("Jumlah Semester", <input required inputMode="numeric" pattern="[0-9]*" placeholder="Contoh: 8" value={studentInfo.totalSemesters} onChange={updateNumericStudentInfo("totalSemesters")} />)}
+          {renderPersonalRow("Tahun Pengajian Terkini", <input required placeholder="Contoh: Tahun 3" value={studentInfo.currentYear} onChange={updateStudentInfo("currentYear")} />)}
+          {renderPersonalRow("Semester Terkini", <input required placeholder="Contoh: Semester 5" value={studentInfo.semester} onChange={updateStudentInfo("semester")} />)}
           {renderPersonalRow("CGPA / Keputusan Terkini", <input required placeholder="Contoh: 3.45" value={studentInfo.cgpa} onChange={updateStudentInfo("cgpa")} />)}
           {renderPersonalRow(
-            <>
-              Nama Penyelia / Penyelaras Universiti
-              <em>(tidak wajib)</em>
-            </>,
+            "Nama Penyelaras Program",
             <input value={studentInfo.supervisorName} onChange={updateStudentInfo("supervisorName")} />,
           )}
           {renderPersonalRow(
-            <>
-              Emel Penyelia
-              <em>(tidak wajib)</em>
-            </>,
+            "Emel Penyelaras Program",
             <input type="email" value={studentInfo.supervisorEmail} onChange={updateStudentInfo("supervisorEmail")} />,
           )}
           {renderPersonalRow(
-            <>
-              No. Telefon Penyelia
-              <em>(tidak wajib)</em>
-            </>,
-            <input inputMode="numeric" pattern="[0-9]*" value={studentInfo.supervisorPhone} onChange={updateNumericStudentInfo("supervisorPhone")} />,
+            "No. Telefon Penyelaras Program",
+            <InternshipPhoneInput value={studentInfo.supervisorPhone} onChange={(value) => updateStudentValue("supervisorPhone", value)} />,
           )}
         </tbody>
       </table>
