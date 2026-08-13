@@ -5,21 +5,6 @@ import { useApplicantSidebarState } from "../../modules/applicant/useApplicantSi
 import { Icon } from "./ApplicantAuthShared";
 import { ProfileContentHeader, ProfileSidebar } from "./ApplicantProfilePage";
 
-const infoMenuItems = [
-  ["person", "Maklumat Peribadi"],
-  ["shield", "Maklumat Kesihatan"],
-  ["work", "Maklumat Kewangan"],
-  ["group", "Maklumat Penjaga"],
-  ["person", "Maklumat Waris"],
-  ["shield_person", "Maklumat Penjamin"],
-  ["description", "Maklumat SPM"],
-  ["description", "Maklumat STPM"],
-  ["description", "Maklumat Matrik"],
-  ["description", "Maklumat STAM"],
-  ["description", "Maklumat Penyeliaan"],
-  ["description", "Maklumat Penyelidikan"],
-];
-
 const infoTabs = [
   "Maklumat Peribadi",
   "Alamat 1",
@@ -412,15 +397,6 @@ export default function ApplicantInternshipApplicationPage() {
             </header>
 
             <div className="student-info-workspace">
-              <aside className="student-info-sidebar" aria-label="Kategori maklumat pelajar">
-                {infoMenuItems.map(([icon, label], index) => (
-                  <button className={index === 0 ? "active" : ""} key={label} type="button">
-                    <Icon>{icon}</Icon>
-                    {label}
-                  </button>
-                ))}
-              </aside>
-
               <div className="student-info-content">
                 <nav className="student-info-tabs" aria-label="Bahagian maklumat pelajar">
                   {infoTabs.map((tab) => (

@@ -6247,46 +6247,7 @@ body:has(.applicant-profile-page) {
 }
 
 .student-info-workspace {
-  display: grid;
-  grid-template-columns: 210px minmax(0, 1fr);
   min-height: 720px;
-}
-
-.student-info-sidebar {
-  display: grid;
-  align-content: start;
-  gap: 3px;
-  border-right: 1px solid #d9eee3;
-  background: rgba(248, 250, 252, .82);
-  padding: 24px 12px;
-}
-
-.student-info-sidebar button {
-  display: flex;
-  width: 100%;
-  min-height: 34px;
-  align-items: center;
-  gap: 7px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: #13844a;
-  font: inherit;
-  font-size: 12px;
-  font-weight: 750;
-  text-align: left;
-  white-space: nowrap;
-}
-
-.student-info-sidebar button.active,
-.student-info-sidebar button:hover {
-  background: #eafff2;
-  color: var(--student-ink);
-}
-
-.student-info-sidebar .material-symbols-outlined {
-  color: #16a34a;
-  font-size: 16px;
 }
 
 .student-info-content {
@@ -6716,15 +6677,8 @@ body:has(.applicant-profile-page) {
 }
 
 @media (max-width: 1100px) {
-  .student-info-workspace,
   .student-info-layout {
     grid-template-columns: 1fr;
-  }
-
-  .student-info-sidebar {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    border-right: 0;
-    border-bottom: 1px solid #d9eee3;
   }
 
   .student-info-photo-card {
@@ -6742,7 +6696,6 @@ body:has(.applicant-profile-page) {
     padding: 14px;
   }
 
-  .student-info-sidebar,
   .student-info-fields {
     grid-template-columns: 1fr;
   }
