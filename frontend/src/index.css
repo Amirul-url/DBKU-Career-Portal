@@ -6463,11 +6463,11 @@ body:has(.applicant-profile-page) {
   border: 1px solid #cfded6;
   border-radius: 4px;
   background: #ffffff;
-  color: var(--student-ink);
+  color: #334155;
   padding: 7px 9px;
   font: inherit;
   font-size: 13px;
-  font-weight: 750;
+  font-weight: 500;
   outline: 0;
 }
 
