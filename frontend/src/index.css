@@ -7899,6 +7899,27 @@ body:has(.applicant-profile-page) {
   gap: 12px;
 }
 
+.spm-grades > .academic-subject-grade-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.academic-subject-grade-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(150px, 0.45fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.academic-subject-remove-button {
+  min-height: 48px;
+}
+
+.academic-subject-add-button {
+  justify-self: start;
+}
+
 .academic-delete-button {
   justify-self: end;
 }
@@ -8839,6 +8860,10 @@ body:has(.applicant-profile-page) {
   }
 
   .spm-grades > div {
+    grid-template-columns: 1fr;
+  }
+
+  .academic-subject-grade-row {
     grid-template-columns: 1fr;
   }
 

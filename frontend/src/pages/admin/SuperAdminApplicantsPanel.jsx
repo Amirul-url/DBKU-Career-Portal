@@ -7,8 +7,7 @@ const APPLICANTS_PER_PAGE = 5;
 const employmentStatusOptions = ["Tetap", "Sementara", "Sambilan", "Kontrak", "Perantisan", "Latihan Industri", "Bekerja sendiri"];
 const workTimeOptions = ["Waktu Biasa", "Syif 3 Masa", "Syif 2 Masa", "Waktu Fleksibel", "Syif Malam", "HIBRID"];
 const salaryRangeOptions = ["< 1,200", "1,200 - 1,499", "1,500 - 1,999", "2,000 - 2,499", "2,500 - 2,999", "3,000 - 3,499", "3,500 - 3,999", "4,000 - 4,999", "5,000 - 5,999", "6,000 - 7,999", "8,000 - 9,999", "10,000 - 12,999", "13,000 - 15,999", "> 16,000"];
-const spmAcademicLevel = "SPM / O Level / SKM Tahap 1 / SKM Tahap 2 / SKM Tahap 3 atau Yang Setaraf";
-const spmSubjectOptions = ["Bahasa Malaysia", "Bahasa Inggeris", "Matematik"];
+const schoolGradeAcademicLevels = new Set(["Sekolah Rendah atau Ke Bawah", "PMR / PT3 atau Yang Setaraf", "SPM / O Level / SKM Tahap 1 / SKM Tahap 2 / SKM Tahap 3 atau Yang Setaraf"]);
 const higherAcademicLevels = new Set(["Diploma / Diploma Lanjutan / Diploma Graduan Atasan / DVM / DKM Tahap 4 / DLKM Tahap 5", "Sarjana Muda atau Yang Setaraf", "Sarjana atau Yang Setaraf", "Doktor Falsafah (PhD) atau Yang Setaraf"]);
 
 const hasValue = (value) => {
@@ -60,6 +59,15 @@ function UploadPrompt({ label, hint }) {
 const asArray = (value) => Array.isArray(value) ? value : [];
 const joinValues = (value) => asArray(value).filter(hasValue).join(", ");
 const formatMonthYear = (month, year) => [month, year].filter(hasValue).join(" ");
+const normalizeSubjectGrades = (record) => {
+  const rawGrades = Array.isArray(record?.subjectGrades)
+    ? record.subjectGrades
+    : Object.entries(record?.spmGrades || {}).map(([subject, grade]) => ({ subject, grade }));
+
+  return rawGrades
+    .map((item) => ({ grade: item?.grade || "", subject: item?.subject || "" }))
+    .filter((item) => item.subject || item.grade);
+};
 
 function TextBlock({ children }) {
   return <div className="profile-empty-row"><span><Icon>info</Icon></span><p>{children}</p></div>;
@@ -91,6 +99,13 @@ function MultiSelectPreview({ label, values, selectedLabel, optional = false, pl
 function ChoicePillPreview({ label, options, values }) {
   const selectedValues = asArray(values);
   return <fieldset className="job-choice-group"><legend>{label}*</legend><div>{options.map((option) => <button type="button" className={selectedValues.includes(option) ? "selected" : ""} key={option}>{selectedValues.includes(option) ? <Icon>check</Icon> : null}{option}</button>)}</div></fieldset>;
+}
+
+function SubjectGradesPreview({ record }) {
+  const subjectGrades = normalizeSubjectGrades(record);
+  if (!subjectGrades.length) return null;
+
+  return <div className="spm-grades"><strong>Gred mata pelajaran <em>(tidak wajib)</em></strong><div>{subjectGrades.map((item, index) => <Field key={`${item.subject}-${index}`} label={item.subject || `Subjek ${index + 1}`} value={item.grade} noIndicator placeholder="Contoh. A+, A1" />)}</div></div>;
 }
 
 function ProfileMirrorCard({ children, details, isOpen, onToggle, title }) {
@@ -130,7 +145,7 @@ function ExperienceMirror({ data, isOpen, onToggle }) {
 function AcademicMirror({ data, isOpen, onToggle }) {
   const records = asArray(data?.records);
   const summary = records.length ? <div className="job-preference-card-list academic-summary-list px-7 py-6">{records.map((record, index) => <article className="job-preference-card academic-summary-card" key={record.id || index}><span className="experience-summary-index">Akademik {index + 1}</span><strong>{record.institution || "Institusi belum diisi"}</strong>{record.level ? <span>{record.level}</span> : null}{record.fieldOfStudy ? <span>{record.fieldOfStudy}</span> : null}{record.specialization ? <span>{record.specialization}</span> : null}{record.result ? <span>{record.result}</span> : null}</article>)}</div> : <div className="px-7 py-6"><TextBlock>Masukkan kelayakan akademik supaya permohonan lebih lengkap.</TextBlock></div>;
-  const details = <div className="academic-layout"><strong className="academic-layout-label">Akademik</strong><div className="academic-form"><p className="academic-intro">Tambah latar belakang akademik anda<span>*</span></p><div className="academic-record-list">{records.length ? records.map((record, index) => <section className="academic-record" key={record.id || index}><strong>Akademik {index + 1}</strong><SelectField label="Tahap Akademik" value={record.level} placeholder="Pilih tahap akademik" />{record.level === spmAcademicLevel ? <div className="spm-grades"><strong>Sila isikan gred untuk mata pelajaran SPM di bawah <em>(tidak wajib)</em></strong><div>{spmSubjectOptions.map((subject) => <Field key={subject} label={subject} value={record.spmGrades?.[subject]} noIndicator placeholder="Contoh. A+, A1" />)}</div></div> : null}{higherAcademicLevels.has(record.level) ? <><SelectField label="Bidang Akademik" value={record.fieldOfStudy} placeholder="Pilih bidang akademik" /><Field label="Pengkhususan" value={record.specialization} optional hint={`Maksimum ${10000 - String(record.specialization || "").length} huruf`} placeholder="Contoh. Software Engineering" /></> : null}<Field label="Nama Institusi Akademik" value={record.institution} hint={`Maksimum ${10000 - String(record.institution || "").length} huruf`} placeholder="Contoh. Universiti Sains Malaysia" /><SelectField label="Negara" value={record.country} placeholder="Pilih negara" /><Field label="Keputusan" value={record.result} optional hint={`Maksimum ${10000 - String(record.result || "").length} huruf`} placeholder="Contoh. 12A 3B+, CGPA 4.0, Cemerlang" /><div className="academic-date-section"><strong>Tarikh Mula <em>(tidak wajib)</em></strong><div className="academic-date-grid"><SelectField label="Bulan" value={record.startMonth} noIndicator placeholder="Pilih" /><SelectField label="Tahun" value={record.startYear} noIndicator placeholder="Pilih" /></div></div><div className="academic-date-section"><strong>Tarikh Akhir <em>(tidak wajib)</em></strong><div className="academic-date-grid"><SelectField label="Bulan" value={record.isStudying ? "" : record.endMonth} noIndicator placeholder="Pilih" /><SelectField label="Tahun" value={record.isStudying ? "" : record.endYear} noIndicator placeholder="Pilih" /></div></div><ReadOnlyCheckbox checked={record.isStudying} label="Saya sedang belajar di sini" /></section>) : <TextBlock>Tiada rekod akademik direkodkan.</TextBlock>}</div></div></div>;
+  const details = <div className="academic-layout"><strong className="academic-layout-label">Akademik</strong><div className="academic-form"><p className="academic-intro">Tambah latar belakang akademik anda<span>*</span></p><div className="academic-record-list">{records.length ? records.map((record, index) => <section className="academic-record" key={record.id || index}><strong>Akademik {index + 1}</strong><SelectField label="Tahap Akademik" value={record.level} placeholder="Pilih tahap akademik" />{schoolGradeAcademicLevels.has(record.level) ? <SubjectGradesPreview record={record} /> : null}{higherAcademicLevels.has(record.level) ? <><SelectField label="Bidang Akademik" value={record.fieldOfStudy} placeholder="Pilih bidang akademik" /><Field label="Pengkhususan" value={record.specialization} optional hint={`Maksimum ${10000 - String(record.specialization || "").length} huruf`} placeholder="Contoh. Software Engineering" /></> : null}<Field label="Nama Institusi Akademik" value={record.institution} hint={`Maksimum ${10000 - String(record.institution || "").length} huruf`} placeholder="Contoh. Universiti Sains Malaysia" /><SelectField label="Negara" value={record.country} placeholder="Pilih negara" /><Field label="Keputusan" value={record.result} optional hint={`Maksimum ${10000 - String(record.result || "").length} huruf`} placeholder="Contoh. 12A 3B+, CGPA 4.0, Cemerlang" /><div className="academic-date-section"><strong>Tarikh Mula <em>(tidak wajib)</em></strong><div className="academic-date-grid"><SelectField label="Bulan" value={record.startMonth} noIndicator placeholder="Pilih" /><SelectField label="Tahun" value={record.startYear} noIndicator placeholder="Pilih" /></div></div><div className="academic-date-section"><strong>Tarikh Akhir <em>(tidak wajib)</em></strong><div className="academic-date-grid"><SelectField label="Bulan" value={record.isStudying ? "" : record.endMonth} noIndicator placeholder="Pilih" /><SelectField label="Tahun" value={record.isStudying ? "" : record.endYear} noIndicator placeholder="Pilih" /></div></div><ReadOnlyCheckbox checked={record.isStudying} label="Saya sedang belajar di sini" /></section>) : <TextBlock>Tiada rekod akademik direkodkan.</TextBlock>}</div></div></div>;
   return <ProfileMirrorCard title="Akademik" details={details} isOpen={isOpen} onToggle={onToggle}>{summary}</ProfileMirrorCard>;
 }
 

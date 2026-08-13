@@ -66,11 +66,15 @@ const raceOptions = ["Melayu", "Cina", "India", "Bumiputera Sabah", "Bumiputera 
 const citizenshipOptions = ["Warganegara Malaysia", "Bukan Warganegara Malaysia"];
 const monthOptions = ["Januari", "Februari", "Mac", "April", "Mei", "Jun", "Julai", "Ogos", "September", "Oktober", "November", "Disember"];
 const yearOptions = Array.from({ length: 50 }, (_, index) => String(new Date().getFullYear() - index));
+const schoolGradeAcademicLevels = new Set([
+  "Sekolah Rendah atau Ke Bawah",
+  "PMR / PT3 atau Yang Setaraf",
+  "SPM / O Level / SKM Tahap 1 / SKM Tahap 2 / SKM Tahap 3 atau Yang Setaraf",
+]);
+const defaultGradeSubjects = ["Bahasa Malaysia", "Bahasa Inggeris", "Matematik"];
 const academicLevelOptions = [
   "Sekolah Rendah atau Ke Bawah", "PMR / PT3 atau Yang Setaraf", "SPM / O Level / SKM Tahap 1 / SKM Tahap 2 / SKM Tahap 3 atau Yang Setaraf", "STPM / A Level atau Yang Setaraf", "Diploma / Diploma Lanjutan / Diploma Graduan Atasan / DVM / DKM Tahap 4 / DLKM Tahap 5", "Sarjana Muda atau Yang Setaraf", "Sarjana atau Yang Setaraf", "Doktor Falsafah (PhD) atau Yang Setaraf",
 ].map((level) => ({ value: level, label: level }));
-const spmAcademicLevel = "SPM / O Level / SKM Tahap 1 / SKM Tahap 2 / SKM Tahap 3 atau Yang Setaraf";
-const spmSubjectOptions = ["Bahasa Malaysia", "Bahasa Inggeris", "Matematik"];
 const higherAcademicLevels = new Set([
   "Diploma / Diploma Lanjutan / Diploma Graduan Atasan / DVM / DKM Tahap 4 / DLKM Tahap 5",
   "Sarjana Muda atau Yang Setaraf", "Sarjana atau Yang Setaraf", "Doktor Falsafah (PhD) atau Yang Setaraf",
@@ -336,15 +340,29 @@ function saveSkills(user, skills) {
   return normalized;
 }
 
+function normalizeSubjectGrades(record) {
+  const rawGrades = Array.isArray(record?.subjectGrades)
+    ? record.subjectGrades
+    : Object.entries(record?.spmGrades || {}).map(([subject, grade]) => ({ subject, grade }));
+
+  return rawGrades
+    .map((item, index) => ({
+      grade: item?.grade || "",
+      id: item?.id || `${item?.subject || "subject"}-${index}`,
+      subject: item?.subject || "",
+    }))
+    .filter((item) => item.subject || item.grade);
+}
+
 function isEmptyAcademicRecord(record) {
   return !record?.level && !record?.fieldOfStudy && !record?.specialization && !record?.institution && !record?.result
     && !record?.startMonth && !record?.startYear && !record?.endMonth && !record?.endYear && !record?.isStudying
-    && !Object.values(record?.spmGrades || {}).some(Boolean);
+    && !normalizeSubjectGrades(record).some((item) => item.subject || item.grade);
 }
 
 function getComparableAcademicProfile(profile) {
   return JSON.stringify((profile?.records || []).filter((record) => !isEmptyAcademicRecord(record)).map((record) => ({
-    level: record.level || "", fieldOfStudy: record.fieldOfStudy || "", specialization: record.specialization || "", institution: record.institution || "", country: record.country || "", result: record.result || "", spmGrades: record.spmGrades || {}, startMonth: record.startMonth || "", startYear: record.startYear || "", endMonth: record.endMonth || "", endYear: record.endYear || "", isStudying: Boolean(record.isStudying),
+    level: record.level || "", fieldOfStudy: record.fieldOfStudy || "", specialization: record.specialization || "", institution: record.institution || "", country: record.country || "", result: record.result || "", subjectGrades: normalizeSubjectGrades(record), startMonth: record.startMonth || "", startYear: record.startYear || "", endMonth: record.endMonth || "", endYear: record.endYear || "", isStudying: Boolean(record.isStudying),
   })));
 }
 
@@ -3039,11 +3057,97 @@ function ExperienceSummary({ data }) {
 }
 
 function createEmptyAcademicRecord() {
-  return { id: createLocalId(), level: "", fieldOfStudy: "", specialization: "", institution: "", country: "Malaysia", result: "", spmGrades: {}, startMonth: "", startYear: "", endMonth: "", endYear: "", isStudying: false };
+  return { id: createLocalId(), level: "", fieldOfStudy: "", specialization: "", institution: "", country: "Malaysia", result: "", subjectGrades: [], startMonth: "", startYear: "", endMonth: "", endYear: "", isStudying: false };
+}
+
+function createDefaultSubjectGrades() {
+  return defaultGradeSubjects.map((subject) => ({ grade: "", id: createLocalId(), subject }));
+}
+
+function prepareAcademicRecord(record) {
+  const subjectGrades = normalizeSubjectGrades(record);
+  return {
+    ...record,
+    subjectGrades: subjectGrades.length ? subjectGrades : createDefaultSubjectGrades(),
+  };
+}
+
+function getSubjectGradesPayload(subjectGrades) {
+  return Object.fromEntries(
+    subjectGrades
+      .filter((item) => String(item.subject || "").trim())
+      .map((item) => [item.subject.trim(), item.grade || ""]),
+  );
+}
+
+function AcademicSubjectGradesEditor({ onChange, record }) {
+  const subjectGrades = Array.isArray(record.subjectGrades) && record.subjectGrades.length
+    ? record.subjectGrades
+    : createDefaultSubjectGrades();
+  const updateSubjectGrade = (subjectGradeId, field, value) => {
+    const nextSubjectGrades = subjectGrades.map((item) =>
+      item.id === subjectGradeId ? { ...item, [field]: value } : item,
+    );
+    onChange({
+      spmGrades: getSubjectGradesPayload(nextSubjectGrades),
+      subjectGrades: nextSubjectGrades,
+    });
+  };
+  const addSubjectGrade = () => {
+    const nextSubjectGrades = [...subjectGrades, { grade: "", id: createLocalId(), subject: "" }];
+    onChange({ spmGrades: getSubjectGradesPayload(nextSubjectGrades), subjectGrades: nextSubjectGrades });
+  };
+  const removeSubjectGrade = (subjectGradeId) => {
+    const nextSubjectGrades = subjectGrades.filter((item) => item.id !== subjectGradeId);
+    onChange({
+      spmGrades: getSubjectGradesPayload(nextSubjectGrades),
+      subjectGrades: nextSubjectGrades.length ? nextSubjectGrades : createDefaultSubjectGrades(),
+    });
+  };
+
+  return (
+    <div className="spm-grades academic-subject-grades">
+      <strong>
+        Sila isikan gred untuk mata pelajaran di bawah <em>(tidak wajib)</em>
+      </strong>
+      <div className="academic-subject-grade-list">
+        {subjectGrades.map((item) => (
+          <div className="academic-subject-grade-row" key={item.id}>
+            <PersonalField label="Mata Pelajaran" noIndicator>
+              <input
+                value={item.subject}
+                placeholder="Contoh. Sains"
+                onChange={(event) => updateSubjectGrade(item.id, "subject", event.target.value)}
+              />
+            </PersonalField>
+            <PersonalField label="Gred" noIndicator>
+              <input
+                value={item.grade}
+                placeholder="Contoh. A+, A1"
+                onChange={(event) => updateSubjectGrade(item.id, "grade", event.target.value)}
+              />
+            </PersonalField>
+            <button
+              type="button"
+              className="personal-outline-button academic-subject-remove-button"
+              onClick={() => removeSubjectGrade(item.id)}
+              disabled={subjectGrades.length === 1}
+            >
+              Padam
+            </button>
+          </div>
+        ))}
+      </div>
+      <button type="button" className="personal-add-reference academic-subject-add-button" onClick={addSubjectGrade}>
+        <Icon>add_circle</Icon>
+        Tambah Subjek
+      </button>
+    </div>
+  );
 }
 
 function AcademicForm({ data, onDraftChange, onSave }) {
-  const [form, setForm] = useState(() => ({ ...defaultAcademicProfile, ...data, records: data.records.length ? data.records : [createEmptyAcademicRecord()] }));
+  const [form, setForm] = useState(() => ({ ...defaultAcademicProfile, ...data, records: data.records.length ? data.records.map(prepareAcademicRecord) : [createEmptyAcademicRecord()] }));
   const updateRecord = (id, changes) => setForm((current) => ({ ...current, records: current.records.map((record) => record.id === id ? { ...record, ...changes } : record) }));
   const addRecord = () => setForm((current) => ({ ...current, records: [...current.records, createEmptyAcademicRecord()] }));
   const removeRecord = (id) => setForm((current) => ({ ...current, records: current.records.filter((record) => record.id !== id) }));
@@ -3058,8 +3162,8 @@ function AcademicForm({ data, onDraftChange, onSave }) {
         {form.records.map((record, index) => (
           <section className="academic-record" key={record.id}>
             <strong>Akademik {index + 1}</strong>
-            <PersonalField label="Tahap Akademik"><PersonalSelect value={record.level} placeholder="Pilih tahap akademik" options={academicLevelOptions} onChange={(event) => updateRecord(record.id, { level: event.target.value })} /></PersonalField>
-            {record.level === spmAcademicLevel ? <div className="spm-grades"><strong>Sila isikan gred untuk mata pelajaran SPM di bawah <em>(tidak wajib)</em></strong><div>{spmSubjectOptions.map((subject) => <PersonalField key={subject} label={subject} noIndicator><input value={record.spmGrades?.[subject] || ""} placeholder="Contoh. A+, A1" onChange={(event) => updateRecord(record.id, { spmGrades: { ...(record.spmGrades || {}), [subject]: event.target.value } })} /></PersonalField>)}</div></div> : null}
+            <PersonalField label="Tahap Akademik"><PersonalSelect value={record.level} placeholder="Pilih tahap akademik" options={academicLevelOptions} onChange={(event) => updateRecord(record.id, { level: event.target.value, subjectGrades: schoolGradeAcademicLevels.has(event.target.value) && !normalizeSubjectGrades(record).length ? createDefaultSubjectGrades() : record.subjectGrades })} /></PersonalField>
+            {schoolGradeAcademicLevels.has(record.level) ? <AcademicSubjectGradesEditor record={record} onChange={(changes) => updateRecord(record.id, changes)} /> : null}
             {higherAcademicLevels.has(record.level) ? <><PersonalField label="Bidang Akademik"><PersonalSelect value={record.fieldOfStudy || ""} placeholder="Pilih bidang akademik" options={academicFieldOptions} searchable searchPlaceholder="Cari bidang akademik" onChange={(event) => updateRecord(record.id, { fieldOfStudy: event.target.value })} /></PersonalField><PersonalField label="Pengkhususan" optional hint={`Maksimum ${10000 - (record.specialization || "").length} huruf`}><input maxLength="10000" value={record.specialization || ""} placeholder="Contoh. Software Engineering" onChange={(event) => updateRecord(record.id, { specialization: event.target.value })} /></PersonalField></> : null}
             <PersonalField label="Nama Institusi Akademik" hint={`Maksimum ${10000 - (record.institution || "").length} huruf`}><input maxLength="10000" value={record.institution || ""} placeholder="Contoh. Universiti Sains Malaysia" onChange={(event) => updateRecord(record.id, { institution: event.target.value })} /></PersonalField>
             <PersonalField label="Negara"><PersonalSelect value={record.country} placeholder="Pilih negara" options={countryOptions} searchable searchPlaceholder="Cari negara" onChange={(event) => updateRecord(record.id, { country: event.target.value })} /></PersonalField>
