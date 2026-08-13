@@ -7122,6 +7122,59 @@ body:has(.applicant-profile-page) {
   font-size: 17px;
 }
 
+.student-submit-dialog-backdrop {
+  position: fixed;
+  z-index: 90;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(15, 23, 42, .42);
+  padding: 24px;
+}
+
+.student-submit-dialog {
+  width: min(100%, 420px);
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 24px;
+  box-shadow: 0 24px 56px rgba(15, 23, 42, .22);
+  text-align: center;
+}
+
+.student-submit-dialog h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.student-submit-dialog p {
+  margin: 12px 0 20px;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.student-submit-dialog button {
+  min-width: 96px;
+  min-height: 38px;
+  border: 0;
+  border-radius: 6px;
+  background: #2563eb;
+  color: #ffffff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.student-submit-dialog button:hover,
+.student-submit-dialog button:focus-visible {
+  background: #1d4ed8;
+  outline: 0;
+}
+
 @media (max-width: 1100px) {
   .student-info-layout,
   .student-document-grid {

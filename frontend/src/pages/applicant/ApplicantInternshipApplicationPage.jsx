@@ -670,6 +670,7 @@ export default function ApplicantInternshipApplicationPage() {
   const [isSubmittingApplication, setIsSubmittingApplication] = useState(false);
   const [internshipVacancy, setInternshipVacancy] = useState(null);
   const [internshipVacancyLoading, setInternshipVacancyLoading] = useState(true);
+  const [submittedReferenceNo, setSubmittedReferenceNo] = useState("");
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
   const email = user?.email || "Belum dikemaskini";
 
@@ -911,7 +912,7 @@ export default function ApplicantInternshipApplicationPage() {
 
       setNoticeStatus("success");
       setNotice(`Permohonan ${submittedApplication.reference_no} telah dihantar kepada HRM.`);
-      navigate(APPLICANT_ROUTES.applications);
+      setSubmittedReferenceNo(submittedApplication.reference_no || "");
     } catch (error) {
       setNoticeStatus("error");
       setNotice(error.message || "Permohonan tidak dapat dihantar. Sila cuba semula.");
@@ -926,6 +927,11 @@ export default function ApplicantInternshipApplicationPage() {
   };
 
   const exitApplicationForm = () => {
+    navigate(APPLICANT_ROUTES.applications);
+  };
+
+  const closeSubmitSuccessPopup = () => {
+    setSubmittedReferenceNo("");
     navigate(APPLICANT_ROUTES.applications);
   };
 
@@ -1153,6 +1159,20 @@ export default function ApplicantInternshipApplicationPage() {
           </section>
         </main>
       </div>
+      {submittedReferenceNo ? (
+        <div className="student-submit-dialog-backdrop" role="presentation">
+          <section
+            aria-labelledby="student-submit-dialog-title"
+            aria-modal="true"
+            className="student-submit-dialog"
+            role="dialog"
+          >
+            <h2 id="student-submit-dialog-title">Permohonan Berjaya Dihantar</h2>
+            <p>Permohonan anda sudah berjaya dihantar.</p>
+            <button type="button" onClick={closeSubmitSuccessPopup}>OK</button>
+          </section>
+        </div>
+      ) : null}
     </div>
   );
 }

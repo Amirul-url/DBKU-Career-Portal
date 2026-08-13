@@ -6,6 +6,8 @@ from django.test import override_settings
 from django.utils import timezone
 from rest_framework.test import APITestCase
 
+from notifications.models import Notification
+
 from .models import LoginSession, User
 
 
@@ -144,6 +146,28 @@ class PasswordResetTests(APITestCase):
 
 
 class ApplicantRegistrationNotificationTests(APITestCase):
+    def test_register_creates_in_app_registration_notification_by_default(self):
+        response = self.client.post(
+            "/api/auth/register/",
+            {
+                "full_name": "AHMAD BIN ALI",
+                "email": "ahmad@example.com",
+                "mobile_number": "60124445555",
+                "password": "Password123!",
+                "password2": "Password123!",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        notification = Notification.objects.get(user__email="ahmad@example.com")
+        self.assertEqual(notification.title, "Pendaftaran Akaun Berjaya")
+        self.assertEqual(
+            notification.message,
+            "Pendaftaran akaun Portal Kerjaya DBKU anda telah berjaya.\n"
+            "Sila log masuk untuk meneruskan penggunaan portal.",
+        )
+
     @override_settings(NOTIFICATION_SIDE_EFFECTS_ENABLED=True, FRONTEND_URL="https://portal-kerjaya.example.test")
     @patch("accounts.services.create_notification")
     def test_register_sends_formal_registration_notification(self, mock_create_notification):
@@ -167,10 +191,9 @@ class ApplicantRegistrationNotificationTests(APITestCase):
         self.assertEqual(call_kwargs["title"], "Pendaftaran Akaun Berjaya")
         self.assertEqual(
             call_kwargs["message"],
-            "Akaun Portal Kerjaya DBKU anda telah berjaya didaftarkan.\n\n"
-            "Sila log masuk ke Portal Kerjaya DBKU untuk melengkapkan profil anda dan membuat permohonan jawatan yang bersesuaian.\n\n"
-            "Pautan log masuk: https://portal-kerjaya.example.test/login\n\n"
-            "Terima kasih.",
+            "Pendaftaran akaun Portal Kerjaya DBKU anda telah berjaya.\n"
+            "Sila log masuk untuk meneruskan penggunaan portal.\n"
+            "Pautan log masuk: https://portal-kerjaya.example.test/login",
         )
 
     @override_settings(NOTIFICATION_SIDE_EFFECTS_ENABLED=True, WHATSAPP_ENABLED=True, FRONTEND_URL="https://portal-kerjaya.example.test")
@@ -195,10 +218,9 @@ class ApplicantRegistrationNotificationTests(APITestCase):
         self.assertEqual(mock_send_whatsapp.call_args.args[0], "60132223333")
         self.assertEqual(
             mock_send_whatsapp.call_args.args[1],
-            "Akaun Portal Kerjaya DBKU anda telah berjaya didaftarkan.\n\n"
-            "Sila log masuk ke Portal Kerjaya DBKU untuk melengkapkan profil anda dan membuat permohonan jawatan yang bersesuaian.\n\n"
-            "Pautan log masuk: https://portal-kerjaya.example.test/login\n\n"
-            "Terima kasih.",
+            "Pendaftaran akaun Portal Kerjaya DBKU anda telah berjaya.\n"
+            "Sila log masuk untuk meneruskan penggunaan portal.\n"
+            "Pautan log masuk: https://portal-kerjaya.example.test/login",
         )
 
 

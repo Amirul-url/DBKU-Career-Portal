@@ -26,13 +26,11 @@ def build_applicant_registration_success_message(user):
     frontend_url = (settings.FRONTEND_URL or "").rstrip("/")
     login_url = f"{frontend_url}/login" if frontend_url else ""
     lines = [
-        "Akaun Portal Kerjaya DBKU anda telah berjaya didaftarkan.",
-        "",
-        "Sila log masuk ke Portal Kerjaya DBKU untuk melengkapkan profil anda dan membuat permohonan jawatan yang bersesuaian.",
+        "Pendaftaran akaun Portal Kerjaya DBKU anda telah berjaya.",
+        "Sila log masuk untuk meneruskan penggunaan portal.",
     ]
     if login_url:
-        lines.extend(["", f"Pautan log masuk: {login_url}"])
-    lines.extend(["", "Terima kasih."])
+        lines.append(f"Pautan log masuk: {login_url}")
     return {
         "title": "Pendaftaran Akaun Berjaya",
         "message": "\n".join(lines),
@@ -40,9 +38,6 @@ def build_applicant_registration_success_message(user):
 
 
 def notify_applicant_registration_success(user):
-    if not getattr(settings, "NOTIFICATION_SIDE_EFFECTS_ENABLED", False):
-        return None
-
     notification = build_applicant_registration_success_message(user)
     try:
         created_notification = create_notification(
