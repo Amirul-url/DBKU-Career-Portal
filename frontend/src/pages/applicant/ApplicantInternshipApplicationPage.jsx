@@ -1087,6 +1087,8 @@ export default function ApplicantInternshipApplicationPage() {
   );
 
   const nextInfoTab = infoTabs[infoTabs.indexOf(activeInfoTab) + 1] || null;
+  const applicationMissingFields = getMissingApplicationFields(studentInfo).missingFields;
+  const isApplicationReadyToSubmit = declarationAccepted && !applicationMissingFields.length;
 
   return (
     <div className={`applicant-profile-page ${sidebarOpen ? "sidebar-open" : "sidebar-collapsed"}`}>
@@ -1137,7 +1139,7 @@ export default function ApplicantInternshipApplicationPage() {
                     {activeInfoTab === "Dokumen Sokongan" ? (
                       <button
                         className="student-info-submit"
-                        disabled={!declarationAccepted || isSubmittingApplication}
+                        disabled={!isApplicationReadyToSubmit || isSubmittingApplication}
                         type="button"
                         onClick={handleSubmitApplication}
                       >
