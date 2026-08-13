@@ -6995,6 +6995,37 @@ body:has(.applicant-profile-page) {
   color: #166534;
 }
 
+.student-declaration {
+  max-width: 1120px;
+  margin-top: 18px;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  background: rgba(240, 253, 244, .76);
+  padding: 14px 16px;
+}
+
+.student-declaration label {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  color: #020617;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.student-declaration input {
+  width: 16px;
+  height: 16px;
+  margin-top: 3px;
+  accent-color: var(--student-green);
+}
+
+.student-declaration strong {
+  font-weight: 900;
+}
+
 .student-document-actions button {
   display: inline-flex;
   min-height: 34px;
@@ -7037,7 +7068,8 @@ body:has(.applicant-profile-page) {
 }
 
 .student-info-update,
-.student-info-next {
+.student-info-next,
+.student-info-submit {
   display: inline-flex;
   min-height: 36px;
   align-items: center;
@@ -7056,8 +7088,20 @@ body:has(.applicant-profile-page) {
   color: #ffffff;
 }
 
-.student-info-update:hover {
+.student-info-update:hover,
+.student-info-submit:hover {
   background: #12843d;
+}
+
+.student-info-submit {
+  background: #0f9f47;
+  color: #ffffff;
+}
+
+.student-info-submit:disabled {
+  background: #cbd5e1;
+  color: #64748b;
+  cursor: not-allowed;
 }
 
 .student-info-next {
@@ -7070,7 +7114,8 @@ body:has(.applicant-profile-page) {
   background: #f0fdf4;
 }
 
-.student-info-next .material-symbols-outlined {
+.student-info-next .material-symbols-outlined,
+.student-info-submit .material-symbols-outlined {
   font-size: 17px;
 }
 

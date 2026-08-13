@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getStoredUser } from "../../lib/authApi";
+import { apiRequest, getStoredUser } from "../../lib/authApi";
 import { countryCallingCodes, defaultCountryCallingCode } from "../../lib/countryCallingCodes";
 import { APPLICANT_ROUTES } from "../../modules/applicant/applicantRoutes";
 import { useApplicantSidebarState } from "../../modules/applicant/useApplicantSidebarState";
@@ -608,6 +608,52 @@ function getFirstIncompleteTab(studentInfo) {
   return infoTabs.find((tab) => !isTabComplete(tab, studentInfo)) || personalInfoTab;
 }
 
+function getMissingApplicationFields(studentInfo) {
+  const missingFields = [];
+  const errors = {};
+
+  infoTabs.forEach((tab) => {
+    (requiredFieldsByTab[tab] || []).forEach(([field, label]) => {
+      if (!String(studentInfo[field] || "").trim()) {
+        missingFields.push(`${tab}: ${label}`);
+        errors[field] = "Wajib diisi.";
+      }
+    });
+  });
+
+  if (!studentInfo.latitude || !studentInfo.longitude) {
+    missingFields.push(`${personalInfoTab}: Lokasi alamat pada map`);
+    errors.location = "Sila pilih lokasi alamat pada map.";
+  }
+
+  return { errors, missingFields };
+}
+
+function getDocumentSummary(studentInfo) {
+  return Object.fromEntries(documentFields.map((document) => [document.field, studentInfo[document.field] || ""]));
+}
+
+function buildApplicationProfileData(studentInfo, vacancy) {
+  return {
+    declaration: {
+      accepted: true,
+      accepted_at: new Date().toISOString(),
+      text:
+        "Saya dengan ini mengaku bahawa semua maklumat yang saya berikan adalah BENAR dan TEPAT. Saya juga bersetuju dan menerima bahawa sekiranya mana-mana daripada pengakuan ini didapati palsu atau tidak benar, pihak Dewan Bandaraya Kuching Utara berhak menarik balik keputusan tawaran dan menamatkan perkhidmatan saya dengan serta-merta tanpa apa-apa syarat",
+    },
+    documents: getDocumentSummary(studentInfo),
+    internship_vacancy: vacancy
+      ? {
+          id: vacancy.id,
+          department: vacancy.department,
+          division: vacancy.division,
+          title: vacancy.title,
+        }
+      : null,
+    student_info: studentInfo,
+  };
+}
+
 export default function ApplicantInternshipApplicationPage() {
   const navigate = useNavigate();
   const user = getStoredUser();
@@ -620,6 +666,10 @@ export default function ApplicantInternshipApplicationPage() {
   const [validationErrors, setValidationErrors] = useState({});
   const documentInputRefs = useRef({});
   const [studentInfo, setStudentInfo] = useState(() => initialStudentInfo);
+  const [declarationAccepted, setDeclarationAccepted] = useState(false);
+  const [isSubmittingApplication, setIsSubmittingApplication] = useState(false);
+  const [internshipVacancy, setInternshipVacancy] = useState(null);
+  const [internshipVacancyLoading, setInternshipVacancyLoading] = useState(true);
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
   const email = user?.email || "Belum dikemaskini";
 
@@ -639,6 +689,30 @@ export default function ApplicantInternshipApplicationPage() {
       });
     }
   }, [studentInfo, user]);
+
+  useEffect(() => {
+    if (user?.role !== "applicant") {
+      return;
+    }
+
+    let isMounted = true;
+    apiRequest("/jobs/?type=internship")
+      .then((data) => {
+        if (!isMounted) return;
+        const vacancies = Array.isArray(data) ? data : data.results || [];
+        setInternshipVacancy(vacancies[0] || null);
+      })
+      .catch(() => {
+        if (isMounted) setInternshipVacancy(null);
+      })
+      .finally(() => {
+        if (isMounted) setInternshipVacancyLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.id, user?.role]);
 
   if (!user || user.role !== "applicant") {
     return null;
@@ -781,6 +855,71 @@ export default function ApplicantInternshipApplicationPage() {
     setNotice(`${activeInfoTab} telah dikemas kini untuk draf permohonan latihan industri.`);
   };
 
+  const handleSubmitApplication = async () => {
+    setNotice("");
+
+    if (!declarationAccepted) {
+      setNoticeStatus("error");
+      setNotice("Sila tandakan perakuan pemohon sebelum menghantar permohonan.");
+      return;
+    }
+
+    const { errors, missingFields } = getMissingApplicationFields(studentInfo);
+    setValidationErrors(errors);
+
+    if (missingFields.length) {
+      setNoticeStatus("error");
+      setActiveInfoTab(getFirstIncompleteTab(studentInfo));
+      setNotice(`Sila lengkapkan: ${missingFields.join(", ")}.`);
+      return;
+    }
+
+    if (internshipVacancyLoading) {
+      setNoticeStatus("error");
+      setNotice("Sila tunggu sebentar sementara peluang latihan industri dimuatkan.");
+      return;
+    }
+
+    if (!internshipVacancy) {
+      setNoticeStatus("error");
+      setNotice("Tiada peluang latihan industri aktif ditemui untuk menerima permohonan ini.");
+      return;
+    }
+
+    setIsSubmittingApplication(true);
+    try {
+      const applicationsData = await apiRequest("/applications/?type=internship");
+      const applications = Array.isArray(applicationsData) ? applicationsData : applicationsData.results || [];
+      const existingApplication = applications.find((application) => Number(application.vacancy) === Number(internshipVacancy.id));
+      const payload = {
+        cover_letter: "Permohonan Latihan Industri DBKU",
+        profile_data: buildApplicationProfileData(studentInfo, internshipVacancy),
+        vacancy: internshipVacancy.id,
+      };
+      const application = existingApplication
+        ? await apiRequest(`/applications/${existingApplication.id}/`, {
+            method: "PATCH",
+            body: JSON.stringify(payload),
+          })
+        : await apiRequest("/applications/", {
+            method: "POST",
+            body: JSON.stringify(payload),
+          });
+      const submittedApplication = application.status === "submitted"
+        ? application
+        : await apiRequest(`/applications/${application.id}/submit/`, { method: "POST" });
+
+      setNoticeStatus("success");
+      setNotice(`Permohonan ${submittedApplication.reference_no} telah dihantar kepada HRM.`);
+      navigate(APPLICANT_ROUTES.applications);
+    } catch (error) {
+      setNoticeStatus("error");
+      setNotice(error.message || "Permohonan tidak dapat dihantar. Sila cuba semula.");
+    } finally {
+      setIsSubmittingApplication(false);
+    }
+  };
+
   const openInfoTab = (tab) => {
     setNotice("");
     setActiveInfoTab(tab);
@@ -897,39 +1036,54 @@ export default function ApplicantInternshipApplicationPage() {
   );
 
   const renderDocumentFields = () => (
-    <div className="student-personal-table-wrap">
-      <table className="student-personal-table">
-        <tbody>
-          {documentFields.map((document) => renderPersonalRow(
-            document.label,
-            <div className="student-document-table-cell">
-              <input
-                ref={(element) => {
-                  documentInputRefs.current[document.field] = element;
-                }}
-                accept={document.accept}
-                className="student-document-upload-input"
-                type="file"
-                onChange={updateDocument(document.field)}
-              />
-              <span className={studentInfo[document.field] ? "uploaded" : ""}>
-                {studentInfo[document.field] || document.hint}
-              </span>
-              <div className="student-document-actions">
-                <button type="button" onClick={() => documentInputRefs.current[document.field]?.click()}>
-                  <Icon>upload_file</Icon>
-                  Muat Naik
-                </button>
-                <button disabled={!studentInfo[document.field]} type="button" onClick={() => clearDocument(document.field)}>
-                  <Icon>delete</Icon>
-                  Padam
-                </button>
-              </div>
-            </div>,
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <>
+      <div className="student-personal-table-wrap">
+        <table className="student-personal-table">
+          <tbody>
+            {documentFields.map((document) => renderPersonalRow(
+              document.label,
+              <div className="student-document-table-cell">
+                <input
+                  ref={(element) => {
+                    documentInputRefs.current[document.field] = element;
+                  }}
+                  accept={document.accept}
+                  className="student-document-upload-input"
+                  type="file"
+                  onChange={updateDocument(document.field)}
+                />
+                <span className={studentInfo[document.field] ? "uploaded" : ""}>
+                  {studentInfo[document.field] || document.hint}
+                </span>
+                <div className="student-document-actions">
+                  <button type="button" onClick={() => documentInputRefs.current[document.field]?.click()}>
+                    <Icon>upload_file</Icon>
+                    Muat Naik
+                  </button>
+                  <button disabled={!studentInfo[document.field]} type="button" onClick={() => clearDocument(document.field)}>
+                    <Icon>delete</Icon>
+                    Padam
+                  </button>
+                </div>
+              </div>,
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <section className="student-declaration" aria-label="Perakuan pemohon">
+        <label>
+          <input
+            checked={declarationAccepted}
+            type="checkbox"
+            onChange={(event) => setDeclarationAccepted(event.target.checked)}
+          />
+          <span>
+            Saya dengan ini mengaku bahawa semua maklumat yang saya berikan adalah <strong>BENAR</strong> dan <strong>TEPAT</strong>. Saya juga bersetuju dan menerima bahawa sekiranya mana-mana daripada pengakuan ini didapati palsu atau tidak benar, pihak Dewan Bandaraya Kuching Utara berhak menarik balik keputusan tawaran dan menamatkan perkhidmatan saya dengan serta-merta tanpa apa-apa syarat
+          </span>
+        </label>
+      </section>
+    </>
   );
 
   const nextInfoTab = infoTabs[infoTabs.indexOf(activeInfoTab) + 1] || null;
@@ -978,6 +1132,17 @@ export default function ApplicantInternshipApplicationPage() {
                       <button className="student-info-next" type="button" onClick={() => openInfoTab(nextInfoTab)}>
                         Seterusnya
                         <Icon>arrow_forward</Icon>
+                      </button>
+                    ) : null}
+                    {activeInfoTab === "Dokumen Sokongan" ? (
+                      <button
+                        className="student-info-submit"
+                        disabled={!declarationAccepted || isSubmittingApplication}
+                        type="button"
+                        onClick={handleSubmitApplication}
+                      >
+                        {isSubmittingApplication ? "Menghantar..." : "Hantar Permohonan"}
+                        <Icon>send</Icon>
                       </button>
                     ) : null}
                   </div>
