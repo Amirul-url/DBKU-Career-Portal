@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 
 
 class CandidateApplication(models.Model):
@@ -51,7 +52,8 @@ class CandidateApplication(models.Model):
 
     @classmethod
     def next_reference_no(cls):
-        prefix = "DBKU-CAR-"
+        year = timezone.localdate().year
+        prefix = f"PK.{year}-"
         last = (
             cls.objects.exclude(reference_no="")
             .filter(reference_no__startswith=prefix)
@@ -64,8 +66,10 @@ class CandidateApplication(models.Model):
             try:
                 next_number = int(last.replace(prefix, "")) + 1
             except ValueError:
-                next_number = cls.objects.count() + 1
-        return f"{prefix}{next_number:05d}"
+                next_number = cls.objects.filter(reference_no__startswith=prefix).count() + 1
+        if next_number > 9999:
+            raise ValueError(f"Had maksimum nombor rujukan permohonan untuk tahun {year} telah dicapai.")
+        return f"{prefix}{next_number:04d}"
 
     def save(self, *args, **kwargs):
         if not self.reference_no:
@@ -74,4 +78,3 @@ class CandidateApplication(models.Model):
 
     def __str__(self):
         return f"{self.reference_no} - {self.vacancy.title}"
-
