@@ -185,9 +185,9 @@ const institutionOptions = [
 
 const documentFields = [
   {
-    accept: ".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    accept: ".pdf,application/pdf",
     field: "universityLetterFile",
-    hint: "PDF, DOC atau DOCX",
+    hint: "PDF",
     label: "Surat rasmi daripada institusi / kolej / universiti",
   },
   {
@@ -197,9 +197,9 @@ const documentFields = [
     label: "Transkrip akademik terkini",
   },
   {
-    accept: ".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    accept: ".pdf,application/pdf",
     field: "resumeFile",
-    hint: "PDF, DOC atau DOCX",
+    hint: "PDF",
     label: "Resume",
   },
   {
