@@ -1,17 +1,35 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { dashboardPathForRole, registerApplicant, saveAuthSession } from "../../lib/authApi";
+import { countryCallingCodes, defaultCountryCallingCode } from "../../lib/countryCallingCodes";
 import { ApplicantAuthLayout, AuthField, PasswordField } from "./ApplicantAuthShared";
 
-const countryCodeOptions = ["+60"];
+const countriesByLongestCode = [...countryCallingCodes].sort(
+  (first, second) =>
+    second.code.replace(/\D/g, "").length - first.code.replace(/\D/g, "").length ||
+    first.name.localeCompare(second.name),
+);
+
+function getCountryKey(country) {
+  return `${country.iso}-${country.code}`;
+}
 
 function splitPhoneNumber(value) {
   const digits = String(value || "").replace(/\D/g, "");
-  if (digits.startsWith("60")) {
-    return { countryCode: "+60", localNumber: digits.slice(2) };
+  const matchedCountry = countriesByLongestCode.find((country) => {
+    const countryDigits = country.code.replace(/\D/g, "");
+    return digits.startsWith(countryDigits);
+  });
+
+  if (matchedCountry) {
+    return {
+      country: matchedCountry,
+      localNumber: digits.slice(matchedCountry.code.replace(/\D/g, "").length),
+    };
   }
-  return { countryCode: "+60", localNumber: digits };
+
+  return { country: defaultCountryCallingCode, localNumber: digits };
 }
 
 function combinePhoneNumber(countryCode, localNumber) {
@@ -22,35 +40,95 @@ function combinePhoneNumber(countryCode, localNumber) {
 
 function PhoneNumberSelectInput({ value, onChange, disabled = false, required = false }) {
   const initialPhone = splitPhoneNumber(value);
-  const [countryCode, setCountryCode] = useState(initialPhone.countryCode);
-  const countryDigits = String(countryCode || "").replace(/\D/g, "");
+  const [selectedCountry, setSelectedCountry] = useState(initialPhone.country);
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const countryDigits = selectedCountry.code.replace(/\D/g, "");
   const valueDigits = String(value || "").replace(/\D/g, "");
   const localNumber =
     countryDigits && valueDigits.startsWith(countryDigits)
       ? valueDigits.slice(countryDigits.length)
       : splitPhoneNumber(value).localNumber;
+  const filteredCountries = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase();
+    if (!query) return countryCallingCodes;
+    const queryDigits = query.replace(/\D/g, "");
+    return countryCallingCodes.filter((country) => {
+      const countryCodeDigits = country.code.replace(/\D/g, "");
+      return (
+        country.name.toLowerCase().includes(query) ||
+        country.iso.toLowerCase().includes(query) ||
+        country.code.includes(query) ||
+        (queryDigits && countryCodeDigits.includes(queryDigits))
+      );
+    });
+  }, [searchTerm]);
 
-  function updatePhone(nextCountryCode, nextLocalNumber) {
-    setCountryCode(nextCountryCode);
-    onChange(combinePhoneNumber(nextCountryCode, nextLocalNumber));
+  function updatePhone(nextCountry, nextLocalNumber) {
+    setSelectedCountry(nextCountry);
+    onChange(combinePhoneNumber(nextCountry.code, nextLocalNumber));
+  }
+
+  function chooseCountry(nextCountry) {
+    setSearchTerm("");
+    setIsOpen(false);
+    updatePhone(nextCountry, localNumber);
   }
 
   return (
-    <div className="split-phone-grid">
-      <select
-        className="split-phone-code"
-        value={countryCode}
-        onChange={(event) => updatePhone(event.target.value, localNumber)}
-        aria-label="Kod negara WhatsApp"
-        disabled={disabled}
-        required={required}
-      >
-        {countryCodeOptions.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
+    <div
+      className="split-phone-grid"
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+          setIsOpen(false);
+          setSearchTerm("");
+        }
+      }}
+    >
+      <div className="split-phone-country">
+        <button
+          type="button"
+          className="split-phone-code"
+          aria-label="Pilih kod negara WhatsApp"
+          aria-expanded={isOpen}
+          disabled={disabled}
+          onClick={() => setIsOpen((open) => !open)}
+        >
+          <span>{selectedCountry.code}</span>
+          <span aria-hidden="true">v</span>
+        </button>
+        {isOpen ? (
+          <div className="split-phone-menu" role="listbox" aria-label="Senarai kod negara">
+            <input
+              type="search"
+              className="split-phone-search"
+              value={searchTerm}
+              placeholder="Cari negara atau kod"
+              autoComplete="off"
+              onChange={(event) => setSearchTerm(event.target.value)}
+            />
+            <div className="split-phone-options">
+              {filteredCountries.length ? (
+                filteredCountries.map((country) => (
+                  <button
+                    type="button"
+                    key={getCountryKey(country)}
+                    className={getCountryKey(country) === getCountryKey(selectedCountry) ? "active" : ""}
+                    role="option"
+                    aria-selected={getCountryKey(country) === getCountryKey(selectedCountry)}
+                    onClick={() => chooseCountry(country)}
+                  >
+                    <span>{country.name}</span>
+                    <strong>{country.code}</strong>
+                  </button>
+                ))
+              ) : (
+                <div className="split-phone-empty">Tiada kod negara dijumpai.</div>
+              )}
+            </div>
+          </div>
+        ) : null}
+      </div>
       <input
         type="tel"
         inputMode="tel"
@@ -62,7 +140,7 @@ function PhoneNumberSelectInput({ value, onChange, disabled = false, required = 
         spellCheck="false"
         aria-label="Nombor WhatsApp"
         disabled={disabled}
-        onChange={(event) => updatePhone(countryCode, event.target.value)}
+        onChange={(event) => updatePhone(selectedCountry, event.target.value)}
         required={required}
       />
     </div>
