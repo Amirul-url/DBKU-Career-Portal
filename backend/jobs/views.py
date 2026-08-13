@@ -21,14 +21,18 @@ class VacancyViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
         user = self.request.user
-        if not user.is_authenticated or user.role == "applicant":
-            queryset = queryset.filter(status="open").filter(
-                Q(closing_date__isnull=True) | Q(closing_date__gte=timezone.localdate())
-            )
-
         vacancy_type = self.request.query_params.get("type")
         search = self.request.query_params.get("search")
         department = self.request.query_params.get("department")
+
+        if not user.is_authenticated or user.role == "applicant":
+            queryset = queryset.filter(status="open")
+            if vacancy_type != "internship":
+                queryset = queryset.filter(
+                    Q(vacancy_type="internship")
+                    | Q(closing_date__isnull=True)
+                    | Q(closing_date__gte=timezone.localdate())
+                )
 
         if vacancy_type:
             queryset = queryset.filter(vacancy_type=vacancy_type)
