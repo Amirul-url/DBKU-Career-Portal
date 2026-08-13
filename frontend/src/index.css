@@ -7141,6 +7141,7 @@ body:has(.applicant-profile-page) {
 .personal-field.has-error input,
 .personal-field.has-error textarea,
 .personal-field.has-error .personal-select-button,
+.personal-field.has-error .profile-phone-code,
 .personal-radio-group.has-error,
 .personal-date-group.has-error input {
   border-color: #dc2626;
@@ -7168,6 +7169,130 @@ body:has(.applicant-profile-page) {
   color: #dc2626;
   font-size: 12px;
   font-weight: 900;
+}
+
+.personal-field small.personal-field-error,
+.personal-radio-group small.personal-field-error,
+.personal-date-group small.personal-field-error {
+  color: #dc2626;
+}
+
+.profile-phone-grid {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: 130px minmax(0, 1fr);
+  gap: 10px;
+}
+
+.profile-phone-country {
+  position: relative;
+  min-width: 0;
+}
+
+.profile-phone-code {
+  display: inline-flex;
+  width: 100%;
+  min-height: 50px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 1px solid #111827;
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--profile-ink);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 0 14px;
+}
+
+.profile-phone-code:focus-visible {
+  border-color: var(--profile-green);
+  box-shadow: 0 0 0 3px var(--profile-mint);
+  outline: 0;
+}
+
+.profile-phone-code .material-symbols-outlined {
+  color: var(--profile-green);
+  font-size: 20px;
+}
+
+.profile-phone-menu {
+  position: absolute;
+  z-index: 35;
+  top: calc(100% + 8px);
+  left: 0;
+  width: min(340px, calc(100vw - 48px));
+  overflow: hidden;
+  border: 1px solid #d9e8df;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 18px 34px rgba(17, 24, 39, 0.12);
+}
+
+.profile-phone-search {
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  border-bottom: 1px solid var(--profile-pale);
+  border-radius: 0;
+  background: #ffffff;
+  color: var(--profile-ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  outline: 0;
+  padding: 0 14px;
+}
+
+.profile-phone-options {
+  display: grid;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+.profile-phone-options button {
+  display: grid;
+  width: 100%;
+  min-height: 40px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--profile-ink);
+  font-size: 13px;
+  font-weight: 750;
+  padding: 0 10px;
+  text-align: left;
+}
+
+.profile-phone-options button:hover,
+.profile-phone-options button.active {
+  background: var(--profile-pale);
+}
+
+.profile-phone-options button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-phone-options button strong {
+  color: var(--profile-green);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.profile-phone-empty {
+  padding: 12px;
+  color: var(--profile-ink);
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .personal-info-helper {

@@ -4,6 +4,7 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { apiRequest, clearAuthSession, fetchAuthenticatedBlob, getStoredUser, recordLogoutActivity, updateCurrentUser } from "../../lib/authApi";
+import { countryCallingCodes, defaultCountryCallingCode } from "../../lib/countryCallingCodes";
 import { applicantSidebarNavItems, getApplicantSectionId } from "../../modules/applicant/applicantRoutes";
 import { useApplicantSidebarState } from "../../modules/applicant/useApplicantSidebarState";
 import { Icon } from "./ApplicantAuthShared";
@@ -72,6 +73,11 @@ const higherAcademicLevels = new Set([
   "Diploma / Diploma Lanjutan / Diploma Graduan Atasan / DVM / DKM Tahap 4 / DLKM Tahap 5",
   "Sarjana Muda atau Yang Setaraf", "Sarjana atau Yang Setaraf", "Doktor Falsafah (PhD) atau Yang Setaraf",
 ]);
+const countriesByLongestCallingCode = [...countryCallingCodes].sort(
+  (first, second) =>
+    second.code.replace(/\D/g, "").length - first.code.replace(/\D/g, "").length ||
+    first.name.localeCompare(second.name),
+);
 // Berdasarkan kategori bidang pengajian dan pengkhususan Kod Pendidikan Nasional 2020 (NEC-2020), MQA.
 const academicFieldOptions = [
   "Pendidikan", "Sains Pendidikan", "Pendidikan Awal Kanak-kanak", "Latihan Perguruan", "Seni", "Reka Bentuk", "Muzik dan Seni Persembahan", "Sastera", "Bahasa", "Sejarah dan Arkeologi", "Falsafah dan Etika", "Teologi dan Agama", "Sains Sosial dan Tingkah Laku", "Ekonomi", "Sains Politik dan Sivik", "Psikologi", "Sosiologi dan Pengajian Budaya", "Kewartawanan dan Pelaporan", "Perpustakaan, Maklumat dan Arkib", "Perniagaan dan Pentadbiran", "Perakaunan dan Percukaian", "Kewangan, Perbankan dan Insurans", "Pengurusan dan Pentadbiran", "Pemasaran dan Pengiklanan", "Kesetiausahaan dan Kerja Pejabat", "Perdagangan Borong dan Runcit", "Undang-undang", "Biologi dan Biokimia", "Alam Sekitar", "Sains Fizikal", "Kimia", "Sains Bumi", "Fizik", "Matematik", "Statistik", "Teknologi Maklumat dan Komunikasi", "Sains Komputer", "Pembangunan Perisian dan Aplikasi", "Pangkalan Data dan Rangkaian", "Kejuruteraan dan Teknologi Kejuruteraan", "Kejuruteraan Kimia dan Proses", "Teknologi Perlindungan Alam Sekitar", "Elektrik dan Tenaga", "Elektronik dan Automasi", "Mekanik dan Perdagangan Logam", "Kenderaan Bermotor, Kapal dan Pesawat Udara", "Pembuatan dan Pemprosesan", "Pemprosesan Makanan", "Tekstil, Pakaian, Kasut dan Kulit", "Bahan", "Seni Bina dan Perancangan Bandar", "Bangunan dan Kejuruteraan Awam", "Pertanian", "Pengeluaran Tanaman dan Ternakan", "Hortikultur", "Perhutanan", "Perikanan", "Veterinar", "Perubatan", "Pergigian", "Kejururawatan dan Penjagaan", "Diagnostik dan Teknologi Rawatan Perubatan", "Terapi dan Pemulihan", "Farmasi", "Kesihatan dan Keselamatan Pekerjaan", "Kerja Sosial dan Kaunseling", "Penjagaan Warga Emas dan Orang Kurang Upaya", "Penjagaan Kanak-kanak dan Belia", "Perkhidmatan Peribadi", "Hospitaliti dan Katering", "Pelancongan, Rekreasi dan Riadah", "Sukan", "Perkhidmatan Kebersihan", "Keselamatan dan Kesihatan", "Keselamatan Awam dan Ketenteraan", "Pengangkutan", "Logistik", "Program Antara Disiplin", "Bidang Tidak Diketahui",
@@ -651,6 +657,129 @@ function PersonalField({ children, error, hint, info, label, noIndicator = false
       {error ? <small className="personal-field-error">{error}</small> : null}
       {hint ? <small>{hint}</small> : null}
     </label>
+  );
+}
+
+function getCallingCodeKey(country) {
+  return `${country.iso}-${country.code}`;
+}
+
+function splitProfilePhoneNumber(value) {
+  const digits = String(value || "").replace(/\D/g, "");
+  const matchedCountry = countriesByLongestCallingCode.find((country) => {
+    const countryDigits = country.code.replace(/\D/g, "");
+    return digits.startsWith(countryDigits);
+  });
+  if (matchedCountry) {
+    return {
+      country: matchedCountry,
+      localNumber: digits.slice(matchedCountry.code.replace(/\D/g, "").length).replace(/^0+/, ""),
+    };
+  }
+  return { country: defaultCountryCallingCode, localNumber: digits.replace(/^0+/, "") };
+}
+
+function combineProfilePhoneNumber(country, localNumber) {
+  const cleanLocalNumber = String(localNumber || "").replace(/\D/g, "").replace(/^0+/, "");
+  if (!cleanLocalNumber) return "";
+  return `${country.code.replace(/\D/g, "")}${cleanLocalNumber}`;
+}
+
+function ProfilePhoneInput({ onChange, value }) {
+  const initialPhone = splitProfilePhoneNumber(value);
+  const [selectedCountry, setSelectedCountry] = useState(initialPhone.country);
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const selectedDigits = selectedCountry.code.replace(/\D/g, "");
+  const valueDigits = String(value || "").replace(/\D/g, "");
+  const localNumber =
+    selectedDigits && valueDigits.startsWith(selectedDigits)
+      ? valueDigits.slice(selectedDigits.length).replace(/^0+/, "")
+      : splitProfilePhoneNumber(value).localNumber;
+  const query = searchTerm.trim().toLowerCase();
+  const queryDigits = query.replace(/\D/g, "");
+  const visibleCountries = query
+    ? countryCallingCodes.filter((country) => {
+        const countryDigits = country.code.replace(/\D/g, "");
+        return (
+          country.name.toLowerCase().includes(query) ||
+          country.iso.toLowerCase().includes(query) ||
+          country.code.includes(query) ||
+          (queryDigits && countryDigits.includes(queryDigits))
+        );
+      })
+    : countryCallingCodes;
+
+  function updatePhone(nextCountry, nextLocalNumber) {
+    setSelectedCountry(nextCountry);
+    onChange({ target: { value: combineProfilePhoneNumber(nextCountry, nextLocalNumber) } });
+  }
+
+  function chooseCountry(nextCountry) {
+    setSearchTerm("");
+    setIsOpen(false);
+    updatePhone(nextCountry, localNumber);
+  }
+
+  return (
+    <div
+      className="profile-phone-grid"
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+          setIsOpen(false);
+          setSearchTerm("");
+        }
+      }}
+    >
+      <div className="profile-phone-country">
+        <button
+          type="button"
+          className="profile-phone-code"
+          aria-label="Pilih kod negara"
+          aria-expanded={isOpen}
+          onClick={() => setIsOpen((current) => !current)}
+        >
+          <span>{selectedCountry.code}</span>
+          <Icon>expand_more</Icon>
+        </button>
+        {isOpen ? (
+          <div className="profile-phone-menu" role="listbox" aria-label="Senarai kod negara">
+            <input
+              type="search"
+              className="profile-phone-search"
+              value={searchTerm}
+              placeholder="Cari negara atau kod"
+              autoComplete="off"
+              onChange={(event) => setSearchTerm(event.target.value)}
+            />
+            <div className="profile-phone-options">
+              {visibleCountries.length ? (
+                visibleCountries.map((country) => (
+                  <button
+                    type="button"
+                    key={getCallingCodeKey(country)}
+                    className={getCallingCodeKey(country) === getCallingCodeKey(selectedCountry) ? "active" : ""}
+                    onClick={() => chooseCountry(country)}
+                  >
+                    <span>{country.name}</span>
+                    <strong>{country.code}</strong>
+                  </button>
+                ))
+              ) : (
+                <div className="profile-phone-empty">Tiada kod negara dijumpai.</div>
+              )}
+            </div>
+          </div>
+        ) : null}
+      </div>
+      <input
+        type="tel"
+        inputMode="tel"
+        value={localNumber}
+        placeholder="Contoh. 123456789"
+        onChange={(event) => updatePhone(selectedCountry, event.target.value)}
+      />
+    </div>
   );
 }
 
@@ -2180,15 +2309,10 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
             <input type="email" value={formEmail} onChange={(event) => setFormEmail(event.target.value)} />
           </PersonalField>
           <PersonalField label="Nombor Telefon Bimbit Utama" error={validationErrors.primaryPhone}>
-            <input type="tel" value={formValues.primaryPhone} onChange={updateField("primaryPhone")} />
+            <ProfilePhoneInput value={formValues.primaryPhone} onChange={updateField("primaryPhone")} />
           </PersonalField>
           <PersonalField label="Nombor Telefon Bimbit Lain" optional>
-            <input
-              type="tel"
-              placeholder="Contoh. 0123456789"
-              value={formValues.secondaryPhone}
-              onChange={updateField("secondaryPhone")}
-            />
+            <ProfilePhoneInput value={formValues.secondaryPhone} onChange={updateField("secondaryPhone")} />
           </PersonalField>
         </ProfileFormRow>
 
