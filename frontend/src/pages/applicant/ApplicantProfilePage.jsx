@@ -372,9 +372,12 @@ function getSavedJobPreferences(user) {
   }
 }
 
-function getPersonalProfileDefaults(displayName, email) {
+function getPersonalProfileDefaults(displayName, email, user = null) {
   return {
-    details: defaultPersonalDetails,
+    details: {
+      ...defaultPersonalDetails,
+      primaryPhone: user?.mobile_number || "",
+    },
     displayName,
     email,
     profilePhotoFile: null,
@@ -423,8 +426,8 @@ function normalizeReference(reference) {
   };
 }
 
-function normalizePersonalProfile(profile, displayName, email) {
-  const defaults = getPersonalProfileDefaults(displayName, email);
+function normalizePersonalProfile(profile, displayName, email, user = null) {
+  const defaults = getPersonalProfileDefaults(displayName, email, user);
   const storedProfile = { ...(profile || {}) };
   const persistentProfilePhotoUrl = getPersistentProfilePhotoUrl(profile);
   delete storedProfile.profilePhoto;
@@ -439,6 +442,7 @@ function normalizePersonalProfile(profile, displayName, email) {
     details: {
       ...defaults.details,
       ...(profile?.details || {}),
+      primaryPhone: profile?.details?.primaryPhone || user?.mobile_number || defaults.details.primaryPhone || "",
       careerObjective: profile?.details?.careerObjective || profile?.careerObjective || "",
       resumeFile: resumeFileUrl ? profile?.details?.resumeFile || getFileNameFromUrl(resumeFileUrl) : "",
       videoResumeFile: videoResumeFileUrl ? profile?.details?.videoResumeFile || getFileNameFromUrl(videoResumeFileUrl) : "",
@@ -3101,6 +3105,7 @@ export default function ApplicantProfilePage() {
       },
       displayName,
       email,
+      user,
     );
   });
   const [jobPreferences, setJobPreferences] = useState(() => normalizeJobPreferences(getSavedDraft(user, "job-preferences") || getSavedJobPreferences(user)));
