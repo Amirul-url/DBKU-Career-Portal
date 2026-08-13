@@ -4,6 +4,71 @@ import { useNavigate } from "react-router-dom";
 import { dashboardPathForRole, registerApplicant, saveAuthSession } from "../../lib/authApi";
 import { ApplicantAuthLayout, AuthField, PasswordField } from "./ApplicantAuthShared";
 
+const countryCodeOptions = ["+60"];
+
+function splitPhoneNumber(value) {
+  const digits = String(value || "").replace(/\D/g, "");
+  if (digits.startsWith("60")) {
+    return { countryCode: "+60", localNumber: digits.slice(2) };
+  }
+  return { countryCode: "+60", localNumber: digits };
+}
+
+function combinePhoneNumber(countryCode, localNumber) {
+  const cleanLocalNumber = String(localNumber || "").replace(/\D/g, "");
+  if (!cleanLocalNumber) return "";
+  return `${String(countryCode || "").replace(/\D/g, "")}${cleanLocalNumber}`;
+}
+
+function PhoneNumberSelectInput({ value, onChange, disabled = false, required = false }) {
+  const initialPhone = splitPhoneNumber(value);
+  const [countryCode, setCountryCode] = useState(initialPhone.countryCode);
+  const countryDigits = String(countryCode || "").replace(/\D/g, "");
+  const valueDigits = String(value || "").replace(/\D/g, "");
+  const localNumber =
+    countryDigits && valueDigits.startsWith(countryDigits)
+      ? valueDigits.slice(countryDigits.length)
+      : splitPhoneNumber(value).localNumber;
+
+  function updatePhone(nextCountryCode, nextLocalNumber) {
+    setCountryCode(nextCountryCode);
+    onChange(combinePhoneNumber(nextCountryCode, nextLocalNumber));
+  }
+
+  return (
+    <div className="split-phone-grid">
+      <select
+        className="split-phone-code"
+        value={countryCode}
+        onChange={(event) => updatePhone(event.target.value, localNumber)}
+        aria-label="Kod negara WhatsApp"
+        disabled={disabled}
+        required={required}
+      >
+        {countryCodeOptions.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </select>
+      <input
+        type="tel"
+        inputMode="tel"
+        value={localNumber}
+        placeholder="cth. 123456789"
+        autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize="off"
+        spellCheck="false"
+        aria-label="Nombor WhatsApp"
+        disabled={disabled}
+        onChange={(event) => updatePhone(countryCode, event.target.value)}
+        required={required}
+      />
+    </div>
+  );
+}
+
 function RegisterForm() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -87,19 +152,10 @@ function RegisterForm() {
         </AuthField>
 
         <AuthField icon="phone" label="Nombor WhatsApp" required>
-          <input
-            type="tel"
-            inputMode="tel"
-            name="applicantRegisterPhone"
-            data-field="phoneNumber"
+          <PhoneNumberSelectInput
             value={formData.phoneNumber}
-            placeholder="cth. 60123456789"
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="off"
-            spellCheck="false"
+            onChange={(phoneNumber) => setFormData((current) => ({ ...current, phoneNumber }))}
             disabled={isSubmitting}
-            onChange={handleChange}
             required
           />
         </AuthField>

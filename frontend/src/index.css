@@ -3446,6 +3446,10 @@ body:has(.auth-page) {
   box-shadow: 0 34px 90px rgba(6, 78, 59, 0.22);
 }
 
+.register-mode .auth-split-card {
+  height: min(720px, calc(100vh - 104px));
+}
+
 .split-form-panel,
 .split-promo-panel {
   min-width: 0;
@@ -3466,6 +3470,7 @@ body:has(.auth-page) {
 
 .register-mode .split-form-panel {
   order: 2;
+  padding: clamp(24px, 3vw, 46px);
 }
 
 .login-mode .split-form-panel {
@@ -3522,6 +3527,10 @@ body:has(.auth-page) {
   line-height: 1.1;
 }
 
+.register-mode .split-form-panel h1 {
+  font-size: clamp(30px, 3vw, 40px);
+}
+
 .split-form-panel p {
   max-width: 520px;
   margin: 12px 0 0;
@@ -3529,6 +3538,11 @@ body:has(.auth-page) {
   font-size: 14px;
   font-weight: 650;
   line-height: 1.55;
+}
+
+.register-mode .split-form-panel p {
+  margin-top: 10px;
+  font-size: 13px;
 }
 
 .split-form {
@@ -3540,8 +3554,8 @@ body:has(.auth-page) {
 }
 
 .register-split-form {
-  gap: 10px;
-  margin-top: 18px;
+  gap: 9px;
+  margin-top: 14px;
 }
 
 .split-field {
@@ -3574,7 +3588,7 @@ body:has(.auth-page) {
 }
 
 .register-split-form .split-input {
-  min-height: 46px;
+  min-height: 44px;
 }
 
 .split-input:focus-within {
@@ -3600,6 +3614,36 @@ body:has(.auth-page) {
 
 .split-input input::placeholder {
   color: rgba(248, 250, 252, 0.34);
+}
+
+.split-phone-grid {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: 86px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.split-phone-code {
+  width: 100%;
+  min-height: 34px;
+  border: 1px solid rgba(209, 250, 229, 0.14);
+  border-radius: 9px;
+  outline: 0;
+  background: rgba(248, 250, 252, 0.06);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 850;
+  padding: 0 10px;
+}
+
+.split-phone-code option {
+  color: #111827;
+}
+
+.split-phone-grid input {
+  min-height: 34px;
 }
 
 .split-password-toggle {
@@ -3822,7 +3866,7 @@ body:has(.auth-page) {
 }
 
 .register-split-form .split-submit {
-  margin-top: 24px;
+  margin-top: 18px;
 }
 
 .split-alert {
@@ -4067,8 +4111,16 @@ body:has(.auth-page) {
     min-height: 0;
   }
 
+  .register-mode .auth-split-card {
+    height: min(620px, calc(100vh - 86px));
+  }
+
   .split-form-panel {
     padding: 28px 44px;
+  }
+
+  .register-mode .split-form-panel {
+    padding: 22px 44px;
   }
 
   .split-promo-panel {
@@ -4119,8 +4171,8 @@ body:has(.auth-page) {
   }
 
   .register-split-form {
-    gap: 9px;
-    margin-top: 16px;
+    gap: 8px;
+    margin-top: 12px;
   }
 
   .split-input {
@@ -4128,11 +4180,11 @@ body:has(.auth-page) {
   }
 
   .register-split-form .split-input {
-    min-height: 42px;
+    min-height: 40px;
   }
 
   .register-split-form .split-submit {
-    margin-top: 24px;
+    margin-top: 14px;
   }
 
   .split-submit {
