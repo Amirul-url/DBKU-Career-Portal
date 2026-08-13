@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { apiRequest, resolveMediaUrl } from "../../lib/authApi";
-import { AcademicSummary, ApplicantPersonalReadOnlyView, ExperienceSummary, SkillsSummary } from "../applicant/ApplicantProfilePage";
+import { ApplicantProfileReadOnlyCards } from "../applicant/ApplicantProfilePage";
 import { Icon } from "../applicant/ApplicantAuthShared";
 
 const text = (value) => Array.isArray(value) ? (value.length ? value.join(", ") : "-") : (value || "-");
@@ -191,12 +191,9 @@ function ApplicantSkillsMirror({ data, isOpen, onToggle }) {
 }
 
 function ApplicantProfileModal({ data, onClose }) {
-  const [openSection, setOpenSection] = useState(null);
-  useEffect(() => { setOpenSection(null); }, [data?.applicant?.id]);
   if (!data) return null;
   const name = data.profile.personal?.displayName || data.applicant.full_name || data.applicant.first_name || "Pemohon";
-  const toggleSection = (section) => setOpenSection((current) => current === section ? null : section);
-  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-5"><section className="flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden rounded-xl bg-slate-50 shadow-2xl" role="dialog" aria-modal="true" aria-label={`Profil ${name}`}><header className="flex items-center justify-between border-b border-slate-200 bg-white px-7 py-5"><div><h2 className="text-2xl font-bold text-slate-950">Profil Pemohon</h2><p className="mt-1 text-sm font-semibold text-slate-500">{name}</p></div><button className="rounded-md p-2 text-slate-500 hover:bg-slate-100" onClick={onClose} type="button" aria-label="Tutup"><Icon>close</Icon></button></header><div className="space-y-5 overflow-y-auto p-7"><PersonalProfileMirror applicant={data.applicant} profile={data.profile} isOpen={openSection === "personal"} onToggle={() => toggleSection("personal")} /><ApplicantExperienceMirror data={data.profile.experience} isOpen={openSection === "experience"} onToggle={() => toggleSection("experience")} /><ApplicantAcademicMirror data={data.profile.academic} isOpen={openSection === "academic"} onToggle={() => toggleSection("academic")} /><ApplicantSkillsMirror data={data.profile.skills} isOpen={openSection === "skills"} onToggle={() => toggleSection("skills")} /></div></section></div>;
+  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-5"><section className="flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden rounded-xl bg-slate-50 shadow-2xl" role="dialog" aria-modal="true" aria-label={`Profil ${name}`}><header className="flex items-center justify-between border-b border-slate-200 bg-white px-7 py-5"><div><h2 className="text-2xl font-bold text-slate-950">Profil Pemohon</h2><p className="mt-1 text-sm font-semibold text-slate-500">{name}</p></div><button className="rounded-md p-2 text-slate-500 hover:bg-slate-100" onClick={onClose} type="button" aria-label="Tutup"><Icon>close</Icon></button></header><div className="overflow-y-auto p-7"><ApplicantProfileReadOnlyCards applicant={data.applicant} profile={data.profile} /></div></section></div>;
 }
 
 function ApplicantDeleteModal({ applicant, deleting, onCancel, onConfirm }) {

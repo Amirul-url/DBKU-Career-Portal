@@ -709,7 +709,7 @@ function combineProfilePhoneNumber(country, localNumber) {
   return `${country.code.replace(/\D/g, "")}${cleanLocalNumber}`;
 }
 
-function ProfilePhoneInput({ onChange, value }) {
+function ProfilePhoneInput({ onChange, readOnly = false, value }) {
   const initialPhone = splitProfilePhoneNumber(value);
   const [selectedCountry, setSelectedCountry] = useState(initialPhone.country);
   const [isOpen, setIsOpen] = useState(false);
@@ -735,6 +735,8 @@ function ProfilePhoneInput({ onChange, value }) {
     : countryCallingCodes;
 
   function updatePhone(nextCountry, nextLocalNumber) {
+    if (readOnly) return;
+
     setSelectedCountry(nextCountry);
     onChange({ target: { value: combineProfilePhoneNumber(nextCountry, nextLocalNumber) } });
   }
@@ -761,7 +763,10 @@ function ProfilePhoneInput({ onChange, value }) {
           className="profile-phone-code"
           aria-label="Pilih kod negara"
           aria-expanded={isOpen}
-          onClick={() => setIsOpen((current) => !current)}
+          disabled={readOnly}
+          onClick={() => {
+            if (!readOnly) setIsOpen((current) => !current);
+          }}
         >
           <span>{selectedCountry.code}</span>
           <Icon>expand_more</Icon>
@@ -801,6 +806,7 @@ function ProfilePhoneInput({ onChange, value }) {
         inputMode="tel"
         value={localNumber}
         placeholder="Contoh. 123456789"
+        readOnly={readOnly}
         onChange={(event) => updatePhone(selectedCountry, event.target.value)}
       />
     </div>
@@ -1770,7 +1776,7 @@ export function ApplicantPersonalReadOnlyView({ applicant, profile }) {
   const videoResumeUrl = resolveMediaUrl(personal.videoResumeFileUrl || applicant.video_resume_file_url);
   const value = (item) => item || "-";
   const field = (label, item, wide = false) => <PersonalField label={label} noIndicator><input readOnly value={value(item)} className={wide ? "" : ""} /></PersonalField>;
-  return <div className="personal-edit-panel"><div className="personal-edit-form"><ProfileFormRow label="Foto Profil"><div className="personal-photo-upload"><div className="personal-photo-preview">{photo ? <img src={photo} alt="" /> : name.charAt(0)}</div><div><strong>Foto profil pemohon</strong><p>Paparan baca sahaja.</p></div></div></ProfileFormRow><ProfileFormRow label="Maklumat Peribadi">{field("Nama Penuh", name)}{field("Nombor Kad Pengenalan", details.identificationNumber || applicant.mykad_number)}<div className="personal-date-group"><span>Tarikh Lahir</span><div><label>Hari<input readOnly value={value(details.birthDay)} /></label><label>Bulan<input readOnly value={value(details.birthMonth)} /></label><label>Tahun<input readOnly value={value(details.birthYear)} /></label></div></div>{field("Bangsa", details.race)}<fieldset className="personal-radio-group"><legend>Kewarganegaraan</legend><div>{citizenshipOptions.map((item) => <label key={item}><input type="radio" checked={details.citizenship === item} readOnly />{item}</label>)}</div></fieldset><fieldset className="personal-radio-group"><legend>Jantina</legend><div>{["Perempuan", "Lelaki"].map((item) => <label key={item}><input type="radio" checked={details.gender === item} readOnly />{item}</label>)}</div></fieldset></ProfileFormRow><ProfileFormRow label="Aksesibiliti dan Kesihatan"><div className="personal-helper-copy">Maklumat kesihatan pemohon adalah sulit.</div><fieldset className="personal-radio-group"><legend>Adakah anda mempunyai sebarang masalah kesihatan?</legend><div>{["Ya", "Tidak"].map((item) => <label key={item}><input type="radio" checked={details.hasHealthIssue === item} readOnly />{item}</label>)}</div></fieldset><fieldset className="personal-radio-group"><legend>Adakah anda mempunyai sebarang ketidakupayaan?</legend><div>{["Ya", "Tidak"].map((item) => <label key={item}><input type="radio" checked={details.hasDisability === item} readOnly />{item}</label>)}</div></fieldset></ProfileFormRow><ProfileFormRow label="Alamat"><ApplicantAddressMap address={details.address || applicant.address} latitude={details.latitude} longitude={details.longitude} onLocationChange={() => {}} readOnly /></ProfileFormRow><ProfileFormRow label="Butiran Hubungan">{field("Alamat E-mel", email)}{field("Nombor Telefon Bimbit Utama", details.primaryPhone || applicant.mobile_number)}{field("Nombor Telefon Bimbit Lain", details.secondaryPhone)}</ProfileFormRow><ProfileFormRow label="Resume"><div className="personal-profile-tip"><header><span><Icon>emoji_objects</Icon></span><strong>Tingkatkan ketampakan profil anda.</strong></header><p>Resume dan video resume pemohon tersedia untuk semakan.</p></div><div className="personal-button-row">{resumeUrl ? <a className="personal-primary-button" href={resumeUrl} target="_blank" rel="noreferrer">Muat Turun Resume</a> : null}{videoResumeUrl ? <a className="personal-primary-button" href={videoResumeUrl} target="_blank" rel="noreferrer">Muat Turun Video Resume</a> : null}</div>{field("LinkedIn", details.linkedIn)}</ProfileFormRow></div></div>;
+  return <div className="personal-edit-panel"><div className="personal-edit-form"><ProfileFormRow label="Foto Profil"><div className="personal-photo-upload"><div className="personal-photo-preview">{photo ? <img src={photo} alt="" /> : name.charAt(0)}</div><div><strong>Foto profil pemohon</strong><p>Paparan baca sahaja.</p></div></div></ProfileFormRow><ProfileFormRow label="Maklumat Peribadi">{field("Nama Penuh", name)}{field("Nombor Kad Pengenalan", details.identificationNumber || applicant.mykad_number)}<div className="personal-date-group"><span>Tarikh Lahir</span><div><label>Hari<input readOnly value={value(details.birthDay)} /></label><label>Bulan<input readOnly value={value(details.birthMonth)} /></label><label>Tahun<input readOnly value={value(details.birthYear)} /></label></div></div>{field("Bangsa", details.race)}<fieldset className="personal-radio-group"><legend>Kewarganegaraan</legend><div>{citizenshipOptions.map((item) => <label key={item}><input type="radio" checked={details.citizenship === item} readOnly />{item}</label>)}</div></fieldset><fieldset className="personal-radio-group"><legend>Jantina</legend><div>{["Perempuan", "Lelaki"].map((item) => <label key={item}><input type="radio" checked={details.gender === item} readOnly />{item}</label>)}</div></fieldset></ProfileFormRow><ProfileFormRow label="Aksesibiliti dan Kesihatan"><div className="personal-helper-copy">Maklumat kesihatan pemohon adalah sulit.</div><fieldset className="personal-radio-group"><legend>Adakah anda mempunyai sebarang masalah kesihatan?</legend><div>{["Ya", "Tidak"].map((item) => <label key={item}><input type="radio" checked={details.hasHealthIssue === item} readOnly />{item}</label>)}</div></fieldset><fieldset className="personal-radio-group"><legend>Adakah anda mempunyai sebarang ketidakupayaan?</legend><div>{["Ya", "Tidak"].map((item) => <label key={item}><input type="radio" checked={details.hasDisability === item} readOnly />{item}</label>)}</div></fieldset></ProfileFormRow><ProfileFormRow label="Alamat"><ApplicantAddressMap address={details.address || applicant.address} latitude={details.latitude} longitude={details.longitude} onLocationChange={() => {}} readOnly /></ProfileFormRow><ProfileFormRow label="Butiran Hubungan">{field("Alamat E-mel", email)}<PersonalField label="Nombor Telefon Bimbit Utama" noIndicator><ProfilePhoneInput value={details.primaryPhone || applicant.mobile_number} onChange={() => {}} readOnly /></PersonalField><PersonalField label="Nombor Telefon Bimbit Lain" noIndicator><ProfilePhoneInput value={details.secondaryPhone} onChange={() => {}} readOnly /></PersonalField></ProfileFormRow><ProfileFormRow label="Resume"><div className="personal-profile-tip"><header><span><Icon>emoji_objects</Icon></span><strong>Tingkatkan ketampakan profil anda.</strong></header><p>Resume dan video resume pemohon tersedia untuk semakan.</p></div><div className="personal-button-row">{resumeUrl ? <a className="personal-primary-button" href={resumeUrl} target="_blank" rel="noreferrer">Muat Turun Resume</a> : null}{videoResumeUrl ? <a className="personal-primary-button" href={videoResumeUrl} target="_blank" rel="noreferrer">Muat Turun Video Resume</a> : null}</div>{field("LinkedIn", details.linkedIn)}</ProfileFormRow></div></div>;
 }
 
 export function ProfileSidebar({ isOpen, onToggle }) {
@@ -1837,10 +1843,12 @@ function ProfileCard({ children, id, isEditing = false, onEdit, title }) {
     <section className={`profile-content-card ${isEditing ? "is-editing" : ""}`} id={id}>
       <header>
         <h2>{title}</h2>
-        <button type="button" className={isEditing ? "profile-close-edit-button" : "profile-edit-button"} onClick={onEdit}>
-          {isEditing ? null : <Icon>edit</Icon>}
-          {isEditing ? "Tutup" : "Kemaskini"}
-        </button>
+        {onEdit ? (
+          <button type="button" className={isEditing ? "profile-close-edit-button" : "profile-edit-button"} onClick={onEdit}>
+            {isEditing ? null : <Icon>edit</Icon>}
+            {isEditing ? "Tutup" : "Kemaskini"}
+          </button>
+        ) : null}
       </header>
       {children}
     </section>
@@ -1866,6 +1874,38 @@ function ProfileDownloadLinks({ resumeUrl, videoUrl }) {
           <span>Muat Turun Video (MP4)</span>
         </a>
       ) : null}
+    </div>
+  );
+}
+
+export function ApplicantProfileReadOnlyCards({ applicant, profile }) {
+  const personalProfile = normalizePersonalProfile(
+    profile?.personal || {},
+    applicant?.full_name || applicant?.first_name || "Pemohon",
+    applicant?.email || "",
+    applicant,
+  );
+  const experienceProfile = { ...defaultExperienceProfile, ...(profile?.experience || {}), records: Array.isArray(profile?.experience?.records) ? profile.experience.records : [] };
+  const academicProfile = { ...defaultAcademicProfile, ...(profile?.academic || {}), records: Array.isArray(profile?.academic?.records) ? profile.academic.records : [] };
+  const skillsProfile = normalizeSkillsProfile(profile?.skills || {});
+
+  return (
+    <div className="profile-content applicant-profile-readonly-cards">
+      <ProfileCard id="profile-section-personal-readonly" title="Maklumat Peribadi">
+        <ApplicantPersonalReadOnlyView applicant={applicant} profile={{ ...profile, personal: personalProfile }} />
+      </ProfileCard>
+
+      <ProfileCard id="profile-section-experience-readonly" title="Pengalaman">
+        <ExperienceSummary data={experienceProfile} />
+      </ProfileCard>
+
+      <ProfileCard id="profile-section-academic-readonly" title="Akademik">
+        <AcademicSummary data={academicProfile} />
+      </ProfileCard>
+
+      <ProfileCard id="profile-section-skills-readonly" title="Kemahiran">
+        <SkillsSummary data={skillsProfile} />
+      </ProfileCard>
     </div>
   );
 }
