@@ -7088,14 +7088,17 @@ body:has(.applicant-profile-page) {
   color: #ffffff;
 }
 
-.student-info-update:hover,
-.student-info-submit:hover {
+.student-info-update:hover {
   background: #12843d;
 }
 
 .student-info-submit {
-  background: #0f9f47;
+  background: #2563eb;
   color: #ffffff;
+}
+
+.student-info-submit:hover {
+  background: #1d4ed8;
 }
 
 .student-info-submit:disabled {

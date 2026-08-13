@@ -1144,7 +1144,6 @@ export default function ApplicantInternshipApplicationPage() {
                         onClick={handleSubmitApplication}
                       >
                         {isSubmittingApplication ? "Menghantar..." : "Hantar Permohonan"}
-                        <Icon>send</Icon>
                       </button>
                     ) : null}
                   </div>
