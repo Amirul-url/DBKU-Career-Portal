@@ -938,7 +938,7 @@ function formatMapboxPlaceName(feature = {}) {
   return formatMapAddressWithPostcode(placeName.split(","), postcode, city);
 }
 
-function ApplicantAddressMap({ address, addressError, latitude, locationError, longitude, onLocationChange, readOnly = false }) {
+export function ApplicantAddressMap({ address, addressError, latitude, locationError, longitude, onLocationChange, readOnly = false }) {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const markerRef = useRef(null);

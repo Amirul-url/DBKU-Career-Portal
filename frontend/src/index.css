@@ -6415,6 +6415,93 @@ body:has(.applicant-profile-page) {
   line-height: 1.5;
 }
 
+.student-personal-table-wrap {
+  overflow-x: auto;
+  max-width: 1120px;
+  border: 1px solid #1f2937;
+  background: #ffffff;
+}
+
+.student-personal-table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+  background: #ffffff;
+}
+
+.student-personal-table th,
+.student-personal-table td {
+  border: 1px solid #1f2937;
+  vertical-align: top;
+}
+
+.student-personal-table th {
+  width: 280px;
+  background: #ffffff;
+  color: #020617;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.25;
+  text-align: left;
+}
+
+.student-personal-table th span {
+  display: block;
+  margin-left: 22px;
+  font-weight: 500;
+}
+
+.student-personal-table td {
+  padding: 8px;
+}
+
+.student-personal-table input,
+.student-personal-table select {
+  width: 100%;
+  min-height: 36px;
+  border: 1px solid #cfded6;
+  border-radius: 4px;
+  background: #ffffff;
+  color: var(--student-ink);
+  padding: 7px 9px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 750;
+  outline: 0;
+}
+
+.student-personal-table input:focus,
+.student-personal-table select:focus {
+  border-color: var(--student-green);
+  box-shadow: 0 0 0 3px rgba(134, 239, 172, .35);
+}
+
+.student-personal-table .nested-row th,
+.student-personal-table .nested-row td,
+.student-personal-table .map-row th,
+.student-personal-table .map-row td {
+  vertical-align: top;
+}
+
+.student-nested-fields {
+  display: grid;
+  gap: 8px;
+}
+
+.student-personal-table .personal-address-location {
+  gap: 12px;
+}
+
+.student-personal-table .personal-address-map {
+  min-height: 0;
+  padding: 12px;
+}
+
+.student-personal-table .personal-address-map-canvas {
+  min-height: 280px;
+}
+
 .student-search-select {
   position: relative;
 }

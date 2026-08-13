@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { getStoredUser } from "../../lib/authApi";
 import { useApplicantSidebarState } from "../../modules/applicant/useApplicantSidebarState";
 import { Icon } from "./ApplicantAuthShared";
-import { ProfileContentHeader, ProfileSidebar } from "./ApplicantProfilePage";
+import { ApplicantAddressMap, ProfileContentHeader, ProfileSidebar } from "./ApplicantProfilePage";
 
-const infoTabs = ["Maklumat Pemohon", "Maklumat Akademik", "Dokumen Sokongan"];
+const personalInfoTab = "Maklumat Peribadi Pemohon";
+const infoTabs = [personalInfoTab, "Maklumat Akademik", "Dokumen Sokongan"];
 
 const academicLevelOptions = [
   "Sijil",
@@ -16,6 +17,33 @@ const academicLevelOptions = [
   "PhD / Doktor Falsafah",
   "Lain-lain",
 ];
+
+const stateOptions = [
+  "Johor",
+  "Kedah",
+  "Kelantan",
+  "Melaka",
+  "Negeri Sembilan",
+  "Pahang",
+  "Perak",
+  "Perlis",
+  "Pulau Pinang",
+  "Sabah",
+  "Sarawak",
+  "Selangor",
+  "Terengganu",
+  "WP Kuala Lumpur",
+  "WP Labuan",
+  "WP Putrajaya",
+  "Lain-lain",
+];
+
+const raceOptions = ["Melayu", "Melanau", "Iban", "Bidayuh", "Cina", "India", "Lain-lain"];
+const religionOptions = ["Islam", "Kristian", "Buddha", "Hindu", "Lain-lain"];
+const citizenshipOptions = ["Warganegara", "Bukan Warganegara", "Penduduk Tetap"];
+const maritalStatusOptions = ["Bujang", "Berkahwin", "Duda", "Janda"];
+const yesNoOptions = ["Ya", "Tidak"];
+const drivingLicenseOptions = ["Tiada", "B2", "B", "D", "DA", "E", "GDL", "PSV", "Lain-lain"];
 
 const documentFields = [
   {
@@ -41,21 +69,37 @@ const documentFields = [
 const getDefaultStudentInfo = () => ({
   academicLevel: "",
   address: "",
+  age: "",
+  birthDate: "",
+  birthPlace: "",
+  citizenship: "",
   cgpa: "",
   currentYear: "",
+  disability: "",
+  drivingLicense: "",
   email: "",
+  fatherBirthState: "",
+  height: "",
   icNo: "",
   institution: "",
+  maritalStatus: "",
+  motherBirthState: "",
   name: "",
   phone: "",
   program: "",
+  race: "",
+  religion: "",
   resumeFile: "",
   semester: "",
+  stateOfBirth: "",
   supervisorEmail: "",
   supervisorName: "",
   supervisorPhone: "",
   transcriptFile: "",
   universityLetterFile: "",
+  weight: "",
+  latitude: "",
+  longitude: "",
 });
 
 const requiredFieldsByTab = {
@@ -65,27 +109,67 @@ const requiredFieldsByTab = {
     ["transcriptFile", "Transkrip / Keputusan Terkini"],
   ],
   "Maklumat Akademik": [
+    ["institution", "Institusi Pengajian"],
+    ["program", "Program / Kursus"],
     ["academicLevel", "Tahap Pengajian"],
     ["currentYear", "Tahun Pengajian"],
     ["semester", "Semester"],
     ["cgpa", "CGPA / Keputusan Terkini"],
   ],
-  "Maklumat Pemohon": [
+  [personalInfoTab]: [
     ["name", "Nama"],
-    ["icNo", "No. Kad Pengenalan"],
-    ["email", "Alamat E-mel"],
-    ["phone", "No. Telefon"],
+    ["icNo", "No. Kad Pengenalan Baru"],
+    ["phone", "No. Telefon Bimbit/ Telefon Rumah"],
     ["address", "Alamat Surat Menyurat"],
-    ["institution", "Institusi Pengajian"],
-    ["program", "Program / Kursus"],
+    ["email", "Alamat Emel"],
+    ["age", "Umur"],
+    ["birthDate", "Tarikh Lahir"],
+    ["birthPlace", "Tempat Lahir"],
+    ["stateOfBirth", "Negeri Tempat Lahir Pemohon"],
+    ["motherBirthState", "Negeri Tempat Lahir Ibu"],
+    ["fatherBirthState", "Negeri Tempat Lahir Bapa"],
+    ["race", "Bangsa"],
+    ["religion", "Agama"],
+    ["citizenship", "Kewarganegaraan"],
+    ["maritalStatus", "Taraf Perkahwinan"],
+    ["height", "Tinggi"],
+    ["weight", "Berat"],
+    ["disability", "Kelainan Upaya"],
+    ["drivingLicense", "Lesen Memandu"],
   ],
 };
 
 const getDraftStorageKey = (user) => `dbku_internship_student_info_manual_${user?.id || user?.email || "guest"}`;
 
+function calculateAge(dateValue) {
+  if (!dateValue) {
+    return "";
+  }
+
+  const birthDate = new Date(dateValue);
+  if (Number.isNaN(birthDate.getTime())) {
+    return "";
+  }
+
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const hasBirthdayPassed =
+    today.getMonth() > birthDate.getMonth() ||
+    (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate());
+
+  if (!hasBirthdayPassed) {
+    age -= 1;
+  }
+
+  return age > 0 ? String(age) : "";
+}
+
 function compactAddress(studentInfo = {}) {
+  if (studentInfo.address) {
+    return studentInfo.address;
+  }
+
   return [
-    studentInfo.address,
     studentInfo.address1Line1,
     studentInfo.address1Line2,
     studentInfo.address1Line3,
@@ -99,16 +183,19 @@ function compactAddress(studentInfo = {}) {
 
 function normalizeStudentInfoDraft(studentInfo = {}, user = null) {
   const defaults = getDefaultStudentInfo();
+  const birthDate = studentInfo.birthDate || studentInfo.dateOfBirth || "";
 
   return {
     ...defaults,
     ...studentInfo,
     academicLevel: studentInfo.academicLevel || studentInfo.qualification || "",
     address: compactAddress(studentInfo),
+    birthDate,
     email: studentInfo.email || user?.email || "",
     icNo: String(studentInfo.icNo || "").replace(/\D/g, ""),
     name: String(studentInfo.name || user?.full_name || user?.first_name || "").toUpperCase(),
     phone: String(studentInfo.phone || studentInfo.address1Phone || "").replace(/\D/g, ""),
+    age: studentInfo.age || calculateAge(birthDate),
   };
 }
 
@@ -142,7 +229,7 @@ export default function ApplicantInternshipApplicationPage() {
   const user = getStoredUser();
   const savedDraft = loadStudentInfoDraft(user);
   const [sidebarOpen, toggleSidebar] = useApplicantSidebarState();
-  const [activeInfoTab, setActiveInfoTab] = useState("Maklumat Pemohon");
+  const [activeInfoTab, setActiveInfoTab] = useState(personalInfoTab);
   const [notice, setNotice] = useState("");
   const [noticeStatus, setNoticeStatus] = useState("success");
   const documentInputRefs = useRef({});
@@ -181,9 +268,31 @@ export default function ApplicantInternshipApplicationPage() {
     setStudentInfo((current) => ({ ...current, name: event.target.value.toUpperCase() }));
   };
 
+  const updateBirthDate = (event) => {
+    const birthDate = event.target.value;
+
+    setNotice("");
+    setStudentInfo((current) => ({ ...current, birthDate, age: calculateAge(birthDate) }));
+  };
+
   const updateNumericStudentInfo = (field) => (event) => {
     setNotice("");
     setStudentInfo((current) => ({ ...current, [field]: event.target.value.replace(/\D/g, "") }));
+  };
+
+  const updateDecimalStudentInfo = (field) => (event) => {
+    setNotice("");
+    setStudentInfo((current) => ({ ...current, [field]: event.target.value.replace(/[^0-9.]/g, "") }));
+  };
+
+  const updateAddressMapLocation = (location) => {
+    setNotice("");
+    setStudentInfo((current) => ({
+      ...current,
+      address: location.address ?? current.address,
+      latitude: location.latitude ?? current.latitude,
+      longitude: location.longitude ?? current.longitude,
+    }));
   };
 
   const updateDocument = (field) => (event) => {
@@ -227,20 +336,76 @@ export default function ApplicantInternshipApplicationPage() {
     setActiveInfoTab(tab);
   };
 
+  const textInput = (field, props = {}) => (
+    <input value={studentInfo[field]} onChange={updateStudentInfo(field)} {...props} />
+  );
+
+  const selectInput = (field, options) => (
+    <select value={studentInfo[field]} onChange={updateStudentInfo(field)}>
+      <option value="">Sila pilih</option>
+      {options.map((option) => <option key={option}>{option}</option>)}
+    </select>
+  );
+
+  const renderPersonalRow = (label, fieldContent, className = "") => (
+    <tr className={className}>
+      <th scope="row">{label}</th>
+      <td>{fieldContent}</td>
+    </tr>
+  );
+
   const renderApplicantFields = () => (
-    <div className="student-info-fields compact">
-      <label className="wide">Nama<input value={studentInfo.name} onChange={updateStudentName} /></label>
-      <label>No. Kad Pengenalan<input inputMode="numeric" maxLength={12} pattern="[0-9]*" value={studentInfo.icNo} onChange={updateNumericStudentInfo("icNo")} /></label>
-      <label>Alamat E-mel<input type="email" value={studentInfo.email} onChange={updateStudentInfo("email")} /></label>
-      <label>No. Telefon<input inputMode="numeric" pattern="[0-9]*" value={studentInfo.phone} onChange={updateNumericStudentInfo("phone")} /></label>
-      <label className="wide">Alamat Surat Menyurat<textarea rows="3" value={studentInfo.address} onChange={updateStudentInfo("address")} /></label>
-      <label className="wide">Institusi Pengajian<input value={studentInfo.institution} onChange={updateStudentInfo("institution")} /></label>
-      <label className="wide">Program / Kursus<input value={studentInfo.program} onChange={updateStudentInfo("program")} /></label>
+    <div className="student-personal-table-wrap">
+      <table className="student-personal-table">
+        <tbody>
+          {renderPersonalRow("Nama", <input value={studentInfo.name} onChange={updateStudentName} />)}
+          {renderPersonalRow("No. Kad Pengenalan Baru", <input inputMode="numeric" maxLength={12} pattern="[0-9]*" value={studentInfo.icNo} onChange={updateNumericStudentInfo("icNo")} />)}
+          {renderPersonalRow("No. Telefon Bimbit/ Telefon Rumah", <input inputMode="numeric" pattern="[0-9]*" value={studentInfo.phone} onChange={updateNumericStudentInfo("phone")} />)}
+          {renderPersonalRow(
+            "Alamat Surat Menyurat",
+            <ApplicantAddressMap
+              address={studentInfo.address}
+              latitude={studentInfo.latitude}
+              longitude={studentInfo.longitude}
+              onLocationChange={updateAddressMapLocation}
+            />,
+            "map-row",
+          )}
+          {renderPersonalRow("Alamat Emel", <input type="email" value={studentInfo.email} onChange={updateStudentInfo("email")} />)}
+          {renderPersonalRow("Umur", <input inputMode="numeric" pattern="[0-9]*" value={studentInfo.age} onChange={updateNumericStudentInfo("age")} />)}
+          {renderPersonalRow("Tarikh Lahir", <input type="date" value={studentInfo.birthDate} onChange={updateBirthDate} />)}
+          {renderPersonalRow("Tempat Lahir", textInput("birthPlace"))}
+          {renderPersonalRow(
+            <>
+              Negeri Tempat Lahir:
+              <span>i. Pemohon</span>
+              <span>ii. Ibu</span>
+              <span>iii. Bapa</span>
+            </>,
+            <div className="student-nested-fields">
+              {selectInput("stateOfBirth", stateOptions)}
+              {selectInput("motherBirthState", stateOptions)}
+              {selectInput("fatherBirthState", stateOptions)}
+            </div>,
+            "nested-row",
+          )}
+          {renderPersonalRow("Bangsa", selectInput("race", raceOptions))}
+          {renderPersonalRow("Agama", selectInput("religion", religionOptions))}
+          {renderPersonalRow("Kewarganegaraan", selectInput("citizenship", citizenshipOptions))}
+          {renderPersonalRow("Taraf Perkahwinan", selectInput("maritalStatus", maritalStatusOptions))}
+          {renderPersonalRow("Tinggi", <input inputMode="decimal" placeholder="cm" value={studentInfo.height} onChange={updateDecimalStudentInfo("height")} />)}
+          {renderPersonalRow("Berat", <input inputMode="decimal" placeholder="kg" value={studentInfo.weight} onChange={updateDecimalStudentInfo("weight")} />)}
+          {renderPersonalRow("Kelainan Upaya (Ya/ Tidak)", selectInput("disability", yesNoOptions))}
+          {renderPersonalRow("Lesen Memandu", selectInput("drivingLicense", drivingLicenseOptions))}
+        </tbody>
+      </table>
     </div>
   );
 
   const renderAcademicFields = () => (
     <div className="student-info-fields compact">
+      <label className="wide">Institusi Pengajian<input value={studentInfo.institution} onChange={updateStudentInfo("institution")} /></label>
+      <label className="wide">Program / Kursus<input value={studentInfo.program} onChange={updateStudentInfo("program")} /></label>
       <label>Tahap Pengajian
         <select value={studentInfo.academicLevel} onChange={updateStudentInfo("academicLevel")}>
           <option value="">Sila pilih</option>
@@ -320,7 +485,7 @@ export default function ApplicantInternshipApplicationPage() {
                   <h2>{activeInfoTab}</h2>
                   {notice ? <p className={`student-info-notice ${noticeStatus}`}>{notice}</p> : null}
 
-                  {activeInfoTab === "Maklumat Pemohon" ? renderApplicantFields() : null}
+                  {activeInfoTab === personalInfoTab ? renderApplicantFields() : null}
                   {activeInfoTab === "Maklumat Akademik" ? renderAcademicFields() : null}
                   {activeInfoTab === "Dokumen Sokongan" ? renderDocumentFields() : null}
 
