@@ -9,6 +9,7 @@ import {
 } from "../../lib/authApi";
 import { adminNavItems, getAdminRoutePath, getAdminRouteState } from "../../modules/admin/adminRoutes";
 import { Icon } from "../applicant/ApplicantAuthShared";
+import SuperAdminApplicantsPanel from "./SuperAdminApplicantsPanel";
 
 const dbkuDepartments = [
   { name: "Bahagian Audit Dalaman", code: "AUD" },
@@ -539,6 +540,7 @@ export default function AdminHrmPage() {
               <button onClick={() => setNotice("")}>×</button>
             </div>
           )}
+          {panel === "applicants" && <SuperAdminApplicantsPanel allowDelete={false} />}
           {panel === "create" && (
             <>
               <div className="hrm-heading">

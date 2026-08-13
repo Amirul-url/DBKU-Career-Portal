@@ -3,6 +3,7 @@ export const ADMIN_ROUTES = {
     internship: "/admin/internships/applications",
     job: "/admin/jobs/applications",
   },
+  applicants: "/admin/applicants",
   create: {
     job: "/admin/jobs/create",
   },
@@ -14,6 +15,8 @@ export const ADMIN_ROUTES = {
 
 export const adminNavItems = [
   { icon: "dashboard", label: "Papan Pemuka", panel: "dashboard", to: ADMIN_ROUTES.dashboard },
+  { kind: "section", label: "PEMOHON" },
+  { icon: "group", label: "Pemohon", panel: "applicants", to: ADMIN_ROUTES.applicants },
   { kind: "section", label: "JAWATAN DBKU" },
   { icon: "add_circle", label: "Tambah Jawatan DBKU", panel: "create", to: ADMIN_ROUTES.create.job, vacancyType: "job" },
   { icon: "work_history", label: "Urus Jawatan DBKU", panel: "manage", to: ADMIN_ROUTES.manage.job, vacancyType: "job" },
@@ -40,6 +43,10 @@ export function getAdminRoutePath(panel, vacancyType = "job") {
 
   if (panel === "applications") {
     return ADMIN_ROUTES.applications[vacancyType] || ADMIN_ROUTES.applications.job;
+  }
+
+  if (panel === "applicants") {
+    return ADMIN_ROUTES.applicants;
   }
 
   return ADMIN_ROUTES.dashboard;
