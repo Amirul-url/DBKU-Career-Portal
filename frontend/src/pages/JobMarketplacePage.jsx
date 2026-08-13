@@ -151,6 +151,19 @@ export function JobMarketplaceContent({ actionTarget = "/login", embedded = fals
     () => filteredOpportunities.find((item) => item.id === selectedId) ?? filteredOpportunities[0] ?? null,
     [filteredOpportunities, selectedId],
   );
+  const hasActiveFilter = Boolean(search.trim()) || employmentFilter !== "all";
+  const emptyStateTitle = opportunities.length
+    ? isInternshipPage
+      ? "Tiada peluang latihan industri yang sepadan"
+      : "Tiada jawatan yang sepadan"
+    : isInternshipPage
+      ? "Tiada peluang latihan industri disiarkan buat masa ini"
+      : "Tiada jawatan kosong disiarkan buat masa ini";
+  const emptyStateMessage = opportunities.length && hasActiveFilter
+    ? "Sila ubah kata kunci carian atau pilihan tapisan untuk melihat peluang lain."
+    : isInternshipPage
+      ? "Pentadbir belum menyiarkan peluang latihan industri. Sila semak semula dari semasa ke semasa."
+      : "Pentadbir belum menyiarkan jawatan kosong. Sila semak semula dari semasa ke semasa.";
   useEffect(() => {
     setSaveNotice("");
   }, [selectedOpportunity?.id]);
@@ -240,6 +253,15 @@ export function JobMarketplaceContent({ actionTarget = "/login", embedded = fals
         </section>
 
         <p className="market-vacancy-count"><strong>{filteredOpportunities.length}</strong> {isInternshipPage ? "Peluang Latihan Industri" : "Kekosongan Jawatan"}</p>
+        {loading || error || !filteredOpportunities.length ? (
+          <section className="market-empty-state" id="jobs" aria-live="polite">
+            <span className="market-empty-icon" aria-hidden="true">
+              <Icon>{isInternshipPage ? "school" : "work"}</Icon>
+            </span>
+            <h2>{loading ? "Memuatkan senarai peluang" : error ? "Senarai tidak dapat dimuatkan" : emptyStateTitle}</h2>
+            <p>{loading ? "Sila tunggu sebentar sementara maklumat dimuatkan." : error || emptyStateMessage}</p>
+          </section>
+        ) : (
         <section className="market-layout" id="jobs">
           <section className="market-results" aria-labelledby="results-title">
             <div className="market-results-head">
@@ -333,6 +355,7 @@ export function JobMarketplaceContent({ actionTarget = "/login", embedded = fals
             )}
           </aside>
         </section>
+        )}
       </main>
   );
 }
