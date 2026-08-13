@@ -6398,10 +6398,11 @@ body:has(.applicant-profile-page) {
   border: 1px solid #cfded6;
   border-radius: 5px;
   background: #ffffff;
-  color: var(--student-ink);
+  color: #334155;
   padding: 6px 9px;
   font: inherit;
   font-size: 13px;
+  font-weight: 400;
   outline: 0;
 }
 
@@ -6469,7 +6470,7 @@ body:has(.applicant-profile-page) {
   padding: 7px 9px;
   font: inherit;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 400;
   outline: 0;
 }
 
@@ -6519,7 +6520,7 @@ body:has(.applicant-profile-page) {
   cursor: pointer;
   font: inherit;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 400;
   padding: 0 9px;
 }
 
@@ -6557,7 +6558,7 @@ body:has(.applicant-profile-page) {
   color: #334155;
   font: inherit;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 400;
   outline: 0;
   padding: 0 12px;
 }
@@ -6581,7 +6582,7 @@ body:has(.applicant-profile-page) {
   background: #ffffff;
   color: #334155;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 400;
   padding: 0 10px;
   text-align: left;
 }
@@ -6637,11 +6638,11 @@ body:has(.applicant-profile-page) {
   border: 1px solid #cfded6;
   border-radius: 5px;
   background: #ffffff;
-  color: var(--student-ink);
+  color: #334155;
   padding: 6px 9px;
   font: inherit;
   font-size: 13px;
-  font-weight: 750;
+  font-weight: 400;
   outline: 0;
   text-align: left;
 }
@@ -6712,13 +6713,13 @@ body:has(.applicant-profile-page) {
   padding: 6px 10px;
   font: inherit;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 400;
   text-align: left;
 }
 
 .student-search-select-options button.selected {
   background: var(--student-pale);
-  color: var(--student-ink);
+  color: #334155;
 }
 
 .student-search-select-options button:hover,
@@ -7602,7 +7603,7 @@ body:has(.applicant-profile-page) {
   background: #ffffff;
   color: var(--profile-ink);
   font-size: 13px;
-  font-weight: 750;
+  font-weight: 400;
   padding: 0 10px;
   text-align: left;
 }
@@ -7960,7 +7961,7 @@ body:has(.applicant-profile-page) {
 .personal-address-map-coordinates {
   color: #41554d;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 400;
   line-height: 1.45;
 }
 
