@@ -5,221 +5,112 @@ import { useApplicantSidebarState } from "../../modules/applicant/useApplicantSi
 import { Icon } from "./ApplicantAuthShared";
 import { ProfileContentHeader, ProfileSidebar } from "./ApplicantProfilePage";
 
-const infoTabs = [
-  "Maklumat Peribadi",
-  "Alamat 1",
-  "Alamat 2",
-  "Maklumat Kursus",
-  "Maklumat Bahasa",
-  "Maklumat E-Portfolio",
+const infoTabs = ["Maklumat Pemohon", "Maklumat Akademik", "Dokumen Sokongan"];
+
+const academicLevelOptions = [
+  "Sijil",
+  "Diploma",
+  "Diploma Lanjutan",
+  "Ijazah Sarjana Muda",
+  "Ijazah Sarjana",
+  "PhD / Doktor Falsafah",
+  "Lain-lain",
 ];
 
-const malaysiaStateOptions = [
-  "Johor",
-  "Kedah",
-  "Kelantan",
-  "Melaka",
-  "Negeri Sembilan",
-  "Pahang",
-  "Perak",
-  "Perlis",
-  "Pulau Pinang",
-  "Sabah",
-  "Sarawak",
-  "Selangor",
-  "Terengganu",
-  "WP Kuala Lumpur",
-  "WP Labuan",
-  "WP Putrajaya",
+const documentFields = [
+  {
+    accept: ".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    field: "resumeFile",
+    hint: "PDF, DOC atau DOCX",
+    label: "Resume",
+  },
+  {
+    accept: ".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    field: "universityLetterFile",
+    hint: "Surat rasmi universiti / surat penempatan",
+    label: "Surat Permohonan Universiti",
+  },
+  {
+    accept: ".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png",
+    field: "transcriptFile",
+    hint: "PDF, JPG atau PNG",
+    label: "Transkrip / Keputusan Terkini",
+  },
 ];
-
-const malaysiaDistrictGroups = {
-  Johor: ["Batu Pahat", "Johor Bahru", "Kluang", "Kota Tinggi", "Kulai", "Mersing", "Muar", "Pontian", "Segamat", "Tangkak"],
-  Kedah: ["Baling", "Bandar Baharu", "Kota Setar", "Kuala Muda", "Kubang Pasu", "Kulim", "Langkawi", "Padang Terap", "Pendang", "Pokok Sena", "Sik", "Yan"],
-  Kelantan: ["Bachok", "Gua Musang", "Jeli", "Kota Bharu", "Kuala Krai", "Lojing", "Machang", "Pasir Mas", "Pasir Puteh", "Tanah Merah", "Tumpat"],
-  Melaka: ["Alor Gajah", "Jasin", "Melaka Tengah"],
-  "Negeri Sembilan": ["Jelebu", "Jempol", "Kuala Pilah", "Port Dickson", "Rembau", "Seremban", "Tampin"],
-  Pahang: ["Bentong", "Bera", "Cameron Highlands", "Jerantut", "Kuantan", "Lipis", "Maran", "Pekan", "Raub", "Rompin", "Temerloh"],
-  Perak: ["Bagan Datuk", "Batang Padang", "Hilir Perak", "Hulu Perak", "Kampar", "Kerian", "Kinta", "Kuala Kangsar", "Larut Matang dan Selama", "Manjung", "Muallim", "Perak Tengah"],
-  Perlis: ["Perlis"],
-  "Pulau Pinang": ["Barat Daya", "Seberang Perai Selatan", "Seberang Perai Tengah", "Seberang Perai Utara", "Timur Laut"],
-  Sabah: ["Beaufort", "Beluran", "Kalabakan", "Keningau", "Kinabatangan", "Kota Belud", "Kota Kinabalu", "Kota Marudu", "Kuala Penyu", "Kudat", "Kunak", "Lahad Datu", "Nabawan", "Papar", "Penampang", "Pitas", "Putatan", "Ranau", "Sandakan", "Semporna", "Sipitang", "Tambunan", "Tawau", "Telupid", "Tenom", "Tongod", "Tuaran"],
-  Sarawak: ["Bahagian Betong", "Bahagian Bintulu", "Bahagian Kapit", "Bahagian Kuching", "Bahagian Limbang", "Bahagian Miri", "Bahagian Mukah", "Bahagian Samarahan", "Bahagian Sarikei", "Bahagian Serian", "Bahagian Sibu", "Bahagian Sri Aman"],
-  Selangor: ["Gombak", "Hulu Langat", "Hulu Selangor", "Klang", "Kuala Langat", "Kuala Selangor", "Petaling", "Sabak Bernam", "Sepang"],
-  Terengganu: ["Besut", "Dungun", "Hulu Terengganu", "Kemaman", "Kuala Nerus", "Kuala Terengganu", "Marang", "Setiu"],
-  "WP Kuala Lumpur": ["Kuala Lumpur"],
-  "WP Labuan": ["Labuan"],
-  "WP Putrajaya": ["Putrajaya"],
-};
-
-const selectOptions = {
-  addressCountry: ["Malaysia"],
-  districtGroups: malaysiaDistrictGroups,
-  citizenship: ["Warganegara", "Bukan Warganegara"],
-  citizenshipCountry: ["Malaysia", "Brunei", "Indonesia", "Lain-lain"],
-  ethnicity: ["Melanau", "Melayu", "Iban", "Bidayuh", "Cina", "Lain-lain"],
-  gender: ["Lelaki", "Perempuan"],
-  nativeStatus: ["Bumiputera", "Bukan Bumiputera"],
-  religion: ["Islam", "Kristian", "Buddha", "Hindu", "Lain-lain"],
-  sponsorship: [
-    "Sendiri",
-    "PTPTN",
-    "JPA",
-    "MARA",
-    "Yayasan Sarawak",
-    "Yayasan Sabah",
-    "Yayasan Selangor",
-    "Yayasan Terengganu",
-    "Yayasan Pahang",
-    "Yayasan Perak",
-    "Yayasan Johor",
-    "Yayasan Negeri Sembilan",
-    "Yayasan Kelantan Darulnaim",
-    "Yayasan Melaka",
-    "Biasiswa Kerajaan Negeri",
-    "Biasiswa Korporat / GLC",
-    "Zakat / Baitulmal",
-    "Biasiswa Universiti / Institusi",
-    "Pinjaman Pendidikan Bank",
-    "Tajaan Majikan",
-    "Lain-lain",
-  ],
-  state: malaysiaStateOptions,
-  qualification: [
-    "SPM",
-    "STPM",
-    "STAM",
-    "Sijil",
-    "Matrikulasi",
-    "Asasi",
-    "Diploma",
-    "Diploma Lanjutan",
-    "Ijazah Sarjana Muda",
-    "Ijazah Sarjana",
-    "PhD / Doktor Falsafah",
-    "Kelayakan Profesional",
-    "Lain-lain",
-  ],
-};
-
-const maritalStatusOptions = ["Tidak Dinyatakan", "Bujang", "Duda", "Janda", "Berkahwin"];
-
-const addressCountryAliases = { MALAYSIA: "Malaysia", BRUNEI: "Brunei", INDONESIA: "Indonesia", SINGAPORE: "Singapura", SINGAPURA: "Singapura", "LAIN-LAIN": "Lain-lain" };
-const addressDistrictAliases = {
-  "BAHAGIAN KUCHING": "Bahagian Kuching",
-  "BAHAGIAN SAMARAHAN": "Bahagian Samarahan",
-  "BAHAGIAN SERIAN": "Bahagian Serian",
-  "BAHAGIAN SRI AMAN": "Bahagian Sri Aman",
-  "BAHAGIAN BETONG": "Bahagian Betong",
-  "BAHAGIAN SARIKEI": "Bahagian Sarikei",
-  "BAHAGIAN SIBU": "Bahagian Sibu",
-  "BAHAGIAN KAPIT": "Bahagian Kapit",
-  "BAHAGIAN MUKAH": "Bahagian Mukah",
-  "BAHAGIAN BINTULU": "Bahagian Bintulu",
-  "BAHAGIAN MIRI": "Bahagian Miri",
-  "BAHAGIAN LIMBANG": "Bahagian Limbang",
-  "LAIN-LAIN": "Lain-lain",
-};
-const malaysiaStateAliases = { SARAWAK: "Sarawak", SABAH: "Sabah", JOHOR: "Johor", KEDAH: "Kedah", KELANTAN: "Kelantan", MELAKA: "Melaka", "NEGERI SEMBILAN": "Negeri Sembilan", PAHANG: "Pahang", PERAK: "Perak", PERLIS: "Perlis", "PULAU PINANG": "Pulau Pinang", SELANGOR: "Selangor", TERENGGANU: "Terengganu", "WP KUALA LUMPUR": "WP Kuala Lumpur", "WP LABUAN": "WP Labuan", "WP PUTRAJAYA": "WP Putrajaya" };
-
-const valueAliases = {
-  address1Country: addressCountryAliases,
-  address1District: addressDistrictAliases,
-  address1State: malaysiaStateAliases,
-  address2Country: addressCountryAliases,
-  address2District: addressDistrictAliases,
-  address2State: malaysiaStateAliases,
-  citizenship: { WARGANEGARA: "Warganegara", "BUKAN WARGANEGARA": "Bukan Warganegara" },
-  citizenshipCountry: { MALAYSIA: "Malaysia", BRUNEI: "Brunei", INDONESIA: "Indonesia", "LAIN-LAIN": "Lain-lain" },
-  ethnicity: { MELANAU: "Melanau", MELAYU: "Melayu", IBAN: "Iban", BIDAYUH: "Bidayuh", CINA: "Cina", "LAIN-LAIN": "Lain-lain" },
-  gender: { MALE: "Lelaki", FEMALE: "Perempuan" },
-  maritalStatus: { SINGLE: "Bujang", MARRIED: "Berkahwin" },
-  nativeStatus: { BUMIPUTERA: "Bumiputera", "BUKAN BUMIPUTERA": "Bukan Bumiputera" },
-  religion: { MUSLIM: "Islam", CHRISTIAN: "Kristian", BUDDHIST: "Buddha", HINDU: "Hindu", "LAIN-LAIN": "Lain-lain" },
-  sponsorship: { BIASISWA: "Biasiswa Korporat / GLC", SENDIRI: "Sendiri" },
-  stateOfBirth: malaysiaStateAliases,
-  residenceState: malaysiaStateAliases,
-  qualification: { MATRICULATION: "Matrikulasi", DIPLOMA: "Diploma", FOUNDATION: "Asasi", DEGREE: "Ijazah Sarjana Muda", MASTER: "Ijazah Sarjana", PHD: "PhD / Doktor Falsafah" },
-};
 
 const getDefaultStudentInfo = () => ({
-  address1City: "",
-  address1Country: "",
-  address1District: "",
-  address1Line1: "",
-  address1Line2: "",
-  address1Line3: "",
-  address1Phone: "",
-  address1Postcode: "",
-  address1State: "",
-  address2City: "",
-  address2Country: "",
-  address2District: "",
-  address2Line1: "",
-  address2Line2: "",
-  address2Line3: "",
-  address2Phone: "",
-  address2Postcode: "",
-  address2State: "",
-  citizenship: "",
-  citizenshipCountry: "",
-  dateOfBirth: "",
+  academicLevel: "",
+  address: "",
+  cgpa: "",
+  currentYear: "",
   email: "",
-  ethnicity: "",
-  gender: "",
   icNo: "",
-  maritalStatus: "",
+  institution: "",
   name: "",
-  nativeStatus: "",
   phone: "",
-  religion: "",
-  residenceState: "",
-  sponsorship: "",
-  stateOfBirth: "",
-  qualification: "",
+  program: "",
+  resumeFile: "",
+  semester: "",
+  supervisorEmail: "",
+  supervisorName: "",
+  supervisorPhone: "",
+  transcriptFile: "",
+  universityLetterFile: "",
 });
 
-const requiredPersonalFields = [
-  ["name", "Nama"],
-  ["icNo", "No. Kad Pengenalan"],
-  ["gender", "Jantina"],
-  ["ethnicity", "Etnik"],
-  ["nativeStatus", "Status Bumiputera"],
-  ["citizenship", "Status Kewarganegaraan Malaysia"],
-  ["citizenshipCountry", "Negara Kewarganegaraan"],
-  ["religion", "Agama"],
-  ["maritalStatus", "Status Perkahwinan"],
-  ["stateOfBirth", "Negeri Kelahiran"],
-  ["residenceState", "Negeri Kediaman"],
-  ["dateOfBirth", "Tarikh Lahir"],
-  ["sponsorship", "Tajaan"],
-  ["qualification", "Kelayakan Kemasukan"],
-  ["phone", "No. Telefon"],
-  ["email", "Alamat E-mel"],
-];
-
-const getRequiredAddressFields = (prefix) => [
-  [`${prefix}Line1`, "Alamat 1"],
-  [`${prefix}Line2`, "Alamat 2"],
-  [`${prefix}Line3`, "Alamat 3"],
-  [`${prefix}Postcode`, "Poskod"],
-  [`${prefix}City`, "Bandar"],
-  [`${prefix}State`, "Negeri"],
-  [`${prefix}District`, "Daerah"],
-  [`${prefix}Country`, "Negara"],
-  [`${prefix}Phone`, "No. Telefon"],
-];
-
-function normalizeStudentInfoDraft(studentInfo = {}) {
-  return Object.fromEntries(
-    Object.entries(studentInfo).map(([field, value]) => [
-      field,
-      field === "name" ? String(value || "").toUpperCase() : valueAliases[field]?.[value] || value,
-    ]),
-  );
-}
+const requiredFieldsByTab = {
+  "Dokumen Sokongan": [
+    ["resumeFile", "Resume"],
+    ["universityLetterFile", "Surat Permohonan Universiti"],
+    ["transcriptFile", "Transkrip / Keputusan Terkini"],
+  ],
+  "Maklumat Akademik": [
+    ["academicLevel", "Tahap Pengajian"],
+    ["currentYear", "Tahun Pengajian"],
+    ["semester", "Semester"],
+    ["cgpa", "CGPA / Keputusan Terkini"],
+  ],
+  "Maklumat Pemohon": [
+    ["name", "Nama"],
+    ["icNo", "No. Kad Pengenalan"],
+    ["email", "Alamat E-mel"],
+    ["phone", "No. Telefon"],
+    ["address", "Alamat Surat Menyurat"],
+    ["institution", "Institusi Pengajian"],
+    ["program", "Program / Kursus"],
+  ],
+};
 
 const getDraftStorageKey = (user) => `dbku_internship_student_info_manual_${user?.id || user?.email || "guest"}`;
+
+function compactAddress(studentInfo = {}) {
+  return [
+    studentInfo.address,
+    studentInfo.address1Line1,
+    studentInfo.address1Line2,
+    studentInfo.address1Line3,
+    studentInfo.address1Postcode,
+    studentInfo.address1City,
+    studentInfo.address1State,
+  ]
+    .filter(Boolean)
+    .join(", ");
+}
+
+function normalizeStudentInfoDraft(studentInfo = {}, user = null) {
+  const defaults = getDefaultStudentInfo();
+
+  return {
+    ...defaults,
+    ...studentInfo,
+    academicLevel: studentInfo.academicLevel || studentInfo.qualification || "",
+    address: compactAddress(studentInfo),
+    email: studentInfo.email || user?.email || "",
+    icNo: String(studentInfo.icNo || "").replace(/\D/g, ""),
+    name: String(studentInfo.name || user?.full_name || user?.first_name || "").toUpperCase(),
+    phone: String(studentInfo.phone || studentInfo.address1Phone || "").replace(/\D/g, ""),
+  };
+}
 
 function loadStudentInfoDraft(user) {
   if (typeof window === "undefined") {
@@ -251,15 +142,11 @@ export default function ApplicantInternshipApplicationPage() {
   const user = getStoredUser();
   const savedDraft = loadStudentInfoDraft(user);
   const [sidebarOpen, toggleSidebar] = useApplicantSidebarState();
-  const [activeInfoTab, setActiveInfoTab] = useState("Maklumat Peribadi");
+  const [activeInfoTab, setActiveInfoTab] = useState("Maklumat Pemohon");
   const [notice, setNotice] = useState("");
   const [noticeStatus, setNoticeStatus] = useState("success");
-  const [passportPhoto, setPassportPhoto] = useState(() => savedDraft?.passportPhoto || null);
-  const passportPhotoInputRef = useRef(null);
-  const [studentInfo, setStudentInfo] = useState(() => ({
-    ...getDefaultStudentInfo(),
-    ...normalizeStudentInfoDraft(savedDraft?.studentInfo || {}),
-  }));
+  const documentInputRefs = useRef({});
+  const [studentInfo, setStudentInfo] = useState(() => normalizeStudentInfoDraft(savedDraft?.studentInfo || {}, user));
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
   const email = user?.email || "Belum dikemaskini";
 
@@ -274,12 +161,11 @@ export default function ApplicantInternshipApplicationPage() {
   useEffect(() => {
     if (user?.role === "applicant") {
       saveStudentInfoDraft(user, {
-        passportPhoto,
         savedAt: new Date().toISOString(),
         studentInfo,
       });
     }
-  }, [passportPhoto, studentInfo, user]);
+  }, [studentInfo, user]);
 
   if (!user || user.role !== "applicant") {
     return null;
@@ -300,48 +186,35 @@ export default function ApplicantInternshipApplicationPage() {
     setStudentInfo((current) => ({ ...current, [field]: event.target.value.replace(/\D/g, "") }));
   };
 
-  const updatePassportPhoto = (event) => {
+  const updateDocument = (field) => (event) => {
     const file = event.target.files?.[0];
     if (!file) {
       return;
     }
 
     setNotice("");
-    const reader = new FileReader();
-    reader.onload = () => {
-      setPassportPhoto({ name: file.name, previewUrl: String(reader.result || "") });
-    };
-    reader.readAsDataURL(file);
+    setStudentInfo((current) => ({ ...current, [field]: file.name }));
   };
 
-  const openPassportPhotoPicker = () => {
-    passportPhotoInputRef.current?.click();
-  };
-
-  const deletePassportPhoto = () => {
+  const clearDocument = (field) => {
     setNotice("");
-    setPassportPhoto(null);
+    setStudentInfo((current) => ({ ...current, [field]: "" }));
 
-    if (passportPhotoInputRef.current) {
-      passportPhotoInputRef.current.value = "";
+    if (documentInputRefs.current[field]) {
+      documentInputRefs.current[field].value = "";
     }
   };
 
   const handleUpdate = (event) => {
     event.preventDefault();
 
-    const requiredFields = activeInfoTab === "Alamat 1"
-      ? getRequiredAddressFields("address1")
-      : activeInfoTab === "Alamat 2"
-        ? getRequiredAddressFields("address2")
-        : requiredPersonalFields;
-    const missingFields = requiredFields
+    const missingFields = requiredFieldsByTab[activeInfoTab]
       .filter(([field]) => !String(studentInfo[field] || "").trim())
       .map(([, label]) => label);
 
     if (missingFields.length) {
       setNoticeStatus("error");
-      setNotice(`Sila lengkapkan field berikut: ${missingFields.join(", ")}.`);
+      setNotice(`Sila lengkapkan: ${missingFields.join(", ")}.`);
       return;
     }
 
@@ -350,40 +223,72 @@ export default function ApplicantInternshipApplicationPage() {
   };
 
   const openInfoTab = (tab) => {
-    if (!["Maklumat Peribadi", "Alamat 1", "Alamat 2"].includes(tab)) {
-      return;
-    }
-
     setNotice("");
     setActiveInfoTab(tab);
   };
 
-  const renderAddressFields = (prefix) => (
-    <div className="student-info-fields student-address-fields">
-      <label>Alamat 1<input value={studentInfo[`${prefix}Line1`]} onChange={updateStudentInfo(`${prefix}Line1`)} /></label>
-      <label>Alamat 2<input value={studentInfo[`${prefix}Line2`]} onChange={updateStudentInfo(`${prefix}Line2`)} /></label>
-      <label>Alamat 3<input value={studentInfo[`${prefix}Line3`]} onChange={updateStudentInfo(`${prefix}Line3`)} /></label>
-      <label>Poskod<input value={studentInfo[`${prefix}Postcode`]} onChange={updateStudentInfo(`${prefix}Postcode`)} /></label>
-      <label className="wide">Bandar<input value={studentInfo[`${prefix}City`]} onChange={updateStudentInfo(`${prefix}City`)} /></label>
-      <label>Negeri<select value={studentInfo[`${prefix}State`]} onChange={updateStudentInfo(`${prefix}State`)}><option value="">Sila pilih</option>{selectOptions.state.map((option) => <option key={option}>{option}</option>)}</select></label>
-      <label>Daerah
-        <select value={studentInfo[`${prefix}District`]} onChange={updateStudentInfo(`${prefix}District`)}>
-          <option value="">Sila pilih</option>
-          {Object.entries(selectOptions.districtGroups).map(([state, districts]) => (
-            <optgroup key={state} label={state}>
-              {districts.map((option) => <option key={`${state}-${option}`} value={option}>{option}</option>)}
-            </optgroup>
-          ))}
-        </select>
-      </label>
-      <label>Negara<select value={studentInfo[`${prefix}Country`]} onChange={updateStudentInfo(`${prefix}Country`)}><option value="">Sila pilih</option>{selectOptions.addressCountry.map((option) => <option key={option}>{option}</option>)}</select></label>
-      <label>No. Telefon<input inputMode="numeric" pattern="[0-9]*" value={studentInfo[`${prefix}Phone`]} onChange={updateNumericStudentInfo(`${prefix}Phone`)} /></label>
+  const renderApplicantFields = () => (
+    <div className="student-info-fields compact">
+      <label className="wide">Nama<input value={studentInfo.name} onChange={updateStudentName} /></label>
+      <label>No. Kad Pengenalan<input inputMode="numeric" maxLength={12} pattern="[0-9]*" value={studentInfo.icNo} onChange={updateNumericStudentInfo("icNo")} /></label>
+      <label>Alamat E-mel<input type="email" value={studentInfo.email} onChange={updateStudentInfo("email")} /></label>
+      <label>No. Telefon<input inputMode="numeric" pattern="[0-9]*" value={studentInfo.phone} onChange={updateNumericStudentInfo("phone")} /></label>
+      <label className="wide">Alamat Surat Menyurat<textarea rows="3" value={studentInfo.address} onChange={updateStudentInfo("address")} /></label>
+      <label className="wide">Institusi Pengajian<input value={studentInfo.institution} onChange={updateStudentInfo("institution")} /></label>
+      <label className="wide">Program / Kursus<input value={studentInfo.program} onChange={updateStudentInfo("program")} /></label>
     </div>
   );
 
-  const isAddressTab = activeInfoTab === "Alamat 1" || activeInfoTab === "Alamat 2";
-  const formTitle = activeInfoTab === "Alamat 1" ? "Alamat Tetap" : activeInfoTab === "Alamat 2" ? "Alamat Surat Menyurat" : "Maklumat Peribadi";
-  const nextInfoTab = activeInfoTab === "Maklumat Peribadi" ? "Alamat 1" : activeInfoTab === "Alamat 1" ? "Alamat 2" : null;
+  const renderAcademicFields = () => (
+    <div className="student-info-fields compact">
+      <label>Tahap Pengajian
+        <select value={studentInfo.academicLevel} onChange={updateStudentInfo("academicLevel")}>
+          <option value="">Sila pilih</option>
+          {academicLevelOptions.map((option) => <option key={option}>{option}</option>)}
+        </select>
+      </label>
+      <label>Tahun Pengajian<input placeholder="Contoh: Tahun 3" value={studentInfo.currentYear} onChange={updateStudentInfo("currentYear")} /></label>
+      <label>Semester<input placeholder="Contoh: Semester 5" value={studentInfo.semester} onChange={updateStudentInfo("semester")} /></label>
+      <label>CGPA / Keputusan Terkini<input placeholder="Contoh: 3.45" value={studentInfo.cgpa} onChange={updateStudentInfo("cgpa")} /></label>
+      <label className="wide">Nama Penyelia / Penyelaras Universiti <em>(tidak wajib)</em><input value={studentInfo.supervisorName} onChange={updateStudentInfo("supervisorName")} /></label>
+      <label>Emel Penyelia <em>(tidak wajib)</em><input type="email" value={studentInfo.supervisorEmail} onChange={updateStudentInfo("supervisorEmail")} /></label>
+      <label>No. Telefon Penyelia <em>(tidak wajib)</em><input inputMode="numeric" pattern="[0-9]*" value={studentInfo.supervisorPhone} onChange={updateNumericStudentInfo("supervisorPhone")} /></label>
+    </div>
+  );
+
+  const renderDocumentFields = () => (
+    <div className="student-document-grid">
+      {documentFields.map((document) => (
+        <section className="student-document-card" key={document.field}>
+          <input
+            ref={(element) => {
+              documentInputRefs.current[document.field] = element;
+            }}
+            accept={document.accept}
+            type="file"
+            onChange={updateDocument(document.field)}
+          />
+          <div>
+            <Icon>{studentInfo[document.field] ? "task" : "upload_file"}</Icon>
+            <strong>{document.label}</strong>
+            <span>{studentInfo[document.field] || document.hint}</span>
+          </div>
+          <div className="student-document-actions">
+            <button type="button" onClick={() => documentInputRefs.current[document.field]?.click()}>
+              <Icon>upload_file</Icon>
+              Muat Naik
+            </button>
+            <button disabled={!studentInfo[document.field]} type="button" onClick={() => clearDocument(document.field)}>
+              <Icon>delete</Icon>
+              Padam
+            </button>
+          </div>
+        </section>
+      ))}
+    </div>
+  );
+
+  const nextInfoTab = infoTabs[infoTabs.indexOf(activeInfoTab) + 1] || null;
 
   return (
     <div className={`applicant-profile-page ${sidebarOpen ? "sidebar-open" : "sidebar-collapsed"}`}>
@@ -391,14 +296,14 @@ export default function ApplicantInternshipApplicationPage() {
       <div className="profile-main-area">
         <ProfileContentHeader displayName={displayName} email={email} photoUrl={user.profile_photo_url} />
         <main className="profile-shell internship-application-shell">
-          <section className="student-info-panel" aria-label="Maklumat asas pelajar">
+          <section className="student-info-panel" aria-label="Maklumat permohonan latihan industri">
             <header className="student-info-titlebar">
-              <h1>Maklumat Asas Pelajar</h1>
+              <h1>Permohonan Latihan Industri</h1>
             </header>
 
             <div className="student-info-workspace">
               <div className="student-info-content">
-                <nav className="student-info-tabs" aria-label="Bahagian maklumat pelajar">
+                <nav className="student-info-tabs" aria-label="Bahagian permohonan latihan industri">
                   {infoTabs.map((tab) => (
                     <button
                       className={activeInfoTab === tab ? "active" : ""}
@@ -412,82 +317,12 @@ export default function ApplicantInternshipApplicationPage() {
                 </nav>
 
                 <form className="student-info-form" onSubmit={handleUpdate}>
-                  <h2>{formTitle}</h2>
+                  <h2>{activeInfoTab}</h2>
                   {notice ? <p className={`student-info-notice ${noticeStatus}`}>{notice}</p> : null}
 
-                  {isAddressTab ? (
-                    renderAddressFields(activeInfoTab === "Alamat 1" ? "address1" : "address2")
-                  ) : (
-                    <div className="student-info-layout">
-                      <div className="student-info-fields">
-                        <label className="wide">Nama<input value={studentInfo.name} onChange={updateStudentName} /></label>
-                        <label>No. Kad Pengenalan<input inputMode="numeric" pattern="[0-9]*" value={studentInfo.icNo} onChange={updateNumericStudentInfo("icNo")} /></label>
-                        <label className="student-plain-select-label">Jantina
-                          <select value={studentInfo.gender} onChange={updateStudentInfo("gender")}>
-                            <option value="">Sila pilih</option>
-                            {selectOptions.gender.map((option) => <option key={option}>{option}</option>)}
-                          </select>
-                        </label>
-                        <label className="student-plain-select-label">Etnik
-                          <select value={studentInfo.ethnicity} onChange={updateStudentInfo("ethnicity")}>
-                            <option value="">Sila pilih</option>
-                            {selectOptions.ethnicity.map((option) => <option key={option}>{option}</option>)}
-                          </select>
-                        </label>
-                        <label className="student-plain-select-label">Status Bumiputera
-                          <select value={studentInfo.nativeStatus} onChange={updateStudentInfo("nativeStatus")}>
-                            <option value="">Sila pilih</option>
-                            {selectOptions.nativeStatus.map((option) => <option key={option}>{option}</option>)}
-                          </select>
-                        </label>
-                        <label>Status Kewarganegaraan Malaysia<select value={studentInfo.citizenship} onChange={updateStudentInfo("citizenship")}><option value="">Sila pilih</option>{selectOptions.citizenship.map((option) => <option key={option}>{option}</option>)}</select></label>
-                        <label>Negara Kewarganegaraan<select value={studentInfo.citizenshipCountry} onChange={updateStudentInfo("citizenshipCountry")}><option value="">Sila pilih</option>{selectOptions.citizenshipCountry.map((option) => <option key={option}>{option}</option>)}</select></label>
-                        <label>Agama<select value={studentInfo.religion} onChange={updateStudentInfo("religion")}><option value="">Sila pilih</option>{selectOptions.religion.map((option) => <option key={option}>{option}</option>)}</select></label>
-                        <label>Status Perkahwinan
-                          <select value={studentInfo.maritalStatus} onChange={updateStudentInfo("maritalStatus")}>
-                            <option value="">Sila pilih</option>
-                            {maritalStatusOptions.map((option) => <option key={option}>{option}</option>)}
-                          </select>
-                        </label>
-                        <label>Negeri Kelahiran<select value={studentInfo.stateOfBirth} onChange={updateStudentInfo("stateOfBirth")}><option value="">Sila pilih</option>{selectOptions.state.map((option) => <option key={option}>{option}</option>)}</select></label>
-                        <label>Negeri Kediaman<select value={studentInfo.residenceState} onChange={updateStudentInfo("residenceState")}><option value="">Sila pilih</option>{selectOptions.state.map((option) => <option key={option}>{option}</option>)}</select></label>
-                        <label>Tarikh Lahir<input type="date" value={studentInfo.dateOfBirth} onChange={updateStudentInfo("dateOfBirth")} /></label>
-                        <label>Tajaan<select value={studentInfo.sponsorship} onChange={updateStudentInfo("sponsorship")}><option value="">Sila pilih</option>{selectOptions.sponsorship.map((option) => <option key={option}>{option}</option>)}</select></label>
-                        <label>Kelayakan Kemasukan<select value={studentInfo.qualification} onChange={updateStudentInfo("qualification")}><option value="">Sila pilih</option>{selectOptions.qualification.map((option) => <option key={option}>{option}</option>)}</select></label>
-                        <label>No. Telefon<input inputMode="numeric" pattern="[0-9]*" value={studentInfo.phone} onChange={updateNumericStudentInfo("phone")} /></label>
-                        <label className="wide">Alamat E-mel<input type="email" value={studentInfo.email} onChange={updateStudentInfo("email")} /></label>
-                      </div>
-
-                      <aside className="student-info-photo-card">
-                        <div className="student-passport-upload">
-                          {passportPhoto?.previewUrl ? (
-                            <img src={passportPhoto.previewUrl} alt="Gambar pasport pelajar" />
-                          ) : (
-                            <span>
-                              <Icon>upload_file</Icon>
-                              <b>Muat naik gambar pasport</b>
-                              <small>3.5 cm x 5.0 cm</small>
-                            </span>
-                          )}
-                        </div>
-                        <input className="student-passport-input" ref={passportPhotoInputRef} accept=".jpg" type="file" onChange={updatePassportPhoto} />
-                        <div className="student-passport-actions">
-                          <button type="button" onClick={openPassportPhotoPicker}>
-                            <Icon>upload_file</Icon>
-                            Muat Naik
-                          </button>
-                          <button disabled={!passportPhoto} type="button" onClick={deletePassportPhoto}>
-                            <Icon>delete</Icon>
-                            Padam
-                          </button>
-                        </div>
-                        <p>
-                          <strong>Nota</strong>
-                          <span>Sila pastikan gambar yang dimuatnaik adalah dalam format .jpg</span>
-                        </p>
-                      </aside>
-                    </div>
-                  )}
+                  {activeInfoTab === "Maklumat Pemohon" ? renderApplicantFields() : null}
+                  {activeInfoTab === "Maklumat Akademik" ? renderAcademicFields() : null}
+                  {activeInfoTab === "Dokumen Sokongan" ? renderDocumentFields() : null}
 
                   <div className="student-info-actions">
                     <button className="student-info-update" type="submit">Kemas Kini</button>

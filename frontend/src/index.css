@@ -6334,6 +6334,12 @@ body:has(.applicant-profile-page) {
   gap: 11px;
 }
 
+.student-info-fields.compact {
+  max-width: 900px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 18px;
+}
+
 .student-info-fields label,
 .student-info-note {
   color: #4b5d52;
@@ -6349,6 +6355,21 @@ body:has(.applicant-profile-page) {
 
 .student-info-fields label.wide {
   max-width: 595px;
+}
+
+.student-info-fields.compact label {
+  max-width: none;
+}
+
+.student-info-fields.compact label.wide {
+  grid-column: 1 / -1;
+  max-width: none;
+}
+
+.student-info-fields label em {
+  color: #64736b;
+  font-style: normal;
+  font-weight: 650;
 }
 
 .student-address-fields {
@@ -6368,7 +6389,8 @@ body:has(.applicant-profile-page) {
 }
 
 .student-info-fields input,
-.student-info-fields select {
+.student-info-fields select,
+.student-info-fields textarea {
   width: 100%;
   min-height: 34px;
   border: 1px solid #cfded6;
@@ -6382,9 +6404,15 @@ body:has(.applicant-profile-page) {
 }
 
 .student-info-fields input:focus,
-.student-info-fields select:focus {
+.student-info-fields select:focus,
+.student-info-fields textarea:focus {
   border-color: var(--student-green);
   box-shadow: 0 0 0 3px rgba(134, 239, 172, .35);
+}
+
+.student-info-fields textarea {
+  resize: vertical;
+  line-height: 1.5;
 }
 
 .student-search-select {
@@ -6631,6 +6659,93 @@ body:has(.applicant-profile-page) {
   min-width: 0;
 }
 
+.student-document-grid {
+  display: grid;
+  max-width: 960px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.student-document-card {
+  display: grid;
+  min-height: 190px;
+  align-content: space-between;
+  gap: 18px;
+  border: 1px solid #cfe8da;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, .9);
+  padding: 18px;
+  box-shadow: 0 10px 22px rgba(17, 24, 39, .05);
+}
+
+.student-document-card input {
+  display: none;
+}
+
+.student-document-card > div:first-of-type {
+  display: grid;
+  gap: 8px;
+}
+
+.student-document-card .material-symbols-outlined {
+  color: var(--student-green);
+  font-size: 28px;
+}
+
+.student-document-card strong {
+  color: var(--student-ink);
+  font-size: 14px;
+  font-weight: 850;
+}
+
+.student-document-card span {
+  overflow-wrap: anywhere;
+  color: #64736b;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.student-document-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.student-document-actions button {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid #bdebd1;
+  border-radius: 7px;
+  background: #ffffff;
+  color: var(--student-green);
+  padding: 0 12px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.student-document-actions button:first-child {
+  border-color: var(--student-green);
+  background: var(--student-green);
+  color: #ffffff;
+}
+
+.student-document-actions button:disabled {
+  border-color: #d7e8df;
+  background: #f8fafc;
+  color: #9aaca2;
+  cursor: not-allowed;
+}
+
+.student-document-actions .material-symbols-outlined {
+  color: currentColor;
+  font-size: 16px;
+}
+
 .student-info-actions {
   display: flex;
   flex-wrap: wrap;
@@ -6677,7 +6792,8 @@ body:has(.applicant-profile-page) {
 }
 
 @media (max-width: 1100px) {
-  .student-info-layout {
+  .student-info-layout,
+  .student-document-grid {
     grid-template-columns: 1fr;
   }
 
@@ -6696,7 +6812,8 @@ body:has(.applicant-profile-page) {
     padding: 14px;
   }
 
-  .student-info-fields {
+  .student-info-fields,
+  .student-info-fields.compact {
     grid-template-columns: 1fr;
   }
 
