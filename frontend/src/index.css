@@ -9546,6 +9546,11 @@ body:has(.applicant-profile-page) {
   pointer-events: none;
 }
 
+.superadmin-compact-control .material-symbols-outlined {
+  font-size: 18px;
+  line-height: 18px;
+}
+
 .superadmin-personal-mirror .personal-field input,
 .superadmin-personal-mirror .personal-field textarea,
 .superadmin-personal-mirror .personal-select-button,
