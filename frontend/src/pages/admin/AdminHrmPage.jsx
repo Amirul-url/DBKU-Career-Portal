@@ -1542,6 +1542,7 @@ function InternshipApplicationDetailPage({ application, loading, onBack, onRevie
   const [activeTab, setActiveTab] = useState("Maklumat Peribadi Pemohon");
 
   const isFinal = application ? ["shortlisted", "rejected"].includes(application.status) : false;
+  const canShowReviewActions = application && activeTab === "Dokumen Sokongan";
 
   return (
     <section className="hrm-application-detail-page">
@@ -1555,7 +1556,7 @@ function InternshipApplicationDetailPage({ application, loading, onBack, onRevie
         onBack={onBack}
         onTabChange={setActiveTab}
       />
-      {application ? (
+      {canShowReviewActions ? (
         <footer className="hrm-application-detail-actions">
           <button
             className="hrm-primary"
