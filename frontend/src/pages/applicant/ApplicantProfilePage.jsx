@@ -981,7 +981,7 @@ export function ApplicantAddressMap({ address, addressError, latitude, locationE
   const addressQuery = [mapAddress, "Malaysia"].filter(Boolean).join(", ");
 
   useEffect(() => {
-    const nextAddress = formatMapAddressText(address);
+    const nextAddress = String(address || "");
     if (nextAddress !== mapAddress) {
       setMapAddress(nextAddress);
       selectedAddressRef.current = nextAddress;
@@ -1300,7 +1300,7 @@ export function ApplicantAddressMap({ address, addressError, latitude, locationE
   const handleMapAddressChange = (event) => {
     if (readOnly) return;
 
-    const nextAddress = formatMapAddressText(event.target.value);
+    const nextAddress = event.target.value;
 
     setMapAddress(nextAddress);
     onLocationChange({ address: nextAddress });
