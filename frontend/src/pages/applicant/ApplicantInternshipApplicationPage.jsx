@@ -645,18 +645,25 @@ function getDocumentSummary(studentInfo) {
   return Object.fromEntries(
     documentFields.map((document) => {
       const fileName = studentInfo[document.field] || "";
-      const fileUrl = studentInfo[`${document.field}Url`] || "";
-      return [
-        document.field,
-        fileUrl
-          ? {
-              name: fileName,
-              url: fileUrl,
-            }
-          : fileName,
-      ];
+      return [document.field, fileName];
     }),
   );
+}
+
+function buildApplicationPayload(studentInfo, vacancy, documentFiles) {
+  const payload = new FormData();
+  payload.append("cover_letter", "Permohonan Latihan Industri DBKU");
+  payload.append("profile_data", JSON.stringify(buildApplicationProfileData(studentInfo, vacancy)));
+  payload.append("vacancy", vacancy.id);
+
+  documentFields.forEach((document) => {
+    const uploadedFile = documentFiles[document.field];
+    if (uploadedFile) {
+      payload.append(document.field, uploadedFile);
+    }
+  });
+
+  return payload;
 }
 
 function buildApplicationProfileData(studentInfo, vacancy) {
@@ -692,6 +699,7 @@ export default function ApplicantInternshipApplicationPage() {
   const [validationErrors, setValidationErrors] = useState({});
   const documentInputRefs = useRef({});
   const [studentInfo, setStudentInfo] = useState(() => initialStudentInfo);
+  const [documentFiles, setDocumentFiles] = useState({});
   const [declarationAccepted, setDeclarationAccepted] = useState(false);
   const [isSubmittingApplication, setIsSubmittingApplication] = useState(false);
   const [internshipVacancy, setInternshipVacancy] = useState(null);
@@ -841,24 +849,18 @@ export default function ApplicantInternshipApplicationPage() {
     }
 
     setNotice("");
-    const reader = new FileReader();
-    reader.onload = () => {
-      setStudentInfo((current) => ({
-        ...current,
-        [field]: file.name,
-        [`${field}Url`]: String(reader.result || ""),
-      }));
-    };
-    reader.onerror = () => {
-      setNoticeStatus("error");
-      setNotice("Fail tidak dapat dibaca. Sila pilih fail semula.");
-    };
-    reader.readAsDataURL(file);
+    setDocumentFiles((current) => ({ ...current, [field]: file }));
+    setStudentInfo((current) => ({ ...current, [field]: file.name }));
   };
 
   const clearDocument = (field) => {
     setNotice("");
-    setStudentInfo((current) => ({ ...current, [field]: "", [`${field}Url`]: "" }));
+    setDocumentFiles((current) => {
+      const next = { ...current };
+      delete next[field];
+      return next;
+    });
+    setStudentInfo((current) => ({ ...current, [field]: "" }));
 
     if (documentInputRefs.current[field]) {
       documentInputRefs.current[field].value = "";
@@ -930,19 +932,15 @@ export default function ApplicantInternshipApplicationPage() {
       const applicationsData = await apiRequest("/applications/?type=internship");
       const applications = Array.isArray(applicationsData) ? applicationsData : applicationsData.results || [];
       const existingApplication = applications.find((application) => Number(application.vacancy) === Number(internshipVacancy.id));
-      const payload = {
-        cover_letter: "Permohonan Latihan Industri DBKU",
-        profile_data: buildApplicationProfileData(studentInfo, internshipVacancy),
-        vacancy: internshipVacancy.id,
-      };
+      const payload = buildApplicationPayload(studentInfo, internshipVacancy, documentFiles);
       const application = existingApplication
         ? await apiRequest(`/applications/${existingApplication.id}/`, {
             method: "PATCH",
-            body: JSON.stringify(payload),
+            body: payload,
           })
         : await apiRequest("/applications/", {
             method: "POST",
-            body: JSON.stringify(payload),
+            body: payload,
           });
       const submittedApplication = application.status === "submitted"
         ? application

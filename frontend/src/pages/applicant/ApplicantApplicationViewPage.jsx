@@ -319,7 +319,10 @@ export function InternshipApplicationReadOnlyPanel({
 }) {
   const profileData = application?.profile_data || {};
   const studentInfo = profileData.student_info || {};
-  const documents = profileData.documents || {};
+  const documents = {
+    ...(profileData.documents || {}),
+    ...(application?.document_files || {}),
+  };
   const vacancy = application?.vacancy_detail || {};
   const status = application?.status || "draft";
 

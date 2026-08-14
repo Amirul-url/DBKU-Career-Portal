@@ -1,8 +1,12 @@
 from datetime import date
+import json
+import shutil
+import tempfile
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase, override_settings
 from rest_framework.test import APIClient
 
 from jobs.models import Vacancy
@@ -13,6 +17,9 @@ from .models import CandidateApplication
 
 class CandidateApplicationReferenceNoTests(TestCase):
     def setUp(self):
+        self.media_root = tempfile.mkdtemp()
+        self.media_override = override_settings(MEDIA_ROOT=self.media_root)
+        self.media_override.enable()
         self.vacancy = Vacancy.objects.create(
             title="Permohonan Latihan Industri DBKU",
             vacancy_type="internship",
@@ -21,6 +28,11 @@ class CandidateApplicationReferenceNoTests(TestCase):
             status="open",
         )
         self.user_model = get_user_model()
+
+    def tearDown(self):
+        self.media_override.disable()
+        shutil.rmtree(self.media_root, ignore_errors=True)
+        super().tearDown()
 
     def create_applicant(self, email):
         return self.user_model.objects.create_user(
@@ -86,3 +98,31 @@ class CandidateApplicationReferenceNoTests(TestCase):
 
         self.assertEqual(response.status_code, 201)
         self.assertFalse(Notification.objects.filter(user=applicant).exists())
+
+    def test_internship_document_upload_is_saved_and_returned(self):
+        applicant = self.create_applicant("documents@example.com")
+        client = APIClient()
+        client.force_authenticate(user=applicant)
+        uploaded_file = SimpleUploadedFile(
+            "surat-institusi.pdf",
+            b"%PDF-1.4\n% test\n",
+            content_type="application/pdf",
+        )
+
+        response = client.post(
+            "/api/applications/",
+            {
+                "vacancy": self.vacancy.id,
+                "cover_letter": "Permohonan Latihan Industri DBKU",
+                "profile_data": json.dumps({"documents": {"universityLetterFile": "surat-institusi.pdf"}}),
+                "universityLetterFile": uploaded_file,
+            },
+            format="multipart",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        application = CandidateApplication.objects.get(id=response.data["id"])
+        self.assertTrue(application.internship_university_letter.name.startswith("internship_documents/"))
+        self.assertEqual(application.internship_university_letter_original_name, "surat-institusi.pdf")
+        self.assertEqual(response.data["document_files"]["universityLetterFile"]["name"], "surat-institusi.pdf")
+        self.assertIn("/media/internship_documents/", response.data["document_files"]["universityLetterFile"]["url"])
