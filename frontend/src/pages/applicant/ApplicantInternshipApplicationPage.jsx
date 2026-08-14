@@ -969,8 +969,16 @@ export default function ApplicantInternshipApplicationPage() {
       const applicationsData = await apiRequest("/applications/?type=internship");
       const applications = Array.isArray(applicationsData) ? applicationsData : applicationsData.results || [];
       const existingApplication = editableApplication
-        || applications.find((application) => String(application.id) === String(editApplicationId))
-        || applications.find((application) => Number(application.vacancy) === Number(internshipVacancy?.id));
+        || applications.find(
+          (application) =>
+            String(application.id) === String(editApplicationId)
+            && editableApplicationStatuses.has(application.status || "draft"),
+        )
+        || applications.find(
+          (application) =>
+            Number(application.vacancy) === Number(internshipVacancy?.id)
+            && editableApplicationStatuses.has(application.status || "draft"),
+        );
       const targetVacancy = existingApplication?.vacancy_detail
         || internshipVacancy
         || (existingApplication?.vacancy ? { id: existingApplication.vacancy } : null);

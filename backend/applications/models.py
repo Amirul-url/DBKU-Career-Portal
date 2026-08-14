@@ -49,12 +49,6 @@ class CandidateApplication(models.Model):
 
     class Meta:
         ordering = ["-updated_at"]
-        constraints = [
-            models.UniqueConstraint(
-                fields=["vacancy", "applicant"],
-                name="unique_application_per_vacancy_applicant",
-            )
-        ]
         indexes = [
             models.Index(fields=["status", "-updated_at"], name="cand_status_updated_idx"),
             models.Index(fields=["applicant", "-updated_at"], name="cand_applicant_updated_idx"),

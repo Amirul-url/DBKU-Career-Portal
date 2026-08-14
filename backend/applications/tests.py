@@ -242,6 +242,45 @@ class CandidateApplicationReferenceNoTests(TestCase):
         application.refresh_from_db()
         self.assertEqual(application.status, "incomplete")
 
+    def test_applicant_can_create_new_application_after_rejection(self):
+        applicant = self.create_applicant("new-after-reject@example.com")
+        CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=self.vacancy,
+            status="rejected",
+        )
+        client = APIClient()
+        client.force_authenticate(user=applicant)
+
+        response = client.post(
+            "/api/applications/",
+            {"vacancy": self.vacancy.id, "cover_letter": "Permohonan baharu."},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(CandidateApplication.objects.filter(applicant=applicant, vacancy=self.vacancy).count(), 2)
+        self.assertNotEqual(response.data["status"], "rejected")
+
+    def test_applicant_cannot_create_duplicate_active_application(self):
+        applicant = self.create_applicant("duplicate-active@example.com")
+        CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=self.vacancy,
+            status="submitted",
+        )
+        client = APIClient()
+        client.force_authenticate(user=applicant)
+
+        response = client.post(
+            "/api/applications/",
+            {"vacancy": self.vacancy.id, "cover_letter": "Permohonan kedua."},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(CandidateApplication.objects.filter(applicant=applicant, vacancy=self.vacancy).count(), 1)
+
     @override_settings(NOTIFICATION_EMAIL_ENABLED=True, WHATSAPP_ENABLED=True)
     @patch("applications.services.send_whatsapp_message")
     @patch("notifications.services.send_notification_email")

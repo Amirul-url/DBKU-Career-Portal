@@ -8,6 +8,9 @@ from jobs.serializers import VacancySerializer
 from .models import CandidateApplication
 
 
+REAPPLY_ALLOWED_STATUSES = {"rejected", "withdrawn"}
+
+
 class CandidateApplicationSerializer(serializers.ModelSerializer):
     vacancy_detail = VacancySerializer(source="vacancy", read_only=True)
     applicant_name = serializers.SerializerMethodField()
@@ -87,6 +90,28 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
             except json.JSONDecodeError as error:
                 raise serializers.ValidationError("Format profile_data tidak sah.") from error
         return value
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if self.instance:
+            return attrs
+
+        request = self.context.get("request")
+        user = getattr(request, "user", None)
+        vacancy = attrs.get("vacancy")
+        if not user or not getattr(user, "is_authenticated", False) or not vacancy:
+            return attrs
+
+        has_active_application = CandidateApplication.objects.filter(
+            applicant=user,
+            vacancy=vacancy,
+        ).exclude(status__in=REAPPLY_ALLOWED_STATUSES).exists()
+        if has_active_application:
+            raise serializers.ValidationError({
+                "vacancy": "Anda sudah mempunyai permohonan aktif untuk peluang ini.",
+            })
+
+        return attrs
 
     def pop_document_uploads(self, validated_data):
         uploads = {}
