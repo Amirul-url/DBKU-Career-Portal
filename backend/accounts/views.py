@@ -13,7 +13,7 @@ from django.db.models import Q
 from .models import AccountActivity, ApplicantProfileData, LoginSession, User
 from .otp_delivery import OTPDeliveryError, send_password_reset_email, send_password_reset_whatsapp
 from .serializers import AccountActivitySerializer, ForgotPasswordSendSerializer, ForgotPasswordVerifySerializer, InternalHrmAccountSerializer, LoginSerializer, RegisterSerializer, ResetPasswordSerializer, SuperAdminAccountSerializer, UserSerializer
-from .services import build_auth_response, notify_applicant_registration_success
+from .services import build_auth_response, notify_applicant_registration_success, notify_password_reset_success
 from .session_services import close_login_session, close_open_login_sessions
 
 
@@ -86,7 +86,8 @@ def forgot_password_verify_otp_view(request):
 def reset_password_submit_view(request):
     serializer = ResetPasswordSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    serializer.save()
+    user = serializer.save()
+    notify_password_reset_success(user)
     return Response({"message": "Kata laluan berjaya ditetapkan semula."})
 
 

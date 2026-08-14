@@ -9,6 +9,7 @@ from rest_framework.test import APITestCase
 from notifications.models import Notification
 
 from .models import LoginSession, User
+from .otp_delivery import password_reset_cache_key
 
 
 class LoginSessionTests(APITestCase):
@@ -96,9 +97,10 @@ class PasswordResetTests(APITestCase):
             role="applicant",
         )
 
-    @override_settings(NOTIFICATION_EMAIL_ENABLED=True)
+    @override_settings(NOTIFICATION_EMAIL_ENABLED=True, WHATSAPP_ENABLED=False)
+    @patch("accounts.views.notify_password_reset_success")
     @patch("accounts.views.send_password_reset_email")
-    def test_forgot_password_sends_and_verifies_otp_then_resets_password(self, mock_send_email):
+    def test_forgot_password_sends_and_verifies_otp_then_resets_password(self, mock_send_email, mock_reset_notification):
         send_response = self.client.post(
             "/api/auth/forgot-password/send-otp/",
             {"email": "reset@example.com"},
@@ -130,6 +132,34 @@ class PasswordResetTests(APITestCase):
         self.assertEqual(reset_response.status_code, 200)
         self.user.refresh_from_db()
         self.assertTrue(self.user.check_password("NewPassword123!"))
+        mock_reset_notification.assert_called_once_with(self.user)
+
+    @override_settings(NOTIFICATION_EMAIL_ENABLED=True, WHATSAPP_ENABLED=True)
+    @patch("accounts.services.send_whatsapp_message")
+    @patch("notifications.services.send_notification_email")
+    def test_reset_password_notifies_email_and_whatsapp(self, mock_send_email, mock_send_whatsapp):
+        cache.set(password_reset_cache_key("email", "reset@example.com"), "123456", timeout=600)
+
+        response = self.client.post(
+            "/api/auth/reset-password/submit/",
+            {
+                "email": "reset@example.com",
+                "otp": "123456",
+                "password": "NewPassword123!",
+                "password2": "NewPassword123!",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        notification = Notification.objects.get(user=self.user, title="Kata Laluan Berjaya Ditukar")
+        self.assertEqual(
+            notification.message,
+            "Kata laluan Portal Kerjaya DBKU anda telah berjaya ditukar. "
+            "Jika anda tidak membuat perubahan ini, sila hubungi pihak pentadbir dengan segera.",
+        )
+        mock_send_email.assert_called_once()
+        mock_send_whatsapp.assert_called_once_with(self.user.mobile_number, notification.message)
 
     @override_settings(WHATSAPP_ENABLED=True)
     @patch("accounts.views.send_password_reset_whatsapp")

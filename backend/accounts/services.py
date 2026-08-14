@@ -56,3 +56,34 @@ def notify_applicant_registration_success(user):
             logger.exception("Unable to send applicant registration WhatsApp for user %s", user.pk)
 
     return created_notification
+
+
+def build_password_reset_success_message():
+    return {
+        "title": "Kata Laluan Berjaya Ditukar",
+        "message": (
+            "Kata laluan Portal Kerjaya DBKU anda telah berjaya ditukar. "
+            "Jika anda tidak membuat perubahan ini, sila hubungi pihak pentadbir dengan segera."
+        ),
+    }
+
+
+def notify_password_reset_success(user):
+    notification = build_password_reset_success_message()
+    try:
+        created_notification = create_notification(
+            user=user,
+            title=notification["title"],
+            message=notification["message"],
+        )
+    except Exception:
+        logger.exception("Unable to create password reset notification for user %s", user.pk)
+        created_notification = None
+
+    if user.mobile_number and getattr(settings, "WHATSAPP_ENABLED", False):
+        try:
+            send_whatsapp_message(user.mobile_number, notification["message"])
+        except OTPDeliveryError:
+            logger.exception("Unable to send password reset WhatsApp for user %s", user.pk)
+
+    return created_notification
