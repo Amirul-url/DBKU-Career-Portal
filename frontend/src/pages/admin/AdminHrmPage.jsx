@@ -141,6 +141,47 @@ const jobStatusOptions = [
   { value: "expired", label: "Tamat tempoh" },
   { value: "closed", label: "Ditutup" },
 ];
+const internshipPersonalRows = [
+  ["name", "Nama"],
+  ["icNo", "No. Kad Pengenalan Baru"],
+  ["phone", "No. Telefon Bimbit / Telefon Rumah"],
+  ["email", "Alamat Emel"],
+  ["address", "Alamat Surat Menyurat"],
+  ["age", "Umur"],
+  ["birthDate", "Tarikh Lahir"],
+  ["birthPlace", "Tempat Lahir"],
+  ["stateOfBirth", "Negeri Tempat Lahir Pemohon"],
+  ["motherBirthState", "Negeri Tempat Lahir Ibu"],
+  ["fatherBirthState", "Negeri Tempat Lahir Bapa"],
+  ["race", "Bangsa"],
+  ["religion", "Agama"],
+  ["citizenship", "Kewarganegaraan"],
+  ["maritalStatus", "Taraf Perkahwinan"],
+  ["height", "Tinggi"],
+  ["weight", "Berat"],
+  ["disability", "Kelainan Upaya"],
+  ["drivingLicense", "Lesen Memandu"],
+];
+const internshipAcademicRows = [
+  ["institution", "Institusi Pengajian"],
+  ["program", "Program / Kursus"],
+  ["academicLevel", "Tahap Pengajian"],
+  ["totalStudyYears", "Jumlah Tahun Pengajian"],
+  ["totalSemesters", "Jumlah Semester"],
+  ["currentYear", "Tahun Pengajian Terkini"],
+  ["semester", "Semester Terkini"],
+  ["cgpa", "CGPA / Keputusan Terkini"],
+  ["supervisorName", "Nama Penyelaras Program"],
+  ["supervisorEmail", "Emel Penyelaras Program"],
+  ["supervisorPhone", "No. Telefon Penyelaras Program"],
+];
+const internshipDocumentRows = [
+  ["universityLetterFile", "Surat rasmi daripada institusi / kolej / universiti"],
+  ["transcriptFile", "Transkrip akademik terkini"],
+  ["resumeFile", "Curriculum Vitae (CV)"],
+  ["passportPhotoFile", "1 keping gambar berukuran passport"],
+  ["bankAccountFile", "1 salinan muka depan akaun bank"],
+];
 const getJobDisplayStatus = (job) => {
   const isOpen = job.is_open ?? job.status === "open";
   if (isOpen) return "active";
@@ -178,6 +219,7 @@ export default function AdminHrmPage() {
   const [jobActionSaving, setJobActionSaving] = useState(false);
   const [jobDeleteTarget, setJobDeleteTarget] = useState(null);
   const [jobStatusFilter, setJobStatusFilter] = useState("all");
+  const [selectedApplication, setSelectedApplication] = useState(null);
   const routeState = getAdminRouteState(location.pathname);
   const [jobForm, setJobForm] = useState(() => createEmptyJobForm(routeState.vacancyType || "job"));
   const panel = routeState.panel || "dashboard";
@@ -210,9 +252,6 @@ export default function AdminHrmPage() {
     const timeoutId = window.setTimeout(() => setNotice(""), 5000);
     return () => window.clearTimeout(timeoutId);
   }, [notice]);
-  useEffect(() => {
-    setJobStatusFilter("all");
-  }, [activeVacancyType]);
   const dashboardMetrics = useMemo(() => {
     const jobTypesById = new Map(jobs.map((job) => [job.id, job.vacancy_type]));
     const applicationsByType = (type) =>
@@ -913,10 +952,18 @@ export default function AdminHrmPage() {
                     <p>{filteredApplications.length} permohonan direkodkan</p>
                   </div>
                 </header>
-                <ApplicationTable
-                  applications={filteredApplications}
-                  onReview={setReview}
-                />
+                {activeVacancyType === "internship" ? (
+                  <InternshipApplicationsPanel
+                    applications={filteredApplications}
+                    onReview={setReview}
+                    onView={setSelectedApplication}
+                  />
+                ) : (
+                  <ApplicationTable
+                    applications={filteredApplications}
+                    onReview={setReview}
+                  />
+                )}
               </section>
             </>
           )}
@@ -938,6 +985,16 @@ export default function AdminHrmPage() {
             onCancel={() => setJobDeleteTarget(null)}
             onConfirm={confirmDeleteJob}
             saving={jobActionSaving}
+          />
+        ) : null}
+        {selectedApplication ? (
+          <InternshipApplicationDetailModal
+            application={selectedApplication}
+            onClose={() => setSelectedApplication(null)}
+            onReview={async (id, status) => {
+              await setReview(id, status);
+              setSelectedApplication(null);
+            }}
           />
         ) : null}
       </main>
@@ -1001,14 +1058,6 @@ function JobManagementTable({ jobs, applications, emptyMessage = "", itemLabel =
   const visibleJobs = jobs.slice(startIndex, startIndex + rowsPerPage);
   const visibleStart = jobs.length ? startIndex + 1 : 0;
   const visibleEnd = Math.min(startIndex + rowsPerPage, jobs.length);
-
-  useEffect(() => {
-    setCurrentPage((page) => Math.min(page, totalPages));
-  }, [totalPages]);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [itemLabel]);
 
   if (!jobs.length)
     return <p className="hrm-empty">{emptyMessage || `Belum ada ${itemLabel} disiarkan.`}</p>;
@@ -1178,6 +1227,314 @@ function JobDeleteModal({ job, onCancel, onConfirm, saving }) {
             </button>
           </footer>
         </div>
+      </section>
+    </div>
+  );
+}
+function getApplicationDateValue(application) {
+  return application?.submitted_at || application?.created_at || "";
+}
+function getDateInputValue(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toISOString().slice(0, 10);
+}
+function formatReferenceNo(application) {
+  const referenceNo = String(application?.reference_no || "").trim();
+  if (!referenceNo) return "Belum dijana";
+  if (referenceNo.startsWith("PK.")) return referenceNo;
+
+  const legacyMatch = referenceNo.match(/^DBKU-CAR-(\d+)$/i);
+  if (!legacyMatch) return referenceNo;
+
+  const applicationDate = new Date(getApplicationDateValue(application));
+  const year = Number.isNaN(applicationDate.getTime()) ? new Date().getFullYear() : applicationDate.getFullYear();
+  const sequence = Number.parseInt(legacyMatch[1], 10);
+  return `PK.${year}-${String(sequence || 1).padStart(4, "0").slice(-4)}`;
+}
+function getInternshipStudentInfo(application) {
+  return application?.profile_data?.student_info || {};
+}
+function getInternshipDocuments(application) {
+  return application?.profile_data?.documents || {};
+}
+function getInternshipInstitution(application) {
+  return getInternshipStudentInfo(application).institution || "Belum diisi";
+}
+function displayText(value) {
+  const text = String(value || "").trim();
+  return text || "-";
+}
+function InternshipApplicationsPanel({ applications, onReview, onView }) {
+  const rowsPerPage = 5;
+  const [referenceFilter, setReferenceFilter] = useState("");
+  const [institutionFilter, setInstitutionFilter] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const statusOptions = useMemo(() => {
+    const statuses = new Set(applications.map((application) => application.status || "submitted"));
+    return Array.from(statuses);
+  }, [applications]);
+  const filteredApplications = useMemo(() => {
+    const referenceQuery = referenceFilter.trim().toLowerCase();
+    const institutionQuery = institutionFilter.trim().toLowerCase();
+    return applications.filter((application) => {
+      const referenceNo = formatReferenceNo(application).toLowerCase();
+      const institution = getInternshipInstitution(application).toLowerCase();
+      const applicationDate = getDateInputValue(getApplicationDateValue(application));
+      return (
+        (!referenceQuery || referenceNo.includes(referenceQuery)) &&
+        (!institutionQuery || institution.includes(institutionQuery)) &&
+        (!dateFilter || applicationDate === dateFilter) &&
+        (statusFilter === "all" || (application.status || "submitted") === statusFilter)
+      );
+    });
+  }, [applications, dateFilter, institutionFilter, referenceFilter, statusFilter]);
+  const totalPages = Math.max(1, Math.ceil(filteredApplications.length / rowsPerPage));
+  const activePage = Math.min(currentPage, totalPages);
+  const startIndex = (activePage - 1) * rowsPerPage;
+  const visibleApplications = filteredApplications.slice(startIndex, startIndex + rowsPerPage);
+  const visibleStart = filteredApplications.length ? startIndex + 1 : 0;
+  const visibleEnd = Math.min(startIndex + rowsPerPage, filteredApplications.length);
+
+  const resetFilters = () => {
+    setReferenceFilter("");
+    setInstitutionFilter("");
+    setDateFilter("");
+    setStatusFilter("all");
+    setCurrentPage(1);
+  };
+
+  return (
+    <section className="hrm-internship-applications-card">
+      <div className="applicant-table-toolbar hrm-internship-toolbar">
+        <div>
+          <h2>Senarai permohonan</h2>
+          <p>Papar 5 permohonan setiap halaman.</p>
+        </div>
+        <div className="applicant-table-controls hrm-internship-filters">
+          <label>
+            <span>No. Rujukan</span>
+            <input
+              value={referenceFilter}
+              placeholder="Contoh: PK.2026-0001"
+              onChange={(event) => {
+                setReferenceFilter(event.target.value);
+                setCurrentPage(1);
+              }}
+            />
+          </label>
+          <label>
+            <span>Nama Institusi</span>
+            <input
+              value={institutionFilter}
+              placeholder="Cari institusi"
+              onChange={(event) => {
+                setInstitutionFilter(event.target.value);
+                setCurrentPage(1);
+              }}
+            />
+          </label>
+          <label>
+            <span>Tarikh</span>
+            <input
+              type="date"
+              value={dateFilter}
+              onChange={(event) => {
+                setDateFilter(event.target.value);
+                setCurrentPage(1);
+              }}
+            />
+          </label>
+          <label>
+            <span>Status</span>
+            <select
+              value={statusFilter}
+              onChange={(event) => {
+                setStatusFilter(event.target.value);
+                setCurrentPage(1);
+              }}
+            >
+              <option value="all">Semua status</option>
+              {statusOptions.map((status) => (
+                <option key={status} value={status}>
+                  {statusLabel[status] || status}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button className="hrm-filter-reset" type="button" onClick={resetFilters}>
+            Set semula
+          </button>
+        </div>
+      </div>
+      <div className="applicant-applications-table-wrap">
+        <table className="applicant-applications-table hrm-internship-applications-table">
+          <thead>
+            <tr>
+              <th>No. Rujukan</th>
+              <th>Calon</th>
+              <th>Nama Institusi</th>
+              <th>Tarikh</th>
+              <th>Status</th>
+              <th>Tindakan</th>
+            </tr>
+          </thead>
+          <tbody>
+            {visibleApplications.length ? (
+              visibleApplications.map((application) => {
+                const isFinal = ["shortlisted", "rejected"].includes(application.status);
+                return (
+                  <tr key={application.id}>
+                    <td>{formatReferenceNo(application)}</td>
+                    <td>
+                      <strong>{application.applicant_name || "Pemohon"}</strong>
+                      <small>{application.vacancy_detail?.title || "Permohonan Latihan Industri DBKU"}</small>
+                    </td>
+                    <td>{getInternshipInstitution(application)}</td>
+                    <td>{dateValue(getApplicationDateValue(application))}</td>
+                    <td>
+                      <Badge status={application.status} />
+                    </td>
+                    <td>
+                      <div className="hrm-actions hrm-internship-actions">
+                        <button className="view" type="button" onClick={() => onView(application)}>
+                          Lihat
+                        </button>
+                        <button
+                          className="shortlist"
+                          type="button"
+                          disabled={isFinal}
+                          onClick={() => onReview(application.id, "shortlisted")}
+                        >
+                          Senarai pendek
+                        </button>
+                        <button
+                          className="reject"
+                          type="button"
+                          disabled={isFinal}
+                          onClick={() => onReview(application.id, "rejected")}
+                        >
+                          Tolak
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td className="applicant-table-empty" colSpan="6">
+                  Tiada permohonan latihan industri ditemui.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+      <footer className="applicant-table-pagination">
+        <span>
+          Memaparkan {visibleStart}-{visibleEnd} daripada {filteredApplications.length} permohonan
+        </span>
+        <div>
+          <button
+            type="button"
+            aria-label="Halaman sebelumnya"
+            disabled={activePage === 1}
+            onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+          >
+            &lt;
+          </button>
+          <strong>{activePage} / {totalPages}</strong>
+          <button
+            type="button"
+            aria-label="Halaman seterusnya"
+            disabled={activePage === totalPages}
+            onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+          >
+            &gt;
+          </button>
+        </div>
+      </footer>
+    </section>
+  );
+}
+function InternshipApplicationDetailModal({ application, onClose, onReview }) {
+  const studentInfo = getInternshipStudentInfo(application);
+  const documents = getInternshipDocuments(application);
+  const isFinal = ["shortlisted", "rejected"].includes(application.status);
+  const sections = [
+    ["Maklumat Peribadi Pemohon", internshipPersonalRows, studentInfo],
+    ["Maklumat Akademik", internshipAcademicRows, studentInfo],
+    ["Dokumen Sokongan", internshipDocumentRows, { ...studentInfo, ...documents }],
+  ];
+
+  return (
+    <div className="hrm-modal-backdrop" role="presentation">
+      <section className="hrm-job-modal hrm-internship-detail-modal" role="dialog" aria-modal="true" aria-labelledby="internship-detail-title">
+        <header>
+          <div>
+            <span className="hrm-eyebrow">SEMAKAN PERMOHONAN</span>
+            <h2 id="internship-detail-title">{application.applicant_name || "Pemohon Latihan Industri"}</h2>
+            <p>{formatReferenceNo(application)} - {getInternshipInstitution(application)}</p>
+          </div>
+          <button type="button" onClick={onClose} aria-label="Tutup">x</button>
+        </header>
+        <div className="hrm-internship-detail-body">
+          <section className="student-readonly-summary hrm-internship-summary">
+            <div>
+              <span>No. Rujukan</span>
+              <strong>{formatReferenceNo(application)}</strong>
+            </div>
+            <div>
+              <span>Permohonan</span>
+              <strong>{application.vacancy_detail?.title || "Permohonan Latihan Industri DBKU"}</strong>
+            </div>
+            <div>
+              <span>Tarikh</span>
+              <strong>{dateValue(getApplicationDateValue(application))}</strong>
+            </div>
+            <div>
+              <span>Status</span>
+              <strong><Badge status={application.status} /></strong>
+            </div>
+          </section>
+
+          {sections.map(([title, rows, values]) => (
+            <section className="hrm-internship-detail-section" key={title}>
+              <h3>{title}</h3>
+              <div className="hrm-internship-detail-grid">
+                {rows.map(([field, label]) => (
+                  <div key={field}>
+                    <span>{label}</span>
+                    <strong>{displayText(values[field])}</strong>
+                  </div>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+        <footer className="hrm-internship-detail-footer">
+          <button className="hrm-secondary" type="button" onClick={onClose}>Tutup</button>
+          <button
+            className="hrm-primary"
+            type="button"
+            disabled={isFinal}
+            onClick={() => onReview(application.id, "shortlisted")}
+          >
+            Senarai pendek
+          </button>
+          <button
+            className="hrm-danger"
+            type="button"
+            disabled={isFinal}
+            onClick={() => onReview(application.id, "rejected")}
+          >
+            Tolak
+          </button>
+        </footer>
       </section>
     </div>
   );

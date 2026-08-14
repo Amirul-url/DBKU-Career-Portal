@@ -9765,3 +9765,186 @@ body:has(.applicant-profile-page) {
 @media (max-width: 600px) { .superadmin-main { padding:18px; }.superadmin-topbar { align-items:flex-start; }.superadmin-topbar h1 { font-size:21px; }.superadmin-user div { display:none; }.superadmin-welcome { padding:24px; }.superadmin-welcome h2 { font-size:21px; }.superadmin-welcome > .material-symbols-outlined { display:none; }.superadmin-stat-grid { grid-template-columns:1fr; } }
 @media (max-width: 720px) { .superadmin-account-form { grid-template-columns:1fr; gap:18px; padding:20px; } }
 .fas-super-page{display:flex;min-width:1180px;min-height:100vh;background:#f8fafc;color:#0f172a}.fas-super-side{width:350px;flex:none;background:#fff;border-right:1px solid #dce3ed}.fas-super-brand{height:70px;display:flex;align-items:center;gap:10px;padding:0 18px;border-bottom:1px solid #dce3ed}.fas-super-brand img{width:36px;height:36px;object-fit:contain}.fas-super-brand strong,.fas-super-brand small{display:block}.fas-super-brand strong{font-size:18px}.fas-super-brand small{font-size:12px;color:#526786}.fas-super-brand button{margin-left:auto;border:1px solid #d6dfeb;background:#fff;border-radius:6px;padding:6px}.fas-super-side nav{padding:10px 15px}.fas-super-side nav p{margin:20px 16px 9px;color:#8da0bf;font-size:13px;font-weight:900}.fas-super-side nav button{display:flex;width:100%;align-items:center;gap:16px;border:0;border-radius:7px;background:transparent;padding:14px 17px;color:#020c20;font-size:15px;text-align:left}.fas-super-side nav button.active{background:#e7fbf1}.fas-super-side nav button .material-symbols-outlined{font-size:25px}.fas-super-work{width:calc(100% - 350px)}.fas-super-work>header{height:70px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #dce3ed;background:#fff;padding:0 30px}.fas-super-work>header>div{display:flex;align-items:center;gap:10px}.fas-super-work>header button{display:inline-flex;align-items:center;gap:6px;border:0;background:transparent;color:#526786;font-weight:800;padding:8px}.fas-super-work>header .fas-lang-active{border-radius:6px;background:#007d41;color:#fff}.fas-super-work main{padding:25px 30px;max-width:1600px}.fas-super-work h1{margin:0;font-size:27px}.fas-description{margin:6px 0 22px;color:#526786}.fas-account-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.fas-account-card,.fas-dashboard-bottom section,.fas-filter,.fas-table-card{border:1px solid #dce3ed;border-radius:7px;background:#fff}.fas-account-card h2{display:flex;align-items:center;gap:14px;margin:0;border-bottom:1px solid #dce3ed;padding:14px 16px;font-size:17px}.fas-account-card h2 span{display:inline-flex;padding:9px;border-radius:8px;background:#e7fbf1;color:#00834a}.fas-account-card>div{display:flex;justify-content:space-between;padding:17px;color:#526786}.fas-account-card>div strong{font-size:25px;color:#000}.fas-dashboard-bottom{display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-top:22px}.fas-dashboard-bottom section{min-height:230px}.fas-dashboard-bottom h2,.fas-dashboard-bottom p{margin:0;padding:15px 17px}.fas-dashboard-bottom h2{font-size:17px}.fas-dashboard-bottom p{border-bottom:1px solid #dce3ed;color:#526786}.fas-empty{padding:24px 17px;color:#64748b}.fas-access{margin:17px;border:1px solid #dce3ed;border-radius:6px;padding:17px;color:#263c5d}.fas-page-heading{display:flex;align-items:flex-start;justify-content:space-between}.fas-primary{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:6px;background:#00834a;color:#fff;padding:11px 16px;font-weight:900}.fas-filter{display:flex;gap:13px;padding:18px;margin-bottom:20px}.fas-filter input{flex:1;border:1px solid #cbd8e8;border-radius:6px;padding:0 13px;font:inherit}.fas-filter>button:not(.fas-primary){border:1px solid #cbd8e8;border-radius:6px;background:#fff;padding:0 15px}.fas-table-card h2,.fas-table-card>p{margin:0;padding:17px}.fas-table-card h2{font-size:17px}.fas-table-card>p{border-bottom:1px solid #dce3ed;color:#526786}.fas-hrm-form{display:grid;gap:13px;max-width:680px;padding:22px}.fas-hrm-form label{display:grid;gap:5px;font-size:13px;font-weight:800}.fas-hrm-form input{height:42px;border:1px solid #cbd8e8;border-radius:5px;padding:0 10px}.fas-hrm-form p{margin:0;color:#00834a;font-weight:800}@media(max-width:900px){.fas-super-page{min-width:0}.fas-super-side{width:72px}.fas-super-brand div,.fas-super-side nav button{font-size:0}.fas-super-brand{padding:0;justify-content:center}.fas-super-brand button{display:none}.fas-super-work{width:calc(100% - 72px)}.fas-account-cards,.fas-dashboard-bottom{grid-template-columns:1fr}.fas-super-work main{padding:18px}.fas-super-work>header{padding:0 16px}}
+
+.hrm-internship-applications-card {
+  overflow: hidden;
+  border: 1px solid #c9f5de;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.hrm-internship-toolbar {
+  align-items: flex-start;
+}
+
+.hrm-internship-filters {
+  max-width: 920px;
+}
+
+.hrm-internship-filters label {
+  min-width: 160px;
+}
+
+.hrm-internship-filters input,
+.hrm-internship-filters select {
+  min-height: 42px;
+  border: 1px solid #bfd8cb;
+  border-radius: 7px;
+  background: #ffffff;
+  padding: 0 12px;
+  color: #102218;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.hrm-internship-filters input:focus,
+.hrm-internship-filters select:focus {
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px #dcfce7;
+  outline: 0;
+}
+
+.hrm-filter-reset {
+  align-self: end;
+  min-height: 42px;
+  border: 1px solid #bfd8cb;
+  border-radius: 7px;
+  background: #ffffff;
+  padding: 0 13px;
+  color: #52615a;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.hrm-internship-applications-table {
+  min-width: 1080px;
+}
+
+.hrm-internship-applications-table td strong,
+.hrm-internship-applications-table td small {
+  display: block;
+}
+
+.hrm-internship-applications-table td small {
+  margin-top: 4px;
+  color: #718478;
+  font-size: 12px;
+}
+
+.hrm-internship-actions {
+  flex-wrap: wrap;
+  min-width: 260px;
+}
+
+.hrm-actions .view {
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  color: #1769aa;
+}
+
+.hrm-internship-detail-modal {
+  width: min(1120px, 100%);
+}
+
+.hrm-internship-detail-modal > header p {
+  margin: 7px 0 0;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.hrm-internship-detail-body {
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+}
+
+.hrm-internship-summary {
+  margin: 0;
+}
+
+.hrm-internship-detail-section {
+  border: 1px solid #dfece5;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.hrm-internship-detail-section h3 {
+  margin: 0;
+  border-bottom: 1px solid #e8f0eb;
+  padding: 14px 16px;
+  color: #0f172a;
+  font-size: 16px;
+}
+
+.hrm-internship-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+}
+
+.hrm-internship-detail-grid div {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  border: 0;
+  border-right: 1px solid #edf3ef;
+  border-bottom: 1px solid #edf3ef;
+  border-radius: 0;
+  background: #ffffff;
+  padding: 13px 16px;
+}
+
+.hrm-internship-detail-grid span {
+  color: #64766d;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.hrm-internship-detail-grid strong {
+  min-width: 0;
+  color: #0f172a;
+  font-size: 13px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.hrm-internship-detail-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  border-top: 1px solid #e8f0eb;
+  padding: 16px 22px;
+}
+
+.hrm-internship-detail-footer button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+@media (max-width: 900px) {
+  .hrm-internship-toolbar {
+    display: grid;
+  }
+
+  .hrm-internship-filters {
+    justify-content: stretch;
+  }
+
+  .hrm-internship-filters label,
+  .hrm-filter-reset {
+    width: 100%;
+  }
+
+  .hrm-internship-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hrm-internship-detail-footer {
+    flex-wrap: wrap;
+  }
+}
