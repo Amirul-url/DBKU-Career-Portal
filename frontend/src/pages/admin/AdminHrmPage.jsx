@@ -1483,7 +1483,7 @@ function InternshipApplicationsPanel({ applications, onView }) {
           <thead>
             <tr>
               <th>No. Rujukan</th>
-              <th>Calon</th>
+              <th>Nama Calon</th>
               <th>Nama Institusi</th>
               <th>Tarikh</th>
               <th>Status</th>
@@ -1495,10 +1495,7 @@ function InternshipApplicationsPanel({ applications, onView }) {
               visibleApplications.map((application) => (
                   <tr key={application.id}>
                     <td>{formatReferenceNo(application)}</td>
-                    <td>
-                      <strong>{application.applicant_name || "Pemohon"}</strong>
-                      <small>{application.vacancy_detail?.title || "Permohonan Latihan Industri DBKU"}</small>
-                    </td>
+                    <td className="hrm-internship-candidate-name">{application.applicant_name || "Pemohon"}</td>
                     <td>{getInternshipInstitution(application)}</td>
                     <td>{dateValue(getApplicationDateValue(application))}</td>
                     <td>

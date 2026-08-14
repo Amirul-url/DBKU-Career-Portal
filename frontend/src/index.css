@@ -9985,12 +9985,12 @@ body:has(.applicant-profile-page) {
 
 .hrm-internship-applications-table th:nth-child(2),
 .hrm-internship-applications-table td:nth-child(2) {
-  width: 250px;
+  width: 235px;
 }
 
 .hrm-internship-applications-table th:nth-child(3),
 .hrm-internship-applications-table td:nth-child(3) {
-  width: 210px;
+  width: 330px;
 }
 
 .hrm-internship-applications-table th:nth-child(4),
@@ -10007,12 +10007,17 @@ body:has(.applicant-profile-page) {
 
 .hrm-internship-applications-table th:nth-child(6),
 .hrm-internship-applications-table td:nth-child(6) {
-  width: 250px;
+  width: 105px;
+  text-align: center;
 }
 
 .hrm-internship-applications-table td strong,
 .hrm-internship-applications-table td small {
   display: block;
+}
+
+.hrm-internship-candidate-name {
+  font-weight: 400;
 }
 
 .hrm-internship-applications-table td small {
@@ -10022,8 +10027,9 @@ body:has(.applicant-profile-page) {
 }
 
 .hrm-internship-actions {
+  justify-content: center;
   flex-wrap: nowrap;
-  min-width: 232px;
+  min-width: 0;
 }
 
 .hrm-internship-actions button {
