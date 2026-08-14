@@ -8251,7 +8251,7 @@ body:has(.applicant-profile-page) {
   border: 1px solid #bfe7cf;
   border-radius: 999px;
   background: #ffffff;
-  color: var(--profile-green);
+  color: var(--profile-green, #16a34a);
   padding: 0 12px;
   font-size: 12px;
   font-weight: 900;
@@ -8263,8 +8263,8 @@ body:has(.applicant-profile-page) {
 
 .personal-address-map-actions button:hover,
 .personal-address-map-actions button.active {
-  border-color: var(--profile-green);
-  background: var(--profile-green);
+  border-color: var(--profile-green, #16a34a);
+  background: var(--profile-green, #16a34a);
   color: #ffffff;
 }
 
