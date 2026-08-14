@@ -262,7 +262,7 @@ export default function ApplicantForgotPasswordPage() {
         </div>
 
         {step === "email" ? (
-          <form className="split-form" autoComplete="off" onSubmit={sendOtp}>
+          <form className="split-form forgot-password-request-form" autoComplete="off" onSubmit={sendOtp}>
             <AuthField icon={method === "email" ? "mail" : "phone"} label={method === "email" ? "Emel Berdaftar" : "Nombor WhatsApp Berdaftar"} required>
               {method === "email" ? (
                 <input
@@ -320,6 +320,8 @@ export default function ApplicantForgotPasswordPage() {
                 {status.message}
               </p>
             ) : null}
+
+            <span className="forgot-password-spacer" aria-hidden="true" />
 
             <button type="submit" className="split-submit" disabled={isSubmitting}>
               {isSubmitting ? "Menghantar..." : "Dapatkan OTP"}
