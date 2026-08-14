@@ -966,10 +966,6 @@ export default function AdminHrmPage() {
               application={selectedApplication}
               loading={loading}
               onBack={() => navigate(ADMIN_ROUTES.applications.internship)}
-              onReview={async (id, status) => {
-                await setReview(id, status);
-                navigate(ADMIN_ROUTES.applications.internship);
-              }}
             />
           )}
         </section>
@@ -1551,11 +1547,8 @@ function InternshipApplicationsPanel({ applications, onReview, onView }) {
     </section>
   );
 }
-function InternshipApplicationDetailPage({ application, loading, onBack, onReview }) {
+function InternshipApplicationDetailPage({ application, loading, onBack }) {
   const [activeTab, setActiveTab] = useState("Maklumat Peribadi Pemohon");
-
-  const isFinal = application ? ["shortlisted", "rejected"].includes(application.status) : false;
-  const canShowReviewActions = application && activeTab === "Dokumen Sokongan";
 
   return (
     <section className="hrm-application-detail-page">
@@ -1569,26 +1562,6 @@ function InternshipApplicationDetailPage({ application, loading, onBack, onRevie
         onBack={onBack}
         onTabChange={setActiveTab}
       />
-      {canShowReviewActions ? (
-        <footer className="hrm-application-detail-actions">
-          <button
-            className="hrm-primary"
-            type="button"
-            disabled={isFinal}
-            onClick={() => onReview(application.id, "shortlisted")}
-          >
-            Senarai pendek
-          </button>
-          <button
-            className="hrm-danger"
-            type="button"
-            disabled={isFinal}
-            onClick={() => onReview(application.id, "rejected")}
-          >
-            Tolak
-          </button>
-        </footer>
-      ) : null}
     </section>
   );
 }
