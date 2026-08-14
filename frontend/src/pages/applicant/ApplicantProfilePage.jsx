@@ -1328,16 +1328,6 @@ export function ApplicantAddressMap({ address, addressError, latitude, locationE
             onChange={handleMapAddressChange}
             readOnly={readOnly}
           />
-          {!readOnly ? (
-            <button
-              type="button"
-              className="personal-address-search-button"
-              disabled={searching}
-              onClick={searchAddressOnMap}
-            >
-              {searching ? "Mencari..." : "Cari Map"}
-            </button>
-          ) : null}
           {!readOnly && (suggestions.length > 0 || searching) ? (
             <div className="personal-address-suggestions">
               {searching ? <span>Mencari cadangan alamat...</span> : null}

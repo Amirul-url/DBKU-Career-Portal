@@ -8168,25 +8168,6 @@ body:has(.applicant-profile-page) {
   position: relative;
 }
 
-.personal-address-search-button {
-  position: absolute;
-  right: 10px;
-  bottom: 10px;
-  min-height: 34px;
-  border: 1px solid #bfe7cf;
-  border-radius: 999px;
-  background: var(--profile-green);
-  color: #ffffff;
-  padding: 0 14px;
-  font-size: 12px;
-  font-weight: 900;
-}
-
-.personal-address-search-button:disabled {
-  cursor: wait;
-  opacity: 0.72;
-}
-
 .personal-address-search textarea,
 .personal-address-map-coordinates input {
   width: 100%;
@@ -8203,7 +8184,6 @@ body:has(.applicant-profile-page) {
 
 .personal-address-search textarea {
   min-height: 72px;
-  padding-right: 110px;
   resize: vertical;
 }
 
