@@ -152,15 +152,6 @@ function getFileNameFromUrl(value) {
   }
 }
 
-function getLegacyDocumentUrl(fileName) {
-  const cleanFileName = String(fileName || "").split(/[\\/]/).filter(Boolean).pop();
-  if (!cleanFileName || cleanFileName === "-") {
-    return "";
-  }
-
-  return resolveMediaUrl(`/media/${encodeURIComponent(cleanFileName)}`);
-}
-
 function normalizeDocumentFile(primaryValue, fallbackValue = "", fallbackUrl = "") {
   const values = [primaryValue, fallbackValue].filter((value) => value !== undefined && value !== null && value !== "");
 
@@ -169,8 +160,7 @@ function normalizeDocumentFile(primaryValue, fallbackValue = "", fallbackUrl = "
       const rawUrl = value.url || value.file_url || value.fileUrl || value.dataUrl || value.data_url || "";
       const resolvedUrl = resolveMediaUrl(rawUrl || fallbackUrl);
       const name = value.name || value.file_name || value.fileName || getFileNameFromUrl(resolvedUrl) || displayValue(fallbackValue);
-      const url = resolvedUrl || getLegacyDocumentUrl(name);
-      return { name: displayValue(name), url };
+      return { isLegacyNameOnly: !resolvedUrl && name !== "-", name: displayValue(name), url: resolvedUrl };
     }
 
     const text = String(value || "").trim();
@@ -180,12 +170,12 @@ function normalizeDocumentFile(primaryValue, fallbackValue = "", fallbackUrl = "
 
     const url = /^(https?:|blob:|data:|\/media\/|media\/)/i.test(text)
       ? resolveMediaUrl(text)
-      : resolveMediaUrl(fallbackUrl) || getLegacyDocumentUrl(text);
-    return { name: getFileNameFromUrl(text) || text, url };
+      : resolveMediaUrl(fallbackUrl);
+    return { isLegacyNameOnly: !url, name: getFileNameFromUrl(text) || text, url };
   }
 
   const url = resolveMediaUrl(fallbackUrl);
-  return { name: getFileNameFromUrl(url) || "-", url };
+  return { isLegacyNameOnly: false, name: getFileNameFromUrl(url) || "-", url };
 }
 
 function renderReadOnlyContentRow(key, label, content, className = "") {
@@ -206,12 +196,49 @@ function renderReadOnlyRow(key, label, value, className = "") {
   );
 }
 
-function openDocumentFile(url) {
-  if (!url || typeof window === "undefined") {
+function escapeHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function getLegacyDocumentPreviewUrl(fileName) {
+  const safeFileName = escapeHtml(displayValue(fileName));
+  const html = `<!doctype html>
+<html lang="ms">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${safeFileName}</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f8fafc; color: #0f172a; }
+    main { max-width: 720px; margin: 60px auto; border: 1px solid #bbf7d0; border-radius: 8px; background: #fff; padding: 28px; }
+    h1 { margin: 0 0 12px; font-size: 24px; }
+    p { margin: 8px 0; color: #425466; line-height: 1.6; }
+    strong { color: #047857; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Fail belum tersedia</h1>
+    <p>Nama fail: <strong>${safeFileName}</strong></p>
+    <p>Rekod prototaip ini hanya menyimpan nama fail, bukan kandungan fail sebenar.</p>
+    <p>Untuk buka dokumen sebenar, pemohon perlu muat naik semula fail tersebut pada permohonan baharu atau draf yang dikemaskini.</p>
+  </main>
+</body>
+</html>`;
+  return `data:text/html;charset=utf-8,${encodeURIComponent(html)}`;
+}
+
+function openDocumentFile(file) {
+  if ((!file?.url && !file?.isLegacyNameOnly) || typeof window === "undefined") {
     return;
   }
 
-  window.open(url, "_blank", "noopener,noreferrer");
+  window.open(file.url || getLegacyDocumentPreviewUrl(file.name), "_blank", "noopener,noreferrer");
 }
 
 function renderDocumentRow(document, documents, studentInfo) {
@@ -229,9 +256,9 @@ function renderDocumentRow(document, documents, studentInfo) {
         {file.name}
       </span>
       <button
-        disabled={!file.url}
+        disabled={!file.url && !file.isLegacyNameOnly}
         type="button"
-        onClick={() => openDocumentFile(file.url)}
+        onClick={() => openDocumentFile(file)}
       >
         <Icon>visibility</Icon>
         Lihat
