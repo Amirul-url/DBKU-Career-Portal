@@ -1590,7 +1590,6 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
   const [decision, setDecision] = useState(savedAssessment.decision || "");
   const [educationLevel, setEducationLevel] = useState(savedAssessment.education_level || savedAssessment.educationLevel || "");
   const [isSavingAssessment, setIsSavingAssessment] = useState(false);
-  const [assessmentError, setAssessmentError] = useState("");
   const isFinal = application ? ["shortlisted", "rejected"].includes(application.status) : false;
   const decisions = ["Layak", "Tidak Layak", "Tidak Lengkap"];
   const educationLevels = ["Ijazah", "Diploma", "STPM", "Matrikulasi", "SPM / SPMV"];
@@ -1598,12 +1597,10 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
     if (!application || !onSaveAssessment) return false;
 
     setIsSavingAssessment(true);
-    setAssessmentError("");
     try {
       await onSaveAssessment(application, buildHrmAssessmentPayload(application, values));
       return true;
-    } catch (error) {
-      setAssessmentError(error.message || "Semakan HRM tidak dapat disimpan.");
+    } catch {
       return false;
     } finally {
       setIsSavingAssessment(false);
@@ -1626,7 +1623,6 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
     if (!isSaved) return;
     await onReview(application.id, status);
   };
-  const hasAssessmentValue = Boolean(decision || educationLevel);
 
   return (
     <div className="hrm-assessment-panel">
@@ -1683,9 +1679,6 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
           </section>
         </div>
       </div>
-      <p className={`hrm-assessment-save-status ${assessmentError ? "error" : ""}`}>
-        {assessmentError || (isSavingAssessment ? "Menyimpan semakan HRM..." : hasAssessmentValue ? "Semakan HRM disimpan ke DB." : "Tandaan HRM akan disimpan ke DB.")}
-      </p>
       <footer className="hrm-application-detail-actions">
         <button
           className="hrm-primary"
