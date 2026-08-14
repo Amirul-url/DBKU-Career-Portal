@@ -141,6 +141,20 @@ const jobStatusOptions = [
   { value: "expired", label: "Tamat tempoh" },
   { value: "closed", label: "Ditutup" },
 ];
+const monthFilterOptions = [
+  { value: "1", label: "Januari" },
+  { value: "2", label: "Februari" },
+  { value: "3", label: "Mac" },
+  { value: "4", label: "April" },
+  { value: "5", label: "Mei" },
+  { value: "6", label: "Jun" },
+  { value: "7", label: "Julai" },
+  { value: "8", label: "Ogos" },
+  { value: "9", label: "September" },
+  { value: "10", label: "Oktober" },
+  { value: "11", label: "November" },
+  { value: "12", label: "Disember" },
+];
 const internshipPersonalRows = [
   ["name", "Nama"],
   ["icNo", "No. Kad Pengenalan Baru"],
@@ -1234,11 +1248,15 @@ function JobDeleteModal({ job, onCancel, onConfirm, saving }) {
 function getApplicationDateValue(application) {
   return application?.submitted_at || application?.created_at || "";
 }
-function getDateInputValue(value) {
-  if (!value) return "";
+function getApplicationDateParts(application) {
+  const value = getApplicationDateValue(application);
+  if (!value) return { month: "", year: "" };
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  return date.toISOString().slice(0, 10);
+  if (Number.isNaN(date.getTime())) return { month: "", year: "" };
+  return {
+    month: String(date.getMonth() + 1),
+    year: String(date.getFullYear()),
+  };
 }
 function formatReferenceNo(application) {
   const referenceNo = String(application?.reference_no || "").trim();
@@ -1266,32 +1284,122 @@ function displayText(value) {
   const text = String(value || "").trim();
   return text || "-";
 }
+function InstitutionSearchFilter({ onChange, options, value }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const visibleOptions = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase();
+    return query
+      ? options.filter((option) => option.toLowerCase().includes(query))
+      : options;
+  }, [options, searchTerm]);
+  const selectedLabel = value === "all" ? "Semua institusi" : value;
+
+  const chooseInstitution = (nextValue) => {
+    onChange(nextValue);
+    setSearchTerm("");
+    setIsOpen(false);
+  };
+
+  return (
+    <div
+      className="hrm-institution-filter"
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+          setIsOpen(false);
+          setSearchTerm("");
+        }
+      }}
+    >
+      <button
+        className="hrm-institution-filter-trigger"
+        type="button"
+        aria-expanded={isOpen}
+        onClick={() => setIsOpen((current) => !current)}
+      >
+        <span>{selectedLabel}</span>
+        <Icon>expand_more</Icon>
+      </button>
+      {isOpen ? (
+        <div className="hrm-institution-filter-menu" role="listbox" aria-label="Senarai institusi">
+          <input
+            type="search"
+            value={searchTerm}
+            placeholder="Cari institusi"
+            autoComplete="off"
+            onChange={(event) => setSearchTerm(event.target.value)}
+          />
+          <div>
+            <button
+              className={value === "all" ? "active" : ""}
+              type="button"
+              role="option"
+              aria-selected={value === "all"}
+              onClick={() => chooseInstitution("all")}
+            >
+              Semua institusi
+            </button>
+            {visibleOptions.length ? (
+              visibleOptions.map((institution) => (
+                <button
+                  className={value === institution ? "active" : ""}
+                  key={institution}
+                  type="button"
+                  role="option"
+                  aria-selected={value === institution}
+                  onClick={() => chooseInstitution(institution)}
+                >
+                  {institution}
+                </button>
+              ))
+            ) : (
+              <p>Tiada institusi dijumpai.</p>
+            )}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
 function InternshipApplicationsPanel({ applications, onReview, onView }) {
   const rowsPerPage = 5;
-  const [referenceFilter, setReferenceFilter] = useState("");
-  const [institutionFilter, setInstitutionFilter] = useState("");
-  const [dateFilter, setDateFilter] = useState("");
+  const [institutionFilter, setInstitutionFilter] = useState("all");
+  const [monthFilter, setMonthFilter] = useState("all");
+  const [yearFilter, setYearFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const institutionOptions = useMemo(() => {
+    const institutions = new Set(
+      applications
+        .map((application) => getInternshipInstitution(application))
+        .filter((institution) => institution && institution !== "Belum diisi"),
+    );
+    return Array.from(institutions).sort((first, second) => first.localeCompare(second));
+  }, [applications]);
+  const yearOptions = useMemo(() => {
+    const years = new Set(
+      applications
+        .map((application) => getApplicationDateParts(application).year)
+        .filter(Boolean),
+    );
+    return Array.from(years).sort((first, second) => Number(second) - Number(first));
+  }, [applications]);
   const statusOptions = useMemo(() => {
     const statuses = new Set(applications.map((application) => application.status || "submitted"));
     return Array.from(statuses);
   }, [applications]);
   const filteredApplications = useMemo(() => {
-    const referenceQuery = referenceFilter.trim().toLowerCase();
-    const institutionQuery = institutionFilter.trim().toLowerCase();
     return applications.filter((application) => {
-      const referenceNo = formatReferenceNo(application).toLowerCase();
-      const institution = getInternshipInstitution(application).toLowerCase();
-      const applicationDate = getDateInputValue(getApplicationDateValue(application));
+      const institution = getInternshipInstitution(application);
+      const applicationDate = getApplicationDateParts(application);
       return (
-        (!referenceQuery || referenceNo.includes(referenceQuery)) &&
-        (!institutionQuery || institution.includes(institutionQuery)) &&
-        (!dateFilter || applicationDate === dateFilter) &&
+        (institutionFilter === "all" || institution === institutionFilter) &&
+        (monthFilter === "all" || applicationDate.month === monthFilter) &&
+        (yearFilter === "all" || applicationDate.year === yearFilter) &&
         (statusFilter === "all" || (application.status || "submitted") === statusFilter)
       );
     });
-  }, [applications, dateFilter, institutionFilter, referenceFilter, statusFilter]);
+  }, [applications, institutionFilter, monthFilter, statusFilter, yearFilter]);
   const totalPages = Math.max(1, Math.ceil(filteredApplications.length / rowsPerPage));
   const activePage = Math.min(currentPage, totalPages);
   const startIndex = (activePage - 1) * rowsPerPage;
@@ -1300,9 +1408,9 @@ function InternshipApplicationsPanel({ applications, onReview, onView }) {
   const visibleEnd = Math.min(startIndex + rowsPerPage, filteredApplications.length);
 
   const resetFilters = () => {
-    setReferenceFilter("");
-    setInstitutionFilter("");
-    setDateFilter("");
+    setInstitutionFilter("all");
+    setMonthFilter("all");
+    setYearFilter("all");
     setStatusFilter("all");
     setCurrentPage(1);
   };
@@ -1315,38 +1423,50 @@ function InternshipApplicationsPanel({ applications, onReview, onView }) {
           <p>Papar 5 permohonan setiap halaman.</p>
         </div>
         <div className="applicant-table-controls hrm-internship-filters">
-          <label>
-            <span>No. Rujukan</span>
-            <input
-              value={referenceFilter}
-              placeholder="Contoh: PK.2026-0001"
-              onChange={(event) => {
-                setReferenceFilter(event.target.value);
-                setCurrentPage(1);
-              }}
-            />
-          </label>
-          <label>
+          <div className="hrm-internship-filter-field">
             <span>Nama Institusi</span>
-            <input
+            <InstitutionSearchFilter
+              options={institutionOptions}
               value={institutionFilter}
-              placeholder="Cari institusi"
-              onChange={(event) => {
-                setInstitutionFilter(event.target.value);
+              onChange={(nextInstitution) => {
+                setInstitutionFilter(nextInstitution);
                 setCurrentPage(1);
               }}
             />
+          </div>
+          <label>
+            <span>Bulan</span>
+            <select
+              value={monthFilter}
+              onChange={(event) => {
+                setMonthFilter(event.target.value);
+                setCurrentPage(1);
+              }}
+            >
+              <option value="all">Semua bulan</option>
+              {monthFilterOptions.map((month) => (
+                <option key={month.value} value={month.value}>
+                  {month.label}
+                </option>
+              ))}
+            </select>
           </label>
           <label>
-            <span>Tarikh</span>
-            <input
-              type="date"
-              value={dateFilter}
+            <span>Tahun</span>
+            <select
+              value={yearFilter}
               onChange={(event) => {
-                setDateFilter(event.target.value);
+                setYearFilter(event.target.value);
                 setCurrentPage(1);
               }}
-            />
+            >
+              <option value="all">Semua tahun</option>
+              {yearOptions.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
           </label>
           <label>
             <span>Status</span>
