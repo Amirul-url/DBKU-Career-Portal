@@ -348,5 +348,7 @@ class CandidateApplicationReferenceNoTests(TestCase):
         self.assertEqual(notification.title, "Permohonan Tidak Layak")
         self.assertIn(application.reference_no, notification.message)
         self.assertIn("tidak layak", notification.message.lower())
+        self.assertIn("Permohonan ini tidak boleh dikemaskini semula", notification.message)
+        self.assertIn("Sila buat permohonan baharu", notification.message)
         mock_send_email.assert_called_once_with(applicant, notification.title, notification.message)
         mock_send_whatsapp.assert_called_once_with(applicant.mobile_number, notification.message)

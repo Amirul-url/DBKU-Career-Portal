@@ -38,8 +38,9 @@ def build_application_review_notification(application, next_status):
             "title": "Permohonan Tidak Layak",
             "message": (
                 f"Permohonan anda dengan No. rujukan {application.reference_no} "
-                "telah ditanda tidak layak selepas semakan HRM. Sila log masuk ke "
-                "Portal Kerjaya DBKU untuk menyemak status permohonan."
+                "telah ditanda tidak layak selepas semakan HRM. Permohonan ini "
+                "tidak boleh dikemaskini semula. Sila buat permohonan baharu "
+                "sekiranya ingin memohon semula melalui Portal Kerjaya DBKU."
             ),
         },
     }
