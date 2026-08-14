@@ -25,8 +25,9 @@ def build_password_reset_otp_message(otp):
     return {
         "subject": "Kod OTP Portal Kerjaya DBKU",
         "text": (
-            f"OTP Portal Kerjaya DBKU: {otp}. "
-            "Sah 10 minit. Abaikan jika bukan anda."
+            f"Kod OTP anda untuk Portal Kerjaya DBKU ialah {otp}. "
+            "Kod ini sah selama 10 minit. "
+            "Jika anda tidak membuat permintaan ini, sila abaikan mesej ini."
         ),
     }
 
