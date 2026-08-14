@@ -967,7 +967,6 @@ export default function AdminHrmPage() {
                 {activeVacancyType === "internship" ? (
                   <InternshipApplicationsPanel
                     applications={filteredApplications}
-                    onReview={setReview}
                     onView={(application) => navigate(`${ADMIN_ROUTES.applications.internship}/${application.id}`)}
                   />
                 ) : (
@@ -1286,7 +1285,7 @@ function InstitutionSearchFilter({ onChange, options, value }) {
       ? options.filter((option) => option.toLowerCase().includes(query))
       : options;
   }, [options, searchTerm]);
-  const selectedLabel = value === "all" ? "Semua institusi" : value;
+  const selectedLabel = value === "all" ? "Semua" : value;
 
   const chooseInstitution = (nextValue) => {
     onChange(nextValue);
@@ -1330,7 +1329,7 @@ function InstitutionSearchFilter({ onChange, options, value }) {
               aria-selected={value === "all"}
               onClick={() => chooseInstitution("all")}
             >
-              Semua institusi
+              Semua
             </button>
             {visibleOptions.length ? (
               visibleOptions.map((institution) => (
@@ -1354,7 +1353,7 @@ function InstitutionSearchFilter({ onChange, options, value }) {
     </div>
   );
 }
-function InternshipApplicationsPanel({ applications, onReview, onView }) {
+function InternshipApplicationsPanel({ applications, onView }) {
   const rowsPerPage = 5;
   const [institutionFilter, setInstitutionFilter] = useState("all");
   const [monthFilter, setMonthFilter] = useState("all");
@@ -1432,7 +1431,7 @@ function InternshipApplicationsPanel({ applications, onReview, onView }) {
                 setCurrentPage(1);
               }}
             >
-              <option value="all">Semua bulan</option>
+              <option value="all">Semua</option>
               {monthFilterOptions.map((month) => (
                 <option key={month.value} value={month.value}>
                   {month.label}
@@ -1449,7 +1448,7 @@ function InternshipApplicationsPanel({ applications, onReview, onView }) {
                 setCurrentPage(1);
               }}
             >
-              <option value="all">Semua tahun</option>
+              <option value="all">Semua</option>
               {yearOptions.map((year) => (
                 <option key={year} value={year}>
                   {year}
@@ -1466,7 +1465,7 @@ function InternshipApplicationsPanel({ applications, onReview, onView }) {
                 setCurrentPage(1);
               }}
             >
-              <option value="all">Semua status</option>
+              <option value="all">Semua</option>
               {statusOptions.map((status) => (
                 <option key={status} value={status}>
                   {statusLabel[status] || status}
@@ -1493,9 +1492,7 @@ function InternshipApplicationsPanel({ applications, onReview, onView }) {
           </thead>
           <tbody>
             {visibleApplications.length ? (
-              visibleApplications.map((application) => {
-                const isFinal = ["shortlisted", "rejected"].includes(application.status);
-                return (
+              visibleApplications.map((application) => (
                   <tr key={application.id}>
                     <td>{formatReferenceNo(application)}</td>
                     <td>
@@ -1512,27 +1509,10 @@ function InternshipApplicationsPanel({ applications, onReview, onView }) {
                         <button className="view" type="button" onClick={() => onView(application)}>
                           Lihat
                         </button>
-                        <button
-                          className="shortlist"
-                          type="button"
-                          disabled={isFinal}
-                          onClick={() => onReview(application.id, "shortlisted")}
-                        >
-                          Senarai pendek
-                        </button>
-                        <button
-                          className="reject"
-                          type="button"
-                          disabled={isFinal}
-                          onClick={() => onReview(application.id, "rejected")}
-                        >
-                          Tolak
-                        </button>
                       </div>
                     </td>
                   </tr>
-                );
-              })
+              ))
             ) : (
               <tr>
                 <td className="applicant-table-empty" colSpan="6">
