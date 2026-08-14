@@ -1418,10 +1418,6 @@ function InternshipApplicationsPanel({ applications, onReview, onView }) {
   return (
     <section className="hrm-internship-applications-card">
       <div className="applicant-table-toolbar hrm-internship-toolbar">
-        <div>
-          <h2>Senarai permohonan</h2>
-          <p>Papar 5 permohonan setiap halaman.</p>
-        </div>
         <div className="applicant-table-controls hrm-internship-filters">
           <div className="hrm-internship-filter-field">
             <span>Nama Institusi</span>

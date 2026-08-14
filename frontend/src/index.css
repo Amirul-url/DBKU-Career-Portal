@@ -9777,8 +9777,8 @@ body:has(.applicant-profile-page) {
   display: grid;
   grid-template-columns: 1fr;
   align-items: start;
-  gap: 16px;
-  padding: 24px 28px 20px;
+  gap: 0;
+  padding: 20px 28px;
 }
 
 .hrm-internship-filters {
