@@ -1722,7 +1722,7 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
           disabled={!application || isFinal || isSavingAssessment}
           onClick={() => reviewWithAssessment("shortlisted")}
         >
-          Senarai pendek
+          Hantar ke Bahagian
         </button>
         <button
           className="hrm-danger"
@@ -1730,7 +1730,7 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
           disabled={!application || isFinal || isSavingAssessment}
           onClick={() => reviewWithAssessment("rejected")}
         >
-          Tolak
+          Tidak Layak
         </button>
       </footer>
     </div>
@@ -1808,7 +1808,7 @@ function ApplicationTable({ applications, onReview, compact }) {
                         app.status,
                       )}
                     >
-                      Senarai pendek
+                      Hantar ke Bahagian
                     </button>
                     <button
                       className="reject"
@@ -1817,7 +1817,7 @@ function ApplicationTable({ applications, onReview, compact }) {
                         app.status,
                       )}
                     >
-                      Tolak
+                      Tidak Layak
                     </button>
                   </div>
                 </td>
