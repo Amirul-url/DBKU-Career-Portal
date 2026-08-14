@@ -7317,7 +7317,7 @@ body:has(.applicant-profile-page) {
   color: #166534;
 }
 
-.student-readonly-document-cell a {
+.student-readonly-document-cell button {
   display: inline-flex;
   flex: 0 0 auto;
   min-height: 34px;
@@ -7333,12 +7333,11 @@ body:has(.applicant-profile-page) {
   font-weight: 900;
 }
 
-.student-readonly-document-cell a.disabled {
+.student-readonly-document-cell button:disabled {
   border-color: #d7e8df;
   background: #f8fafc;
   color: #9aaca2;
   cursor: not-allowed;
-  pointer-events: none;
 }
 
 .student-readonly-document-cell .material-symbols-outlined {

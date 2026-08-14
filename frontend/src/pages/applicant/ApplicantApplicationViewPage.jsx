@@ -206,6 +206,14 @@ function renderReadOnlyRow(key, label, value, className = "") {
   );
 }
 
+function openDocumentFile(url) {
+  if (!url || typeof window === "undefined") {
+    return;
+  }
+
+  window.open(url, "_blank", "noopener,noreferrer");
+}
+
 function renderDocumentRow(document, documents, studentInfo) {
   const file = normalizeDocumentFile(
     documents[document.field],
@@ -220,16 +228,14 @@ function renderDocumentRow(document, documents, studentInfo) {
       <span className={file.name !== "-" ? "student-readonly-value uploaded" : "student-readonly-value"}>
         {file.name}
       </span>
-      <a
-        aria-disabled={!file.url}
-        className={!file.url ? "disabled" : ""}
-        href={file.url || undefined}
-        rel="noreferrer"
-        target="_blank"
+      <button
+        disabled={!file.url}
+        type="button"
+        onClick={() => openDocumentFile(file.url)}
       >
         <Icon>visibility</Icon>
         Lihat
-      </a>
+      </button>
     </div>,
   );
 }
