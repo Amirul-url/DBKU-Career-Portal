@@ -10132,8 +10132,7 @@ body:has(.applicant-profile-page) {
 
 .hrm-assessment-options input:checked {
   background:
-    linear-gradient(135deg, transparent 0 46%, #000 47% 58%, transparent 59%) 7px 13px / 11px 15px no-repeat,
-    linear-gradient(45deg, transparent 0 43%, #000 44% 56%, transparent 57%) 15px 6px / 15px 23px no-repeat,
+    linear-gradient(115deg, transparent 0 46%, #000 47% 55%, transparent 56%) 5px 4px / 24px 26px no-repeat,
     #ffffff;
 }
 
