@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { apiRequest, getStoredUser } from "../../lib/authApi";
+import { apiRequest, getStoredUser, resolveMediaUrl } from "../../lib/authApi";
 import { countryCallingCodes, defaultCountryCallingCode } from "../../lib/countryCallingCodes";
 import { APPLICANT_ROUTES } from "../../modules/applicant/applicantRoutes";
 import { useApplicantSidebarState } from "../../modules/applicant/useApplicantSidebarState";
@@ -138,6 +138,44 @@ function displayValue(value) {
   return cleanValue || "-";
 }
 
+function getFileNameFromUrl(value) {
+  if (!value || typeof value !== "string" || value.startsWith("data:")) {
+    return "";
+  }
+
+  try {
+    const url = new URL(value, window.location.origin);
+    const fileName = url.pathname.split("/").filter(Boolean).pop();
+    return fileName ? decodeURIComponent(fileName) : "";
+  } catch {
+    return value.split("/").filter(Boolean).pop() || "";
+  }
+}
+
+function normalizeDocumentFile(primaryValue, fallbackValue = "", fallbackUrl = "") {
+  const values = [primaryValue, fallbackValue].filter((value) => value !== undefined && value !== null && value !== "");
+
+  for (const value of values) {
+    if (typeof value === "object") {
+      const rawUrl = value.url || value.file_url || value.fileUrl || value.dataUrl || value.data_url || "";
+      const url = resolveMediaUrl(rawUrl || fallbackUrl);
+      const name = value.name || value.file_name || value.fileName || getFileNameFromUrl(url) || displayValue(fallbackValue);
+      return { name: displayValue(name), url };
+    }
+
+    const text = String(value || "").trim();
+    if (!text) {
+      continue;
+    }
+
+    const url = /^(https?:|blob:|data:|\/media\/|media\/)/i.test(text) ? resolveMediaUrl(text) : resolveMediaUrl(fallbackUrl);
+    return { name: getFileNameFromUrl(text) || text, url };
+  }
+
+  const url = resolveMediaUrl(fallbackUrl);
+  return { name: getFileNameFromUrl(url) || "-", url };
+}
+
 function renderReadOnlyContentRow(key, label, content, className = "") {
   return (
     <tr className={className} key={key}>
@@ -153,6 +191,34 @@ function renderReadOnlyRow(key, label, value, className = "") {
     label,
     <span className="student-readonly-value">{displayValue(value)}</span>,
     className,
+  );
+}
+
+function renderDocumentRow(document, documents, studentInfo) {
+  const file = normalizeDocumentFile(
+    documents[document.field],
+    studentInfo[document.field],
+    studentInfo[`${document.field}Url`],
+  );
+
+  return renderReadOnlyContentRow(
+    document.field,
+    document.label,
+    <div className="student-readonly-document-cell">
+      <span className={file.name !== "-" ? "student-readonly-value uploaded" : "student-readonly-value"}>
+        {file.name}
+      </span>
+      <a
+        aria-disabled={!file.url}
+        className={!file.url ? "disabled" : ""}
+        href={file.url || undefined}
+        rel="noreferrer"
+        target="_blank"
+      >
+        <Icon>visibility</Icon>
+        Lihat
+      </a>
+    </div>,
   );
 }
 
@@ -253,11 +319,7 @@ export function InternshipApplicationReadOnlyPanel({
     <div className="student-personal-table-wrap">
       <table className="student-personal-table student-readonly-table">
         <tbody>
-          {documentFields.map((document) => renderReadOnlyRow(
-            document.field,
-            document.label,
-            documents[document.field] || studentInfo[document.field],
-          ))}
+          {documentFields.map((document) => renderDocumentRow(document, documents, studentInfo))}
         </tbody>
       </table>
     </div>

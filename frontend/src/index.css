@@ -7301,6 +7301,50 @@ body:has(.applicant-profile-page) {
   margin-bottom: 22px;
 }
 
+.student-readonly-document-cell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.student-readonly-document-cell .student-readonly-value {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.student-readonly-document-cell .student-readonly-value.uploaded {
+  color: #166534;
+}
+
+.student-readonly-document-cell a {
+  display: inline-flex;
+  flex: 0 0 auto;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid #bfdbfe;
+  border-radius: 7px;
+  background: #eff6ff;
+  color: #1769aa;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.student-readonly-document-cell a.disabled {
+  border-color: #d7e8df;
+  background: #f8fafc;
+  color: #9aaca2;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.student-readonly-document-cell .material-symbols-outlined {
+  font-size: 16px;
+}
+
 @media (max-width: 1100px) {
   .student-info-layout,
   .student-document-grid,

@@ -642,7 +642,21 @@ function getMissingApplicationFields(studentInfo) {
 }
 
 function getDocumentSummary(studentInfo) {
-  return Object.fromEntries(documentFields.map((document) => [document.field, studentInfo[document.field] || ""]));
+  return Object.fromEntries(
+    documentFields.map((document) => {
+      const fileName = studentInfo[document.field] || "";
+      const fileUrl = studentInfo[`${document.field}Url`] || "";
+      return [
+        document.field,
+        fileUrl
+          ? {
+              name: fileName,
+              url: fileUrl,
+            }
+          : fileName,
+      ];
+    }),
+  );
 }
 
 function buildApplicationProfileData(studentInfo, vacancy) {
@@ -827,12 +841,24 @@ export default function ApplicantInternshipApplicationPage() {
     }
 
     setNotice("");
-    setStudentInfo((current) => ({ ...current, [field]: file.name }));
+    const reader = new FileReader();
+    reader.onload = () => {
+      setStudentInfo((current) => ({
+        ...current,
+        [field]: file.name,
+        [`${field}Url`]: String(reader.result || ""),
+      }));
+    };
+    reader.onerror = () => {
+      setNoticeStatus("error");
+      setNotice("Fail tidak dapat dibaca. Sila pilih fail semula.");
+    };
+    reader.readAsDataURL(file);
   };
 
   const clearDocument = (field) => {
     setNotice("");
-    setStudentInfo((current) => ({ ...current, [field]: "" }));
+    setStudentInfo((current) => ({ ...current, [field]: "", [`${field}Url`]: "" }));
 
     if (documentInputRefs.current[field]) {
       documentInputRefs.current[field].value = "";
