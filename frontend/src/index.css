@@ -10149,21 +10149,24 @@ body:has(.applicant-profile-page) {
 .hrm-assessment-right dl div {
   display: grid;
   grid-template-columns: 118px 20px minmax(0, 1fr);
-  align-items: end;
+  align-items: center;
   gap: 8px;
   font-size: 13px;
 }
 
 .hrm-assessment-right dt {
+  grid-column: 1;
+  grid-row: 1;
   font-weight: 400;
 }
 
 .hrm-assessment-right dd {
   display: grid;
   grid-column: 3;
+  grid-row: 1;
   min-height: 24px;
   margin: 0;
-  align-items: end;
+  align-items: center;
   border-bottom: 1px dotted #000000;
   font-weight: 500;
   overflow-wrap: anywhere;
@@ -10172,6 +10175,7 @@ body:has(.applicant-profile-page) {
 .hrm-assessment-right dl div::before {
   content: ":";
   grid-column: 2;
+  grid-row: 1;
 }
 
 @media (max-width: 900px) {
