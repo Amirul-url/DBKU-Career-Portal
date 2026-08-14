@@ -32,6 +32,20 @@ function getApplicationDate(application) {
   return application.submitted_at || application.created_at || "";
 }
 
+function formatReferenceNo(application) {
+  const referenceNo = String(application?.reference_no || "").trim();
+  if (!referenceNo || application?.isLocalDraft) return "Belum dijana";
+  if (referenceNo.startsWith("PK.")) return referenceNo;
+
+  const legacyMatch = referenceNo.match(/^DBKU-CAR-(\d+)$/i);
+  if (!legacyMatch) return referenceNo;
+
+  const applicationDate = new Date(getApplicationDate(application));
+  const year = Number.isNaN(applicationDate.getTime()) ? new Date().getFullYear() : applicationDate.getFullYear();
+  const sequence = Number.parseInt(legacyMatch[1], 10);
+  return `PK.${year}-${String(sequence || 1).padStart(4, "0").slice(-4)}`;
+}
+
 function getInternshipDraftApplication(user) {
   if (typeof window === "undefined" || !user) return null;
 
@@ -168,7 +182,7 @@ function ApplicationList({ applications, loading }) {
         <table className="applicant-applications-table">
           <thead>
             <tr>
-              <th>Bil.</th>
+              <th>No. Rujukan</th>
               <th>Permohonan</th>
               <th>Tarikh</th>
               <th>Status</th>
@@ -177,12 +191,12 @@ function ApplicationList({ applications, loading }) {
           </thead>
           <tbody>
             {paginatedApplications.length ? (
-              paginatedApplications.map((application, index) => {
+              paginatedApplications.map((application) => {
                 const vacancy = application.vacancy_detail || {};
                 const status = application.status || "draft";
                 return (
                   <tr key={application.id}>
-                    <td>{(activePage - 1) * APPLICATIONS_PER_PAGE + index + 1}</td>
+                    <td>{formatReferenceNo(application)}</td>
                     <td>{vacancy.title || "Jawatan DBKU"}</td>
                     <td>{formatDate(getApplicationDate(application))}</td>
                     <td>
