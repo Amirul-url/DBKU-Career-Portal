@@ -58,6 +58,7 @@ const statusClass = {
   withdrawn: "slate",
   draft: "slate",
 };
+const hrmReviewTab = "Semakan HRM";
 const hrmVisibleApplicationStatuses = new Set([
   "submitted",
   "screening",
@@ -966,6 +967,10 @@ export default function AdminHrmPage() {
               application={selectedApplication}
               loading={loading}
               onBack={() => navigate(ADMIN_ROUTES.applications.internship)}
+              onReview={async (id, status) => {
+                await setReview(id, status);
+                navigate(ADMIN_ROUTES.applications.internship);
+              }}
             />
           )}
         </section>
@@ -1547,7 +1552,100 @@ function InternshipApplicationsPanel({ applications, onReview, onView }) {
     </section>
   );
 }
-function InternshipApplicationDetailPage({ application, loading, onBack }) {
+function inferHrmEducationLevel(academicLevel = "") {
+  const level = String(academicLevel || "").toLowerCase();
+  if (level.includes("ijazah")) return "Ijazah";
+  if (level.includes("diploma")) return "Diploma";
+  if (level.includes("stpm")) return "STPM";
+  if (level.includes("matrikulasi")) return "Matrikulasi";
+  if (level.includes("spm")) return "SPM / SPMV";
+  return "";
+}
+function HrmInternshipAssessmentTab({ application, onReview }) {
+  const studentInfo = getInternshipStudentInfo(application);
+  const [decision, setDecision] = useState("");
+  const [educationLevel, setEducationLevel] = useState(() => inferHrmEducationLevel(studentInfo.academicLevel));
+  const isFinal = application ? ["shortlisted", "rejected"].includes(application.status) : false;
+  const decisions = ["Layak", "Tidak Layak", "Tidak Lengkap"];
+  const educationLevels = ["Ijazah", "Diploma", "STPM", "Matrikulasi", "SPM / SPMV"];
+
+  return (
+    <div className="hrm-assessment-panel">
+      <div className="hrm-assessment-form" aria-label="Borang semakan HRM">
+        <h3>UNTUK KEGUNAAN BAHAGIAN PENGURUSAN SUMBER MANUSIA, DBKU</h3>
+        <div className="hrm-assessment-grid">
+          <section className="hrm-assessment-left">
+            <p>Tandakan (/) pada ruangan yang berkenaan.</p>
+            <div className="hrm-assessment-options">
+              <div>
+                <strong>i. Keputusan</strong>
+                {decisions.map((item) => (
+                  <label key={item}>
+                    <span>{item}</span>
+                    <input
+                      checked={decision === item}
+                      type="checkbox"
+                      onChange={() => setDecision((current) => (current === item ? "" : item))}
+                    />
+                  </label>
+                ))}
+              </div>
+              <div>
+                <strong>ii. Tahap Pendidikan</strong>
+                {educationLevels.map((item) => (
+                  <label key={item}>
+                    <span>{item}</span>
+                    <input
+                      checked={educationLevel === item}
+                      type="checkbox"
+                      onChange={() => setEducationLevel((current) => (current === item ? "" : item))}
+                    />
+                  </label>
+                ))}
+              </div>
+            </div>
+          </section>
+          <section className="hrm-assessment-right">
+            <strong>iii. Keputusan Pendidikan Tinggi</strong>
+            <dl>
+              <div>
+                <dt>Institusi</dt>
+                <dd>{studentInfo.institution || ""}</dd>
+              </div>
+              <div>
+                <dt>Pengkhususan</dt>
+                <dd>{studentInfo.program || ""}</dd>
+              </div>
+              <div>
+                <dt>CGPA</dt>
+                <dd>{studentInfo.cgpa || ""}</dd>
+              </div>
+            </dl>
+          </section>
+        </div>
+      </div>
+      <footer className="hrm-application-detail-actions">
+        <button
+          className="hrm-primary"
+          type="button"
+          disabled={!application || isFinal}
+          onClick={() => onReview(application.id, "shortlisted")}
+        >
+          Senarai pendek
+        </button>
+        <button
+          className="hrm-danger"
+          type="button"
+          disabled={!application || isFinal}
+          onClick={() => onReview(application.id, "rejected")}
+        >
+          Tolak
+        </button>
+      </footer>
+    </div>
+  );
+}
+function InternshipApplicationDetailPage({ application, loading, onBack, onReview }) {
   const [activeTab, setActiveTab] = useState("Maklumat Peribadi Pemohon");
 
   return (
@@ -1558,9 +1656,13 @@ function InternshipApplicationDetailPage({ application, loading, onBack }) {
         backLabel="Kembali"
         className="hrm-application-direct-panel"
         error={!loading && !application ? "Permohonan tidak ditemui." : ""}
+        extraTabs={[hrmReviewTab]}
         loading={loading}
         onBack={onBack}
         onTabChange={setActiveTab}
+        renderExtraTabContent={(tab) =>
+          tab === hrmReviewTab ? <HrmInternshipAssessmentTab application={application} onReview={onReview} /> : null
+        }
       />
     </section>
   );

@@ -10046,11 +10046,149 @@ body:has(.applicant-profile-page) {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+  margin-top: 16px;
 }
 
 .hrm-application-detail-actions button:disabled {
   cursor: not-allowed;
   opacity: 0.55;
+}
+
+.hrm-assessment-panel {
+  max-width: 1120px;
+}
+
+.hrm-assessment-form {
+  border: 2px solid #111827;
+  background: #ffffff;
+  color: #020617;
+}
+
+.hrm-assessment-form h3 {
+  margin: 0;
+  border-bottom: 2px solid #111827;
+  background: #d9d9d9;
+  padding: 10px 14px;
+  color: #000000;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1.25;
+  text-align: center;
+  text-decoration: underline;
+}
+
+.hrm-assessment-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 285px;
+}
+
+.hrm-assessment-left,
+.hrm-assessment-right {
+  padding: 20px 24px;
+}
+
+.hrm-assessment-left {
+  border-right: 2px solid #111827;
+}
+
+.hrm-assessment-left p {
+  margin: 0 0 24px;
+  font-size: 16px;
+}
+
+.hrm-assessment-options {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.7fr) minmax(220px, 1fr);
+  gap: 34px;
+}
+
+.hrm-assessment-options strong,
+.hrm-assessment-right > strong {
+  display: block;
+  margin-bottom: 14px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.hrm-assessment-options label {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) 52px;
+  align-items: center;
+  gap: 12px;
+  min-height: 38px;
+  font-size: 16px;
+}
+
+.hrm-assessment-options input {
+  width: 42px;
+  height: 42px;
+  margin: 0;
+  appearance: none;
+  border: 2px solid #000000;
+  background: #ffffff;
+}
+
+.hrm-assessment-options input:checked {
+  background:
+    linear-gradient(45deg, transparent 42%, #000 43%, #000 57%, transparent 58%),
+    linear-gradient(-45deg, transparent 42%, #000 43%, #000 57%, transparent 58%),
+    #ffffff;
+}
+
+.hrm-assessment-right {
+  padding-top: 54px;
+}
+
+.hrm-assessment-right dl {
+  display: grid;
+  gap: 16px;
+  margin: 28px 0 0;
+}
+
+.hrm-assessment-right dl div {
+  display: grid;
+  grid-template-columns: 150px 24px minmax(0, 1fr);
+  align-items: end;
+  gap: 10px;
+  font-size: 16px;
+}
+
+.hrm-assessment-right dt {
+  font-weight: 400;
+}
+
+.hrm-assessment-right dd {
+  display: grid;
+  grid-column: 3;
+  min-height: 24px;
+  margin: 0;
+  align-items: end;
+  border-bottom: 1px dotted #000000;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.hrm-assessment-right dl div::before {
+  content: ":";
+  grid-column: 2;
+}
+
+@media (max-width: 900px) {
+  .hrm-assessment-grid,
+  .hrm-assessment-options {
+    grid-template-columns: 1fr;
+  }
+
+  .hrm-assessment-left {
+    border-right: 0;
+    border-bottom: 2px solid #111827;
+  }
+
+  .hrm-assessment-right {
+    padding-top: 20px;
+  }
 }
 
 .hrm-internship-detail-modal {

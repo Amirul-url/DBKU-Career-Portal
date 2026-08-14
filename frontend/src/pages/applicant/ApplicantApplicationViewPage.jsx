@@ -313,9 +313,11 @@ export function InternshipApplicationReadOnlyPanel({
   backLabel = "Kembali",
   className = "",
   error = "",
+  extraTabs = [],
   loading = false,
   onBack,
   onTabChange,
+  renderExtraTabContent,
 }) {
   const profileData = application?.profile_data || {};
   const studentInfo = profileData.student_info || {};
@@ -325,6 +327,7 @@ export function InternshipApplicationReadOnlyPanel({
   };
   const vacancy = application?.vacancy_detail || {};
   const status = application?.status || "draft";
+  const panelTabs = [...infoTabs, ...extraTabs];
 
   const renderPersonalFields = () => (
     <div className="student-personal-table-wrap">
@@ -409,7 +412,7 @@ export function InternshipApplicationReadOnlyPanel({
               </section>
 
               <nav className="student-info-tabs" aria-label="Bahagian permohonan latihan industri">
-                {infoTabs.map((tab) => (
+                {panelTabs.map((tab) => (
                   <button
                     className={activeInfoTab === tab ? "active" : ""}
                     key={tab}
@@ -426,6 +429,7 @@ export function InternshipApplicationReadOnlyPanel({
                 {activeInfoTab === personalInfoTab ? renderPersonalFields() : null}
                 {activeInfoTab === "Maklumat Akademik" ? renderAcademicFields() : null}
                 {activeInfoTab === "Dokumen Sokongan" ? renderDocumentFields() : null}
+                {!infoTabs.includes(activeInfoTab) && renderExtraTabContent ? renderExtraTabContent(activeInfoTab) : null}
               </section>
             </>
           ) : null}
