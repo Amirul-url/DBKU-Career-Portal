@@ -1141,7 +1141,7 @@ export function ApplicantAddressMap({ address, addressError, latitude, locationE
 
     return data.map((item) => {
       const addr = item.address || {};
-      const buildingName = addr.building || addr.amenity || addr.shop || addr.office || addr.tourism || "";
+      const buildingName = item.name || addr.building || addr.amenity || addr.shop || addr.office || addr.tourism || "";
       const road = addr.road || addr.pedestrian || addr.footway || "";
       const suburb = addr.suburb || addr.neighbourhood || addr.quarter || "";
       const city = addr.city || addr.town || addr.village || addr.county || "";
