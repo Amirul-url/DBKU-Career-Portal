@@ -291,6 +291,23 @@ export default function AdminHrmPage() {
       setNotice(error.message);
     }
   };
+  const saveHrmAssessment = async (application, assessment) => {
+    if (!application) return null;
+
+    const profileData = {
+      ...(application.profile_data || {}),
+      hrm_assessment: assessment,
+    };
+    const updatedApplication = await apiRequest(`/applications/${application.id}/`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ profile_data: profileData }),
+    });
+    setApplications((current) =>
+      current.map((item) => (String(item.id) === String(updatedApplication.id) ? updatedApplication : item)),
+    );
+    return updatedApplication;
+  };
   const openJobView = (job) => {
     setSelectedJob(job);
     setJobModalMode("view");
@@ -971,6 +988,7 @@ export default function AdminHrmPage() {
                 await setReview(id, status);
                 navigate(ADMIN_ROUTES.applications.internship);
               }}
+              onSaveAssessment={saveHrmAssessment}
             />
           )}
         </section>
@@ -1552,13 +1570,63 @@ function InternshipApplicationsPanel({ applications, onReview, onView }) {
     </section>
   );
 }
-function HrmInternshipAssessmentTab({ application, onReview }) {
+function getSavedHrmAssessment(application) {
+  return application?.profile_data?.hrm_assessment || {};
+}
+function buildHrmAssessmentPayload(application, values) {
   const studentInfo = getInternshipStudentInfo(application);
-  const [decision, setDecision] = useState("");
-  const [educationLevel, setEducationLevel] = useState("");
+  return {
+    cgpa: studentInfo.cgpa || "",
+    decision: values.decision || "",
+    education_level: values.educationLevel || "",
+    institution: studentInfo.institution || "",
+    specialization: studentInfo.program || "",
+    updated_at: new Date().toISOString(),
+  };
+}
+function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment }) {
+  const studentInfo = getInternshipStudentInfo(application);
+  const savedAssessment = getSavedHrmAssessment(application);
+  const [decision, setDecision] = useState(savedAssessment.decision || "");
+  const [educationLevel, setEducationLevel] = useState(savedAssessment.education_level || savedAssessment.educationLevel || "");
+  const [isSavingAssessment, setIsSavingAssessment] = useState(false);
+  const [assessmentError, setAssessmentError] = useState("");
   const isFinal = application ? ["shortlisted", "rejected"].includes(application.status) : false;
   const decisions = ["Layak", "Tidak Layak", "Tidak Lengkap"];
   const educationLevels = ["Ijazah", "Diploma", "STPM", "Matrikulasi", "SPM / SPMV"];
+  const saveAssessment = async (values) => {
+    if (!application || !onSaveAssessment) return false;
+
+    setIsSavingAssessment(true);
+    setAssessmentError("");
+    try {
+      await onSaveAssessment(application, buildHrmAssessmentPayload(application, values));
+      return true;
+    } catch (error) {
+      setAssessmentError(error.message || "Semakan HRM tidak dapat disimpan.");
+      return false;
+    } finally {
+      setIsSavingAssessment(false);
+    }
+  };
+  const chooseDecision = (item) => {
+    const nextDecision = decision === item ? "" : item;
+    setDecision(nextDecision);
+    saveAssessment({ decision: nextDecision, educationLevel });
+  };
+  const chooseEducationLevel = (item) => {
+    const nextEducationLevel = educationLevel === item ? "" : item;
+    setEducationLevel(nextEducationLevel);
+    saveAssessment({ decision, educationLevel: nextEducationLevel });
+  };
+  const reviewWithAssessment = async (status) => {
+    if (!application) return;
+
+    const isSaved = await saveAssessment({ decision, educationLevel });
+    if (!isSaved) return;
+    await onReview(application.id, status);
+  };
+  const hasAssessmentValue = Boolean(decision || educationLevel);
 
   return (
     <div className="hrm-assessment-panel">
@@ -1576,7 +1644,7 @@ function HrmInternshipAssessmentTab({ application, onReview }) {
                     <input
                       checked={decision === item}
                       type="checkbox"
-                      onChange={() => setDecision((current) => (current === item ? "" : item))}
+                      onChange={() => chooseDecision(item)}
                     />
                   </label>
                 ))}
@@ -1589,7 +1657,7 @@ function HrmInternshipAssessmentTab({ application, onReview }) {
                     <input
                       checked={educationLevel === item}
                       type="checkbox"
-                      onChange={() => setEducationLevel((current) => (current === item ? "" : item))}
+                      onChange={() => chooseEducationLevel(item)}
                     />
                   </label>
                 ))}
@@ -1615,20 +1683,23 @@ function HrmInternshipAssessmentTab({ application, onReview }) {
           </section>
         </div>
       </div>
+      <p className={`hrm-assessment-save-status ${assessmentError ? "error" : ""}`}>
+        {assessmentError || (isSavingAssessment ? "Menyimpan semakan HRM..." : hasAssessmentValue ? "Semakan HRM disimpan ke DB." : "Tandaan HRM akan disimpan ke DB.")}
+      </p>
       <footer className="hrm-application-detail-actions">
         <button
           className="hrm-primary"
           type="button"
-          disabled={!application || isFinal}
-          onClick={() => onReview(application.id, "shortlisted")}
+          disabled={!application || isFinal || isSavingAssessment}
+          onClick={() => reviewWithAssessment("shortlisted")}
         >
           Senarai pendek
         </button>
         <button
           className="hrm-danger"
           type="button"
-          disabled={!application || isFinal}
-          onClick={() => onReview(application.id, "rejected")}
+          disabled={!application || isFinal || isSavingAssessment}
+          onClick={() => reviewWithAssessment("rejected")}
         >
           Tolak
         </button>
@@ -1636,7 +1707,7 @@ function HrmInternshipAssessmentTab({ application, onReview }) {
     </div>
   );
 }
-function InternshipApplicationDetailPage({ application, loading, onBack, onReview }) {
+function InternshipApplicationDetailPage({ application, loading, onBack, onReview, onSaveAssessment }) {
   const [activeTab, setActiveTab] = useState("Maklumat Peribadi Pemohon");
 
   return (
@@ -1652,7 +1723,14 @@ function InternshipApplicationDetailPage({ application, loading, onBack, onRevie
         onBack={onBack}
         onTabChange={setActiveTab}
         renderExtraTabContent={(tab) =>
-          tab === hrmReviewTab ? <HrmInternshipAssessmentTab application={application} onReview={onReview} /> : null
+          tab === hrmReviewTab ? (
+            <HrmInternshipAssessmentTab
+              application={application}
+              key={application?.id || "hrm-assessment"}
+              onReview={onReview}
+              onSaveAssessment={onSaveAssessment}
+            />
+          ) : null
         }
       />
     </section>

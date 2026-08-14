@@ -10178,6 +10178,17 @@ body:has(.applicant-profile-page) {
   grid-row: 1;
 }
 
+.hrm-assessment-save-status {
+  margin: 10px 0 0;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.hrm-assessment-save-status.error {
+  color: #b42318;
+}
+
 @media (max-width: 900px) {
   .hrm-assessment-grid,
   .hrm-assessment-options {
