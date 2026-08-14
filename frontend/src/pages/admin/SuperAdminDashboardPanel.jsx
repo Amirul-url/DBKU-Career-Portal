@@ -65,20 +65,20 @@ function buildActivitySessions(activities) {
 function StatCard({ accentClass, icon, rows, title }) {
   return (
     <article className="overflow-hidden rounded-lg border border-slate-200 bg-white">
-      <header className="flex items-center gap-3 border-b border-slate-200 px-5 py-4">
-        <span className={`inline-flex h-10 w-10 items-center justify-center rounded-md ${accentClass}`}>
+      <header className="flex items-center gap-3 border-b border-slate-200 px-5 py-3.5">
+        <span className={`inline-flex h-9 w-9 items-center justify-center rounded-md ${accentClass}`}>
           <Icon>{icon}</Icon>
         </span>
-        <h2 className="text-lg font-bold text-slate-950">{title}</h2>
+        <h2 className="text-base font-bold text-slate-950">{title}</h2>
       </header>
       <div>
         {rows.map((row) => (
-          <div className="flex items-center justify-between gap-4 border-b border-slate-100 px-5 py-4 last:border-b-0" key={row.label}>
-            <span className="flex items-center gap-3 font-semibold text-slate-600">
+          <div className="flex items-center justify-between gap-4 border-b border-slate-100 px-5 py-3.5 last:border-b-0" key={row.label}>
+            <span className="flex items-center gap-3 text-sm font-semibold text-slate-600">
               <Icon>{row.icon}</Icon>
               {row.label}
             </span>
-            <strong className="text-2xl text-slate-950">{row.value}</strong>
+            <strong className="text-xl font-bold text-slate-950">{row.value}</strong>
           </div>
         ))}
       </div>
@@ -89,36 +89,36 @@ function StatCard({ accentClass, icon, rows, title }) {
 function AccessSummary({ user }) {
   return (
     <aside className="rounded-lg border border-slate-200 bg-white">
-      <header className="flex items-center gap-3 border-b border-slate-200 px-5 py-4">
-        <span className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-violet-100 text-violet-700">
+      <header className="flex items-center gap-3 border-b border-slate-200 px-5 py-3.5">
+        <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-violet-100 text-violet-700">
           <Icon>shield_person</Icon>
         </span>
         <div>
-          <h2 className="font-bold text-slate-950">Ringkasan Akses</h2>
-          <p className="text-sm text-slate-500">Kebenaran anda</p>
+          <h2 className="text-base font-bold text-slate-950">Ringkasan Akses</h2>
+          <p className="text-xs text-slate-500">Kebenaran anda</p>
         </div>
       </header>
-      <div className="grid gap-3 p-5">
-        <section className="rounded-md border border-slate-200 bg-slate-50 p-4">
+      <div className="grid gap-3 p-4">
+        <section className="rounded-md border border-slate-200 bg-slate-50 p-3.5">
           <div className="flex items-center gap-3">
             <Icon>person</Icon>
-            <h3 className="font-bold text-slate-950">Peranan Anda</h3>
+            <h3 className="text-base font-bold text-slate-950">Peranan Anda</h3>
           </div>
           <span className="mt-3 inline-flex rounded-full bg-slate-800 px-3 py-1 text-xs font-bold text-white">{user?.role === "superadmin" ? "Super Admin" : display(user?.role)}</span>
         </section>
-        <section className="rounded-md border border-slate-200 bg-slate-50 p-4">
+        <section className="rounded-md border border-slate-200 bg-slate-50 p-3.5">
           <div className="flex items-center gap-3">
             <Icon>dashboard</Icon>
-            <h3 className="font-bold text-slate-950">Akses Papan Pemuka</h3>
+            <h3 className="text-base font-bold text-slate-950">Akses Papan Pemuka</h3>
           </div>
-          <p className="mt-2 text-sm leading-6 text-slate-600">Super Admin boleh melihat ringkasan akaun pemohon, pentadbir DBKU dan akaun sistem.</p>
+          <p className="mt-2 text-sm leading-5 text-slate-600">Super Admin boleh melihat ringkasan akaun pemohon, pentadbir DBKU dan akaun sistem.</p>
         </section>
-        <section className="rounded-md border border-slate-200 bg-slate-50 p-4">
+        <section className="rounded-md border border-slate-200 bg-slate-50 p-3.5">
           <div className="flex items-center gap-3">
             <Icon>admin_panel_settings</Icon>
-            <h3 className="font-bold text-slate-950">Akses Pengurusan</h3>
+            <h3 className="text-base font-bold text-slate-950">Akses Pengurusan</h3>
           </div>
-          <p className="mt-2 text-sm leading-6 text-slate-600">Akses penuh untuk mengurus akaun Pemohon, Pentadbir DBKU dan Super Admin.</p>
+          <p className="mt-2 text-sm leading-5 text-slate-600">Akses penuh untuk mengurus akaun Pemohon, Pentadbir DBKU dan Super Admin.</p>
         </section>
       </div>
     </aside>
@@ -147,8 +147,6 @@ export default function SuperAdminDashboardPanel({ user }) {
 
   useEffect(() => {
     let isMounted = true;
-    setLoading(true);
-    setError("");
     Promise.all([
       apiRequest("/auth/applicants/"),
       apiRequest("/auth/admin-accounts/"),
@@ -167,7 +165,9 @@ export default function SuperAdminDashboardPanel({ user }) {
     return () => { isMounted = false; };
   }, []);
 
-  useEffect(() => { loadActivities(activityDate); }, [activityDate, loadActivities]);
+  useEffect(() => {
+    Promise.resolve().then(() => loadActivities(activityDate));
+  }, [activityDate, loadActivities]);
 
   const activitySessions = useMemo(() => buildActivitySessions(activities), [activities]);
 
@@ -176,10 +176,10 @@ export default function SuperAdminDashboardPanel({ user }) {
   };
 
   return (
-    <section className="p-8">
+    <section className="p-7">
       <header className="mb-5">
-        <h1 className="text-3xl font-bold text-slate-950">Papan Pemuka Super Admin</h1>
-        <p className="mt-1 text-slate-500">Pantau akses akaun, aktiviti log masuk dan liputan pentadbir.</p>
+        <h1 className="text-2xl font-bold text-slate-950">Papan Pemuka Super Admin</h1>
+        <p className="mt-1 text-sm text-slate-500">Pantau akses akaun, aktiviti log masuk dan liputan pentadbir.</p>
       </header>
 
       {error ? <p className="mb-5 rounded-md bg-red-50 p-4 text-sm font-semibold text-red-700">{error}</p> : null}
@@ -192,10 +192,10 @@ export default function SuperAdminDashboardPanel({ user }) {
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
         <section className="overflow-hidden rounded-lg border border-slate-200 bg-white">
-          <header className="flex items-center justify-between gap-4 border-b border-slate-200 px-5 py-4">
+          <header className="flex items-center justify-between gap-4 border-b border-slate-200 px-5 py-3.5">
             <div>
-              <h2 className="font-bold text-slate-950">Aktiviti Terkini</h2>
-              <p className="mt-1 text-sm text-slate-500">{activityLoading ? "Memuatkan aktiviti..." : `${activitySessions.length} aktiviti akaun terkini`}</p>
+              <h2 className="text-base font-bold text-slate-950">Aktiviti Terkini</h2>
+              <p className="mt-1 text-xs text-slate-500">{activityLoading ? "Memuatkan aktiviti..." : `${activitySessions.length} aktiviti akaun terkini`}</p>
             </div>
             <div className="flex items-center gap-2">
               <input className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100" type="date" value={activityDate} onChange={(event) => updateActivityDate(event.target.value)} aria-label="Pilih tarikh aktiviti" />
@@ -219,13 +219,13 @@ export default function SuperAdminDashboardPanel({ user }) {
                 {activityLoading ? <tr><td className="px-5 py-6 text-slate-500" colSpan="2">Memuatkan aktiviti...</td></tr> : null}
                 {!activityLoading && activitySessions.length ? activitySessions.map((activity) => (
                   <tr className="border-t border-slate-100" key={activity.id}>
-                    <td className="px-5 py-5">
-                      <p className="font-bold text-slate-950">{display(activity.full_name || activity.email).toUpperCase()}</p>
-                      <p className="mt-1 text-slate-600">{activity.sessionLabel}</p>
-                      <p className="mt-1 text-slate-500">Jumlah masa: {formatDuration(activity.duration_seconds)}</p>
-                      <p className="mt-1 text-slate-500">{formatActivityRange(activity)}</p>
+                    <td className="px-5 py-4">
+                      <p className="text-sm font-bold text-slate-950">{display(activity.full_name || activity.email).toUpperCase()}</p>
+                      <p className="mt-1 text-sm text-slate-600">{activity.sessionLabel}</p>
+                      <p className="mt-1 text-sm text-slate-500">Jumlah masa: {formatDuration(activity.duration_seconds)}</p>
+                      <p className="mt-1 text-sm text-slate-500">{formatActivityRange(activity)}</p>
                     </td>
-                    <td className="px-5 py-5">
+                    <td className="px-5 py-4">
                       <span className="rounded-full bg-rose-50 px-3 py-1 text-xs font-bold text-rose-600">{activity.role_label}</span>
                     </td>
                   </tr>
