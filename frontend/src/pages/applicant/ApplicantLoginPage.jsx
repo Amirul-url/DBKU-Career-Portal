@@ -19,6 +19,12 @@ function LoginForm() {
     if (storedUser) navigate(dashboardPathForRole(storedUser.role), { replace: true });
   }, [navigate, storedUser]);
 
+  useEffect(() => {
+    if (location.state?.message) {
+      navigate(`${location.pathname}${location.search}`, { replace: true, state: null });
+    }
+  }, [location.pathname, location.search, location.state, navigate]);
+
   const handleChange = (event) => {
     const { name, value, dataset } = event.currentTarget;
     const fieldName = dataset.field || name;
