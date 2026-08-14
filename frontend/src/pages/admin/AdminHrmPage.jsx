@@ -543,9 +543,9 @@ export default function AdminHrmPage() {
             <>
               <div className="hrm-heading">
                 <div>
-                  <h1 className="text-3xl font-bold text-slate-950">Ringkasan pengambilan</h1>
+                  <h1 className="text-3xl font-bold text-slate-950">Papan pemuka HRM</h1>
                   <p>
-                    Pantau prestasi jawatan DBKU dan latihan industri dalam satu paparan.
+                    Semak permohonan baharu, iklan aktif dan saluran pengambilan.
                   </p>
                 </div>
               </div>
@@ -555,19 +555,7 @@ export default function AdminHrmPage() {
                 <Stat icon="stars" label="Disenarai pendek" value={summaryMetrics.shortlist} tone="mint" />
                 <Stat icon="notifications" label="Permohonan baharu" value={summaryMetrics.newApplications} tone="amber" />
               </div>
-              <div className="hrm-category-grid">
-                {dashboardTypes.map((item) => (
-                  <DashboardCategoryCard
-                    key={item.type}
-                    label={item.label}
-                    metrics={dashboardMetrics[item.type]}
-                    onCreate={item.type === "job" ? () => openCreatePanel("Tambah Jawatan DBKU", item.type) : null}
-                    onManage={item.type === "job" ? () => openFilteredPanel("Urus Jawatan DBKU", "Urus Jawatan", item.type) : null}
-                    onViewApplications={() => openFilteredPanel(item.applicationsLabel, "Permohonan", item.type)}
-                  />
-                ))}
-              </div>
-              <div className="hrm-grid">
+              <div className="hrm-grid hrm-dashboard-grid">
                 <section className="hrm-card hrm-table-card">
                   <header>
                     <div>
@@ -585,32 +573,18 @@ export default function AdminHrmPage() {
                   </header>
                   <ApplicationTable applications={latestApplications} onReview={setReview} compact />
                 </section>
-                <section className="hrm-card hrm-analytics">
-                  <header>
-                    <h2>Analitik pemohon</h2>
-                    <p>Agihan status permohonan keseluruhan</p>
-                  </header>
-                  <div className="hrm-chart">
-                    {applicationStatusKeys.map((status) => {
-                      const statusCount = overallMetrics.applications.filter((app) => app.status === status).length;
-                      const statusPercent = overallMetrics.applications.length ? Math.max(8, (statusCount / overallMetrics.applications.length) * 100) : 8;
-                      return (
-                        <div key={status}>
-                          <span>
-                            <Badge status={status} />
-                          </span>
-                          <i>
-                            <b style={{ width: `${statusPercent}%` }} />
-                          </i>
-                          <strong>{statusCount}</strong>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <footer>
-                    <Icon>history</Icon> Dikemas kini secara langsung
-                  </footer>
-                </section>
+                <aside className="hrm-dashboard-side">
+                  <DashboardChannelsPanel
+                    channels={dashboardTypes.map((item) => ({
+                      ...item,
+                      metrics: dashboardMetrics[item.type],
+                      onCreate: item.type === "job" ? () => openCreatePanel("Tambah Jawatan DBKU", item.type) : null,
+                      onManage: item.type === "job" ? () => openFilteredPanel("Urus Jawatan DBKU", "Urus Jawatan", item.type) : null,
+                      onViewApplications: () => openFilteredPanel(item.applicationsLabel, "Permohonan", item.type),
+                    }))}
+                  />
+                  <StatusSummaryPanel applications={overallMetrics.applications} />
+                </aside>
               </div>
             </>
           )}
@@ -984,39 +958,77 @@ function Stat({ icon, label, value, tone }) {
     </article>
   );
 }
-function DashboardCategoryCard({ label, metrics, onCreate, onManage, onViewApplications }) {
+function DashboardChannelsPanel({ channels }) {
   return (
-    <article className="hrm-category-card">
+    <section className="hrm-card hrm-channel-card">
       <header>
         <div>
-          <span>{label}</span>
-          <h2>{metrics?.open || 0} iklan aktif</h2>
+          <h2>Saluran pengambilan</h2>
+          <p>Ringkasan jawatan DBKU dan latihan industri</p>
         </div>
-        {onCreate ? (
-          <button onClick={onCreate} type="button">
-            <Icon>add_circle</Icon>Tambah
-          </button>
-        ) : null}
       </header>
-      <div className="hrm-category-metrics">
-        <span>
-          <strong>{metrics?.total || 0}</strong>
-          Permohonan
-        </span>
-        <span>
-          <strong>{metrics?.new || 0}</strong>
-          Baharu
-        </span>
-        <span>
-          <strong>{metrics?.shortlist || 0}</strong>
-          Disenarai pendek
-        </span>
+      <div className="hrm-channel-list">
+        {channels.map((channel) => (
+          <article key={channel.type}>
+            <div>
+              <span>{channel.label}</span>
+              <strong>{channel.metrics?.open || 0} iklan aktif</strong>
+            </div>
+            <dl>
+              <div>
+                <dt>Permohonan</dt>
+                <dd>{channel.metrics?.total || 0}</dd>
+              </div>
+              <div>
+                <dt>Baharu</dt>
+                <dd>{channel.metrics?.new || 0}</dd>
+              </div>
+              <div>
+                <dt>Pendek</dt>
+                <dd>{channel.metrics?.shortlist || 0}</dd>
+              </div>
+            </dl>
+            <footer>
+              {channel.onCreate ? (
+                <button className="primary" onClick={channel.onCreate} type="button">
+                  <Icon>add_circle</Icon>Tambah
+                </button>
+              ) : null}
+              {channel.onManage ? <button onClick={channel.onManage} type="button">Urus</button> : null}
+              <button onClick={channel.onViewApplications} type="button">Permohonan</button>
+            </footer>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+function StatusSummaryPanel({ applications }) {
+  return (
+    <section className="hrm-card hrm-status-card">
+      <header>
+        <div>
+          <h2>Status permohonan</h2>
+          <p>Keadaan semasa untuk tindakan HRM</p>
+        </div>
+      </header>
+      <div className="hrm-status-list">
+        {applicationStatusKeys.map((status) => {
+          const statusCount = applications.filter((app) => app.status === status).length;
+          const statusPercent = applications.length ? Math.max(6, (statusCount / applications.length) * 100) : 0;
+          return (
+            <div key={status}>
+              <span><Badge status={status} /></span>
+              <i><b style={{ width: `${statusPercent}%` }} /></i>
+              <strong>{statusCount}</strong>
+            </div>
+          );
+        })}
       </div>
       <footer>
-        {onManage ? <button onClick={onManage} type="button">Urus iklan</button> : null}
-        <button onClick={onViewApplications} type="button">Lihat permohonan</button>
+        <Icon>history</Icon> Dikemas kini langsung
       </footer>
-    </article>
+    </section>
   );
 }
 function JobManagementTable({ jobs, applications, emptyMessage = "", itemLabel = "jawatan", onDelete, onEdit, onView }) {

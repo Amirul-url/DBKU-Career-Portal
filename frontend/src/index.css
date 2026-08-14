@@ -3181,93 +3181,6 @@ body:has(.auth-page) {
   text-align: center;
 }
 
-.hrm-category-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-  margin-top: 18px;
-}
-
-.hrm-category-card {
-  border: 1px solid #dfece5;
-  border-radius: 14px;
-  background: #fff;
-  box-shadow: 0 10px 26px rgba(30, 70, 49, 0.045);
-  padding: 20px;
-}
-
-.hrm-category-card header,
-.hrm-category-card footer,
-.hrm-category-metrics {
-  display: flex;
-  align-items: center;
-}
-
-.hrm-category-card header {
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.hrm-category-card header span {
-  color: #078044;
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-}
-
-.hrm-category-card h2 {
-  margin: 7px 0 0;
-  font-size: 22px;
-}
-
-.hrm-category-card header button,
-.hrm-category-card footer button {
-  border: 0;
-  background: transparent;
-  color: #078044;
-  font-size: 12px;
-  font-weight: 900;
-}
-
-.hrm-category-card header button {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border-radius: 8px;
-  background: #e8f7ee;
-  padding: 9px 12px;
-}
-
-.hrm-category-metrics {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 18px;
-}
-
-.hrm-category-metrics span {
-  border-radius: 10px;
-  background: #f6faf8;
-  padding: 12px;
-  color: #65786d;
-  font-size: 11px;
-  font-weight: 800;
-}
-
-.hrm-category-metrics strong {
-  display: block;
-  margin-bottom: 3px;
-  color: #071529;
-  font-size: 22px;
-}
-
-.hrm-category-card footer {
-  justify-content: flex-end;
-  gap: 14px;
-  margin-top: 16px;
-}
-
 .hrm-card-actions {
   display: flex;
   flex-wrap: wrap;
@@ -3284,6 +3197,165 @@ body:has(.auth-page) {
   color: #078044;
   font-size: 12px;
   font-weight: 900;
+}
+
+.hrm-dashboard-grid {
+  grid-template-columns: minmax(0, 1.65fr) minmax(360px, .82fr);
+  align-items: start;
+  margin-top: 18px;
+}
+
+.hrm-dashboard-side {
+  display: grid;
+  gap: 16px;
+}
+
+.hrm-channel-card header,
+.hrm-status-card header {
+  padding: 17px 19px;
+}
+
+.hrm-channel-list {
+  display: grid;
+}
+
+.hrm-channel-list article {
+  display: grid;
+  gap: 14px;
+  border-top: 1px solid #e8f0eb;
+  padding: 16px 19px;
+}
+
+.hrm-channel-list article:first-child {
+  border-top: 0;
+}
+
+.hrm-channel-list article > div:first-child {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.hrm-channel-list span {
+  color: #078044;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.hrm-channel-list strong {
+  color: #071529;
+  font-size: 18px;
+  white-space: nowrap;
+}
+
+.hrm-channel-list dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.hrm-channel-list dl div {
+  border-radius: 8px;
+  background: #f6faf8;
+  padding: 10px;
+}
+
+.hrm-channel-list dt,
+.hrm-channel-list dd {
+  margin: 0;
+}
+
+.hrm-channel-list dt {
+  color: #65786d;
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.hrm-channel-list dd {
+  margin-top: 3px;
+  color: #071529;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.hrm-channel-list footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.hrm-channel-list footer button {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #078044;
+  padding: 0 7px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.hrm-channel-list footer button.primary {
+  background: #e8f7ee;
+  padding: 0 10px;
+}
+
+.hrm-status-list {
+  display: grid;
+  gap: 13px;
+  padding: 18px 19px;
+}
+
+.hrm-status-list > div {
+  display: grid;
+  grid-template-columns: 108px minmax(0, 1fr) 24px;
+  align-items: center;
+  gap: 10px;
+}
+
+.hrm-status-list i {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #eef3f0;
+}
+
+.hrm-status-list i b {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #078044;
+}
+
+.hrm-status-list strong {
+  color: #071529;
+  font-size: 12px;
+  text-align: right;
+}
+
+.hrm-status-card footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-top: 1px solid #edf3ef;
+  padding: 13px 19px;
+  color: #7b9083;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+@media (max-width: 1100px) {
+  .hrm-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .register-auth-page .auth-switch-link {
