@@ -33,6 +33,33 @@ const fileNameFromUrl = (url) => {
   }
 };
 
+const localFilePattern = /\.(?:pdf|docx?|jpe?g|png|gif|webp|mp4|mov|avi|webm)(?:[?#].*)?$/i;
+
+function resolveProfileOpenUrl(value, preferExternal = false) {
+  const rawValue = typeof value === "string" ? value.trim() : "";
+  if (!rawValue) return "";
+
+  if (
+    preferExternal &&
+    !/^(?:blob:|data:|https?:\/\/|\/)/i.test(rawValue) &&
+    (/^www\./i.test(rawValue) || /^[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:[/:?#]|$)/i.test(rawValue)) &&
+    !localFilePattern.test(rawValue)
+  ) {
+    return `https://${rawValue}`;
+  }
+
+  return resolveMediaUrl(rawValue);
+}
+
+function openProfileUrl(value, preferExternal = false) {
+  if (typeof window === "undefined") return;
+
+  const url = resolveProfileOpenUrl(value, preferExternal);
+  if (!url) return;
+
+  window.open(url, "_blank", "noopener,noreferrer");
+}
+
 function FormRow({ label, children }) {
   return <section className="personal-form-row"><strong className="personal-form-section-label">{label}</strong><div className="personal-form-fields">{children}</div></section>;
 }
@@ -174,10 +201,62 @@ function PersonalProfileMirror({ applicant, isOpen, onToggle, profile }) {
   const name = personal.displayName || applicant.full_name || applicant.first_name || "Pemohon";
   const email = personal.email || applicant.email;
   const photo = resolveMediaUrl(personal.profilePhotoUrl || applicant.profile_photo_url);
-  const resumeUrl = resolveMediaUrl(personal.resumeFileUrl || applicant.resume_file_url);
-  const videoResumeUrl = resolveMediaUrl(personal.videoResumeUrl || details.videoResumeUrl || applicant.video_resume_url || personal.videoResumeFileUrl || applicant.video_resume_file_url);
+  const resumeUrl = resolveProfileOpenUrl(personal.resumeFileUrl || applicant.resume_file_url);
+  const videoResumeSource = personal.videoResumeUrl || details.videoResumeUrl || applicant.video_resume_url || personal.videoResumeFileUrl || applicant.video_resume_file_url;
+  const videoResumeUrl = resolveProfileOpenUrl(videoResumeSource, true);
 
-  return <section className={`superadmin-personal-mirror overflow-hidden rounded-lg border bg-white ${isOpen ? "is-editing border-emerald-600" : "border-emerald-100"}`}><header className="flex items-center justify-between border-b border-slate-200 px-7 py-6"><h3 className="text-2xl font-bold text-slate-950">Maklumat Peribadi</h3><button className={`inline-flex items-center gap-2 font-bold ${isOpen ? "text-slate-950" : "text-emerald-700 hover:text-emerald-800"}`} type="button" onClick={onToggle}>{isOpen ? null : <Icon>visibility</Icon>}{isOpen ? "Tutup" : "Lihat Butiran"}</button></header>{isOpen ? <div className="superadmin-personal-mirror-body"><ApplicantPersonalReadOnlyView applicant={applicant} profile={profile} /></div> : <div className="flex flex-col justify-between gap-6 px-7 py-6 md:flex-row md:items-center"><div className="flex items-center gap-5">{photo ? <img className="h-24 w-24 rounded-full border border-emerald-200 object-cover" src={photo} alt={`Foto profil ${name}`} /> : <span className="flex h-24 w-24 items-center justify-center rounded-full bg-emerald-100 text-3xl font-bold text-emerald-700">{name.charAt(0)}</span>}<div><p className="text-xl font-bold text-slate-950">{name}</p><p className="mt-2 font-semibold text-slate-600">{email}</p></div></div><div className="grid w-full gap-3 md:w-72">{resumeUrl ? <a className="inline-flex items-center justify-center gap-2 border border-emerald-200 px-4 py-3 font-bold text-emerald-600 hover:bg-emerald-50" href={resumeUrl} target="_blank" rel="noreferrer"><Icon>description</Icon>Muat Turun Resume (PDF)</a> : null}{videoResumeUrl ? <a className="inline-flex items-center justify-center gap-2 border border-emerald-200 px-4 py-3 font-bold text-emerald-600 hover:bg-emerald-50" href={videoResumeUrl} target="_blank" rel="noreferrer"><Icon>movie</Icon>Buka Link Video</a> : null}</div></div>}</section>;
+  return (
+    <section className={`superadmin-personal-mirror overflow-hidden rounded-lg border bg-white ${isOpen ? "is-editing border-emerald-600" : "border-emerald-100"}`}>
+      <header className="flex items-center justify-between border-b border-slate-200 px-7 py-6">
+        <h3 className="text-2xl font-bold text-slate-950">Maklumat Peribadi</h3>
+        <button className={`inline-flex items-center gap-2 font-bold ${isOpen ? "text-slate-950" : "text-emerald-700 hover:text-emerald-800"}`} type="button" onClick={onToggle}>
+          {isOpen ? null : <Icon>visibility</Icon>}
+          {isOpen ? "Tutup" : "Lihat Butiran"}
+        </button>
+      </header>
+      {isOpen ? (
+        <div className="superadmin-personal-mirror-body">
+          <ApplicantPersonalReadOnlyView applicant={applicant} profile={profile} />
+        </div>
+      ) : (
+        <div className="flex flex-col justify-between gap-6 px-7 py-6 md:flex-row md:items-center">
+          <div className="flex items-center gap-5">
+            {photo ? (
+              <img className="h-24 w-24 rounded-full border border-emerald-200 object-cover" src={photo} alt={`Foto profil ${name}`} />
+            ) : (
+              <span className="flex h-24 w-24 items-center justify-center rounded-full bg-emerald-100 text-3xl font-bold text-emerald-700">{name.charAt(0)}</span>
+            )}
+            <div>
+              <p className="text-xl font-bold text-slate-950">{name}</p>
+              <p className="mt-2 font-semibold text-slate-600">{email}</p>
+            </div>
+          </div>
+          <div className="grid w-full gap-3 md:w-72">
+            {resumeUrl ? (
+              <button
+                className="inline-flex items-center justify-center gap-2 border border-emerald-200 bg-white px-4 py-3 font-bold text-emerald-600 hover:bg-emerald-50"
+                type="button"
+                onClick={() => openProfileUrl(resumeUrl)}
+              >
+                <Icon>description</Icon>
+                Muat Turun Resume (PDF)
+              </button>
+            ) : null}
+            {videoResumeUrl ? (
+              <button
+                className="inline-flex items-center justify-center gap-2 border border-emerald-200 bg-white px-4 py-3 font-bold text-emerald-600 hover:bg-emerald-50"
+                type="button"
+                onClick={() => openProfileUrl(videoResumeSource, true)}
+              >
+                <Icon>movie</Icon>
+                Buka Link Video
+              </button>
+            ) : null}
+          </div>
+        </div>
+      )}
+    </section>
+  );
 }
 
 function SharedSummaryMirror({ children, isOpen, onToggle, title }) {
