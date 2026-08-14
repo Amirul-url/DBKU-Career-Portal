@@ -1552,19 +1552,10 @@ function InternshipApplicationsPanel({ applications, onReview, onView }) {
     </section>
   );
 }
-function inferHrmEducationLevel(academicLevel = "") {
-  const level = String(academicLevel || "").toLowerCase();
-  if (level.includes("ijazah")) return "Ijazah";
-  if (level.includes("diploma")) return "Diploma";
-  if (level.includes("stpm")) return "STPM";
-  if (level.includes("matrikulasi")) return "Matrikulasi";
-  if (level.includes("spm")) return "SPM / SPMV";
-  return "";
-}
 function HrmInternshipAssessmentTab({ application, onReview }) {
   const studentInfo = getInternshipStudentInfo(application);
   const [decision, setDecision] = useState("");
-  const [educationLevel, setEducationLevel] = useState(() => inferHrmEducationLevel(studentInfo.academicLevel));
+  const [educationLevel, setEducationLevel] = useState("");
   const isFinal = application ? ["shortlisted", "rejected"].includes(application.status) : false;
   const decisions = ["Layak", "Tidak Layak", "Tidak Lengkap"];
   const educationLevels = ["Ijazah", "Diploma", "STPM", "Matrikulasi", "SPM / SPMV"];
