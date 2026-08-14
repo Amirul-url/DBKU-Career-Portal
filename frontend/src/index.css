@@ -5966,6 +5966,11 @@ body:has(.applicant-profile-page) {
   color: #92400e;
 }
 
+.applicant-status-pill.incomplete {
+  background: #fffbeb;
+  color: #92400e;
+}
+
 .applicant-status-pill.shortlisted {
   background: #dcfce7;
   color: #087a42;

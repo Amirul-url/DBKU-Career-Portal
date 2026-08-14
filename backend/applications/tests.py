@@ -34,12 +34,13 @@ class CandidateApplicationReferenceNoTests(TestCase):
         shutil.rmtree(self.media_root, ignore_errors=True)
         super().tearDown()
 
-    def create_applicant(self, email):
+    def create_applicant(self, email, mobile_number=""):
         return self.user_model.objects.create_user(
             username=email,
             email=email,
             password="Password123!",
             role="applicant",
+            mobile_number=mobile_number,
         )
 
     def test_reference_no_uses_yearly_pk_format(self):
@@ -155,3 +156,73 @@ class CandidateApplicationReferenceNoTests(TestCase):
         returned_ids = {application["id"] for application in applications}
         self.assertNotIn(draft_application.id, returned_ids)
         self.assertIn(submitted_application.id, returned_ids)
+
+    @override_settings(NOTIFICATION_EMAIL_ENABLED=True, WHATSAPP_ENABLED=True)
+    @patch("applications.services.send_whatsapp_message")
+    @patch("notifications.services.send_notification_email")
+    def test_review_marks_application_incomplete_and_notifies_applicant(self, mock_send_email, mock_send_whatsapp):
+        applicant = self.create_applicant("incomplete@example.com", mobile_number="60123456789")
+        staff = self.user_model.objects.create_user(
+            username="hrm-incomplete@example.com",
+            email="hrm-incomplete@example.com",
+            password="Password123!",
+            role="admin",
+        )
+        application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=self.vacancy,
+            status="submitted",
+        )
+        client = APIClient()
+        client.force_authenticate(user=staff)
+
+        response = client.post(
+            f"/api/applications/{application.id}/review/",
+            {"status": "incomplete"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        application.refresh_from_db()
+        self.assertEqual(application.status, "incomplete")
+        notification = Notification.objects.get(application=application, user=applicant)
+        self.assertEqual(notification.title, "Permohonan Tidak Lengkap")
+        self.assertIn(application.reference_no, notification.message)
+        self.assertIn("tidak lengkap", notification.message.lower())
+        mock_send_email.assert_called_once_with(applicant, notification.title, notification.message)
+        mock_send_whatsapp.assert_called_once_with(applicant.mobile_number, notification.message)
+
+    @override_settings(NOTIFICATION_EMAIL_ENABLED=True, WHATSAPP_ENABLED=True)
+    @patch("applications.services.send_whatsapp_message")
+    @patch("notifications.services.send_notification_email")
+    def test_review_marks_application_not_eligible_and_notifies_applicant(self, mock_send_email, mock_send_whatsapp):
+        applicant = self.create_applicant("not-eligible@example.com", mobile_number="60199887766")
+        staff = self.user_model.objects.create_user(
+            username="hrm-reject@example.com",
+            email="hrm-reject@example.com",
+            password="Password123!",
+            role="admin",
+        )
+        application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=self.vacancy,
+            status="submitted",
+        )
+        client = APIClient()
+        client.force_authenticate(user=staff)
+
+        response = client.post(
+            f"/api/applications/{application.id}/review/",
+            {"status": "rejected"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        application.refresh_from_db()
+        self.assertEqual(application.status, "rejected")
+        notification = Notification.objects.get(application=application, user=applicant)
+        self.assertEqual(notification.title, "Permohonan Tidak Layak")
+        self.assertIn(application.reference_no, notification.message)
+        self.assertIn("tidak layak", notification.message.lower())
+        mock_send_email.assert_called_once_with(applicant, notification.title, notification.message)
+        mock_send_whatsapp.assert_called_once_with(applicant.mobile_number, notification.message)

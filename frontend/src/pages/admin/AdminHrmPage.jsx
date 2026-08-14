@@ -40,6 +40,7 @@ const dbkuDepartments = [
 const statusLabel = {
   submitted: "Baharu",
   screening: "Saringan",
+  incomplete: "Tidak Lengkap",
   shortlisted: "Disenarai pendek",
   interview: "Temu duga",
   offered: "Tawaran",
@@ -51,6 +52,7 @@ const statusLabel = {
 const statusClass = {
   submitted: "blue",
   screening: "amber",
+  incomplete: "amber",
   shortlisted: "green",
   interview: "violet",
   offered: "green",
@@ -137,7 +139,7 @@ const dashboardTypes = [
     applicationsLabel: "Permohonan Latihan Industri",
   },
 ];
-const applicationStatusKeys = ["submitted", "screening", "shortlisted", "rejected"];
+const applicationStatusKeys = ["submitted", "screening", "incomplete", "shortlisted", "rejected"];
 const jobStatusOptions = [
   { value: "all", label: "Semua status" },
   { value: "active", label: "Aktif" },
@@ -239,7 +241,7 @@ export default function AdminHrmPage() {
       });
       const reviewNotice = {
         shortlisted: "Permohonan telah dihantar ke bahagian.",
-        screening: "Permohonan telah ditanda tidak lengkap.",
+        incomplete: "Permohonan telah ditanda tidak lengkap.",
         rejected: "Permohonan telah ditanda tidak layak.",
       };
       setNotice(reviewNotice[status] || "Semakan permohonan telah dikemaskini.");
@@ -1730,7 +1732,7 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
           className="hrm-secondary"
           type="button"
           disabled={!application || isFinal || isSavingAssessment}
-          onClick={() => reviewWithAssessment("screening", "Tidak Lengkap")}
+          onClick={() => reviewWithAssessment("incomplete", "Tidak Lengkap")}
         >
           Tidak Lengkap
         </button>
@@ -1822,7 +1824,7 @@ function ApplicationTable({ applications, onReview, compact }) {
                     </button>
                     <button
                       className="incomplete"
-                      onClick={() => onReview(app.id, "screening")}
+                      onClick={() => onReview(app.id, "incomplete")}
                       disabled={["shortlisted", "rejected"].includes(
                         app.status,
                       )}

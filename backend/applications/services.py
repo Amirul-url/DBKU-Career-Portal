@@ -24,6 +24,44 @@ def build_application_submitted_message(application):
     )
 
 
+def build_application_review_notification(application, next_status):
+    copy = {
+        "incomplete": {
+            "title": "Permohonan Tidak Lengkap",
+            "message": (
+                f"Permohonan anda dengan No. rujukan {application.reference_no} "
+                "telah ditanda tidak lengkap. Sila log masuk ke Portal Kerjaya DBKU "
+                "untuk menyemak dan melengkapkan maklumat atau dokumen yang diperlukan."
+            ),
+        },
+        "rejected": {
+            "title": "Permohonan Tidak Layak",
+            "message": (
+                f"Permohonan anda dengan No. rujukan {application.reference_no} "
+                "telah ditanda tidak layak selepas semakan HRM. Sila log masuk ke "
+                "Portal Kerjaya DBKU untuk menyemak status permohonan."
+            ),
+        },
+    }
+    return copy.get(
+        next_status,
+        {
+            "title": "Status permohonan dikemas kini",
+            "message": f"{application.reference_no} kini berstatus {application.get_status_display()}.",
+        },
+    )
+
+
+def send_application_whatsapp(application, message, context):
+    if not application.applicant.mobile_number or not getattr(settings, "WHATSAPP_ENABLED", False):
+        return
+
+    try:
+        send_whatsapp_message(application.applicant.mobile_number, message)
+    except OTPDeliveryError:
+        logger.exception("Unable to send %s WhatsApp for application %s", context, application.pk)
+
+
 def submit_application(application):
     application.status = "submitted"
     application.submitted_at = application.submitted_at or timezone.now()
@@ -35,11 +73,7 @@ def submit_application(application):
         message=message,
         application=application,
     )
-    if application.applicant.mobile_number and getattr(settings, "WHATSAPP_ENABLED", False):
-        try:
-            send_whatsapp_message(application.applicant.mobile_number, message)
-        except OTPDeliveryError:
-            logger.exception("Unable to send application submission WhatsApp for application %s", application.pk)
+    send_application_whatsapp(application, message, "application submission")
     return application
 
 
@@ -59,10 +93,13 @@ def review_application(application, next_status, remark=None):
     if remark is not None:
         application.latest_remark = remark
     application.save(update_fields=["status", "latest_remark", "updated_at"])
+    notification = build_application_review_notification(application, next_status)
     create_notification(
         user=application.applicant,
-        title="Status permohonan dikemas kini",
-        message=f"{application.reference_no} kini berstatus {application.get_status_display()}.",
+        title=notification["title"],
+        message=notification["message"],
         application=application,
     )
+    if next_status in {"incomplete", "rejected"}:
+        send_application_whatsapp(application, notification["message"], "application review")
     return application

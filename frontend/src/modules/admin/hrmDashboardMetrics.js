@@ -1,6 +1,7 @@
 const hrmVisibleApplicationStatuses = new Set([
   "submitted",
   "screening",
+  "incomplete",
   "shortlisted",
   "interview",
   "offered",

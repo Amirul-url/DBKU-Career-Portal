@@ -45,6 +45,16 @@ describe("buildHrmDashboardMetrics", () => {
     assert.equal(metrics.summary.activeJobAds, 0);
     assert.equal(metrics.job.open, 0);
   });
+
+  it("counts incomplete applications as visible HRM applications", () => {
+    const metrics = buildHrmDashboardMetrics(
+      [{ id: 1, vacancy_type: "internship", status: "open", is_open: true }],
+      [{ id: 1, vacancy: 1, status: "incomplete" }],
+    );
+
+    assert.equal(metrics.summary.totalApplications, 1);
+    assert.equal(metrics.internship.total, 1);
+  });
 });
 
 describe("buildRecentApplicationsView", () => {

@@ -8,6 +8,7 @@ class CandidateApplication(models.Model):
         ("draft", "Draft"),
         ("submitted", "Submitted"),
         ("screening", "Screening"),
+        ("incomplete", "Incomplete"),
         ("shortlisted", "Shortlisted"),
         ("interview", "Interview"),
         ("offered", "Offered"),
