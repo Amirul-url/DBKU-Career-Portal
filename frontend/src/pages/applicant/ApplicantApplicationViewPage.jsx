@@ -152,14 +152,24 @@ function getFileNameFromUrl(value) {
   }
 }
 
+function getLegacyDocumentUrl(fileName) {
+  const cleanFileName = String(fileName || "").split(/[\\/]/).filter(Boolean).pop();
+  if (!cleanFileName || cleanFileName === "-") {
+    return "";
+  }
+
+  return resolveMediaUrl(`/media/${encodeURIComponent(cleanFileName)}`);
+}
+
 function normalizeDocumentFile(primaryValue, fallbackValue = "", fallbackUrl = "") {
   const values = [primaryValue, fallbackValue].filter((value) => value !== undefined && value !== null && value !== "");
 
   for (const value of values) {
     if (typeof value === "object") {
       const rawUrl = value.url || value.file_url || value.fileUrl || value.dataUrl || value.data_url || "";
-      const url = resolveMediaUrl(rawUrl || fallbackUrl);
-      const name = value.name || value.file_name || value.fileName || getFileNameFromUrl(url) || displayValue(fallbackValue);
+      const resolvedUrl = resolveMediaUrl(rawUrl || fallbackUrl);
+      const name = value.name || value.file_name || value.fileName || getFileNameFromUrl(resolvedUrl) || displayValue(fallbackValue);
+      const url = resolvedUrl || getLegacyDocumentUrl(name);
       return { name: displayValue(name), url };
     }
 
@@ -168,7 +178,9 @@ function normalizeDocumentFile(primaryValue, fallbackValue = "", fallbackUrl = "
       continue;
     }
 
-    const url = /^(https?:|blob:|data:|\/media\/|media\/)/i.test(text) ? resolveMediaUrl(text) : resolveMediaUrl(fallbackUrl);
+    const url = /^(https?:|blob:|data:|\/media\/|media\/)/i.test(text)
+      ? resolveMediaUrl(text)
+      : resolveMediaUrl(fallbackUrl) || getLegacyDocumentUrl(text);
     return { name: getFileNameFromUrl(text) || text, url };
   }
 
