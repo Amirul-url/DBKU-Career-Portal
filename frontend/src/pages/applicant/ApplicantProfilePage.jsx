@@ -979,6 +979,7 @@ export function ApplicantAddressMap({ address, addressError, latitude, locationE
   const currentLongitude = Number(longitude) || defaultLongitude;
   const currentLatitude = Number(latitude) || defaultLatitude;
   const addressQuery = [mapAddress, "Malaysia"].filter(Boolean).join(", ");
+  const mapActionClassName = `personal-address-map-actions${readOnly ? " read-only" : ""}`;
 
   useEffect(() => {
     const nextAddress = String(address || "");
@@ -1348,11 +1349,15 @@ export function ApplicantAddressMap({ address, addressError, latitude, locationE
             <strong>Map Lokasi</strong>
             <span>{readOnly ? "Paparan lokasi pemohon." : "Pilih cadangan alamat, klik map atau gerakkan pin untuk tetapkan lokasi."}</span>
           </div>
-          <div className="personal-address-map-actions">
+          <div className={mapActionClassName}>
             <button type="button" onClick={focusLocation}>Fokus</button>
-            <button type="button" className={mapMode === "2d" ? "active" : ""} onClick={() => applyMapMode("2d")}>2D</button>
+            {!readOnly ? (
+              <button type="button" className={mapMode === "2d" ? "active" : ""} onClick={() => applyMapMode("2d")}>2D</button>
+            ) : null}
             <button type="button" className={mapMode === "3d" ? "active" : ""} onClick={() => applyMapMode("3d")}>3D</button>
-            <button type="button" className={mapStyle === "street" ? "active" : ""} onClick={() => applyMapStyle("street")}>Jalan</button>
+            {!readOnly ? (
+              <button type="button" className={mapStyle === "street" ? "active" : ""} onClick={() => applyMapStyle("street")}>Jalan</button>
+            ) : null}
             <button type="button" className={mapStyle === "satellite" ? "active" : ""} onClick={() => applyMapStyle("satellite")}>Satelit</button>
             <button type="button" className={mapStyle === "outdoor" ? "active" : ""} onClick={() => applyMapStyle("outdoor")}>Luar</button>
           </div>

@@ -8231,15 +8231,22 @@ body:has(.applicant-profile-page) {
 }
 
 .personal-address-map-actions {
-  display: flex;
+  display: inline-flex;
+  width: fit-content;
   flex-wrap: nowrap;
+  align-items: center;
   justify-content: flex-end;
   gap: 8px;
+  margin-left: auto;
   white-space: nowrap;
 }
 
 .personal-address-map-actions button {
+  display: inline-flex;
+  width: auto;
   flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
   min-height: 32px;
   border: 1px solid #bfe7cf;
   border-radius: 999px;
@@ -8248,6 +8255,10 @@ body:has(.applicant-profile-page) {
   padding: 0 12px;
   font-size: 12px;
   font-weight: 900;
+}
+
+.personal-address-map-actions.read-only {
+  gap: 8px;
 }
 
 .personal-address-map-actions button:hover,
