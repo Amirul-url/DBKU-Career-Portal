@@ -9,7 +9,7 @@ from rest_framework.test import APITestCase
 from notifications.models import Notification
 
 from .models import LoginSession, User
-from .otp_delivery import password_reset_cache_key
+from .otp_delivery import normalize_phone_number, password_reset_cache_key
 
 
 class LoginSessionTests(APITestCase):
@@ -84,6 +84,12 @@ class LoginSessionTests(APITestCase):
         stale_session.refresh_from_db()
         self.assertEqual(stale_session.logout_at, stale_login_at + timedelta(hours=1))
         self.assertEqual(stale_session.duration_seconds, 3600)
+
+
+class PhoneNumberNormalizationTests(APITestCase):
+    def test_malaysian_local_mobile_number_is_normalized_for_whatsapp(self):
+        self.assertEqual(normalize_phone_number("0175151829"), "60175151829")
+        self.assertEqual(normalize_phone_number("+60 17-515 1829"), "60175151829")
 
 
 class PasswordResetTests(APITestCase):
@@ -176,6 +182,7 @@ class PasswordResetTests(APITestCase):
 
 
 class ApplicantRegistrationNotificationTests(APITestCase):
+    @override_settings(FRONTEND_URL="", NOTIFICATION_EMAIL_ENABLED=False, WHATSAPP_ENABLED=False)
     def test_register_creates_in_app_registration_notification_by_default(self):
         response = self.client.post(
             "/api/auth/register/",
@@ -198,7 +205,7 @@ class ApplicantRegistrationNotificationTests(APITestCase):
             "Sila log masuk untuk meneruskan penggunaan portal.",
         )
 
-    @override_settings(NOTIFICATION_SIDE_EFFECTS_ENABLED=True, FRONTEND_URL="https://portal-kerjaya.example.test")
+    @override_settings(NOTIFICATION_SIDE_EFFECTS_ENABLED=True, WHATSAPP_ENABLED=False, FRONTEND_URL="https://portal-kerjaya.example.test")
     @patch("accounts.services.create_notification")
     def test_register_sends_formal_registration_notification(self, mock_create_notification):
         response = self.client.post(

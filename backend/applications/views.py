@@ -7,7 +7,6 @@ from .permissions import CandidateApplicationPermission
 from .serializers import CandidateApplicationSerializer
 from .services import (
     InvalidApplicationStatus,
-    create_draft_notification,
     review_application,
     submit_application,
     withdraw_application,
@@ -31,10 +30,6 @@ class CandidateApplicationViewSet(viewsets.ModelViewSet):
         if vacancy_type:
             queryset = queryset.filter(vacancy__vacancy_type=vacancy_type)
         return queryset
-
-    def perform_create(self, serializer):
-        application = serializer.save()
-        create_draft_notification(application)
 
     @action(detail=True, methods=["post"])
     def submit(self, request, pk=None):

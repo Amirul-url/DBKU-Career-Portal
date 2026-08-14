@@ -3,8 +3,10 @@ from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from rest_framework.test import APIClient
 
 from jobs.models import Vacancy
+from notifications.models import Notification
 
 from .models import CandidateApplication
 
@@ -70,3 +72,17 @@ class CandidateApplicationReferenceNoTests(TestCase):
                     applicant=self.create_applicant("overflow@example.com"),
                     vacancy=self.vacancy,
                 )
+
+    def test_creating_draft_application_does_not_create_notification(self):
+        applicant = self.create_applicant("draft@example.com")
+        client = APIClient()
+        client.force_authenticate(user=applicant)
+
+        response = client.post(
+            "/api/applications/",
+            {"vacancy": self.vacancy.id, "cover_letter": "Draf sementara."},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertFalse(Notification.objects.filter(user=applicant).exists())

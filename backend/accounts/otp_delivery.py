@@ -14,6 +14,8 @@ class OTPDeliveryError(Exception):
 
 def normalize_phone_number(value):
     digits = re.sub(r"\D", "", value or "")
+    if digits.startswith("0"):
+        digits = f"60{digits[1:]}"
     return digits or None
 
 

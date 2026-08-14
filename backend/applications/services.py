@@ -24,15 +24,6 @@ def build_application_submitted_message(application):
     )
 
 
-def create_draft_notification(application):
-    return create_notification(
-        user=application.applicant,
-        title="Draf permohonan dicipta",
-        message=f"Draf telah dicipta untuk {application.vacancy.title}.",
-        application=application,
-    )
-
-
 def submit_application(application):
     application.status = "submitted"
     application.submitted_at = application.submitted_at or timezone.now()
