@@ -195,7 +195,10 @@ function ApplicationList({ applications, loading }) {
               paginatedApplications.map((application) => {
                 const vacancy = application.vacancy_detail || {};
                 const status = application.status || "draft";
-                const shouldContinueApplication = application.isLocalDraft || status === "draft";
+                const shouldContinueApplication = application.isLocalDraft || status === "draft" || status === "incomplete";
+                const actionTarget = status === "incomplete"
+                  ? APPLICANT_ROUTES.internshipApplicationEdit(application.id)
+                  : APPLICANT_ROUTES.internshipApplication;
                 return (
                   <tr key={application.id}>
                     <td>{formatReferenceNo(application)}</td>
@@ -208,7 +211,9 @@ function ApplicationList({ applications, loading }) {
                     </td>
                     <td>
                       {shouldContinueApplication ? (
-                        <Link className="applicant-table-action" to={APPLICANT_ROUTES.internshipApplication}>Teruskan</Link>
+                        <Link className="applicant-table-action" to={actionTarget}>
+                          {status === "incomplete" ? "Kemaskini" : "Teruskan"}
+                        </Link>
                       ) : (
                         <Link className="applicant-table-action app-view-action" to={APPLICANT_ROUTES.applicationView(application.id)}>
                           <Icon>visibility</Icon>

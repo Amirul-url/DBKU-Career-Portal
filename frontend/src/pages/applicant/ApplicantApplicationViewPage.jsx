@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { apiRequest, getStoredUser, resolveMediaUrl } from "../../lib/authApi";
 import { countryCallingCodes, defaultCountryCallingCode } from "../../lib/countryCallingCodes";
 import { APPLICANT_ROUTES } from "../../modules/applicant/applicantRoutes";
@@ -412,6 +412,14 @@ export function InternshipApplicationReadOnlyPanel({
                   <strong className={`applicant-status-pill ${status}`}>{statusLabels[status] || status}</strong>
                 </div>
               </section>
+              {status === "incomplete" ? (
+                <div className="student-readonly-actions">
+                  <Link className="applicant-table-action" to={APPLICANT_ROUTES.internshipApplicationEdit(application.id)}>
+                    <Icon>edit</Icon>
+                    Kemaskini Permohonan
+                  </Link>
+                </div>
+              ) : null}
 
               <nav className="student-info-tabs" aria-label="Bahagian permohonan latihan industri">
                 {panelTabs.map((tab) => (

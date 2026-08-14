@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { apiRequest, getStoredUser } from "../../lib/authApi";
 import { countryCallingCodes, defaultCountryCallingCode } from "../../lib/countryCallingCodes";
 import { APPLICANT_ROUTES } from "../../modules/applicant/applicantRoutes";
@@ -9,6 +9,7 @@ import { ApplicantAddressMap, ProfileContentHeader, ProfileSidebar } from "./App
 
 const personalInfoTab = "Maklumat Peribadi Pemohon";
 const infoTabs = [personalInfoTab, "Maklumat Akademik", "Dokumen Sokongan"];
+const editableApplicationStatuses = new Set(["draft", "incomplete"]);
 
 const academicLevelOptions = [
   "Sijil",
@@ -689,7 +690,9 @@ function buildApplicationProfileData(studentInfo, vacancy) {
 
 export default function ApplicantInternshipApplicationPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const user = getStoredUser();
+  const editApplicationId = searchParams.get("application") || "";
   const savedDraft = loadStudentInfoDraft(user);
   const initialStudentInfo = normalizeStudentInfoDraft(savedDraft?.studentInfo || {}, user);
   const [sidebarOpen, toggleSidebar] = useApplicantSidebarState();
@@ -704,6 +707,7 @@ export default function ApplicantInternshipApplicationPage() {
   const [isSubmittingApplication, setIsSubmittingApplication] = useState(false);
   const [internshipVacancy, setInternshipVacancy] = useState(null);
   const [internshipVacancyLoading, setInternshipVacancyLoading] = useState(true);
+  const [editableApplication, setEditableApplication] = useState(null);
   const [submittedReferenceNo, setSubmittedReferenceNo] = useState("");
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
   const email = user?.email || "Belum dikemaskini";
@@ -750,7 +754,7 @@ export default function ApplicantInternshipApplicationPage() {
   }, [user?.id, user?.role]);
 
   useEffect(() => {
-    if (user?.role !== "applicant" || savedDraft?.studentInfo) {
+    if (user?.role !== "applicant" || (savedDraft?.studentInfo && !editApplicationId)) {
       return;
     }
 
@@ -759,13 +763,25 @@ export default function ApplicantInternshipApplicationPage() {
       .then((data) => {
         if (!isMounted) return;
         const applications = Array.isArray(data) ? data : data.results || [];
-        const draftApplication = applications.find((application) => (application.status || "draft") === "draft");
+        const draftApplication = applications.find((application) => {
+          const status = application.status || "draft";
+          if (!editableApplicationStatuses.has(status)) return false;
+          return editApplicationId ? String(application.id) === String(editApplicationId) : true;
+        });
         const draftStudentInfo = draftApplication?.profile_data?.student_info;
         if (!draftStudentInfo) return;
 
         const nextStudentInfo = normalizeStudentInfoDraft(draftStudentInfo, user);
+        setEditableApplication(draftApplication);
+        if (draftApplication.vacancy_detail) {
+          setInternshipVacancy(draftApplication.vacancy_detail);
+        }
         setStudentInfo(nextStudentInfo);
         setActiveInfoTab(getFirstIncompleteTab(nextStudentInfo));
+        if ((draftApplication.status || "draft") === "incomplete") {
+          setNoticeStatus("error");
+          setNotice("Permohonan ini ditanda Tidak Lengkap. Sila kemaskini maklumat atau dokumen dan hantar semula.");
+        }
       })
       .catch(() => {
         // Keep the current form state if the server draft cannot be loaded.
@@ -774,7 +790,7 @@ export default function ApplicantInternshipApplicationPage() {
     return () => {
       isMounted = false;
     };
-  }, [savedDraft?.studentInfo, user]);
+  }, [editApplicationId, savedDraft?.studentInfo, user]);
 
   if (!user || user.role !== "applicant") {
     return null;
@@ -942,15 +958,9 @@ export default function ApplicantInternshipApplicationPage() {
       return;
     }
 
-    if (internshipVacancyLoading) {
+    if (!editApplicationId && internshipVacancyLoading) {
       setNoticeStatus("error");
       setNotice("Sila tunggu sebentar sementara peluang latihan industri dimuatkan.");
-      return;
-    }
-
-    if (!internshipVacancy) {
-      setNoticeStatus("error");
-      setNotice("Tiada peluang latihan industri aktif ditemui untuk menerima permohonan ini.");
       return;
     }
 
@@ -958,8 +968,18 @@ export default function ApplicantInternshipApplicationPage() {
     try {
       const applicationsData = await apiRequest("/applications/?type=internship");
       const applications = Array.isArray(applicationsData) ? applicationsData : applicationsData.results || [];
-      const existingApplication = applications.find((application) => Number(application.vacancy) === Number(internshipVacancy.id));
-      const payload = buildApplicationPayload(studentInfo, internshipVacancy, documentFiles);
+      const existingApplication = editableApplication
+        || applications.find((application) => String(application.id) === String(editApplicationId))
+        || applications.find((application) => Number(application.vacancy) === Number(internshipVacancy?.id));
+      const targetVacancy = existingApplication?.vacancy_detail
+        || internshipVacancy
+        || (existingApplication?.vacancy ? { id: existingApplication.vacancy } : null);
+      if (!targetVacancy?.id) {
+        setNoticeStatus("error");
+        setNotice("Tiada peluang latihan industri aktif ditemui untuk menerima permohonan ini.");
+        return;
+      }
+      const payload = buildApplicationPayload(studentInfo, targetVacancy, documentFiles);
       const application = existingApplication
         ? await apiRequest(`/applications/${existingApplication.id}/`, {
             method: "PATCH",

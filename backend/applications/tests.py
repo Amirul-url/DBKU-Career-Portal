@@ -157,6 +157,91 @@ class CandidateApplicationReferenceNoTests(TestCase):
         self.assertNotIn(draft_application.id, returned_ids)
         self.assertIn(submitted_application.id, returned_ids)
 
+    def test_applicant_can_update_and_resubmit_incomplete_application(self):
+        applicant = self.create_applicant("resubmit-incomplete@example.com")
+        application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=self.vacancy,
+            status="incomplete",
+            profile_data={"student_info": {"name": "OLD NAME"}},
+        )
+        client = APIClient()
+        client.force_authenticate(user=applicant)
+
+        update_response = client.patch(
+            f"/api/applications/{application.id}/",
+            {
+                "profile_data": {"student_info": {"name": "UPDATED NAME"}},
+            },
+            format="json",
+        )
+        submit_response = client.post(f"/api/applications/{application.id}/submit/")
+
+        self.assertEqual(update_response.status_code, 200)
+        self.assertEqual(submit_response.status_code, 200)
+        application.refresh_from_db()
+        self.assertEqual(application.status, "submitted")
+        self.assertEqual(application.profile_data["student_info"]["name"], "UPDATED NAME")
+
+    def test_applicant_cannot_update_submitted_application(self):
+        applicant = self.create_applicant("locked-submitted@example.com")
+        application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=self.vacancy,
+            status="submitted",
+            profile_data={"student_info": {"name": "LOCKED NAME"}},
+        )
+        client = APIClient()
+        client.force_authenticate(user=applicant)
+
+        response = client.patch(
+            f"/api/applications/{application.id}/",
+            {
+                "profile_data": {"student_info": {"name": "SHOULD NOT SAVE"}},
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 403)
+        application.refresh_from_db()
+        self.assertEqual(application.profile_data["student_info"]["name"], "LOCKED NAME")
+
+    def test_applicant_cannot_resubmit_rejected_application(self):
+        applicant = self.create_applicant("locked-rejected@example.com")
+        application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=self.vacancy,
+            status="rejected",
+        )
+        client = APIClient()
+        client.force_authenticate(user=applicant)
+
+        response = client.post(f"/api/applications/{application.id}/submit/")
+
+        self.assertEqual(response.status_code, 400)
+        application.refresh_from_db()
+        self.assertEqual(application.status, "rejected")
+
+    def test_applicant_cannot_change_status_with_update(self):
+        applicant = self.create_applicant("status-guard@example.com")
+        application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=self.vacancy,
+            status="incomplete",
+        )
+        client = APIClient()
+        client.force_authenticate(user=applicant)
+
+        response = client.patch(
+            f"/api/applications/{application.id}/",
+            {"status": "submitted"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 403)
+        application.refresh_from_db()
+        self.assertEqual(application.status, "incomplete")
+
     @override_settings(NOTIFICATION_EMAIL_ENABLED=True, WHATSAPP_ENABLED=True)
     @patch("applications.services.send_whatsapp_message")
     @patch("notifications.services.send_notification_email")

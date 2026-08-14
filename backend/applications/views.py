@@ -16,6 +16,7 @@ from .services import (
 class CandidateApplicationViewSet(viewsets.ModelViewSet):
     serializer_class = CandidateApplicationSerializer
     permission_classes = [permissions.IsAuthenticated, CandidateApplicationPermission]
+    applicant_editable_statuses = {"draft", "incomplete"}
 
     def get_queryset(self):
         queryset = CandidateApplication.objects.select_related("vacancy", "applicant")
@@ -33,11 +34,38 @@ class CandidateApplicationViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(vacancy__vacancy_type=vacancy_type)
         return queryset
 
+    def update(self, request, *args, **kwargs):
+        application = self.get_object()
+        if (
+            request.user.role not in CandidateApplicationPermission.staff_roles
+            and application.status not in self.applicant_editable_statuses
+        ):
+            return Response(
+                {"detail": "Permohonan ini tidak boleh dikemaskini pada status semasa."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        requested_status = request.data.get("status")
+        if (
+            request.user.role not in CandidateApplicationPermission.staff_roles
+            and requested_status
+            and requested_status != application.status
+        ):
+            return Response(
+                {"detail": "Status permohonan hanya boleh berubah melalui proses hantar semula."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return super().update(request, *args, **kwargs)
+
     @action(detail=True, methods=["post"])
     def submit(self, request, pk=None):
         application = self.get_object()
         if application.applicant_id != request.user.id:
             return Response({"detail": "Hanya pemohon boleh menghantar permohonan ini."}, status=403)
+        if application.status not in self.applicant_editable_statuses:
+            return Response(
+                {"detail": "Permohonan ini tidak boleh dihantar semula pada status semasa."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         application = submit_application(application)
         return Response(self.get_serializer(application).data)
 
