@@ -6,7 +6,10 @@ const source = readFileSync(new URL("./AdminHrmPage.jsx", import.meta.url), "utf
 
 test("HRM application action labels match the department review workflow", () => {
   assert.match(source, />\s*Hantar ke Bahagian\s*</);
+  assert.match(source, />\s*Tidak Lengkap\s*</);
   assert.match(source, />\s*Tidak Layak\s*</);
+  assert.match(source, /reviewWithAssessment\("screening", "Tidak Lengkap"\)/);
+  assert.match(source, /onReview\(app\.id, "screening"\)/);
   assert.doesNotMatch(source, />\s*Senarai pendek\s*</);
   assert.doesNotMatch(source, />\s*Tolak\s*</);
 });

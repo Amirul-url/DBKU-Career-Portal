@@ -237,11 +237,12 @@ export default function AdminHrmPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
       });
-      setNotice(
-        status === "shortlisted"
-          ? "Calon telah disenarai pendek."
-          : "Permohonan telah ditolak.",
-      );
+      const reviewNotice = {
+        shortlisted: "Permohonan telah dihantar ke bahagian.",
+        screening: "Permohonan telah ditanda tidak lengkap.",
+        rejected: "Permohonan telah ditanda tidak layak.",
+      };
+      setNotice(reviewNotice[status] || "Semakan permohonan telah dikemaskini.");
       loadData();
     } catch (error) {
       setNotice(error.message);
@@ -1652,10 +1653,11 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
     setEducationLevel(nextEducationLevel);
     saveAssessment({ decision, educationLevel: nextEducationLevel });
   };
-  const reviewWithAssessment = async (status) => {
+  const reviewWithAssessment = async (status, nextDecision = decision) => {
     if (!application) return;
 
-    const isSaved = await saveAssessment({ decision, educationLevel });
+    setDecision(nextDecision);
+    const isSaved = await saveAssessment({ decision: nextDecision, educationLevel });
     if (!isSaved) return;
     await onReview(application.id, status);
   };
@@ -1720,15 +1722,23 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
           className="hrm-primary"
           type="button"
           disabled={!application || isFinal || isSavingAssessment}
-          onClick={() => reviewWithAssessment("shortlisted")}
+          onClick={() => reviewWithAssessment("shortlisted", "Layak")}
         >
           Hantar ke Bahagian
+        </button>
+        <button
+          className="hrm-secondary"
+          type="button"
+          disabled={!application || isFinal || isSavingAssessment}
+          onClick={() => reviewWithAssessment("screening", "Tidak Lengkap")}
+        >
+          Tidak Lengkap
         </button>
         <button
           className="hrm-danger"
           type="button"
           disabled={!application || isFinal || isSavingAssessment}
-          onClick={() => reviewWithAssessment("rejected")}
+          onClick={() => reviewWithAssessment("rejected", "Tidak Layak")}
         >
           Tidak Layak
         </button>
@@ -1809,6 +1819,15 @@ function ApplicationTable({ applications, onReview, compact }) {
                       )}
                     >
                       Hantar ke Bahagian
+                    </button>
+                    <button
+                      className="incomplete"
+                      onClick={() => onReview(app.id, "screening")}
+                      disabled={["shortlisted", "rejected"].includes(
+                        app.status,
+                      )}
+                    >
+                      Tidak Lengkap
                     </button>
                     <button
                       className="reject"
