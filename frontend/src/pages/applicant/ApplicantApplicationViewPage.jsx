@@ -256,6 +256,7 @@ function renderDocumentRow(document, documents, studentInfo) {
         {file.name}
       </span>
       <button
+        className="app-view-action"
         disabled={!file.url && !file.isLegacyNameOnly}
         type="button"
         onClick={() => openDocumentFile(file)}

@@ -209,7 +209,8 @@ function ApplicationList({ applications, loading }) {
                       {shouldContinueApplication ? (
                         <Link className="applicant-table-action" to={APPLICANT_ROUTES.internshipApplication}>Teruskan</Link>
                       ) : (
-                        <Link className="applicant-table-action" to={APPLICANT_ROUTES.applicationView(application.id)}>
+                        <Link className="applicant-table-action app-view-action" to={APPLICANT_ROUTES.applicationView(application.id)}>
+                          <Icon>visibility</Icon>
                           Lihat
                         </Link>
                       )}

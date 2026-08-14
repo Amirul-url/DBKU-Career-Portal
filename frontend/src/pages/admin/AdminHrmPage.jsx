@@ -1503,7 +1503,8 @@ function InternshipApplicationsPanel({ applications, onView }) {
                     </td>
                     <td>
                       <div className="hrm-actions hrm-internship-actions">
-                        <button className="view" type="button" onClick={() => onView(application)}>
+                        <button className="view app-view-action" type="button" onClick={() => onView(application)}>
+                          <Icon>visibility</Icon>
                           Lihat
                         </button>
                       </div>

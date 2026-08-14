@@ -5654,6 +5654,49 @@ body:has(.applicant-profile-page) {
   outline: 0;
 }
 
+.app-view-action {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 0 14px;
+  color: #334155;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.app-view-action:hover,
+.app-view-action:focus-visible {
+  border-color: #94a3b8;
+  background: #f8fafc;
+  color: #0f172a;
+  outline: 0;
+}
+
+.app-view-action .app-svg-icon,
+.app-view-action .material-symbols-outlined {
+  width: 22px;
+  height: 22px;
+  color: currentColor;
+  font-size: 22px;
+}
+
+.app-view-action:disabled {
+  border-color: #d7e8df;
+  background: #f8fafc;
+  color: #9aaca2;
+  cursor: not-allowed;
+}
+
 .applicant-table-no-action {
   color: #789083;
 }
@@ -7320,17 +7363,17 @@ body:has(.applicant-profile-page) {
 .student-readonly-document-cell button {
   display: inline-flex;
   flex: 0 0 auto;
-  min-height: 34px;
+  min-height: 38px;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  border: 1px solid #bfdbfe;
-  border-radius: 7px;
-  background: #eff6ff;
-  color: #1769aa;
-  padding: 0 12px;
-  font-size: 12px;
-  font-weight: 900;
+  gap: 9px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #334155;
+  padding: 0 14px;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .student-readonly-document-cell button:disabled {
@@ -7341,7 +7384,7 @@ body:has(.applicant-profile-page) {
 }
 
 .student-readonly-document-cell .material-symbols-outlined {
-  font-size: 16px;
+  font-size: 22px;
 }
 
 @media (max-width: 1100px) {
@@ -10037,10 +10080,17 @@ body:has(.applicant-profile-page) {
   white-space: nowrap;
 }
 
-.hrm-actions .view {
-  border: 1px solid #bfdbfe;
-  background: #eff6ff;
-  color: #1769aa;
+.hrm-internship-actions .view {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  padding: 0 14px;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .hrm-application-detail-page {
