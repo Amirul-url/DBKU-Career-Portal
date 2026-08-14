@@ -1,29 +1,41 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { getStoredUser } from "../../lib/authApi";
+import { apiRequest, getStoredUser } from "../../lib/authApi";
 import { APPLICANT_ROUTES } from "../../modules/applicant/applicantRoutes";
 import { useApplicantSidebarState } from "../../modules/applicant/useApplicantSidebarState";
 import { Icon } from "./ApplicantAuthShared";
 import { ProfileContentHeader, ProfileSidebar } from "./ApplicantProfilePage";
 
-function getProfileChecklist(user) {
+function getProfileChecklist(user, profileData) {
+  const personal = profileData?.personal || {};
+  const details = personal.details || {};
+  const displayName = personal.displayName || user?.full_name || user?.first_name;
+  const email = personal.email || user?.email;
+
   return [
-    { done: Boolean(user?.full_name || user?.first_name), label: "Nama penuh" },
-    { done: Boolean(user?.email), label: "Alamat e-mel" },
-    { done: Boolean(user?.mykad_number), label: "Nombor kad pengenalan" },
-    { done: Boolean(user?.mobile_number), label: "Nombor telefon" },
-    { done: Boolean(user?.profile_photo_url), label: "Foto profil" },
-    { done: Boolean(user?.resume_file_url), label: "Resume" },
+    { done: Boolean(displayName), label: "Nama penuh" },
+    { done: Boolean(email), label: "Alamat e-mel" },
+    { done: Boolean(details.identificationNumber || user?.mykad_number), label: "Nombor kad pengenalan" },
+    { done: Boolean(details.birthDay && details.birthMonth && details.birthYear), label: "Tarikh lahir" },
+    { done: Boolean(details.citizenship), label: "Kewarganegaraan" },
+    { done: Boolean(details.gender), label: "Jantina" },
+    { done: Boolean(details.hasHealthIssue), label: "Status kesihatan" },
+    { done: Boolean(details.hasDisability), label: "Status ketidakupayaan" },
+    { done: Boolean(details.address || user?.address), label: "Alamat" },
+    { done: Boolean(details.latitude && details.longitude), label: "Lokasi alamat" },
+    { done: Boolean(details.primaryPhone || user?.mobile_number), label: "Nombor telefon utama" },
+    { done: Boolean(details.careerObjective), label: "Matlamat kerjaya" },
   ];
 }
 
 export default function ApplicantDashboardPage() {
   const navigate = useNavigate();
   const [user] = useState(() => getStoredUser());
+  const [profileData, setProfileData] = useState(null);
   const [sidebarOpen, toggleSidebar] = useApplicantSidebarState();
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
   const email = user?.email || "Belum dikemaskini";
-  const checklist = useMemo(() => getProfileChecklist(user), [user]);
+  const checklist = useMemo(() => getProfileChecklist(user, profileData), [profileData, user]);
   const completedCount = checklist.filter((item) => item.done).length;
   const completionPercent = Math.round((completedCount / checklist.length) * 100);
 
@@ -34,6 +46,25 @@ export default function ApplicantDashboardPage() {
       navigate("/", { replace: true });
     }
   }, [navigate, user]);
+
+  useEffect(() => {
+    if (!user || user.role !== "applicant") {
+      return undefined;
+    }
+
+    let isMounted = true;
+    apiRequest("/auth/profile-data/")
+      .then((data) => {
+        if (isMounted) {
+          setProfileData(data);
+        }
+      })
+      .catch(() => null);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user]);
 
   if (!user || user.role !== "applicant") {
     return null;

@@ -45,6 +45,7 @@ function normalizeUserMediaUrls(user) {
     profile_photo_url: resolveMediaUrl(user.profile_photo_url),
     resume_file_url: resolveMediaUrl(user.resume_file_url),
     video_resume_file_url: resolveMediaUrl(user.video_resume_file_url),
+    video_resume_url: user.video_resume_url || "",
   };
 }
 

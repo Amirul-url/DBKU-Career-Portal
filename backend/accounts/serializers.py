@@ -1,6 +1,8 @@
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.cache import cache
+from django.core.exceptions import ValidationError as DjangoValidationError
+from django.core.validators import URLValidator
 from rest_framework import serializers
 
 from .models import AccountActivity
@@ -14,6 +16,7 @@ class UserSerializer(serializers.ModelSerializer):
     profile_photo_url = serializers.SerializerMethodField()
     resume_file_url = serializers.SerializerMethodField()
     video_resume_file_url = serializers.SerializerMethodField()
+    video_resume_url = serializers.CharField(required=False, allow_blank=True)
     remove_profile_photo = serializers.BooleanField(write_only=True, required=False)
     remove_resume_file = serializers.BooleanField(write_only=True, required=False)
     remove_video_resume_file = serializers.BooleanField(write_only=True, required=False)
@@ -38,6 +41,7 @@ class UserSerializer(serializers.ModelSerializer):
             "resume_file_url",
             "video_resume_file",
             "video_resume_file_url",
+            "video_resume_url",
             "remove_profile_photo",
             "remove_resume_file",
             "remove_video_resume_file",
@@ -115,6 +119,22 @@ class UserSerializer(serializers.ModelSerializer):
             (".mp4",),
             "Sila pilih fail .mp4 sahaja.",
         )
+
+    def validate_video_resume_url(self, value):
+        normalized_url = value.strip()
+
+        if not normalized_url:
+            return ""
+
+        if not normalized_url.startswith(("http://", "https://")):
+            normalized_url = f"https://{normalized_url}"
+
+        try:
+            URLValidator(schemes=["http", "https"])(normalized_url)
+        except DjangoValidationError as exc:
+            raise serializers.ValidationError("Masukkan pautan video resume yang sah.") from exc
+
+        return normalized_url
 
     def update(self, instance, validated_data):
         file_fields = (

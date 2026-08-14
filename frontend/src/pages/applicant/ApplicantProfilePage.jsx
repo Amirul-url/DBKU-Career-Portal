@@ -51,6 +51,7 @@ const defaultPersonalDetails = {
   careerObjective: "",
   resumeFile: "",
   videoResumeFile: "",
+  videoResumeUrl: "",
   linkedIn: "",
 };
 
@@ -406,8 +407,8 @@ function getPersonalProfileDefaults(displayName, email, user = null) {
     profilePhotoUrl: "",
     resumeUploadFile: null,
     resumeFileUrl: "",
-    videoResumeUploadFile: null,
     videoResumeFileUrl: "",
+    videoResumeUrl: user?.video_resume_url || "",
     references: [],
   };
 }
@@ -455,6 +456,7 @@ function normalizePersonalProfile(profile, displayName, email, user = null) {
   delete storedProfile.profilePhotoStorageKey;
   const resumeFileUrl = getPersistentDocumentUrl(profile?.resumeFileUrl);
   const videoResumeFileUrl = getPersistentDocumentUrl(profile?.videoResumeFileUrl);
+  const videoResumeUrl = profile?.videoResumeUrl || profile?.details?.videoResumeUrl || user?.video_resume_url || "";
 
   return {
     ...defaults,
@@ -466,6 +468,7 @@ function normalizePersonalProfile(profile, displayName, email, user = null) {
       careerObjective: profile?.details?.careerObjective || profile?.careerObjective || "",
       resumeFile: resumeFileUrl ? profile?.details?.resumeFile || getFileNameFromUrl(resumeFileUrl) : "",
       videoResumeFile: videoResumeFileUrl ? profile?.details?.videoResumeFile || getFileNameFromUrl(videoResumeFileUrl) : "",
+      videoResumeUrl,
     },
     displayName: formatApplicantName(storedProfile.displayName || defaults.displayName),
     profilePhotoFile: null,
@@ -476,8 +479,8 @@ function normalizePersonalProfile(profile, displayName, email, user = null) {
     profilePhotoUrl: persistentProfilePhotoUrl,
     resumeUploadFile: null,
     resumeFileUrl,
-    videoResumeUploadFile: null,
     videoResumeFileUrl,
+    videoResumeUrl,
     references: Array.isArray(profile?.references) ? profile.references.map(normalizeReference) : defaults.references,
   };
 }
@@ -525,6 +528,7 @@ function getComparablePersonalProfile(profile) {
     profilePhotoUrl: profile?.profilePhotoUrl || "",
     resumeFileUrl: profile?.resumeFileUrl || "",
     videoResumeFileUrl: profile?.videoResumeFileUrl || "",
+    videoResumeUrl: profile?.videoResumeUrl || profile?.details?.videoResumeUrl || "",
     references: profile?.references || [],
   };
 
@@ -580,9 +584,8 @@ async function savePersonalProfile(user, profile) {
     formData.append("remove_resume_file", "true");
   }
 
-  if (profile.videoResumeUploadFile && profile.details.videoResumeFile) {
-    formData.append("video_resume_file", profile.videoResumeUploadFile);
-  } else if (!profile.details.videoResumeFile) {
+  formData.append("video_resume_url", profile.videoResumeUrl || profile.details.videoResumeUrl || "");
+  if (!profile.details.videoResumeFile) {
     formData.append("remove_video_resume_file", "true");
   }
 
@@ -590,18 +593,23 @@ async function savePersonalProfile(user, profile) {
   const profilePhotoUrl = resolveMediaUrl(updatedUser.profile_photo_url);
   const resumeFileUrl = resolveMediaUrl(updatedUser.resume_file_url);
   const videoResumeFileUrl = resolveMediaUrl(updatedUser.video_resume_file_url);
+  const videoResumeUrl = updatedUser.video_resume_url || profile.videoResumeUrl || profile.details.videoResumeUrl || "";
   const serializableProfile = {
     ...profile,
+    details: {
+      ...profile.details,
+      videoResumeUrl,
+    },
     profilePhotoUrl,
     resumeFileUrl,
     videoResumeFileUrl,
+    videoResumeUrl,
   };
 
   delete serializableProfile.profilePhoto;
   delete serializableProfile.profilePhotoFile;
   delete serializableProfile.profilePhotoPreviewUrl;
   delete serializableProfile.resumeUploadFile;
-  delete serializableProfile.videoResumeUploadFile;
 
   try {
     window.localStorage.setItem(getPersonalProfileStorageKey(user), JSON.stringify(serializableProfile));
@@ -614,7 +622,6 @@ async function savePersonalProfile(user, profile) {
     profilePhotoFile: null,
     profilePhotoPreviewUrl: profilePhotoUrl,
     resumeUploadFile: null,
-    videoResumeUploadFile: null,
   };
 }
 
@@ -1785,10 +1792,16 @@ export function ApplicantPersonalReadOnlyView({ applicant, profile }) {
   const name = personal.displayName || applicant.full_name || applicant.first_name || "Pemohon";
   const email = personal.email || applicant.email; const photo = resolveMediaUrl(personal.profilePhotoUrl || applicant.profile_photo_url);
   const resumeUrl = resolveMediaUrl(personal.resumeFileUrl || applicant.resume_file_url);
-  const videoResumeUrl = resolveMediaUrl(personal.videoResumeFileUrl || applicant.video_resume_file_url);
+  const videoResumeUrl = resolveMediaUrl(
+    personal.videoResumeUrl ||
+      details.videoResumeUrl ||
+      applicant.video_resume_url ||
+      personal.videoResumeFileUrl ||
+      applicant.video_resume_file_url,
+  );
   const value = (item) => item || "-";
   const field = (label, item, wide = false) => <PersonalField label={label} noIndicator><input readOnly value={value(item)} className={wide ? "" : ""} /></PersonalField>;
-  return <div className="personal-edit-panel"><div className="personal-edit-form"><ProfileFormRow label="Foto Profil"><div className="personal-photo-upload"><div className="personal-photo-preview">{photo ? <img src={photo} alt="" /> : name.charAt(0)}</div><div><strong>Foto profil pemohon</strong><p>Paparan baca sahaja.</p></div></div></ProfileFormRow><ProfileFormRow label="Maklumat Peribadi">{field("Nama Penuh", name)}{field("Nombor Kad Pengenalan", details.identificationNumber || applicant.mykad_number)}<div className="personal-date-group"><span>Tarikh Lahir</span><div><label>Hari<input readOnly value={value(details.birthDay)} /></label><label>Bulan<input readOnly value={value(details.birthMonth)} /></label><label>Tahun<input readOnly value={value(details.birthYear)} /></label></div></div>{field("Bangsa", details.race)}<fieldset className="personal-radio-group"><legend>Kewarganegaraan</legend><div>{citizenshipOptions.map((item) => <label key={item}><input type="radio" checked={details.citizenship === item} readOnly />{item}</label>)}</div></fieldset><fieldset className="personal-radio-group"><legend>Jantina</legend><div>{["Perempuan", "Lelaki"].map((item) => <label key={item}><input type="radio" checked={details.gender === item} readOnly />{item}</label>)}</div></fieldset></ProfileFormRow><ProfileFormRow label="Aksesibiliti dan Kesihatan"><div className="personal-helper-copy">Maklumat kesihatan pemohon adalah sulit.</div><fieldset className="personal-radio-group"><legend>Adakah anda mempunyai sebarang masalah kesihatan?</legend><div>{["Ya", "Tidak"].map((item) => <label key={item}><input type="radio" checked={details.hasHealthIssue === item} readOnly />{item}</label>)}</div></fieldset><fieldset className="personal-radio-group"><legend>Adakah anda mempunyai sebarang ketidakupayaan?</legend><div>{["Ya", "Tidak"].map((item) => <label key={item}><input type="radio" checked={details.hasDisability === item} readOnly />{item}</label>)}</div></fieldset></ProfileFormRow><ProfileFormRow label="Alamat"><ApplicantAddressMap address={details.address || applicant.address} latitude={details.latitude} longitude={details.longitude} onLocationChange={() => {}} readOnly /></ProfileFormRow><ProfileFormRow label="Butiran Hubungan">{field("Alamat E-mel", email)}<PersonalField label="Nombor Telefon Bimbit Utama" noIndicator><ProfilePhoneInput value={details.primaryPhone || applicant.mobile_number} onChange={() => {}} readOnly /></PersonalField><PersonalField label="Nombor Telefon Bimbit Lain" noIndicator><ProfilePhoneInput value={details.secondaryPhone} onChange={() => {}} readOnly /></PersonalField></ProfileFormRow><ProfileFormRow label="Resume"><div className="personal-profile-tip"><header><span><Icon>emoji_objects</Icon></span><strong>Tingkatkan ketampakan profil anda.</strong></header><p>Resume dan video resume pemohon tersedia untuk semakan.</p></div><div className="personal-button-row">{resumeUrl ? <a className="personal-primary-button" href={resumeUrl} target="_blank" rel="noreferrer">Muat Turun Resume</a> : null}{videoResumeUrl ? <a className="personal-primary-button" href={videoResumeUrl} target="_blank" rel="noreferrer">Muat Turun Video Resume</a> : null}</div>{field("LinkedIn", details.linkedIn)}</ProfileFormRow></div></div>;
+  return <div className="personal-edit-panel"><div className="personal-edit-form"><ProfileFormRow label="Foto Profil"><div className="personal-photo-upload"><div className="personal-photo-preview">{photo ? <img src={photo} alt="" /> : name.charAt(0)}</div><div><strong>Foto profil pemohon</strong><p>Paparan baca sahaja.</p></div></div></ProfileFormRow><ProfileFormRow label="Maklumat Peribadi">{field("Nama Penuh", name)}{field("Nombor Kad Pengenalan", details.identificationNumber || applicant.mykad_number)}<div className="personal-date-group"><span>Tarikh Lahir</span><div><label>Hari<input readOnly value={value(details.birthDay)} /></label><label>Bulan<input readOnly value={value(details.birthMonth)} /></label><label>Tahun<input readOnly value={value(details.birthYear)} /></label></div></div>{field("Bangsa", details.race)}<fieldset className="personal-radio-group"><legend>Kewarganegaraan</legend><div>{citizenshipOptions.map((item) => <label key={item}><input type="radio" checked={details.citizenship === item} readOnly />{item}</label>)}</div></fieldset><fieldset className="personal-radio-group"><legend>Jantina</legend><div>{["Perempuan", "Lelaki"].map((item) => <label key={item}><input type="radio" checked={details.gender === item} readOnly />{item}</label>)}</div></fieldset></ProfileFormRow><ProfileFormRow label="Aksesibiliti dan Kesihatan"><div className="personal-helper-copy">Maklumat kesihatan pemohon adalah sulit.</div><fieldset className="personal-radio-group"><legend>Adakah anda mempunyai sebarang masalah kesihatan?</legend><div>{["Ya", "Tidak"].map((item) => <label key={item}><input type="radio" checked={details.hasHealthIssue === item} readOnly />{item}</label>)}</div></fieldset><fieldset className="personal-radio-group"><legend>Adakah anda mempunyai sebarang ketidakupayaan?</legend><div>{["Ya", "Tidak"].map((item) => <label key={item}><input type="radio" checked={details.hasDisability === item} readOnly />{item}</label>)}</div></fieldset></ProfileFormRow><ProfileFormRow label="Alamat"><ApplicantAddressMap address={details.address || applicant.address} latitude={details.latitude} longitude={details.longitude} onLocationChange={() => {}} readOnly /></ProfileFormRow><ProfileFormRow label="Butiran Hubungan">{field("Alamat E-mel", email)}<PersonalField label="Nombor Telefon Bimbit Utama" noIndicator><ProfilePhoneInput value={details.primaryPhone || applicant.mobile_number} onChange={() => {}} readOnly /></PersonalField><PersonalField label="Nombor Telefon Bimbit Lain" noIndicator><ProfilePhoneInput value={details.secondaryPhone} onChange={() => {}} readOnly /></PersonalField></ProfileFormRow><ProfileFormRow label="Resume"><div className="personal-profile-tip"><header><span><Icon>emoji_objects</Icon></span><strong>Tingkatkan ketampakan profil anda.</strong></header><p>Resume dan pautan video resume pemohon tersedia untuk semakan.</p></div><div className="personal-button-row">{resumeUrl ? <a className="personal-primary-button" href={resumeUrl} target="_blank" rel="noreferrer">Muat Turun Resume</a> : null}{videoResumeUrl ? <a className="personal-primary-button" href={videoResumeUrl} target="_blank" rel="noreferrer">Buka Link Video Resume</a> : null}</div>{field("LinkedIn", details.linkedIn)}</ProfileFormRow></div></div>;
 }
 
 export function ProfileSidebar({ isOpen, onToggle }) {
@@ -1883,7 +1896,7 @@ function ProfileDownloadLinks({ resumeUrl, videoUrl }) {
       {videoUrl ? (
         <a href={resolveMediaUrl(videoUrl)} target="_blank" rel="noreferrer">
           <Icon>movie</Icon>
-          <span>Muat Turun Video (MP4)</span>
+          <span>Buka Link Video</span>
         </a>
       ) : null}
     </div>
@@ -1933,10 +1946,10 @@ export function ApplicantProfileReadOnlyCards({ applicant, profile }) {
               <h3>{profileDisplayName}</h3>
               <p>{profileEmail}</p>
             </div>
-            <ProfileDownloadLinks
-              resumeUrl={personalProfile.resumeFileUrl}
-              videoUrl={personalProfile.videoResumeFileUrl}
-            />
+              <ProfileDownloadLinks
+                resumeUrl={personalProfile.resumeFileUrl}
+                videoUrl={personalProfile.videoResumeUrl || personalProfile.details?.videoResumeUrl || personalProfile.videoResumeFileUrl}
+              />
           </div>
         )}
       </ProfileCard>
@@ -1978,7 +1991,6 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
   const photoInputRef = useRef(null);
   const resumeInputRef = useRef(null);
   const handledSaveRequestRef = useRef(saveRequestKey);
-  const videoResumeInputRef = useRef(null);
   const [formValues, setFormValues] = useState(profileData.details);
   const [formDisplayName, setFormDisplayName] = useState(profileData.displayName);
   const [formEmail, setFormEmail] = useState(profileData.email);
@@ -1991,9 +2003,7 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
   const [resumeFileUrl, setResumeFileUrl] = useState(profileData.resumeFileUrl);
   const [resumeUploadFile, setResumeUploadFile] = useState(profileData.resumeUploadFile);
   const [saveError, setSaveError] = useState("");
-  const [videoResumeError, setVideoResumeError] = useState("");
   const [videoResumeFileUrl, setVideoResumeFileUrl] = useState(profileData.videoResumeFileUrl);
-  const [videoResumeUploadFile, setVideoResumeUploadFile] = useState(profileData.videoResumeUploadFile);
   const [references, setReferences] = useState(profileData.references);
   const [validationErrors, setValidationErrors] = useState({});
 
@@ -2138,11 +2148,6 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
       setResumeFileUrl("");
     }
 
-    if (field === "videoResumeFile") {
-      setVideoResumeUploadFile(file);
-      setVideoResumeFileUrl("");
-    }
-
     setError("");
     event.target.value = "";
   };
@@ -2159,7 +2164,6 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
     }
 
     if (field === "videoResumeFile") {
-      setVideoResumeUploadFile(null);
       setVideoResumeFileUrl("");
     }
   };
@@ -2249,7 +2253,7 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
       resumeUploadFile,
       references,
       videoResumeFileUrl,
-      videoResumeUploadFile,
+      videoResumeUrl: formValues.videoResumeUrl,
     }),
     [
       formEmail,
@@ -2263,7 +2267,6 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
       resumeUploadFile,
       references,
       videoResumeFileUrl,
-      videoResumeUploadFile,
     ],
   );
 
@@ -2487,7 +2490,7 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
               </button>
             </header>
             <p>
-              Ketengahkan bakat anda dan tingkatkan profil anda - muat naik resume dan video resume anda untuk menarik
+              Ketengahkan bakat anda dan tingkatkan profil anda - muat naik resume dan masukkan pautan video untuk menarik
               perhatian DBKU.
             </p>
           </div>
@@ -2528,34 +2531,20 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
               </button>
             </div>
           ) : null}
-          <PersonalField label="Muat naik resume video anda" optional hint=".mp4 sahaja (maksimum 5MB)">
+          <PersonalField label="Masukkan link resume video anda" optional hint="Masukkan pautan URL ke video resume anda.">
             <input
-              ref={videoResumeInputRef}
-              type="file"
-              accept=".mp4,video/mp4"
-              className="sr-only"
-              onChange={handleDocumentUpload({
-                allowedTypes: ["video/mp4"],
-                errorMessage: "Sila pilih fail .mp4 sahaja.",
-                field: "videoResumeFile",
-                setError: setVideoResumeError,
-              })}
+              type="url"
+              value={formValues.videoResumeUrl}
+              placeholder="Contoh: https://youtu.be/..."
+              onChange={updateField("videoResumeUrl")}
             />
-            <button
-              type="button"
-              className="personal-primary-button personal-upload-button"
-              onClick={() => videoResumeInputRef.current?.click()}
-            >
-              Muat Naik
-            </button>
-            {videoResumeError ? <small className="personal-upload-error">{videoResumeError}</small> : null}
           </PersonalField>
           {formValues.videoResumeFile ? (
             <div className="personal-file-card">
               <span>
                 <Icon>movie</Icon>
               </span>
-              <strong>{formValues.videoResumeFile}</strong>
+              <strong>Fail video lama: {formValues.videoResumeFile}</strong>
               <button
                 type="button"
                 className="personal-outline-button"
@@ -3319,6 +3308,7 @@ export default function ApplicantProfilePage() {
     const profilePhotoUrl = resolveMediaUrl(savedProfile?.profilePhotoUrl || user?.profile_photo_url || "");
     const resumeFileUrl = resolveMediaUrl(savedProfile?.resumeFileUrl || user?.resume_file_url || "");
     const videoResumeFileUrl = resolveMediaUrl(savedProfile?.videoResumeFileUrl || user?.video_resume_file_url || "");
+    const videoResumeUrl = savedProfile?.videoResumeUrl || savedProfile?.details?.videoResumeUrl || user?.video_resume_url || "";
 
     return normalizePersonalProfile(
       {
@@ -3328,11 +3318,13 @@ export default function ApplicantProfilePage() {
           careerObjective: savedProfile?.details?.careerObjective || savedPreferences?.careerObjective || "",
           resumeFile: savedProfile?.details?.resumeFile || getFileNameFromUrl(resumeFileUrl),
           videoResumeFile: savedProfile?.details?.videoResumeFile || getFileNameFromUrl(videoResumeFileUrl),
+          videoResumeUrl,
         },
         profilePhotoFileName: savedProfile?.profilePhotoFileName || getFileNameFromUrl(profilePhotoUrl),
         profilePhotoUrl,
         resumeFileUrl,
         videoResumeFileUrl,
+        videoResumeUrl,
       },
       displayName,
       email,
@@ -3392,7 +3384,7 @@ export default function ApplicantProfilePage() {
   };
 
   const handlePersonalDraftChange = useCallback((draft, isDirty) => {
-    const persistentDraft = { ...draft, profilePhotoFile: null, resumeUploadFile: null, videoResumeUploadFile: null, profilePhotoPreviewUrl: draft.profilePhotoPreviewUrl?.startsWith("blob:") ? "" : draft.profilePhotoPreviewUrl };
+    const persistentDraft = { ...draft, profilePhotoFile: null, resumeUploadFile: null, profilePhotoPreviewUrl: draft.profilePhotoPreviewUrl?.startsWith("blob:") ? "" : draft.profilePhotoPreviewUrl };
     saveDraft(user, "personal", persistentDraft);
     setPersonalDraft(draft);
     setIsPersonalDraftDirty(isDirty);
@@ -3591,6 +3583,7 @@ export default function ApplicantProfilePage() {
           const freshPhotoUrl = resolveMediaUrl(freshUser.profile_photo_url || "");
           const freshResumeUrl = resolveMediaUrl(freshUser.resume_file_url || "");
           const freshVideoResumeUrl = resolveMediaUrl(freshUser.video_resume_file_url || "");
+          const freshVideoResumeLink = freshUser.video_resume_url || "";
 
           return normalizePersonalProfile(
             {
@@ -3599,11 +3592,13 @@ export default function ApplicantProfilePage() {
                 ...(current.details || {}),
                 resumeFile: current.details?.resumeFile || getFileNameFromUrl(freshResumeUrl),
                 videoResumeFile: current.details?.videoResumeFile || getFileNameFromUrl(freshVideoResumeUrl),
+                videoResumeUrl: current.details?.videoResumeUrl || freshVideoResumeLink,
               },
               profilePhotoFileName: current.profilePhotoFileName || getFileNameFromUrl(freshPhotoUrl),
               profilePhotoUrl: current.profilePhotoUrl || freshPhotoUrl,
               resumeFileUrl: current.resumeFileUrl || freshResumeUrl,
               videoResumeFileUrl: current.videoResumeFileUrl || freshVideoResumeUrl,
+              videoResumeUrl: current.videoResumeUrl || current.details?.videoResumeUrl || freshVideoResumeLink,
             },
             freshUser.full_name || freshUser.first_name || displayName,
             freshUser.email || email,
@@ -3678,7 +3673,7 @@ export default function ApplicantProfilePage() {
                     </div>
                     <ProfileDownloadLinks
                       resumeUrl={personalProfile.resumeFileUrl}
-                      videoUrl={personalProfile.videoResumeFileUrl}
+                      videoUrl={personalProfile.videoResumeUrl || personalProfile.details?.videoResumeUrl || personalProfile.videoResumeFileUrl}
                     />
                   </div>
                 )}

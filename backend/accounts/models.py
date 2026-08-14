@@ -17,6 +17,7 @@ class User(AbstractUser):
     profile_photo = models.FileField(upload_to="profile_photos/", blank=True)
     resume_file = models.FileField(upload_to="resumes/", blank=True)
     video_resume_file = models.FileField(upload_to="video_resumes/", blank=True)
+    video_resume_url = models.URLField(blank=True)
 
     def __str__(self):
         return f"{self.username} ({self.role})"

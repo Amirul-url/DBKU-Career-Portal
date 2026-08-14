@@ -19,6 +19,7 @@ class PortalUserAdmin(UserAdmin):
                     "profile_photo",
                     "resume_file",
                     "video_resume_file",
+                    "video_resume_url",
                 )
             },
         ),
