@@ -6,6 +6,7 @@ import {
   getStoredUser,
   recordLogoutActivity,
 } from "../../lib/authApi";
+import { buildHrmDashboardMetrics } from "../../modules/admin/hrmDashboardMetrics";
 import { ADMIN_ROUTES, adminNavItems, getAdminRoutePath, getAdminRouteState } from "../../modules/admin/adminRoutes";
 import { InternshipApplicationReadOnlyPanel } from "../applicant/ApplicantApplicationViewPage";
 import { Icon } from "../applicant/ApplicantAuthShared";
@@ -59,18 +60,6 @@ const statusClass = {
   draft: "slate",
 };
 const hrmReviewTab = "Semakan HRM";
-const hrmVisibleApplicationStatuses = new Set([
-  "submitted",
-  "screening",
-  "shortlisted",
-  "interview",
-  "offered",
-  "accepted",
-  "rejected",
-  "withdrawn",
-]);
-const isHrmVisibleApplication = (application) =>
-  hrmVisibleApplicationStatuses.has(application.status || "submitted");
 const dateValue = (value) =>
   value
     ? new Date(value).toLocaleDateString("ms-MY", {
@@ -240,40 +229,7 @@ export default function AdminHrmPage() {
     const timeoutId = window.setTimeout(() => setNotice(""), 5000);
     return () => window.clearTimeout(timeoutId);
   }, [notice]);
-  const dashboardMetrics = useMemo(() => {
-    const jobTypesById = new Map(jobs.map((job) => [job.id, job.vacancy_type]));
-    const visibleApplications = applications.filter(isHrmVisibleApplication);
-    const applicationsByType = (type) =>
-      visibleApplications.filter((application) => {
-        const vacancyType = application.vacancy_detail?.vacancy_type || jobTypesById.get(application.vacancy);
-        return vacancyType === type;
-      });
-    const metricsByType = (type) => {
-      const typeJobs = jobs.filter((job) => job.vacancy_type === type);
-      const typeApplications = applicationsByType(type);
-      return {
-        applications: typeApplications,
-        jobs: typeJobs,
-        new: typeApplications.filter((app) => app.status === "submitted").length,
-        open: typeJobs.filter((job) => job.status === "open").length,
-        shortlist: typeApplications.filter((app) => app.status === "shortlisted").length,
-        total: typeApplications.length,
-      };
-    };
-    const overallMetrics = {
-      applications: visibleApplications,
-      jobs,
-      new: visibleApplications.filter((app) => app.status === "submitted").length,
-      open: jobs.filter((job) => job.status === "open").length,
-      shortlist: visibleApplications.filter((app) => app.status === "shortlisted").length,
-      total: visibleApplications.length,
-    };
-    return {
-      all: overallMetrics,
-      internship: metricsByType("internship"),
-      job: metricsByType("job"),
-    };
-  }, [applications, jobs]);
+  const dashboardMetrics = useMemo(() => buildHrmDashboardMetrics(jobs, applications), [applications, jobs]);
   const setReview = async (id, status) => {
     try {
       await apiRequest(`/applications/${id}/review/`, {
@@ -419,6 +375,7 @@ export default function AdminHrmPage() {
   const activeOpportunityLabel = opportunityTypeLabels[activeVacancyType] || opportunityTypeLabels.job;
   const activeMetrics = dashboardMetrics[activeVacancyType] || dashboardMetrics.job;
   const overallMetrics = dashboardMetrics.all;
+  const summaryMetrics = dashboardMetrics.summary;
   const filteredJobs = activeMetrics.jobs.filter((job) =>
     jobStatusFilter === "all" ? true : getJobDisplayStatus(job) === jobStatusFilter,
   );
@@ -593,10 +550,10 @@ export default function AdminHrmPage() {
                 </div>
               </div>
               <div className="hrm-stats">
-                <Stat icon="work_history" label="Iklan aktif" value={overallMetrics.open} tone="green" />
-                <Stat icon="description" label="Jumlah permohonan" value={overallMetrics.total} tone="blue" />
-                <Stat icon="stars" label="Disenarai pendek" value={overallMetrics.shortlist} tone="mint" />
-                <Stat icon="notifications" label="Permohonan baharu" value={overallMetrics.new} tone="amber" />
+                <Stat icon="work_history" label="Iklan jawatan aktif" value={summaryMetrics.activeJobAds} tone="green" />
+                <Stat icon="description" label="Jumlah permohonan" value={summaryMetrics.totalApplications} tone="blue" />
+                <Stat icon="stars" label="Disenarai pendek" value={summaryMetrics.shortlist} tone="mint" />
+                <Stat icon="notifications" label="Permohonan baharu" value={summaryMetrics.newApplications} tone="amber" />
               </div>
               <div className="hrm-category-grid">
                 {dashboardTypes.map((item) => (
