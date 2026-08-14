@@ -10068,9 +10068,9 @@ body:has(.applicant-profile-page) {
   margin: 0;
   border-bottom: 2px solid #111827;
   background: #d9d9d9;
-  padding: 10px 14px;
+  padding: 8px 12px;
   color: #000000;
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 900;
   letter-spacing: 0;
   line-height: 1.25;
@@ -10081,12 +10081,12 @@ body:has(.applicant-profile-page) {
 .hrm-assessment-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  min-height: 285px;
+  min-height: 230px;
 }
 
 .hrm-assessment-left,
 .hrm-assessment-right {
-  padding: 20px 24px;
+  padding: 16px 20px;
 }
 
 .hrm-assessment-left {
@@ -10094,36 +10094,36 @@ body:has(.applicant-profile-page) {
 }
 
 .hrm-assessment-left p {
-  margin: 0 0 24px;
-  font-size: 16px;
+  margin: 0 0 18px;
+  font-size: 13px;
 }
 
 .hrm-assessment-options {
   display: grid;
-  grid-template-columns: minmax(180px, 0.7fr) minmax(220px, 1fr);
-  gap: 34px;
+  grid-template-columns: minmax(160px, 0.7fr) minmax(190px, 1fr);
+  gap: 28px;
 }
 
 .hrm-assessment-options strong,
 .hrm-assessment-right > strong {
   display: block;
-  margin-bottom: 14px;
-  font-size: 16px;
+  margin-bottom: 10px;
+  font-size: 13px;
   font-weight: 500;
 }
 
 .hrm-assessment-options label {
   display: grid;
-  grid-template-columns: minmax(120px, 1fr) 52px;
+  grid-template-columns: minmax(105px, 1fr) 38px;
   align-items: center;
-  gap: 12px;
-  min-height: 38px;
-  font-size: 16px;
+  gap: 10px;
+  min-height: 30px;
+  font-size: 13px;
 }
 
 .hrm-assessment-options input {
-  width: 42px;
-  height: 42px;
+  width: 34px;
+  height: 34px;
   margin: 0;
   appearance: none;
   border: 2px solid #000000;
@@ -10132,27 +10132,27 @@ body:has(.applicant-profile-page) {
 
 .hrm-assessment-options input:checked {
   background:
-    linear-gradient(135deg, transparent 0 46%, #000 47% 58%, transparent 59%) 9px 16px / 13px 18px no-repeat,
-    linear-gradient(45deg, transparent 0 43%, #000 44% 56%, transparent 57%) 18px 8px / 18px 27px no-repeat,
+    linear-gradient(135deg, transparent 0 46%, #000 47% 58%, transparent 59%) 7px 13px / 11px 15px no-repeat,
+    linear-gradient(45deg, transparent 0 43%, #000 44% 56%, transparent 57%) 15px 6px / 15px 23px no-repeat,
     #ffffff;
 }
 
 .hrm-assessment-right {
-  padding-top: 54px;
+  padding-top: 44px;
 }
 
 .hrm-assessment-right dl {
   display: grid;
-  gap: 16px;
-  margin: 28px 0 0;
+  gap: 12px;
+  margin: 22px 0 0;
 }
 
 .hrm-assessment-right dl div {
   display: grid;
-  grid-template-columns: 150px 24px minmax(0, 1fr);
+  grid-template-columns: 118px 20px minmax(0, 1fr);
   align-items: end;
-  gap: 10px;
-  font-size: 16px;
+  gap: 8px;
+  font-size: 13px;
 }
 
 .hrm-assessment-right dt {
