@@ -9985,71 +9985,7 @@ body:has(.applicant-profile-page) {
 
 .hrm-application-detail-page {
   overflow: hidden;
-  border: 1px solid #bcefd0;
   border-radius: 8px;
-  background: #ffffff;
-  box-shadow: 0 14px 32px rgba(30, 70, 49, 0.06);
-}
-
-.hrm-application-detail-titlebar {
-  display: flex;
-  min-height: 66px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  background: #d1fae5;
-  padding: 0 22px;
-}
-
-.hrm-application-detail-titlebar h1 {
-  margin: 0;
-  color: #061526;
-  font-size: 23px;
-  font-weight: 900;
-}
-
-.hrm-application-detail-titlebar button {
-  display: inline-flex;
-  min-height: 40px;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border: 1px solid #b6e7c8;
-  border-radius: 8px;
-  background: #ffffff;
-  padding: 0 16px;
-  color: #089047;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 900;
-}
-
-.hrm-application-detail-workspace {
-  display: grid;
-  gap: 22px;
-  padding: 22px 30px 30px;
-}
-
-.hrm-application-detail-tabs {
-  margin: 0;
-}
-
-.hrm-application-detail-section h2 {
-  margin: 0 0 16px;
-  border-radius: 6px;
-  background: #d1fae5;
-  padding: 12px 16px;
-  color: #061526;
-  font-size: 24px;
-  font-weight: 900;
-}
-
-.hrm-application-detail-table {
-  min-width: 760px;
-}
-
-.hrm-application-detail-table th {
-  width: 300px;
 }
 
 .hrm-application-detail-actions {

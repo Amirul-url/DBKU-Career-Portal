@@ -196,65 +196,21 @@ function renderDateOfBirthRow(value) {
   );
 }
 
-export default function ApplicantApplicationViewPage() {
-  const { applicationId } = useParams();
-  const navigate = useNavigate();
-  const [user] = useState(() => getStoredUser());
-  const [sidebarOpen, toggleSidebar] = useApplicantSidebarState();
-  const [activeInfoTab, setActiveInfoTab] = useState(personalInfoTab);
-  const [application, setApplication] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
-  const email = user?.email || "Belum dikemaskini";
+export function InternshipApplicationReadOnlyPanel({
+  activeInfoTab,
+  application,
+  backLabel = "Kembali",
+  className = "",
+  error = "",
+  loading = false,
+  onBack,
+  onTabChange,
+}) {
   const profileData = application?.profile_data || {};
   const studentInfo = profileData.student_info || {};
   const documents = profileData.documents || {};
   const vacancy = application?.vacancy_detail || {};
   const status = application?.status || "draft";
-
-  useEffect(() => {
-    if (!user) {
-      navigate("/login", { replace: true, state: { message: "Sila log masuk untuk melihat permohonan anda." } });
-    } else if (user.role !== "applicant") {
-      navigate("/", { replace: true });
-    }
-  }, [navigate, user]);
-
-  useEffect(() => {
-    if (!user || user.role !== "applicant" || !applicationId) return undefined;
-
-    let isMounted = true;
-    const controller = new AbortController();
-    const timeoutId = window.setTimeout(() => {
-      setLoading(true);
-      setError("");
-      apiRequest(`/applications/${applicationId}/`, { signal: controller.signal })
-        .then((data) => {
-          if (isMounted) setApplication(data);
-        })
-        .catch((requestError) => {
-          if (!isMounted) return;
-          const message = requestError.name === "AbortError"
-            ? "Permohonan mengambil masa terlalu lama untuk dimuatkan. Sila cuba semula."
-            : requestError.message || "Permohonan tidak dapat dimuatkan.";
-          setError(message);
-        })
-        .finally(() => {
-          if (isMounted) setLoading(false);
-        });
-    }, 0);
-
-    return () => {
-      isMounted = false;
-      window.clearTimeout(timeoutId);
-      controller.abort();
-    };
-  }, [applicationId, user]);
-
-  const exitApplicationView = () => {
-    navigate(APPLICANT_ROUTES.applications);
-  };
 
   const renderPersonalFields = () => (
     <div className="student-personal-table-wrap">
@@ -307,6 +263,123 @@ export default function ApplicantApplicationViewPage() {
     </div>
   );
 
+  return (
+    <section className={`student-info-panel student-readonly-panel ${className}`} aria-label="Paparan permohonan latihan industri">
+      <header className="student-info-titlebar">
+        <h1>Permohonan Latihan Industri</h1>
+        <button className="student-info-back" type="button" onClick={onBack}>
+          <Icon>arrow_back</Icon>
+          {backLabel}
+        </button>
+      </header>
+
+      <div className="student-info-workspace">
+        <div className="student-info-content">
+          {loading ? <p className="student-info-notice">Memuatkan permohonan...</p> : null}
+          {error ? <p className="student-info-notice error">{error}</p> : null}
+          {!loading && application ? (
+            <>
+              <section className="student-readonly-summary" aria-label="Ringkasan permohonan">
+                <div>
+                  <span>No. Rujukan</span>
+                  <strong>{formatReferenceNo(application)}</strong>
+                </div>
+                <div>
+                  <span>Permohonan</span>
+                  <strong>{vacancy.title || "Permohonan DBKU"}</strong>
+                </div>
+                <div>
+                  <span>Tarikh</span>
+                  <strong>{formatDate(getApplicationDate(application))}</strong>
+                </div>
+                <div>
+                  <span>Status</span>
+                  <strong className={`applicant-status-pill ${status}`}>{statusLabels[status] || status}</strong>
+                </div>
+              </section>
+
+              <nav className="student-info-tabs" aria-label="Bahagian permohonan latihan industri">
+                {infoTabs.map((tab) => (
+                  <button
+                    className={activeInfoTab === tab ? "active" : ""}
+                    key={tab}
+                    type="button"
+                    onClick={() => onTabChange(tab)}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </nav>
+
+              <section className="student-info-form">
+                <h2>{activeInfoTab}</h2>
+                {activeInfoTab === personalInfoTab ? renderPersonalFields() : null}
+                {activeInfoTab === "Maklumat Akademik" ? renderAcademicFields() : null}
+                {activeInfoTab === "Dokumen Sokongan" ? renderDocumentFields() : null}
+              </section>
+            </>
+          ) : null}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export default function ApplicantApplicationViewPage() {
+  const { applicationId } = useParams();
+  const navigate = useNavigate();
+  const [user] = useState(() => getStoredUser());
+  const [sidebarOpen, toggleSidebar] = useApplicantSidebarState();
+  const [activeInfoTab, setActiveInfoTab] = useState(personalInfoTab);
+  const [application, setApplication] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
+  const email = user?.email || "Belum dikemaskini";
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/login", { replace: true, state: { message: "Sila log masuk untuk melihat permohonan anda." } });
+    } else if (user.role !== "applicant") {
+      navigate("/", { replace: true });
+    }
+  }, [navigate, user]);
+
+  useEffect(() => {
+    if (!user || user.role !== "applicant" || !applicationId) return undefined;
+
+    let isMounted = true;
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => {
+      setLoading(true);
+      setError("");
+      apiRequest(`/applications/${applicationId}/`, { signal: controller.signal })
+        .then((data) => {
+          if (isMounted) setApplication(data);
+        })
+        .catch((requestError) => {
+          if (!isMounted) return;
+          const message = requestError.name === "AbortError"
+            ? "Permohonan mengambil masa terlalu lama untuk dimuatkan. Sila cuba semula."
+            : requestError.message || "Permohonan tidak dapat dimuatkan.";
+          setError(message);
+        })
+        .finally(() => {
+          if (isMounted) setLoading(false);
+        });
+    }, 0);
+
+    return () => {
+      isMounted = false;
+      window.clearTimeout(timeoutId);
+      controller.abort();
+    };
+  }, [applicationId, user]);
+
+  const exitApplicationView = () => {
+    navigate(APPLICANT_ROUTES.applications);
+  };
+
   if (!user || user.role !== "applicant") {
     return null;
   }
@@ -317,64 +390,14 @@ export default function ApplicantApplicationViewPage() {
       <div className="profile-main-area">
         <ProfileContentHeader displayName={displayName} email={email} photoUrl={user.profile_photo_url} />
         <main className="profile-shell internship-application-shell">
-          <section className="student-info-panel student-readonly-panel" aria-label="Paparan permohonan latihan industri">
-            <header className="student-info-titlebar">
-              <h1>Permohonan Latihan Industri</h1>
-              <button className="student-info-back" type="button" onClick={exitApplicationView}>
-                <Icon>arrow_back</Icon>
-                Kembali
-              </button>
-            </header>
-
-            <div className="student-info-workspace">
-              <div className="student-info-content">
-                {loading ? <p className="student-info-notice">Memuatkan permohonan...</p> : null}
-                {error ? <p className="student-info-notice error">{error}</p> : null}
-                {!loading && application ? (
-                  <>
-                    <section className="student-readonly-summary" aria-label="Ringkasan permohonan">
-                      <div>
-                        <span>No. Rujukan</span>
-                        <strong>{formatReferenceNo(application)}</strong>
-                      </div>
-                      <div>
-                        <span>Permohonan</span>
-                        <strong>{vacancy.title || "Permohonan DBKU"}</strong>
-                      </div>
-                      <div>
-                        <span>Tarikh</span>
-                        <strong>{formatDate(getApplicationDate(application))}</strong>
-                      </div>
-                      <div>
-                        <span>Status</span>
-                        <strong className={`applicant-status-pill ${status}`}>{statusLabels[status] || status}</strong>
-                      </div>
-                    </section>
-
-                    <nav className="student-info-tabs" aria-label="Bahagian permohonan latihan industri">
-                      {infoTabs.map((tab) => (
-                        <button
-                          className={activeInfoTab === tab ? "active" : ""}
-                          key={tab}
-                          type="button"
-                          onClick={() => setActiveInfoTab(tab)}
-                        >
-                          {tab}
-                        </button>
-                      ))}
-                    </nav>
-
-                    <section className="student-info-form">
-                      <h2>{activeInfoTab}</h2>
-                      {activeInfoTab === personalInfoTab ? renderPersonalFields() : null}
-                      {activeInfoTab === "Maklumat Akademik" ? renderAcademicFields() : null}
-                      {activeInfoTab === "Dokumen Sokongan" ? renderDocumentFields() : null}
-                    </section>
-                  </>
-                ) : null}
-              </div>
-            </div>
-          </section>
+          <InternshipApplicationReadOnlyPanel
+            activeInfoTab={activeInfoTab}
+            application={application}
+            error={error}
+            loading={loading}
+            onBack={exitApplicationView}
+            onTabChange={setActiveInfoTab}
+          />
         </main>
       </div>
     </div>

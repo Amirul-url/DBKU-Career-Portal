@@ -7,6 +7,7 @@ import {
   recordLogoutActivity,
 } from "../../lib/authApi";
 import { ADMIN_ROUTES, adminNavItems, getAdminRoutePath, getAdminRouteState } from "../../modules/admin/adminRoutes";
+import { InternshipApplicationReadOnlyPanel } from "../applicant/ApplicantApplicationViewPage";
 import { Icon } from "../applicant/ApplicantAuthShared";
 import SuperAdminApplicantsPanel from "./SuperAdminApplicantsPanel";
 
@@ -154,47 +155,6 @@ const monthFilterOptions = [
   { value: "10", label: "Oktober" },
   { value: "11", label: "November" },
   { value: "12", label: "Disember" },
-];
-const internshipPersonalRows = [
-  ["name", "Nama"],
-  ["icNo", "No. Kad Pengenalan Baru"],
-  ["phone", "No. Telefon Bimbit / Telefon Rumah"],
-  ["email", "Alamat Emel"],
-  ["address", "Alamat Surat Menyurat"],
-  ["age", "Umur"],
-  ["birthDate", "Tarikh Lahir"],
-  ["birthPlace", "Tempat Lahir"],
-  ["stateOfBirth", "Negeri Tempat Lahir Pemohon"],
-  ["motherBirthState", "Negeri Tempat Lahir Ibu"],
-  ["fatherBirthState", "Negeri Tempat Lahir Bapa"],
-  ["race", "Bangsa"],
-  ["religion", "Agama"],
-  ["citizenship", "Kewarganegaraan"],
-  ["maritalStatus", "Taraf Perkahwinan"],
-  ["height", "Tinggi"],
-  ["weight", "Berat"],
-  ["disability", "Kelainan Upaya"],
-  ["drivingLicense", "Lesen Memandu"],
-];
-const internshipAcademicRows = [
-  ["institution", "Institusi Pengajian"],
-  ["program", "Program / Kursus"],
-  ["academicLevel", "Tahap Pengajian"],
-  ["totalStudyYears", "Jumlah Tahun Pengajian"],
-  ["totalSemesters", "Jumlah Semester"],
-  ["currentYear", "Tahun Pengajian Terkini"],
-  ["semester", "Semester Terkini"],
-  ["cgpa", "CGPA / Keputusan Terkini"],
-  ["supervisorName", "Nama Penyelaras Program"],
-  ["supervisorEmail", "Emel Penyelaras Program"],
-  ["supervisorPhone", "No. Telefon Penyelaras Program"],
-];
-const internshipDocumentRows = [
-  ["universityLetterFile", "Surat rasmi daripada institusi / kolej / universiti"],
-  ["transcriptFile", "Transkrip akademik terkini"],
-  ["resumeFile", "Curriculum Vitae (CV)"],
-  ["passportPhotoFile", "1 keping gambar berukuran passport"],
-  ["bankAccountFile", "1 salinan muka depan akaun bank"],
 ];
 const getJobDisplayStatus = (job) => {
   const isOpen = job.is_open ?? job.status === "open";
@@ -1282,15 +1242,8 @@ function formatReferenceNo(application) {
 function getInternshipStudentInfo(application) {
   return application?.profile_data?.student_info || {};
 }
-function getInternshipDocuments(application) {
-  return application?.profile_data?.documents || {};
-}
 function getInternshipInstitution(application) {
   return getInternshipStudentInfo(application).institution || "Belum diisi";
-}
-function displayText(value) {
-  const text = String(value || "").trim();
-  return text || "-";
 }
 function InstitutionSearchFilter({ onChange, options, value }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -1588,95 +1541,21 @@ function InternshipApplicationsPanel({ applications, onReview, onView }) {
 function InternshipApplicationDetailPage({ application, loading, onBack, onReview }) {
   const [activeTab, setActiveTab] = useState("Maklumat Peribadi Pemohon");
 
-  if (loading) {
-    return <p className="hrm-empty">Memuatkan permohonan latihan industri...</p>;
-  }
-
-  if (!application) {
-    return (
-      <section className="hrm-application-detail-page">
-        <header className="hrm-application-detail-titlebar">
-          <h1>Permohonan Latihan Industri</h1>
-          <button type="button" onClick={onBack}>
-            <Icon>arrow_back</Icon>Kembali
-          </button>
-        </header>
-        <p className="hrm-empty">Permohonan tidak ditemui.</p>
-      </section>
-    );
-  }
-
-  const studentInfo = getInternshipStudentInfo(application);
-  const documents = getInternshipDocuments(application);
-  const isFinal = ["shortlisted", "rejected"].includes(application.status);
-  const sections = [
-    ["Maklumat Peribadi Pemohon", internshipPersonalRows, studentInfo],
-    ["Maklumat Akademik", internshipAcademicRows, studentInfo],
-    ["Dokumen Sokongan", internshipDocumentRows, { ...studentInfo, ...documents }],
-  ];
-  const activeSection = sections.find(([title]) => title === activeTab) || sections[0];
-  const [_sectionTitle, rows, values] = activeSection;
+  const isFinal = application ? ["shortlisted", "rejected"].includes(application.status) : false;
 
   return (
     <section className="hrm-application-detail-page">
-      <header className="hrm-application-detail-titlebar">
-        <h1>Permohonan Latihan Industri</h1>
-        <button type="button" onClick={onBack}>
-          <Icon>arrow_back</Icon>Kembali
-        </button>
-      </header>
-
-      <div className="hrm-application-detail-workspace">
-        <section className="student-readonly-summary hrm-internship-summary">
-          <div>
-            <span>No. Rujukan</span>
-            <strong>{formatReferenceNo(application)}</strong>
-          </div>
-          <div>
-            <span>Calon</span>
-            <strong>{application.applicant_name || "Pemohon"}</strong>
-          </div>
-          <div>
-            <span>Institusi</span>
-            <strong>{getInternshipInstitution(application)}</strong>
-          </div>
-          <div>
-            <span>Status</span>
-            <strong><Badge status={application.status} /></strong>
-          </div>
-        </section>
-
-        <nav className="student-info-tabs hrm-application-detail-tabs" aria-label="Bahagian permohonan latihan industri">
-          {sections.map(([title]) => (
-            <button
-              className={activeTab === title ? "active" : ""}
-              key={title}
-              type="button"
-              onClick={() => setActiveTab(title)}
-            >
-              {title}
-            </button>
-          ))}
-        </nav>
-
-        <section className="hrm-application-detail-section">
-          <h2>{activeTab}</h2>
-          <div className="student-personal-table-wrap">
-            <table className="student-personal-table student-readonly-table hrm-application-detail-table">
-              <tbody>
-                {rows.map(([field, label]) => (
-                  <tr key={field}>
-                    <th scope="row">{label}</th>
-                    <td>
-                      <span className="student-readonly-value">{displayText(values[field])}</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
+      <InternshipApplicationReadOnlyPanel
+        activeInfoTab={activeTab}
+        application={application}
+        backLabel="Kembali"
+        className="hrm-application-direct-panel"
+        error={!loading && !application ? "Permohonan tidak ditemui." : ""}
+        loading={loading}
+        onBack={onBack}
+        onTabChange={setActiveTab}
+      />
+      {application ? (
         <footer className="hrm-application-detail-actions">
           <button
             className="hrm-primary"
@@ -1695,7 +1574,7 @@ function InternshipApplicationDetailPage({ application, loading, onBack, onRevie
             Tolak
           </button>
         </footer>
-      </div>
+      ) : null}
     </section>
   );
 }
