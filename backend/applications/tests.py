@@ -126,3 +126,32 @@ class CandidateApplicationReferenceNoTests(TestCase):
         self.assertEqual(application.internship_university_letter_original_name, "surat-institusi.pdf")
         self.assertEqual(response.data["document_files"]["universityLetterFile"]["name"], "surat-institusi.pdf")
         self.assertIn("/media/internship_documents/", response.data["document_files"]["universityLetterFile"]["url"])
+
+    def test_staff_application_list_excludes_drafts(self):
+        applicant = self.create_applicant("hidden-draft@example.com")
+        staff = self.user_model.objects.create_user(
+            username="hrm@example.com",
+            email="hrm@example.com",
+            password="Password123!",
+            role="admin",
+        )
+        draft_application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=self.vacancy,
+            status="draft",
+        )
+        submitted_application = CandidateApplication.objects.create(
+            applicant=self.create_applicant("submitted@example.com"),
+            vacancy=self.vacancy,
+            status="submitted",
+        )
+        client = APIClient()
+        client.force_authenticate(user=staff)
+
+        response = client.get("/api/applications/")
+
+        self.assertEqual(response.status_code, 200)
+        applications = response.data.get("results", response.data) if isinstance(response.data, dict) else response.data
+        returned_ids = {application["id"] for application in applications}
+        self.assertNotIn(draft_application.id, returned_ids)
+        self.assertIn(submitted_application.id, returned_ids)

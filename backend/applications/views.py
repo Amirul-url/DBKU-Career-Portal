@@ -22,6 +22,8 @@ class CandidateApplicationViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if user.role not in CandidateApplicationPermission.staff_roles:
             queryset = queryset.filter(applicant=user)
+        else:
+            queryset = queryset.exclude(status="draft")
 
         status_filter = self.request.query_params.get("status")
         vacancy_type = self.request.query_params.get("type")

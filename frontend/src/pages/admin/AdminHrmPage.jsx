@@ -58,6 +58,18 @@ const statusClass = {
   withdrawn: "slate",
   draft: "slate",
 };
+const hrmVisibleApplicationStatuses = new Set([
+  "submitted",
+  "screening",
+  "shortlisted",
+  "interview",
+  "offered",
+  "accepted",
+  "rejected",
+  "withdrawn",
+]);
+const isHrmVisibleApplication = (application) =>
+  hrmVisibleApplicationStatuses.has(application.status || "submitted");
 const dateValue = (value) =>
   value
     ? new Date(value).toLocaleDateString("ms-MY", {
@@ -229,8 +241,9 @@ export default function AdminHrmPage() {
   }, [notice]);
   const dashboardMetrics = useMemo(() => {
     const jobTypesById = new Map(jobs.map((job) => [job.id, job.vacancy_type]));
+    const visibleApplications = applications.filter(isHrmVisibleApplication);
     const applicationsByType = (type) =>
-      applications.filter((application) => {
+      visibleApplications.filter((application) => {
         const vacancyType = application.vacancy_detail?.vacancy_type || jobTypesById.get(application.vacancy);
         return vacancyType === type;
       });
@@ -247,12 +260,12 @@ export default function AdminHrmPage() {
       };
     };
     const overallMetrics = {
-      applications,
+      applications: visibleApplications,
       jobs,
-      new: applications.filter((app) => app.status === "submitted").length,
+      new: visibleApplications.filter((app) => app.status === "submitted").length,
       open: jobs.filter((job) => job.status === "open").length,
-      shortlist: applications.filter((app) => app.status === "shortlisted").length,
-      total: applications.length,
+      shortlist: visibleApplications.filter((app) => app.status === "shortlisted").length,
+      total: visibleApplications.length,
     };
     return {
       all: overallMetrics,
@@ -393,7 +406,7 @@ export default function AdminHrmPage() {
   );
   const filteredApplications = activeMetrics.applications;
   const selectedApplication = activeApplicationId
-    ? applications.find((application) => String(application.id) === String(activeApplicationId))
+    ? activeMetrics.applications.find((application) => String(application.id) === String(activeApplicationId))
     : null;
   const latestApplications = overallMetrics.applications.slice(0, 6);
   const isInternshipForm = jobForm.vacancy_type === "internship";
