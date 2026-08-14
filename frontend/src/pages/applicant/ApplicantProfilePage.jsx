@@ -1351,13 +1351,9 @@ export function ApplicantAddressMap({ address, addressError, latitude, locationE
           </div>
           <div className={mapActionClassName}>
             <button type="button" onClick={focusLocation}>Fokus</button>
-            {!readOnly ? (
-              <button type="button" className={mapMode === "2d" ? "active" : ""} onClick={() => applyMapMode("2d")}>2D</button>
-            ) : null}
+            <button type="button" className={mapMode === "2d" ? "active" : ""} onClick={() => applyMapMode("2d")}>2D</button>
             <button type="button" className={mapMode === "3d" ? "active" : ""} onClick={() => applyMapMode("3d")}>3D</button>
-            {!readOnly ? (
-              <button type="button" className={mapStyle === "street" ? "active" : ""} onClick={() => applyMapStyle("street")}>Jalan</button>
-            ) : null}
+            <button type="button" className={mapStyle === "street" ? "active" : ""} onClick={() => applyMapStyle("street")}>Jalan</button>
             <button type="button" className={mapStyle === "satellite" ? "active" : ""} onClick={() => applyMapStyle("satellite")}>Satelit</button>
             <button type="button" className={mapStyle === "outdoor" ? "active" : ""} onClick={() => applyMapStyle("outdoor")}>Luar</button>
           </div>
