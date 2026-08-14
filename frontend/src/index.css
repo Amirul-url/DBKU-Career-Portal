@@ -9774,15 +9774,30 @@ body:has(.applicant-profile-page) {
 }
 
 .hrm-internship-toolbar {
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: start;
+  gap: 16px;
+  padding: 24px 28px 20px;
 }
 
 .hrm-internship-filters {
-  max-width: 920px;
+  display: grid;
+  grid-template-columns:
+    minmax(170px, 0.9fr)
+    minmax(230px, 1.2fr)
+    minmax(155px, 0.75fr)
+    minmax(165px, 0.8fr)
+    auto;
+  align-items: end;
+  justify-content: stretch;
+  gap: 12px;
+  width: 100%;
+  max-width: none;
 }
 
 .hrm-internship-filters label {
-  min-width: 160px;
+  min-width: 0;
 }
 
 .hrm-internship-filters input,
@@ -9809,6 +9824,7 @@ body:has(.applicant-profile-page) {
 .hrm-filter-reset {
   align-self: end;
   min-height: 42px;
+  white-space: nowrap;
   border: 1px solid #bfd8cb;
   border-radius: 7px;
   background: #ffffff;
@@ -9820,7 +9836,41 @@ body:has(.applicant-profile-page) {
 }
 
 .hrm-internship-applications-table {
-  min-width: 1080px;
+  min-width: 1120px;
+  table-layout: fixed;
+}
+
+.hrm-internship-applications-table th:nth-child(1),
+.hrm-internship-applications-table td:nth-child(1) {
+  width: 150px;
+  white-space: nowrap;
+}
+
+.hrm-internship-applications-table th:nth-child(2),
+.hrm-internship-applications-table td:nth-child(2) {
+  width: 310px;
+}
+
+.hrm-internship-applications-table th:nth-child(3),
+.hrm-internship-applications-table td:nth-child(3) {
+  width: 260px;
+}
+
+.hrm-internship-applications-table th:nth-child(4),
+.hrm-internship-applications-table td:nth-child(4) {
+  width: 130px;
+  white-space: nowrap;
+}
+
+.hrm-internship-applications-table th:nth-child(5),
+.hrm-internship-applications-table td:nth-child(5) {
+  width: 110px;
+  text-align: center;
+}
+
+.hrm-internship-applications-table th:nth-child(6),
+.hrm-internship-applications-table td:nth-child(6) {
+  width: 320px;
 }
 
 .hrm-internship-applications-table td strong,
@@ -9835,8 +9885,13 @@ body:has(.applicant-profile-page) {
 }
 
 .hrm-internship-actions {
-  flex-wrap: wrap;
-  min-width: 260px;
+  flex-wrap: nowrap;
+  min-width: 292px;
+}
+
+.hrm-internship-actions button {
+  min-height: 36px;
+  white-space: nowrap;
 }
 
 .hrm-actions .view {
@@ -9932,6 +9987,7 @@ body:has(.applicant-profile-page) {
   }
 
   .hrm-internship-filters {
+    grid-template-columns: 1fr;
     justify-content: stretch;
   }
 
