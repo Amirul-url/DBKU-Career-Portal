@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { apiRequest } from "../../lib/authApi";
 import { Icon } from "../applicant/ApplicantAuthShared";
 
@@ -39,7 +39,7 @@ const blankForm = {
 
 const display = (value) => value || "-";
 
-function AdminAccountModal({ account, config, error, form, mode, onChange, onClose, onSave, saving }) {
+function AdminAccountModal({ config, error, form, mode, onChange, onClose, onSave, saving }) {
   const isEdit = mode === "edit";
   const inputClass = "h-12 w-full rounded-md border border-slate-300 px-4 text-sm font-semibold text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100";
   const labelClass = "grid gap-2 text-sm font-bold text-slate-600";
@@ -125,7 +125,7 @@ export default function SuperAdminAdministratorsPanel({ accountType = "admin" })
   const [saving, setSaving] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const loadAccounts = async (search = query, selectedDepartment = department) => {
+  const fetchAccounts = useCallback(async (search = "", selectedDepartment = "") => {
     setLoading(true);
     setError("");
     try {
@@ -140,19 +140,28 @@ export default function SuperAdminAdministratorsPanel({ accountType = "admin" })
     } finally {
       setLoading(false);
     }
-  };
+  }, [config]);
+
+  const loadAccounts = useCallback(
+    (search = query, selectedDepartment = department) => fetchAccounts(search, selectedDepartment),
+    [department, fetchAccounts, query],
+  );
 
   useEffect(() => {
-    setQuery("");
-    setDepartment("");
-    setCurrentPage(1);
-    loadAccounts("", "");
-  }, [accountType]);
+    Promise.resolve().then(() => {
+      setQuery("");
+      setDepartment("");
+      setCurrentPage(1);
+      fetchAccounts("", "");
+    });
+  }, [accountType, fetchAccounts]);
 
   const pageCount = Math.max(1, Math.ceil(accounts.length / ADMIN_PAGE_SIZE));
   const pageStart = (currentPage - 1) * ADMIN_PAGE_SIZE;
   const visibleAccounts = useMemo(() => accounts.slice(pageStart, pageStart + ADMIN_PAGE_SIZE), [accounts, pageStart]);
-  useEffect(() => { setCurrentPage((page) => Math.min(page, pageCount)); }, [pageCount]);
+  useEffect(() => {
+    Promise.resolve().then(() => setCurrentPage((page) => Math.min(page, pageCount)));
+  }, [pageCount]);
 
   const openAddModal = () => {
     setEditingAccount(null);
@@ -222,36 +231,36 @@ export default function SuperAdminAdministratorsPanel({ accountType = "admin" })
   };
 
   return (
-    <section className="p-8">
+    <section className="p-7">
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-950">{config.title}</h1>
-          <p className="mt-1 text-slate-500">{config.subtitle}</p>
+          <h1 className="text-2xl font-bold text-slate-950">{config.title}</h1>
+          <p className="mt-1 text-sm text-slate-500">{config.subtitle}</p>
         </div>
-        <button className="inline-flex items-center gap-2 rounded-md bg-emerald-700 px-5 py-3 font-bold text-white hover:bg-emerald-800" type="button" onClick={openAddModal}>
+        <button className="inline-flex items-center gap-2 rounded-md bg-emerald-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-800" type="button" onClick={openAddModal}>
           <Icon>person_add</Icon>
           Tambah Akaun
         </button>
       </div>
 
-      <form className={`mb-5 grid gap-3 rounded-lg border border-slate-200 bg-white p-4 ${config.hasDepartment ? "lg:grid-cols-[minmax(0,1fr)_320px_auto_auto]" : "lg:grid-cols-[minmax(0,1fr)_auto_auto]"}`} onSubmit={(event) => { event.preventDefault(); loadAccounts(); }}>
-        <input className="min-w-0 rounded-md border border-slate-300 px-4 py-3 text-sm" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={config.searchPlaceholder} />
+      <form className={`mb-5 grid gap-3 rounded-lg border border-slate-200 bg-white p-3.5 ${config.hasDepartment ? "lg:grid-cols-[minmax(0,1fr)_300px_auto_auto]" : "lg:grid-cols-[minmax(0,1fr)_auto_auto]"}`} onSubmit={(event) => { event.preventDefault(); loadAccounts(); }}>
+        <input className="min-w-0 rounded-md border border-slate-300 px-4 py-2.5 text-sm" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={config.searchPlaceholder} />
         {config.hasDepartment ? (
-          <select className="rounded-md border border-slate-300 px-4 py-3 text-sm" value={department} onChange={(event) => setDepartment(event.target.value)}>
+          <select className="rounded-md border border-slate-300 px-4 py-2.5 text-sm" value={department} onChange={(event) => setDepartment(event.target.value)}>
             <option value="">Semua jabatan</option>
             {departmentOptions.map((option) => <option value={option} key={option}>{option}</option>)}
           </select>
         ) : null}
-        <button className="inline-flex items-center justify-center gap-2 rounded-md bg-emerald-700 px-5 py-3 font-bold text-white hover:bg-emerald-800" type="submit">
+        <button className="inline-flex items-center justify-center gap-2 rounded-md bg-emerald-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-800" type="submit">
           <Icon>search</Icon>
           Tapis
         </button>
-        <button className="rounded-md border border-slate-300 px-4 font-bold text-slate-600" type="button" onClick={() => { setQuery(""); setDepartment(""); loadAccounts("", ""); }}>Set Semula</button>
+        <button className="rounded-md border border-slate-300 px-4 text-sm font-bold text-slate-600" type="button" onClick={() => { setQuery(""); setDepartment(""); loadAccounts("", ""); }}>Set Semula</button>
       </form>
 
       <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
-        <header className="border-b border-slate-200 px-5 py-4">
-          <h2 className="font-bold text-slate-950">{config.listTitle}</h2>
+        <header className="border-b border-slate-200 px-5 py-3.5">
+          <h2 className="text-base font-bold text-slate-950">{config.listTitle}</h2>
           <p className="mt-1 text-sm text-slate-500">{accounts.length} akaun dijumpai.</p>
         </header>
         {error ? <p className="m-5 rounded-md bg-red-50 p-4 text-sm font-semibold text-red-700">{error}</p> : null}
@@ -259,28 +268,28 @@ export default function SuperAdminAdministratorsPanel({ accountType = "admin" })
           <table className="min-w-full text-left text-sm">
             <thead className="bg-slate-50 text-xs uppercase text-slate-500">
               <tr>
-                <th className="w-20 px-5 py-4">No.</th>
-                <th className="px-5 py-4">Nama</th>
-                <th className="px-5 py-4">Emel</th>
-                <th className="px-5 py-4">Nombor Telefon</th>
-                <th className="px-5 py-4">Tindakan</th>
+                <th className="w-20 px-5 py-3.5">No.</th>
+                <th className="px-5 py-3.5">Nama</th>
+                <th className="px-5 py-3.5">Emel</th>
+                <th className="px-5 py-3.5">Nombor Telefon</th>
+                <th className="px-5 py-3.5">Tindakan</th>
               </tr>
             </thead>
             <tbody>
               {loading ? <tr><td className="px-5 py-6 text-slate-500" colSpan="5">Memuatkan {config.accountLabel}...</td></tr> : null}
               {!loading && visibleAccounts.length ? visibleAccounts.map((account, index) => (
                 <tr className="border-t border-slate-100" key={account.id}>
-                  <td className="px-5 py-4 font-semibold text-slate-500">{pageStart + index + 1}</td>
-                  <td className="px-5 py-4 font-bold text-slate-900">{display(account.first_name)}</td>
-                  <td className="px-5 py-4 text-slate-600">{display(account.email)}</td>
-                  <td className="px-5 py-4 text-slate-600">{display(account.mobile_number)}</td>
-                  <td className="px-5 py-4">
+                  <td className="px-5 py-3.5 font-semibold text-slate-500">{pageStart + index + 1}</td>
+                  <td className="px-5 py-3.5 text-sm font-bold text-slate-900">{display(account.first_name)}</td>
+                  <td className="px-5 py-3.5 text-sm text-slate-600">{display(account.email)}</td>
+                  <td className="px-5 py-3.5 text-sm text-slate-600">{display(account.mobile_number)}</td>
+                  <td className="px-5 py-3.5">
                     <div className="flex gap-2">
-                      <button className="inline-flex items-center gap-2 rounded-md border border-slate-300 px-3 py-2 font-bold text-slate-700 hover:bg-slate-50" type="button" onClick={() => openEditModal(account)}>
+                      <button className="inline-flex items-center gap-2 rounded-md border border-slate-300 px-3 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50" type="button" onClick={() => openEditModal(account)}>
                         <Icon>edit</Icon>
                         Kemaskini
                       </button>
-                      <button className="inline-flex items-center gap-2 rounded-md border border-red-200 px-3 py-2 font-bold text-red-600 hover:bg-red-50" type="button" onClick={() => deleteAccount(account)}>
+                      <button className="inline-flex items-center gap-2 rounded-md border border-red-200 px-3 py-2 text-sm font-bold text-red-600 hover:bg-red-50" type="button" onClick={() => deleteAccount(account)}>
                         <Icon>delete</Icon>
                         Padam
                       </button>
