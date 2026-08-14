@@ -6,7 +6,7 @@ import {
   getStoredUser,
   recordLogoutActivity,
 } from "../../lib/authApi";
-import { adminNavItems, getAdminRoutePath, getAdminRouteState } from "../../modules/admin/adminRoutes";
+import { ADMIN_ROUTES, adminNavItems, getAdminRoutePath, getAdminRouteState } from "../../modules/admin/adminRoutes";
 import { Icon } from "../applicant/ApplicantAuthShared";
 import SuperAdminApplicantsPanel from "./SuperAdminApplicantsPanel";
 
@@ -233,13 +233,14 @@ export default function AdminHrmPage() {
   const [jobActionSaving, setJobActionSaving] = useState(false);
   const [jobDeleteTarget, setJobDeleteTarget] = useState(null);
   const [jobStatusFilter, setJobStatusFilter] = useState("all");
-  const [selectedApplication, setSelectedApplication] = useState(null);
   const routeState = getAdminRouteState(location.pathname);
   const [jobForm, setJobForm] = useState(() => createEmptyJobForm(routeState.vacancyType || "job"));
   const panel = routeState.panel || "dashboard";
+  const activeApplicationId = routeState.applicationId || "";
   const activeVacancyType = routeState.vacancyType || jobForm.vacancy_type || "job";
   const isKnownRoute =
     location.pathname === "/admin" ||
+    panel === "application-detail" ||
     adminNavItems.some((item) => item.to === location.pathname.replace(/\/+$/, ""));
 
   const loadData = useCallback(() => {
@@ -431,6 +432,9 @@ export default function AdminHrmPage() {
     jobStatusFilter === "all" ? true : getJobDisplayStatus(job) === jobStatusFilter,
   );
   const filteredApplications = activeMetrics.applications;
+  const selectedApplication = activeApplicationId
+    ? applications.find((application) => String(application.id) === String(activeApplicationId))
+    : null;
   const latestApplications = overallMetrics.applications.slice(0, 6);
   const isInternshipForm = jobForm.vacancy_type === "internship";
   return (
@@ -480,7 +484,10 @@ export default function AdminHrmPage() {
               )
             ) : (
               <NavLink
-                className={({ isActive }) => `flex w-full items-center rounded-md py-3 text-left text-[14px] font-bold ${isSidebarOpen ? "gap-4 px-4" : "justify-center px-0"} ${isActive ? "bg-emerald-50 text-slate-950" : "text-slate-950"}`}
+                className={({ isActive }) => {
+                  const isDetailActive = panel === "application-detail" && item.to === ADMIN_ROUTES.applications.internship;
+                  return `flex w-full items-center rounded-md py-3 text-left text-[14px] font-bold ${isSidebarOpen ? "gap-4 px-4" : "justify-center px-0"} ${isActive || isDetailActive ? "bg-emerald-50 text-slate-950" : "text-slate-950"}`;
+                }}
                 end
                 key={`${item.label}-${index}`}
                 onClick={() => {
@@ -970,7 +977,7 @@ export default function AdminHrmPage() {
                   <InternshipApplicationsPanel
                     applications={filteredApplications}
                     onReview={setReview}
-                    onView={setSelectedApplication}
+                    onView={(application) => navigate(`${ADMIN_ROUTES.applications.internship}/${application.id}`)}
                   />
                 ) : (
                   <ApplicationTable
@@ -980,6 +987,17 @@ export default function AdminHrmPage() {
                 )}
               </section>
             </>
+          )}
+          {panel === "application-detail" && (
+            <InternshipApplicationDetailPage
+              application={selectedApplication}
+              loading={loading}
+              onBack={() => navigate(ADMIN_ROUTES.applications.internship)}
+              onReview={async (id, status) => {
+                await setReview(id, status);
+                navigate(ADMIN_ROUTES.applications.internship);
+              }}
+            />
           )}
         </section>
         {jobModalMode && selectedJob ? (
@@ -999,16 +1017,6 @@ export default function AdminHrmPage() {
             onCancel={() => setJobDeleteTarget(null)}
             onConfirm={confirmDeleteJob}
             saving={jobActionSaving}
-          />
-        ) : null}
-        {selectedApplication ? (
-          <InternshipApplicationDetailModal
-            application={selectedApplication}
-            onClose={() => setSelectedApplication(null)}
-            onReview={async (id, status) => {
-              await setReview(id, status);
-              setSelectedApplication(null);
-            }}
           />
         ) : null}
       </main>
@@ -1577,7 +1585,27 @@ function InternshipApplicationsPanel({ applications, onReview, onView }) {
     </section>
   );
 }
-function InternshipApplicationDetailModal({ application, onClose, onReview }) {
+function InternshipApplicationDetailPage({ application, loading, onBack, onReview }) {
+  const [activeTab, setActiveTab] = useState("Maklumat Peribadi Pemohon");
+
+  if (loading) {
+    return <p className="hrm-empty">Memuatkan permohonan latihan industri...</p>;
+  }
+
+  if (!application) {
+    return (
+      <section className="hrm-application-detail-page">
+        <header className="hrm-application-detail-titlebar">
+          <h1>Permohonan Latihan Industri</h1>
+          <button type="button" onClick={onBack}>
+            <Icon>arrow_back</Icon>Kembali
+          </button>
+        </header>
+        <p className="hrm-empty">Permohonan tidak ditemui.</p>
+      </section>
+    );
+  }
+
   const studentInfo = getInternshipStudentInfo(application);
   const documents = getInternshipDocuments(application);
   const isFinal = ["shortlisted", "rejected"].includes(application.status);
@@ -1586,54 +1614,70 @@ function InternshipApplicationDetailModal({ application, onClose, onReview }) {
     ["Maklumat Akademik", internshipAcademicRows, studentInfo],
     ["Dokumen Sokongan", internshipDocumentRows, { ...studentInfo, ...documents }],
   ];
+  const activeSection = sections.find(([title]) => title === activeTab) || sections[0];
+  const [_sectionTitle, rows, values] = activeSection;
 
   return (
-    <div className="hrm-modal-backdrop" role="presentation">
-      <section className="hrm-job-modal hrm-internship-detail-modal" role="dialog" aria-modal="true" aria-labelledby="internship-detail-title">
-        <header>
-          <div>
-            <span className="hrm-eyebrow">SEMAKAN PERMOHONAN</span>
-            <h2 id="internship-detail-title">{application.applicant_name || "Pemohon Latihan Industri"}</h2>
-            <p>{formatReferenceNo(application)} - {getInternshipInstitution(application)}</p>
-          </div>
-          <button type="button" onClick={onClose} aria-label="Tutup">x</button>
-        </header>
-        <div className="hrm-internship-detail-body">
-          <section className="student-readonly-summary hrm-internship-summary">
-            <div>
-              <span>No. Rujukan</span>
-              <strong>{formatReferenceNo(application)}</strong>
-            </div>
-            <div>
-              <span>Permohonan</span>
-              <strong>{application.vacancy_detail?.title || "Permohonan Latihan Industri DBKU"}</strong>
-            </div>
-            <div>
-              <span>Tarikh</span>
-              <strong>{dateValue(getApplicationDateValue(application))}</strong>
-            </div>
-            <div>
-              <span>Status</span>
-              <strong><Badge status={application.status} /></strong>
-            </div>
-          </section>
+    <section className="hrm-application-detail-page">
+      <header className="hrm-application-detail-titlebar">
+        <h1>Permohonan Latihan Industri</h1>
+        <button type="button" onClick={onBack}>
+          <Icon>arrow_back</Icon>Kembali
+        </button>
+      </header>
 
-          {sections.map(([title, rows, values]) => (
-            <section className="hrm-internship-detail-section" key={title}>
-              <h3>{title}</h3>
-              <div className="hrm-internship-detail-grid">
-                {rows.map(([field, label]) => (
-                  <div key={field}>
-                    <span>{label}</span>
-                    <strong>{displayText(values[field])}</strong>
-                  </div>
-                ))}
-              </div>
-            </section>
+      <div className="hrm-application-detail-workspace">
+        <section className="student-readonly-summary hrm-internship-summary">
+          <div>
+            <span>No. Rujukan</span>
+            <strong>{formatReferenceNo(application)}</strong>
+          </div>
+          <div>
+            <span>Calon</span>
+            <strong>{application.applicant_name || "Pemohon"}</strong>
+          </div>
+          <div>
+            <span>Institusi</span>
+            <strong>{getInternshipInstitution(application)}</strong>
+          </div>
+          <div>
+            <span>Status</span>
+            <strong><Badge status={application.status} /></strong>
+          </div>
+        </section>
+
+        <nav className="student-info-tabs hrm-application-detail-tabs" aria-label="Bahagian permohonan latihan industri">
+          {sections.map(([title]) => (
+            <button
+              className={activeTab === title ? "active" : ""}
+              key={title}
+              type="button"
+              onClick={() => setActiveTab(title)}
+            >
+              {title}
+            </button>
           ))}
-        </div>
-        <footer className="hrm-internship-detail-footer">
-          <button className="hrm-secondary" type="button" onClick={onClose}>Tutup</button>
+        </nav>
+
+        <section className="hrm-application-detail-section">
+          <h2>{activeTab}</h2>
+          <div className="student-personal-table-wrap">
+            <table className="student-personal-table student-readonly-table hrm-application-detail-table">
+              <tbody>
+                {rows.map(([field, label]) => (
+                  <tr key={field}>
+                    <th scope="row">{label}</th>
+                    <td>
+                      <span className="student-readonly-value">{displayText(values[field])}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <footer className="hrm-application-detail-actions">
           <button
             className="hrm-primary"
             type="button"
@@ -1651,8 +1695,8 @@ function InternshipApplicationDetailModal({ application, onClose, onReview }) {
             Tolak
           </button>
         </footer>
-      </section>
-    </div>
+      </div>
+    </section>
   );
 }
 function ApplicationTable({ applications, onReview, compact }) {

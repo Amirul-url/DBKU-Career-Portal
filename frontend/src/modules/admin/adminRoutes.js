@@ -27,6 +27,18 @@ export const adminNavItems = [
 
 export function getAdminRouteState(pathname) {
   const currentPath = pathname.replace(/\/+$/, "") || "/admin";
+  const internshipApplicationDetailMatch = currentPath.match(/^\/admin\/internships\/applications\/([^/]+)$/);
+  if (internshipApplicationDetailMatch) {
+    return {
+      icon: "group",
+      label: "Butiran Permohonan Latihan Industri",
+      panel: "application-detail",
+      to: currentPath,
+      vacancyType: "internship",
+      applicationId: internshipApplicationDetailMatch[1],
+    };
+  }
+
   const route = adminNavItems.find((item) => item.to === currentPath);
 
   return route || adminNavItems[0];
