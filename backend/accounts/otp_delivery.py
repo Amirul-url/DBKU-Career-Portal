@@ -23,11 +23,10 @@ def password_reset_cache_key(method, identifier):
 
 def build_password_reset_otp_message(otp):
     return {
-        "subject": "OTP Tetapan Semula Kata Laluan Portal Kerjaya DBKU",
+        "subject": "Kod OTP Portal Kerjaya DBKU",
         "text": (
-            "Kod OTP anda untuk menetapkan semula kata laluan Portal Kerjaya DBKU ialah "
-            f"{otp}. Kod ini sah selama 10 minit. "
-            "Jika anda tidak membuat permintaan ini, sila abaikan emel ini."
+            f"OTP Portal Kerjaya DBKU: {otp}. "
+            "Sah 10 minit. Abaikan jika bukan anda."
         ),
     }
 

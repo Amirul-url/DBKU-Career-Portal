@@ -55,7 +55,7 @@ export default function ApplicantResetPasswordPage() {
           <span className="active">Kata Laluan</span>
         </div>
 
-        <form className="split-form" autoComplete="off" onSubmit={handleSubmit}>
+        <form className="split-form reset-password-form" autoComplete="off" onSubmit={handleSubmit}>
           <PasswordField
             label="Kata Laluan Baharu"
             name="applicantResetSecret"
@@ -86,6 +86,8 @@ export default function ApplicantResetPasswordPage() {
               {status.message}
             </p>
           ) : null}
+
+          <span className="reset-password-spacer" aria-hidden="true" />
 
           <button type="submit" className="split-submit" disabled={isSubmitting}>
             {isSubmitting ? "Menyimpan..." : "Tetapkan Kata Laluan"}

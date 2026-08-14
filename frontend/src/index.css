@@ -3502,6 +3502,19 @@ body:has(.auth-page) {
   min-height: 48px;
 }
 
+.forgot-mode .reset-password-form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 12px;
+  min-height: 0;
+}
+
+.reset-password-spacer {
+  flex: 1;
+  min-height: clamp(18px, 10vh, 92px);
+}
+
 .forgot-mode .split-otp-grid input {
   height: 46px;
 }
