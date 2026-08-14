@@ -465,7 +465,12 @@ export default function ApplicantApplicationViewPage() {
       setError("");
       apiRequest(`/applications/${applicationId}/`, { signal: controller.signal })
         .then((data) => {
-          if (isMounted) setApplication(data);
+          if (!isMounted) return;
+          if ((data.status || "draft") === "draft") {
+            navigate(APPLICANT_ROUTES.internshipApplication, { replace: true });
+            return;
+          }
+          setApplication(data);
         })
         .catch((requestError) => {
           if (!isMounted) return;
@@ -484,7 +489,7 @@ export default function ApplicantApplicationViewPage() {
       window.clearTimeout(timeoutId);
       controller.abort();
     };
-  }, [applicationId, user]);
+  }, [applicationId, navigate, user]);
 
   const exitApplicationView = () => {
     navigate(APPLICANT_ROUTES.applications);

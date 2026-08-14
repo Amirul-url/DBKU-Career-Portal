@@ -749,6 +749,33 @@ export default function ApplicantInternshipApplicationPage() {
     };
   }, [user?.id, user?.role]);
 
+  useEffect(() => {
+    if (user?.role !== "applicant" || savedDraft?.studentInfo) {
+      return;
+    }
+
+    let isMounted = true;
+    apiRequest("/applications/?type=internship")
+      .then((data) => {
+        if (!isMounted) return;
+        const applications = Array.isArray(data) ? data : data.results || [];
+        const draftApplication = applications.find((application) => (application.status || "draft") === "draft");
+        const draftStudentInfo = draftApplication?.profile_data?.student_info;
+        if (!draftStudentInfo) return;
+
+        const nextStudentInfo = normalizeStudentInfoDraft(draftStudentInfo, user);
+        setStudentInfo(nextStudentInfo);
+        setActiveInfoTab(getFirstIncompleteTab(nextStudentInfo));
+      })
+      .catch(() => {
+        // Keep the current form state if the server draft cannot be loaded.
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [savedDraft?.studentInfo, user]);
+
   if (!user || user.role !== "applicant") {
     return null;
   }
