@@ -58,3 +58,37 @@ export function buildHrmDashboardMetrics(jobs = [], applications = []) {
     },
   };
 }
+
+function getApplicationDateParts(application) {
+  const value = application?.submitted_at || application?.created_at || "";
+  if (!value) return { month: "", year: "" };
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return { month: "", year: "" };
+  return {
+    month: String(date.getMonth() + 1),
+    year: String(date.getFullYear()),
+  };
+}
+
+export function buildRecentApplicationsView(applications = [], { month = "all", page = 1, pageSize = 5, year = "all" } = {}) {
+  const filteredApplications = (Array.isArray(applications) ? applications : []).filter((application) => {
+    const dateParts = getApplicationDateParts(application);
+    return (
+      (month === "all" || dateParts.month === month) &&
+      (year === "all" || dateParts.year === year)
+    );
+  });
+  const totalPages = Math.max(1, Math.ceil(filteredApplications.length / pageSize));
+  const activePage = Math.min(Math.max(1, Number(page) || 1), totalPages);
+  const startIndex = (activePage - 1) * pageSize;
+  const visibleApplications = filteredApplications.slice(startIndex, startIndex + pageSize);
+
+  return {
+    activePage,
+    total: filteredApplications.length,
+    totalPages,
+    visibleApplications,
+    visibleEnd: Math.min(startIndex + pageSize, filteredApplications.length),
+    visibleStart: filteredApplications.length ? startIndex + 1 : 0,
+  };
+}

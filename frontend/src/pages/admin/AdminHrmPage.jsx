@@ -6,7 +6,7 @@ import {
   getStoredUser,
   recordLogoutActivity,
 } from "../../lib/authApi";
-import { buildHrmDashboardMetrics } from "../../modules/admin/hrmDashboardMetrics";
+import { buildHrmDashboardMetrics, buildRecentApplicationsView } from "../../modules/admin/hrmDashboardMetrics";
 import { ADMIN_ROUTES, adminNavItems, getAdminRoutePath, getAdminRouteState } from "../../modules/admin/adminRoutes";
 import { InternshipApplicationReadOnlyPanel } from "../applicant/ApplicantApplicationViewPage";
 import { Icon } from "../applicant/ApplicantAuthShared";
@@ -383,7 +383,6 @@ export default function AdminHrmPage() {
   const selectedApplication = activeApplicationId
     ? activeMetrics.applications.find((application) => String(application.id) === String(activeApplicationId))
     : null;
-  const latestApplications = overallMetrics.applications.slice(0, 6);
   const isInternshipForm = jobForm.vacancy_type === "internship";
   return (
     <div className="min-h-screen min-w-[900px] bg-slate-50">
@@ -556,23 +555,15 @@ export default function AdminHrmPage() {
                 <Stat icon="notifications" label="Permohonan baharu" value={summaryMetrics.newApplications} tone="amber" />
               </div>
               <div className="hrm-grid hrm-dashboard-grid">
-                <section className="hrm-card hrm-table-card">
-                  <header>
-                    <div>
-                      <h2>Permohonan terkini</h2>
-                      <p>Calon daripada jawatan DBKU dan latihan industri</p>
-                    </div>
-                    <div className="hrm-card-actions">
-                      <button onClick={() => openFilteredPanel("Permohonan Jawatan DBKU", "Permohonan", "job")} type="button">
-                        DBKU <Icon>chevron_right</Icon>
-                      </button>
-                      <button onClick={() => openFilteredPanel("Permohonan Latihan Industri", "Permohonan", "internship")} type="button">
-                        Latihan Industri <Icon>chevron_right</Icon>
-                      </button>
-                    </div>
-                  </header>
-                  <ApplicationTable applications={latestApplications} onReview={setReview} compact />
-                </section>
+                <RecentApplicationsPanel
+                  applications={overallMetrics.applications}
+                  onOpenApplications={(vacancyType) => openFilteredPanel(
+                    vacancyType === "internship" ? "Permohonan Latihan Industri" : "Permohonan Jawatan DBKU",
+                    "Permohonan",
+                    vacancyType,
+                  )}
+                  onReview={setReview}
+                />
                 <aside className="hrm-dashboard-side">
                   <DashboardChannelsPanel
                     channels={dashboardTypes.map((item) => ({
@@ -958,6 +949,105 @@ function Stat({ icon, label, value, tone }) {
     </article>
   );
 }
+function RecentApplicationsPanel({ applications, onOpenApplications, onReview }) {
+  const [monthFilter, setMonthFilter] = useState("all");
+  const [yearFilter, setYearFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const yearOptions = useMemo(() => {
+    const years = new Set(
+      applications
+        .map((application) => getApplicationDateParts(application).year)
+        .filter(Boolean),
+    );
+    return Array.from(years).sort((first, second) => Number(second) - Number(first));
+  }, [applications]);
+  const recentApplications = useMemo(
+    () => buildRecentApplicationsView(applications, {
+      month: monthFilter,
+      page: currentPage,
+      pageSize: 5,
+      year: yearFilter,
+    }),
+    [applications, currentPage, monthFilter, yearFilter],
+  );
+  const updateMonthFilter = (value) => {
+    setMonthFilter(value);
+    setCurrentPage(1);
+  };
+  const updateYearFilter = (value) => {
+    setYearFilter(value);
+    setCurrentPage(1);
+  };
+
+  return (
+    <section className="hrm-card hrm-table-card hrm-recent-card">
+      <header>
+        <div>
+          <h2>Permohonan terkini</h2>
+        </div>
+        <div className="hrm-recent-tools">
+          <label>
+            <span>Bulan</span>
+            <select value={monthFilter} onChange={(event) => updateMonthFilter(event.target.value)}>
+              <option value="all">Semua</option>
+              {monthFilterOptions.map((month) => (
+                <option key={month.value} value={month.value}>
+                  {month.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>Tahun</span>
+            <select value={yearFilter} onChange={(event) => updateYearFilter(event.target.value)}>
+              <option value="all">Semua</option>
+              {yearOptions.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="hrm-card-actions">
+            <button onClick={() => onOpenApplications("job")} type="button">
+              DBKU <Icon>chevron_right</Icon>
+            </button>
+            <button onClick={() => onOpenApplications("internship")} type="button">
+              Latihan Industri <Icon>chevron_right</Icon>
+            </button>
+          </div>
+        </div>
+      </header>
+      <ApplicationTable applications={recentApplications.visibleApplications} onReview={onReview} compact />
+      <footer className="hrm-recent-pagination">
+        <span>
+          {recentApplications.total
+            ? `Memaparkan ${recentApplications.visibleStart}-${recentApplications.visibleEnd} daripada ${recentApplications.total} permohonan`
+            : "Tiada permohonan untuk paparan ini."}
+        </span>
+        <div>
+          <button
+            type="button"
+            aria-label="Halaman sebelumnya"
+            disabled={recentApplications.activePage === 1}
+            onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+          >
+            &lt;
+          </button>
+          <strong>{recentApplications.activePage} / {recentApplications.totalPages}</strong>
+          <button
+            type="button"
+            aria-label="Halaman seterusnya"
+            disabled={recentApplications.activePage === recentApplications.totalPages}
+            onClick={() => setCurrentPage((page) => Math.min(recentApplications.totalPages, page + 1))}
+          >
+            &gt;
+          </button>
+        </div>
+      </footer>
+    </section>
+  );
+}
 function DashboardChannelsPanel({ channels }) {
   return (
     <section className="hrm-card hrm-channel-card">
@@ -972,7 +1062,6 @@ function DashboardChannelsPanel({ channels }) {
           <article key={channel.type}>
             <div>
               <span>{channel.label}</span>
-              <strong>{channel.metrics?.open || 0} iklan aktif</strong>
             </div>
             <dl>
               <div>

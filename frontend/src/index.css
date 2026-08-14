@@ -3199,6 +3199,83 @@ body:has(.auth-page) {
   font-weight: 900;
 }
 
+.hrm-recent-card > header {
+  align-items: flex-start;
+}
+
+.hrm-recent-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.hrm-recent-tools label {
+  display: grid;
+  gap: 5px;
+  color: #65786d;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.hrm-recent-tools select {
+  min-width: 118px;
+  height: 36px;
+  border: 1px solid #cfe0d6;
+  border-radius: 7px;
+  background: #fff;
+  color: #17251e;
+  padding: 0 28px 0 10px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.hrm-recent-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid #edf3ef;
+  padding: 13px 20px;
+  color: #6d8075;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.hrm-recent-pagination div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hrm-recent-pagination button {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #cfe0d6;
+  border-radius: 7px;
+  background: #fff;
+  color: #078044;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.hrm-recent-pagination button:disabled {
+  cursor: not-allowed;
+  color: #a7b4ad;
+  opacity: .55;
+}
+
+.hrm-recent-pagination strong {
+  min-width: 46px;
+  color: #17251e;
+  font-size: 12px;
+  text-align: center;
+}
+
 .hrm-dashboard-grid {
   grid-template-columns: minmax(0, 1.65fr) minmax(360px, .82fr);
   align-items: start;
