@@ -32,19 +32,18 @@ function Icon({ children, className = "" }) {
 
 const getInternshipDraftStorageKey = (user) => `dbku_internship_student_info_manual_${user?.id || user?.email || "guest"}`;
 
-function hasInternshipDraft(user) {
+function getInternshipDraft(user) {
   if (typeof window === "undefined" || !user) {
-    return false;
+    return null;
   }
 
   try {
     const saved = window.localStorage.getItem(getInternshipDraftStorageKey(user));
-    if (!saved) return false;
+    if (!saved) return null;
 
-    const draft = JSON.parse(saved);
-    return Boolean(draft?.studentInfo);
+    return JSON.parse(saved);
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -81,7 +80,9 @@ export default function ApplicantInternshipInfoContent() {
   const user = getStoredUser();
   const userId = user?.id || user?.email || "";
   const userRole = user?.role;
-  const hasDraft = hasInternshipDraft(user);
+  const draft = getInternshipDraft(user);
+  const hasDraft = Boolean(draft?.studentInfo);
+  const hasNewApplicationDraft = draft?.purpose === "new-application";
   const [hasSubmittedInternshipApplication, setHasSubmittedInternshipApplication] = useState(false);
   const [hasReapplyAllowedInternshipApplication, setHasReapplyAllowedInternshipApplication] = useState(false);
 
@@ -110,7 +111,7 @@ export default function ApplicantInternshipInfoContent() {
     };
   }, [userId, userRole]);
 
-  const hasEditableLocalDraft = hasDraft && !hasReapplyAllowedInternshipApplication;
+  const hasEditableLocalDraft = hasDraft && (!hasReapplyAllowedInternshipApplication || hasNewApplicationDraft);
   const ctaTitle = hasSubmittedInternshipApplication
     ? "Permohonan latihan industri telah dihantar."
     : hasEditableLocalDraft
@@ -121,7 +122,11 @@ export default function ApplicantInternshipInfoContent() {
     : hasEditableLocalDraft
       ? "Sambung isi draf latihan industri anda dari bahagian yang belum lengkap."
       : "Lengkapkan profil sebelum membuat permohonan latihan industri.";
-  const ctaTo = hasSubmittedInternshipApplication ? APPLICANT_ROUTES.applications : APPLICANT_ROUTES.internshipApplication;
+  const ctaTo = hasSubmittedInternshipApplication
+    ? APPLICANT_ROUTES.applications
+    : hasReapplyAllowedInternshipApplication
+      ? APPLICANT_ROUTES.internshipApplicationNew
+      : APPLICANT_ROUTES.internshipApplication;
   const ctaLabel = hasSubmittedInternshipApplication
     ? "Lihat Permohonan"
     : hasEditableLocalDraft

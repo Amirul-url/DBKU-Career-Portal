@@ -693,7 +693,9 @@ export default function ApplicantInternshipApplicationPage() {
   const [searchParams] = useSearchParams();
   const user = getStoredUser();
   const editApplicationId = searchParams.get("application") || "";
+  const isStartingNewApplication = searchParams.get("new") === "1";
   const [savedDraft] = useState(() => loadStudentInfoDraft(user));
+  const activeSavedDraft = isStartingNewApplication && savedDraft?.purpose !== "new-application" ? null : savedDraft;
   const applicantRole = user?.role || "";
   const applicantDraftDefaults = useMemo(
     () => ({
@@ -703,7 +705,7 @@ export default function ApplicantInternshipApplicationPage() {
     }),
     [user?.email, user?.first_name, user?.full_name],
   );
-  const initialStudentInfo = normalizeStudentInfoDraft(savedDraft?.studentInfo || {}, applicantDraftDefaults);
+  const initialStudentInfo = normalizeStudentInfoDraft(activeSavedDraft?.studentInfo || {}, applicantDraftDefaults);
   const [sidebarOpen, toggleSidebar] = useApplicantSidebarState();
   const [activeInfoTab, setActiveInfoTab] = useState(() => getFirstIncompleteTab(initialStudentInfo));
   const [notice, setNotice] = useState("");
@@ -732,11 +734,12 @@ export default function ApplicantInternshipApplicationPage() {
   useEffect(() => {
     if (user?.role === "applicant") {
       saveStudentInfoDraft(user, {
+        purpose: isStartingNewApplication || savedDraft?.purpose === "new-application" ? "new-application" : "manual",
         savedAt: new Date().toISOString(),
         studentInfo,
       });
     }
-  }, [studentInfo, user]);
+  }, [isStartingNewApplication, savedDraft?.purpose, studentInfo, user]);
 
   useEffect(() => {
     if (user?.role !== "applicant") {
@@ -763,7 +766,7 @@ export default function ApplicantInternshipApplicationPage() {
   }, [user?.id, user?.role]);
 
   useEffect(() => {
-    if (applicantRole !== "applicant" || (savedDraft?.studentInfo && !editApplicationId)) {
+    if (applicantRole !== "applicant" || (activeSavedDraft?.studentInfo && !editApplicationId)) {
       return;
     }
 
@@ -799,7 +802,7 @@ export default function ApplicantInternshipApplicationPage() {
     return () => {
       isMounted = false;
     };
-  }, [applicantDraftDefaults, applicantRole, editApplicationId, savedDraft?.studentInfo]);
+  }, [activeSavedDraft?.studentInfo, applicantDraftDefaults, applicantRole, editApplicationId]);
 
   if (!user || user.role !== "applicant") {
     return null;

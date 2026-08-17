@@ -6,6 +6,7 @@ export const APPLICANT_ROUTES = {
   experience: "/profile/experience",
   internshipApplication: "/profile/internship-application",
   internshipApplicationEdit: (id) => `/profile/internship-application?application=${id}`,
+  internshipApplicationNew: "/profile/internship-application?new=1",
   internships: "/profile/internships",
   jobs: "/profile/jobs",
   personal: "/profile/personal",

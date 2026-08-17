@@ -32,6 +32,7 @@ test("applicant rejected applications use Ditolak status label", () => {
 });
 
 test("applicant rejected internship applications can apply again", () => {
+  assert.match(routesSource, /internshipApplicationNew: "\/profile\/internship-application\?new=1"/);
   assert.match(infoSource, /reapplyAllowedApplicationStatuses = new Set\(\["rejected", "withdrawn"\]\)/);
   assert.match(infoSource, /function isReapplyAllowedInternshipApplication/);
   assert.match(infoSource, /function isBlockingInternshipApplication/);
@@ -44,6 +45,21 @@ test("applicant rejected internship applications can apply again", () => {
     infoSource,
     /setHasReapplyAllowedInternshipApplication\(applications\.some\(isReapplyAllowedInternshipApplication\)\)/,
   );
-  assert.match(infoSource, /const hasEditableLocalDraft = hasDraft && !hasReapplyAllowedInternshipApplication/);
+  assert.match(infoSource, /draft\?\.purpose === "new-application"/);
+  assert.match(
+    infoSource,
+    /const hasEditableLocalDraft = hasDraft && \(!hasReapplyAllowedInternshipApplication \|\| hasNewApplicationDraft\)/,
+  );
+  assert.match(
+    infoSource,
+    /hasReapplyAllowedInternshipApplication\s*\?\s*APPLICANT_ROUTES\.internshipApplicationNew/,
+  );
   assert.doesNotMatch(infoSource, /: hasDraft\s*\?/);
+  assert.match(formSource, /const isStartingNewApplication = searchParams\.get\("new"\) === "1"/);
+  assert.match(
+    formSource,
+    /const activeSavedDraft = isStartingNewApplication && savedDraft\?\.purpose !== "new-application"\s*\?\s*null\s*:\s*savedDraft/,
+  );
+  assert.match(formSource, /activeSavedDraft\?\.studentInfo/);
+  assert.match(formSource, /purpose:[\s\S]*"new-application"/);
 });
