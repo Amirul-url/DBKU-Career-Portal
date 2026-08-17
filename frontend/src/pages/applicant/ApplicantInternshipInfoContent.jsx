@@ -59,6 +59,11 @@ function isInternshipApplication(application) {
 
 const reapplyAllowedApplicationStatuses = new Set(["rejected", "withdrawn"]);
 
+function isReapplyAllowedInternshipApplication(application) {
+  const status = application?.status || "draft";
+  return isInternshipApplication(application) && reapplyAllowedApplicationStatuses.has(status);
+}
+
 function isBlockingInternshipApplication(application) {
   const status = application?.status || "draft";
   return isInternshipApplication(application)
@@ -78,6 +83,7 @@ export default function ApplicantInternshipInfoContent() {
   const userRole = user?.role;
   const hasDraft = hasInternshipDraft(user);
   const [hasSubmittedInternshipApplication, setHasSubmittedInternshipApplication] = useState(false);
+  const [hasReapplyAllowedInternshipApplication, setHasReapplyAllowedInternshipApplication] = useState(false);
 
   useEffect(() => {
     if (!userId || userRole !== "applicant") {
@@ -90,9 +96,13 @@ export default function ApplicantInternshipInfoContent() {
         if (!isMounted) return;
         const applications = getApplicationRows(data);
         setHasSubmittedInternshipApplication(applications.some(isBlockingInternshipApplication));
+        setHasReapplyAllowedInternshipApplication(applications.some(isReapplyAllowedInternshipApplication));
       })
       .catch(() => {
-        if (isMounted) setHasSubmittedInternshipApplication(false);
+        if (isMounted) {
+          setHasSubmittedInternshipApplication(false);
+          setHasReapplyAllowedInternshipApplication(false);
+        }
       });
 
     return () => {
@@ -100,20 +110,21 @@ export default function ApplicantInternshipInfoContent() {
     };
   }, [userId, userRole]);
 
+  const hasEditableLocalDraft = hasDraft && !hasReapplyAllowedInternshipApplication;
   const ctaTitle = hasSubmittedInternshipApplication
     ? "Permohonan latihan industri telah dihantar."
-    : hasDraft
+    : hasEditableLocalDraft
       ? "Draf permohonan belum lengkap."
       : "Bersedia untuk hantar permohonan?";
   const ctaDescription = hasSubmittedInternshipApplication
     ? "Semak status permohonan anda melalui menu Permohonan Saya."
-    : hasDraft
+    : hasEditableLocalDraft
       ? "Sambung isi draf latihan industri anda dari bahagian yang belum lengkap."
       : "Lengkapkan profil sebelum membuat permohonan latihan industri.";
   const ctaTo = hasSubmittedInternshipApplication ? APPLICANT_ROUTES.applications : APPLICANT_ROUTES.internshipApplication;
   const ctaLabel = hasSubmittedInternshipApplication
     ? "Lihat Permohonan"
-    : hasDraft
+    : hasEditableLocalDraft
       ? "Teruskan Draf"
       : "Mohon Latihan Industri";
 

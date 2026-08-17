@@ -33,10 +33,17 @@ test("applicant rejected applications use Ditolak status label", () => {
 
 test("applicant rejected internship applications can apply again", () => {
   assert.match(infoSource, /reapplyAllowedApplicationStatuses = new Set\(\["rejected", "withdrawn"\]\)/);
+  assert.match(infoSource, /function isReapplyAllowedInternshipApplication/);
   assert.match(infoSource, /function isBlockingInternshipApplication/);
   assert.match(
     infoSource,
     /status !== "draft"[\s\S]*!reapplyAllowedApplicationStatuses\.has\(status\)/,
   );
   assert.match(infoSource, /setHasSubmittedInternshipApplication\(applications\.some\(isBlockingInternshipApplication\)\)/);
+  assert.match(
+    infoSource,
+    /setHasReapplyAllowedInternshipApplication\(applications\.some\(isReapplyAllowedInternshipApplication\)\)/,
+  );
+  assert.match(infoSource, /const hasEditableLocalDraft = hasDraft && !hasReapplyAllowedInternshipApplication/);
+  assert.doesNotMatch(infoSource, /: hasDraft\s*\?/);
 });
