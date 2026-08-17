@@ -127,7 +127,7 @@ function AdminAccountModal({ config, error, form, mode, onChange, onClose, onSav
               ) : null}
               <div className={`${labelClass} md:col-span-2`}>
                 <span>Notifikasi</span>
-                <div className="flex h-12 items-center gap-6 rounded-md border border-slate-300 px-4 text-sm font-bold text-slate-700">
+                <div className="flex h-12 items-center gap-6 rounded-md border border-slate-300 px-4 text-sm font-bold text-slate-700 md:max-w-[calc(50%-0.625rem)]">
                   <label className="inline-flex items-center gap-2"><input type="checkbox" checked={form.notify_whatsapp} onChange={(event) => onChange("notify_whatsapp", event.target.checked)} />WhatsApp</label>
                   <label className="inline-flex items-center gap-2"><input type="checkbox" checked={form.notify_email} onChange={(event) => onChange("notify_email", event.target.checked)} />E-mel</label>
                 </div>

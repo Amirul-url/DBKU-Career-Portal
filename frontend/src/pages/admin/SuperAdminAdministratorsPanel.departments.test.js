@@ -50,6 +50,7 @@ test("administrator modal captures department role and password visibility toggl
 
 test("password fields stay adjacent at the bottom of the administrator modal grid", () => {
   assert.match(source, /<div className=\{`\$\{labelClass\} md:col-span-2`\}>\s*<span>Notifikasi<\/span>/);
+  assert.match(source, /md:max-w-\[calc\(50%-0\.625rem\)\]/);
   assert.ok(source.indexOf("Notifikasi") < source.indexOf("Kata Laluan"));
   assert.ok(source.indexOf("Kata Laluan") < source.indexOf("Sahkan Kata Laluan"));
 });
