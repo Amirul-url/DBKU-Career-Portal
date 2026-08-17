@@ -22,3 +22,10 @@ test("applicant incomplete applications can be reopened for editing", () => {
     /Number\(application\.vacancy\) === Number\(internshipVacancy\?\.id\)[\s\S]*editableApplicationStatuses\.has\(application\.status \|\| "draft"\)/,
   );
 });
+
+test("applicant rejected applications use Ditolak status label", () => {
+  assert.match(listSource, /rejected: "Ditolak"/);
+  assert.match(viewSource, /rejected: "Ditolak"/);
+  assert.doesNotMatch(listSource, /Tidak berjaya/);
+  assert.doesNotMatch(viewSource, /Tidak berjaya/);
+});

@@ -13,7 +13,7 @@ const infoTabs = [personalInfoTab, "Maklumat Akademik", "Dokumen Sokongan"];
 const statusLabels = {
   draft: "Draf",
   incomplete: "Tidak Lengkap",
-  rejected: "Tidak berjaya",
+  rejected: "Ditolak",
   screening: "Dalam semakan",
   shortlisted: "Disenarai pendek",
   submitted: "Dihantar",

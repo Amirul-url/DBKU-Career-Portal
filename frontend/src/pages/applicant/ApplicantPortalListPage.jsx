@@ -10,7 +10,7 @@ import { ProfileContentHeader, ProfileSidebar } from "./ApplicantProfilePage";
 const statusLabels = {
   draft: "Draf",
   incomplete: "Tidak Lengkap",
-  rejected: "Tidak berjaya",
+  rejected: "Ditolak",
   screening: "Dalam semakan",
   shortlisted: "Disenarai pendek",
   submitted: "Dihantar",
