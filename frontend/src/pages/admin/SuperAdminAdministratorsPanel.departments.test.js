@@ -48,7 +48,7 @@ test("administrator modal captures department role and password visibility toggl
   assert.match(source, /aria-label=\{showConfirmPassword \? "Sembunyikan pengesahan kata laluan" : "Tunjuk pengesahan kata laluan"\}/);
 });
 
-test("password fields stay adjacent in the administrator modal grid", () => {
+test("password fields stay adjacent at the bottom of the administrator modal grid", () => {
+  assert.ok(source.indexOf("Notifikasi") < source.indexOf("Kata Laluan"));
   assert.ok(source.indexOf("Kata Laluan") < source.indexOf("Sahkan Kata Laluan"));
-  assert.ok(source.indexOf("Sahkan Kata Laluan") < source.indexOf("Notifikasi"));
 });
