@@ -1795,16 +1795,16 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
             </dl>
           </section>
         </div>
-        <label className="hrm-assignment-target">
-          <span>Hantar kepada bahagian</span>
-          <select value={assignedDepartment} onChange={(event) => setAssignedDepartment(event.target.value)}>
-            <option value="">Sila pilih bahagian</option>
-            {departmentAssignmentOptions.map((department) => (
-              <option key={department} value={department}>{department}</option>
-            ))}
-          </select>
-        </label>
       </div>
+      <label className="hrm-assignment-target">
+        <span>Hantar kepada bahagian</span>
+        <select value={assignedDepartment} onChange={(event) => setAssignedDepartment(event.target.value)}>
+          <option value="">Sila pilih bahagian</option>
+          {departmentAssignmentOptions.map((department) => (
+            <option key={department} value={department}>{department}</option>
+          ))}
+        </select>
+      </label>
       <footer className="hrm-application-detail-actions">
         <button
           className="hrm-primary"

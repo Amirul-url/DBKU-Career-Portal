@@ -32,5 +32,6 @@ test("admin workspace labels and navigation follow the signed-in department", ()
 test("HRM review can assign internship applications to a department dashboard", () => {
   assert.match(source, /assigned_department: assignedDepartment/);
   assert.match(source, />\s*Hantar kepada bahagian\s*</);
+  assert.match(source, /<\/div>\s*<label className="hrm-assignment-target">/);
   assert.match(source, /disabled=\{!application \|\| isFinal \|\| isSavingAssessment \|\| !assignedDepartment\}/);
 });
