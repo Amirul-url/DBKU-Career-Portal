@@ -85,7 +85,7 @@ def withdraw_application(application, remark=""):
     return application
 
 
-def review_application(application, next_status, remark=None):
+def review_application(application, next_status, remark=None, assigned_department=None):
     valid_statuses = {key for key, _label in CandidateApplication.STATUS_CHOICES}
     if next_status not in valid_statuses:
         raise InvalidApplicationStatus("Status tidak sah.")
@@ -93,7 +93,11 @@ def review_application(application, next_status, remark=None):
     application.status = next_status
     if remark is not None:
         application.latest_remark = remark
-    application.save(update_fields=["status", "latest_remark", "updated_at"])
+    update_fields = ["status", "latest_remark", "updated_at"]
+    if assigned_department is not None:
+        application.assigned_department = assigned_department
+        update_fields.append("assigned_department")
+    application.save(update_fields=update_fields)
     notification = build_application_review_notification(application, next_status)
     create_notification(
         user=application.applicant,

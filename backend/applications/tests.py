@@ -157,6 +157,137 @@ class CandidateApplicationReferenceNoTests(TestCase):
         self.assertNotIn(draft_application.id, returned_ids)
         self.assertIn(submitted_application.id, returned_ids)
 
+    def test_department_admin_only_sees_applications_assigned_to_department(self):
+        applicant = self.create_applicant("assigned-applicant@example.com")
+        ict_admin = self.user_model.objects.create_user(
+            username="ict-admin@example.com",
+            email="ict-admin@example.com",
+            password="Password123!",
+            role="admin",
+            department="Bahagian Teknologi Maklumat (ICT)",
+            department_role="Ketua Bahagian",
+        )
+        finance_admin = self.user_model.objects.create_user(
+            username="finance-admin@example.com",
+            email="finance-admin@example.com",
+            password="Password123!",
+            role="admin",
+            department="Bahagian Kewangan (FIN)",
+            department_role="Ketua Bahagian",
+        )
+        ict_application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=self.vacancy,
+            status="shortlisted",
+            assigned_department="Bahagian Teknologi Maklumat (ICT)",
+        )
+        finance_application = CandidateApplication.objects.create(
+            applicant=self.create_applicant("finance-assigned@example.com"),
+            vacancy=self.vacancy,
+            status="shortlisted",
+            assigned_department="Bahagian Kewangan (FIN)",
+        )
+
+        client = APIClient()
+        client.force_authenticate(user=ict_admin)
+        ict_response = client.get("/api/applications/")
+        client.force_authenticate(user=finance_admin)
+        finance_response = client.get("/api/applications/")
+
+        self.assertEqual(ict_response.status_code, 200)
+        self.assertEqual(finance_response.status_code, 200)
+        ict_applications = ict_response.data.get("results", ict_response.data) if isinstance(ict_response.data, dict) else ict_response.data
+        finance_applications = finance_response.data.get("results", finance_response.data) if isinstance(finance_response.data, dict) else finance_response.data
+        ict_ids = {application["id"] for application in ict_applications}
+        finance_ids = {application["id"] for application in finance_applications}
+        self.assertIn(ict_application.id, ict_ids)
+        self.assertNotIn(finance_application.id, ict_ids)
+        self.assertIn(finance_application.id, finance_ids)
+        self.assertNotIn(ict_application.id, finance_ids)
+
+    def test_hrm_review_can_assign_application_to_department(self):
+        applicant = self.create_applicant("assign-target@example.com")
+        hrm = self.user_model.objects.create_user(
+            username="hrm-assign@example.com",
+            email="hrm-assign@example.com",
+            password="Password123!",
+            role="admin",
+            department="Bahagian Pengurusan Sumber Manusia (HRM)",
+        )
+        application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=self.vacancy,
+            status="submitted",
+        )
+        client = APIClient()
+        client.force_authenticate(user=hrm)
+
+        response = client.post(
+            f"/api/applications/{application.id}/review/",
+            {
+                "status": "shortlisted",
+                "assigned_department": "Bahagian Teknologi Maklumat (ICT)",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["assigned_department"], "Bahagian Teknologi Maklumat (ICT)")
+        application.refresh_from_db()
+        self.assertEqual(application.assigned_department, "Bahagian Teknologi Maklumat (ICT)")
+
+    def test_department_admin_cannot_reassign_application_to_another_department(self):
+        applicant = self.create_applicant("department-review@example.com")
+        ict_admin = self.user_model.objects.create_user(
+            username="ict-review@example.com",
+            email="ict-review@example.com",
+            password="Password123!",
+            role="admin",
+            department="Bahagian Teknologi Maklumat (ICT)",
+            department_role="Ketua Bahagian",
+        )
+        application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=self.vacancy,
+            status="shortlisted",
+            assigned_department="Bahagian Teknologi Maklumat (ICT)",
+        )
+        client = APIClient()
+        client.force_authenticate(user=ict_admin)
+
+        response = client.post(
+            f"/api/applications/{application.id}/review/",
+            {
+                "status": "shortlisted",
+                "assigned_department": "Bahagian Kewangan (FIN)",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        application.refresh_from_db()
+        self.assertEqual(application.assigned_department, "Bahagian Teknologi Maklumat (ICT)")
+
+    def test_assigned_department_is_read_only_on_application_update(self):
+        applicant = self.create_applicant("readonly-assignment@example.com")
+        application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=self.vacancy,
+            status="incomplete",
+        )
+        client = APIClient()
+        client.force_authenticate(user=applicant)
+
+        response = client.patch(
+            f"/api/applications/{application.id}/",
+            {"assigned_department": "Bahagian Teknologi Maklumat (ICT)"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        application.refresh_from_db()
+        self.assertEqual(application.assigned_department, "")
+
     def test_applicant_can_update_and_resubmit_incomplete_application(self):
         applicant = self.create_applicant("resubmit-incomplete@example.com")
         application = CandidateApplication.objects.create(

@@ -43,6 +43,7 @@ class CandidateApplication(models.Model):
     internship_bank_account_original_name = models.CharField(max_length=255, blank=True)
     profile_data = models.JSONField(default=dict, blank=True)
     latest_remark = models.TextField(blank=True)
+    assigned_department = models.CharField(max_length=120, blank=True)
     submitted_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -53,6 +54,7 @@ class CandidateApplication(models.Model):
             models.Index(fields=["status", "-updated_at"], name="cand_status_updated_idx"),
             models.Index(fields=["applicant", "-updated_at"], name="cand_applicant_updated_idx"),
             models.Index(fields=["vacancy", "status"], name="cand_vacancy_status_idx"),
+            models.Index(fields=["assigned_department"], name="cand_assigned_dept_idx"),
         ]
 
     @classmethod

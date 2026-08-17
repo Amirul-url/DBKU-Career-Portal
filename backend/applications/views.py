@@ -12,6 +12,16 @@ from .services import (
     withdraw_application,
 )
 
+HRM_DEPARTMENT_ALIASES = {
+    "HRM",
+    "Pengurusan Sumber Manusia (HRM)",
+    "Bahagian Pengurusan Sumber Manusia (HRM)",
+}
+
+
+def is_hrm_staff(user):
+    return getattr(user, "role", None) == "superadmin" or getattr(user, "department", "") in HRM_DEPARTMENT_ALIASES
+
 
 class CandidateApplicationViewSet(viewsets.ModelViewSet):
     serializer_class = CandidateApplicationSerializer
@@ -25,6 +35,8 @@ class CandidateApplicationViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(applicant=user)
         else:
             queryset = queryset.exclude(status="draft")
+            if user.role == "admin" and not is_hrm_staff(user):
+                queryset = queryset.filter(assigned_department=user.department)
 
         status_filter = self.request.query_params.get("status")
         vacancy_type = self.request.query_params.get("type")
@@ -84,11 +96,13 @@ class CandidateApplicationViewSet(viewsets.ModelViewSet):
             return Response({"detail": "Akses kakitangan diperlukan."}, status=403)
 
         next_status = request.data.get("status")
+        assigned_department = request.data.get("assigned_department") if is_hrm_staff(request.user) else None
         try:
             application = review_application(
                 application,
                 next_status=next_status,
                 remark=request.data.get("remark", application.latest_remark),
+                assigned_department=assigned_department,
             )
         except InvalidApplicationStatus as error:
             return Response({"status": str(error)}, status=status.HTTP_400_BAD_REQUEST)

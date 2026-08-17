@@ -36,6 +36,29 @@ const dbkuDepartments = [
   { name: "Bahagian Projek Kejuruteraan", code: "ENG" },
   { name: "Bahagian Mekanikal dan Elektrikal", code: "MNE" },
 ];
+const hrmDepartmentAliases = new Set([
+  "HRM",
+  "Pengurusan Sumber Manusia (HRM)",
+  "Bahagian Pengurusan Sumber Manusia (HRM)",
+]);
+
+function getDepartmentCode(department = "") {
+  const codeMatch = String(department || "").match(/\(([^)]+)\)$/);
+  return codeMatch?.[1] || (String(department || "").toUpperCase() === "HRM" ? "HRM" : "");
+}
+
+function isHrmDepartmentUser(user) {
+  return hrmDepartmentAliases.has(user?.department || "") || getDepartmentCode(user?.department) === "HRM";
+}
+
+function getDepartmentWorkspaceLabel(user) {
+  return getDepartmentCode(user?.department) || "DBKU";
+}
+
+function getAdminShellRoleLabel(user) {
+  const workspaceLabel = getDepartmentWorkspaceLabel(user);
+  return user?.department_role ? `${user.department_role} ${workspaceLabel}` : `Pentadbir ${workspaceLabel}`;
+}
 
 const statusLabel = {
   submitted: "Baharu",
@@ -211,10 +234,21 @@ export default function AdminHrmPage() {
   const panel = routeState.panel || "dashboard";
   const activeApplicationId = routeState.applicationId || "";
   const activeVacancyType = routeState.vacancyType || jobForm.vacancy_type || "job";
+  const isHrmWorkspace = isHrmDepartmentUser(user);
+  const workspaceLabel = getDepartmentWorkspaceLabel(user);
+  const shellRoleLabel = getAdminShellRoleLabel(user);
+  const visibleAdminNavItems = useMemo(
+    () => isHrmWorkspace ? adminNavItems : adminNavItems.filter((item) =>
+      item.panel === "dashboard" ||
+      (item.kind === "section" && item.label === "LATIHAN INDUSTRI") ||
+      (item.panel === "applications" && item.vacancyType === "internship")
+    ),
+    [isHrmWorkspace],
+  );
   const isKnownRoute =
     location.pathname === "/admin" ||
     panel === "application-detail" ||
-    adminNavItems.some((item) => item.to === location.pathname.replace(/\/+$/, ""));
+    visibleAdminNavItems.some((item) => item.to === location.pathname.replace(/\/+$/, ""));
 
   const loadData = useCallback(() => {
     setLoading(true);
@@ -241,12 +275,12 @@ export default function AdminHrmPage() {
     return () => window.clearTimeout(timeoutId);
   }, [notice]);
   const dashboardMetrics = useMemo(() => buildHrmDashboardMetrics(jobs, applications), [applications, jobs]);
-  const setReview = async (id, status) => {
+  const setReview = async (id, status, options = {}) => {
     try {
       await apiRequest(`/applications/${id}/review/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status, ...options }),
       });
       const reviewNotice = {
         shortlisted: "Permohonan telah dihantar ke bahagian.",
@@ -416,7 +450,7 @@ export default function AdminHrmPage() {
               <p className="font-semibold text-slate-950">
                 Portal Kerjaya DBKU
               </p>
-              <p className="text-xs text-slate-500">Pentadbir HRM</p>
+              <p className="text-xs text-slate-500">{shellRoleLabel}</p>
             </div>
           </div>
           <button
@@ -429,7 +463,7 @@ export default function AdminHrmPage() {
           </button>
         </div>
         <nav className={`space-y-1 py-5 ${isSidebarOpen ? "px-4" : "px-3"}`}>
-          {adminNavItems.map((item, index) => {
+          {visibleAdminNavItems.map((item, index) => {
             if (item.kind === "section") {
               return isSidebarOpen ? (
                 <p
@@ -502,7 +536,7 @@ export default function AdminHrmPage() {
           <div>
             <p className="text-sm font-bold text-slate-950">Selamat datang</p>
             <strong className="mt-1 block text-[17px] text-slate-950">
-              {user.full_name || user.first_name || "Pentadbir HRM"}
+              {user.full_name || user.first_name || shellRoleLabel}
             </strong>
           </div>
           <div className="profile-actions">
@@ -530,9 +564,9 @@ export default function AdminHrmPage() {
                   </span>
                   <span>
                     <strong>
-                      {user.full_name || user.first_name || "Pentadbir HRM"}
+                      {user.full_name || user.first_name || shellRoleLabel}
                     </strong>
-                    <em>{user.email || "Pentadbir HRM"}</em>
+                    <em>{user.email || shellRoleLabel}</em>
                   </span>
                 </div>
                 <button
@@ -578,9 +612,11 @@ export default function AdminHrmPage() {
             <>
               <div className="hrm-heading">
                 <div>
-                  <h1 className="text-3xl font-bold text-slate-950">Papan pemuka HRM</h1>
+                  <h1 className="text-3xl font-bold text-slate-950">Papan pemuka {workspaceLabel}</h1>
                   <p>
-                    Semak permohonan baharu, iklan aktif dan saluran pengambilan.
+                    {isHrmWorkspace
+                      ? "Semak permohonan baharu, iklan aktif dan saluran pengambilan."
+                      : `Semak permohonan yang dihantar kepada ${user?.department || "bahagian anda"}.`}
                   </p>
                 </div>
               </div>
@@ -590,7 +626,7 @@ export default function AdminHrmPage() {
                 <Stat icon="stars" label="Disenarai pendek" value={summaryMetrics.shortlist} tone="mint" />
                 <Stat icon="notifications" label="Permohonan baharu" value={summaryMetrics.newApplications} tone="amber" />
               </div>
-              <div className="hrm-grid hrm-dashboard-grid">
+              <div className={`hrm-grid hrm-dashboard-grid ${isHrmWorkspace ? "" : "department-dashboard"}`}>
                 <RecentApplicationsPanel
                   applications={overallMetrics.applications}
                   onOpenApplications={(vacancyType) => openFilteredPanel(
@@ -600,7 +636,7 @@ export default function AdminHrmPage() {
                   )}
                   onReview={setReview}
                 />
-                <aside className="hrm-dashboard-side">
+                {isHrmWorkspace ? <aside className="hrm-dashboard-side">
                   <DashboardChannelsPanel
                     channels={dashboardTypes.map((item) => ({
                       ...item,
@@ -611,7 +647,7 @@ export default function AdminHrmPage() {
                     }))}
                   />
                   <StatusSummaryPanel applications={overallMetrics.applications} />
-                </aside>
+                </aside> : null}
               </div>
             </>
           )}
@@ -941,8 +977,8 @@ export default function AdminHrmPage() {
               application={selectedApplication}
               loading={loading}
               onBack={() => navigate(ADMIN_ROUTES.applications.internship)}
-              onReview={async (id, status) => {
-                await setReview(id, status);
+              onReview={async (id, status, options) => {
+                await setReview(id, status, options);
                 navigate(ADMIN_ROUTES.applications.internship);
               }}
               onSaveAssessment={saveHrmAssessment}
@@ -1661,10 +1697,14 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
   const savedAssessment = getSavedHrmAssessment(application);
   const [decision, setDecision] = useState(savedAssessment.decision || "");
   const [educationLevel, setEducationLevel] = useState(savedAssessment.education_level || savedAssessment.educationLevel || "");
+  const [assignedDepartment, setAssignedDepartment] = useState(application?.assigned_department || "");
   const [isSavingAssessment, setIsSavingAssessment] = useState(false);
   const isFinal = application ? ["shortlisted", "rejected"].includes(application.status) : false;
   const decisions = ["Layak", "Tidak Layak", "Tidak Lengkap"];
   const educationLevels = ["Ijazah", "Diploma", "STPM", "Matrikulasi", "SPM / SPMV"];
+  const departmentAssignmentOptions = dbkuDepartments
+    .filter((department) => department.code !== "HRM")
+    .map((department) => `${department.name} (${department.code})`);
   const saveAssessment = async (values) => {
     if (!application || !onSaveAssessment) return false;
 
@@ -1694,7 +1734,11 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
     setDecision(nextDecision);
     const isSaved = await saveAssessment({ decision: nextDecision, educationLevel });
     if (!isSaved) return;
-    await onReview(application.id, status);
+    await onReview(
+      application.id,
+      status,
+      status === "shortlisted" ? { assigned_department: assignedDepartment } : {},
+    );
   };
 
   return (
@@ -1751,12 +1795,21 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
             </dl>
           </section>
         </div>
+        <label className="hrm-assignment-target">
+          <span>Hantar kepada bahagian</span>
+          <select value={assignedDepartment} onChange={(event) => setAssignedDepartment(event.target.value)}>
+            <option value="">Sila pilih bahagian</option>
+            {departmentAssignmentOptions.map((department) => (
+              <option key={department} value={department}>{department}</option>
+            ))}
+          </select>
+        </label>
       </div>
       <footer className="hrm-application-detail-actions">
         <button
           className="hrm-primary"
           type="button"
-          disabled={!application || isFinal || isSavingAssessment}
+          disabled={!application || isFinal || isSavingAssessment || !assignedDepartment}
           onClick={() => reviewWithAssessment("shortlisted", "Layak")}
         >
           Hantar ke Bahagian
