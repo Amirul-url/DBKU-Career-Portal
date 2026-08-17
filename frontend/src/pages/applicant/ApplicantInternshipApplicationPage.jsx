@@ -693,8 +693,17 @@ export default function ApplicantInternshipApplicationPage() {
   const [searchParams] = useSearchParams();
   const user = getStoredUser();
   const editApplicationId = searchParams.get("application") || "";
-  const savedDraft = loadStudentInfoDraft(user);
-  const initialStudentInfo = normalizeStudentInfoDraft(savedDraft?.studentInfo || {}, user);
+  const [savedDraft] = useState(() => loadStudentInfoDraft(user));
+  const applicantRole = user?.role || "";
+  const applicantDraftDefaults = useMemo(
+    () => ({
+      email: user?.email || "",
+      first_name: user?.first_name || "",
+      full_name: user?.full_name || "",
+    }),
+    [user?.email, user?.first_name, user?.full_name],
+  );
+  const initialStudentInfo = normalizeStudentInfoDraft(savedDraft?.studentInfo || {}, applicantDraftDefaults);
   const [sidebarOpen, toggleSidebar] = useApplicantSidebarState();
   const [activeInfoTab, setActiveInfoTab] = useState(() => getFirstIncompleteTab(initialStudentInfo));
   const [notice, setNotice] = useState("");
@@ -754,7 +763,7 @@ export default function ApplicantInternshipApplicationPage() {
   }, [user?.id, user?.role]);
 
   useEffect(() => {
-    if (user?.role !== "applicant" || (savedDraft?.studentInfo && !editApplicationId)) {
+    if (applicantRole !== "applicant" || (savedDraft?.studentInfo && !editApplicationId)) {
       return;
     }
 
@@ -771,7 +780,7 @@ export default function ApplicantInternshipApplicationPage() {
         const draftStudentInfo = draftApplication?.profile_data?.student_info;
         if (!draftStudentInfo) return;
 
-        const nextStudentInfo = normalizeStudentInfoDraft(draftStudentInfo, user);
+        const nextStudentInfo = normalizeStudentInfoDraft(draftStudentInfo, applicantDraftDefaults);
         setEditableApplication(draftApplication);
         if (draftApplication.vacancy_detail) {
           setInternshipVacancy(draftApplication.vacancy_detail);
@@ -790,7 +799,7 @@ export default function ApplicantInternshipApplicationPage() {
     return () => {
       isMounted = false;
     };
-  }, [editApplicationId, savedDraft?.studentInfo, user]);
+  }, [applicantDraftDefaults, applicantRole, editApplicationId, savedDraft?.studentInfo]);
 
   if (!user || user.role !== "applicant") {
     return null;

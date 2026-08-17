@@ -15,6 +15,8 @@ test("applicant incomplete applications can be reopened for editing", () => {
   assert.match(viewSource, /Kemaskini Permohonan/);
   assert.match(formSource, /useSearchParams/);
   assert.match(formSource, /editableApplicationStatuses\.has/);
+  assert.match(formSource, /useState\(\(\) => loadStudentInfoDraft\(user\)\)/);
+  assert.doesNotMatch(formSource, /\[editApplicationId, savedDraft\?\.studentInfo, user\]/);
   assert.match(
     formSource,
     /Number\(application\.vacancy\) === Number\(internshipVacancy\?\.id\)[\s\S]*editableApplicationStatuses\.has\(application\.status \|\| "draft"\)/,
