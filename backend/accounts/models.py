@@ -11,6 +11,7 @@ class User(AbstractUser):
 
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="applicant")
     department = models.CharField(max_length=80, blank=True)
+    department_role = models.CharField(max_length=40, blank=True)
     mykad_number = models.CharField(max_length=12, blank=True)
     mobile_number = models.CharField(max_length=30, blank=True)
     address = models.TextField(blank=True)

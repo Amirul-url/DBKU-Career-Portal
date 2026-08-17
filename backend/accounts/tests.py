@@ -307,3 +307,74 @@ class SuperAdminApplicantManagementTests(APITestCase):
 
         self.assertEqual(response.status_code, 403)
         self.assertTrue(User.objects.filter(id=self.applicant.id).exists())
+
+
+class SuperAdminAdministratorDepartmentTests(APITestCase):
+    def setUp(self):
+        self.superadmin = User.objects.create_user(
+            username="superadmin-departments@example.com",
+            email="superadmin-departments@example.com",
+            password="Password123!",
+            role="superadmin",
+        )
+        self.audit_admin = User.objects.create_user(
+            username="audit-admin@example.com",
+            email="audit-admin@example.com",
+            password="Password123!",
+            role="admin",
+            department="AUD",
+        )
+        self.hrm_admin = User.objects.create_user(
+            username="hrm-admin@example.com",
+            email="hrm-admin@example.com",
+            password="Password123!",
+            role="admin",
+            department="HRM",
+        )
+
+    def test_department_filter_matches_legacy_department_codes(self):
+        self.client.force_authenticate(user=self.superadmin)
+
+        response = self.client.get(
+            "/api/auth/admin-accounts/",
+            {"department": "Bahagian Audit Dalaman (AUD)"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([account["email"] for account in response.data], ["audit-admin@example.com"])
+
+    def test_department_filter_still_matches_legacy_hrm_code(self):
+        self.client.force_authenticate(user=self.superadmin)
+
+        response = self.client.get(
+            "/api/auth/admin-accounts/",
+            {"department": "Bahagian Pengurusan Sumber Manusia (HRM)"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([account["email"] for account in response.data], ["hrm-admin@example.com"])
+
+    def test_superadmin_can_create_department_admin_with_department_role(self):
+        self.client.force_authenticate(user=self.superadmin)
+
+        response = self.client.post(
+            "/api/auth/admin-accounts/",
+            {
+                "full_name": "Ketua Bahagian ICT",
+                "email": "ketua-ict@example.com",
+                "password": "Password123!",
+                "department": "Bahagian Teknologi Maklumat (ICT)",
+                "department_role": "Ketua Bahagian",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["department_role"], "Ketua Bahagian")
+        self.assertTrue(
+            User.objects.filter(
+                email="ketua-ict@example.com",
+                department="Bahagian Teknologi Maklumat (ICT)",
+                department_role="Ketua Bahagian",
+            ).exists()
+        )

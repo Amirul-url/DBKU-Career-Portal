@@ -146,6 +146,39 @@ def internal_hrm_account_view(request):
 
 PROFILE_SECTIONS = ("personal", "job_preferences", "experience", "academic", "skills")
 APPLICANT_VIEWER_ROLES = {"admin", "superadmin"}
+DBKU_DEPARTMENT_CODES = {
+    "Bahagian Audit Dalaman (AUD)": "AUD",
+    "Bahagian Projek Khas & Fasiliti Awam (SPF)": "SPF",
+    "Bahagian Hal Ehwal Undang-Undang (LAW)": "LAW",
+    "Bahagian Penguatkuasaan dan Keselamatan (ENS)": "ENS",
+    "Bahagian Pelesenan (LES)": "LES",
+    "Bahagian Pengurusan Sumber Manusia (HRM)": "HRM",
+    "Bahagian Pentadbiran (ADM)": "ADM",
+    "Bahagian Transformasi dan Inovasi (CTS)": "CTS",
+    "Bahagian Kewangan (FIN)": "FIN",
+    "Bahagian Penilaian dan Pencukaian (VAL)": "VAL",
+    "Bahagian Teknologi Maklumat (ICT)": "ICT",
+    "Bahagian Kesihatan Persekitaran (ENV)": "ENV",
+    "Bahagian Perhubungan Awam (PRD)": "PRD",
+    "Bahagian Pembangunan & Perkhidmatan (CDS)": "CDS",
+    "Bahagian Pembangunan Sumber (IRD)": "IRD",
+    "Bahagian Landskap (LNP)": "LNP",
+    "Bahagian Kontrak dan Perolehan (COP)": "COP",
+    "Bahagian Geoinformasi dan Pengurusan Hartanah (GPM)": "GPM",
+    "Bahagian Penyelenggaraan Infrastruktur (IMT)": "IMT",
+    "Bahagian Bangunan (BLG)": "BLG",
+    "Bahagian Projek Kejuruteraan (ENG)": "ENG",
+    "Bahagian Mekanikal dan Elektrikal (MNE)": "MNE",
+    "Pengurusan Sumber Manusia (HRM)": "HRM",
+}
+
+
+def department_filter_aliases(department):
+    aliases = [department]
+    code = DBKU_DEPARTMENT_CODES.get(department)
+    if code:
+        aliases.append(code)
+    return aliases
 
 
 def profile_payload(profile):
@@ -247,10 +280,7 @@ def superadmin_admin_accounts_view(request):
             | Q(department__icontains=query)
         )
     if department:
-        department_aliases = [department]
-        if department == "Pengurusan Sumber Manusia (HRM)":
-            department_aliases.append("HRM")
-        accounts = accounts.filter(department__in=department_aliases)
+        accounts = accounts.filter(department__in=department_filter_aliases(department))
     return Response(SuperAdminAccountSerializer(accounts, many=True).data)
 
 

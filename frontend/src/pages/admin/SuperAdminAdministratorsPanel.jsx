@@ -3,7 +3,38 @@ import { apiRequest } from "../../lib/authApi";
 import { Icon } from "../applicant/ApplicantAuthShared";
 
 const ADMIN_PAGE_SIZE = 5;
-const departmentOptions = ["Pengurusan Sumber Manusia (HRM)"];
+const departmentOptions = [
+  "Bahagian Audit Dalaman (AUD)",
+  "Bahagian Projek Khas & Fasiliti Awam (SPF)",
+  "Bahagian Hal Ehwal Undang-Undang (LAW)",
+  "Bahagian Penguatkuasaan dan Keselamatan (ENS)",
+  "Bahagian Pelesenan (LES)",
+  "Bahagian Pengurusan Sumber Manusia (HRM)",
+  "Bahagian Pentadbiran (ADM)",
+  "Bahagian Transformasi dan Inovasi (CTS)",
+  "Bahagian Kewangan (FIN)",
+  "Bahagian Penilaian dan Pencukaian (VAL)",
+  "Bahagian Teknologi Maklumat (ICT)",
+  "Bahagian Kesihatan Persekitaran (ENV)",
+  "Bahagian Perhubungan Awam (PRD)",
+  "Bahagian Pembangunan & Perkhidmatan (CDS)",
+  "Bahagian Pembangunan Sumber (IRD)",
+  "Bahagian Landskap (LNP)",
+  "Bahagian Kontrak dan Perolehan (COP)",
+  "Bahagian Geoinformasi dan Pengurusan Hartanah (GPM)",
+  "Bahagian Penyelenggaraan Infrastruktur (IMT)",
+  "Bahagian Bangunan (BLG)",
+  "Bahagian Projek Kejuruteraan (ENG)",
+  "Bahagian Mekanikal dan Elektrikal (MNE)",
+];
+const departmentAliases = departmentOptions.reduce((aliases, department) => {
+  const code = department.match(/\(([^)]+)\)$/)?.[1];
+  return code ? { ...aliases, [code]: department } : aliases;
+}, {
+  "Pengurusan Sumber Manusia (HRM)": "Bahagian Pengurusan Sumber Manusia (HRM)",
+});
+const normalizeDepartment = (department) => departmentAliases[department] || department || "";
+const departmentRoleOptions = ["Ketua Bahagian", "Pembantu Bahagian"];
 
 const panelConfigs = {
   admin: {
@@ -31,6 +62,7 @@ const blankForm = {
   email: "",
   mobile_number: "",
   department: "",
+  department_role: "",
   password: "",
   confirm_password: "",
   notify_whatsapp: true,
@@ -42,20 +74,23 @@ const display = (value) => value || "-";
 function AdminAccountModal({ config, error, form, mode, onChange, onClose, onSave, saving }) {
   const isEdit = mode === "edit";
   const inputClass = "h-12 w-full rounded-md border border-slate-300 px-4 text-sm font-semibold text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100";
+  const passwordInputClass = `${inputClass} pr-12`;
   const labelClass = "grid gap-2 text-sm font-bold text-slate-600";
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-5">
-      <section className="w-full max-w-[780px] overflow-hidden rounded-xl bg-white shadow-2xl" role="dialog" aria-modal="true" aria-label={isEdit ? `Kemaskini akaun ${config.accountLabel}` : `Tambah akaun ${config.accountLabel}`}>
-        <header className="flex items-center justify-between border-b border-slate-200 px-7 py-5">
+      <section className="flex max-h-[calc(100vh-3rem)] w-full max-w-[900px] flex-col overflow-hidden rounded-xl bg-white shadow-2xl" role="dialog" aria-modal="true" aria-label={isEdit ? `Kemaskini akaun ${config.accountLabel}` : `Tambah akaun ${config.accountLabel}`}>
+        <header className="shrink-0 flex items-center justify-between border-b border-slate-200 px-7 py-5">
           <h2 className="text-2xl font-bold text-slate-950">{isEdit ? "Kemaskini Akaun" : "Tambah Akaun"}</h2>
           <button className="rounded-md p-2 text-slate-500 hover:bg-slate-100" type="button" onClick={onClose} aria-label="Tutup">
             <Icon>close</Icon>
           </button>
         </header>
 
-        <form onSubmit={onSave}>
-          <div className="grid gap-5 px-7 py-6">
+        <form className="flex min-h-0 flex-1 flex-col" onSubmit={onSave}>
+          <div className="grid min-h-0 flex-1 gap-5 overflow-y-auto px-7 py-6">
             {error ? <p className="rounded-md bg-red-50 p-3 text-sm font-semibold text-red-700">{error}</p> : null}
 
             <label className={labelClass}>
@@ -81,6 +116,33 @@ function AdminAccountModal({ config, error, form, mode, onChange, onClose, onSav
                   </select>
                 </label>
               ) : null}
+              {config.hasDepartment ? (
+                <label className={labelClass}>
+                  Peranan
+                  <select className={inputClass} value={form.department_role} onChange={(event) => onChange("department_role", event.target.value)} required>
+                    <option value="">Sila pilih</option>
+                    {departmentRoleOptions.map((role) => <option value={role} key={role}>{role}</option>)}
+                  </select>
+                </label>
+              ) : null}
+              <label className={labelClass}>
+                Kata Laluan
+                <span className="relative block">
+                  <input className={passwordInputClass} value={form.password} onChange={(event) => onChange("password", event.target.value)} placeholder={isEdit ? "Kosongkan jika tidak mahu tukar" : "Masukkan kata laluan"} type={showPassword ? "text" : "password"} required={!isEdit} />
+                  <button className="absolute right-2 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-800" type="button" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? "Sembunyikan kata laluan" : "Tunjuk kata laluan"}>
+                    <Icon>{showPassword ? "visibility_off" : "visibility"}</Icon>
+                  </button>
+                </span>
+              </label>
+              <label className={labelClass}>
+                Sahkan Kata Laluan
+                <span className="relative block">
+                  <input className={passwordInputClass} value={form.confirm_password} onChange={(event) => onChange("confirm_password", event.target.value)} placeholder="Sahkan kata laluan" type={showConfirmPassword ? "text" : "password"} required={!isEdit || Boolean(form.password)} />
+                  <button className="absolute right-2 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-800" type="button" onClick={() => setShowConfirmPassword((visible) => !visible)} aria-label={showConfirmPassword ? "Sembunyikan pengesahan kata laluan" : "Tunjuk pengesahan kata laluan"}>
+                    <Icon>{showConfirmPassword ? "visibility_off" : "visibility"}</Icon>
+                  </button>
+                </span>
+              </label>
               <div className={labelClass}>
                 <span>Notifikasi</span>
                 <div className="flex h-12 items-center gap-6 rounded-md border border-slate-300 px-4 text-sm font-bold text-slate-700">
@@ -88,20 +150,11 @@ function AdminAccountModal({ config, error, form, mode, onChange, onClose, onSav
                   <label className="inline-flex items-center gap-2"><input type="checkbox" checked={form.notify_email} onChange={(event) => onChange("notify_email", event.target.checked)} />E-mel</label>
                 </div>
               </div>
-              {!config.hasDepartment ? <span className="hidden md:block" aria-hidden="true" /> : null}
-              <label className={labelClass}>
-                Kata Laluan
-                <input className={inputClass} value={form.password} onChange={(event) => onChange("password", event.target.value)} placeholder={isEdit ? "Kosongkan jika tidak mahu tukar" : "Masukkan kata laluan"} type="password" required={!isEdit} />
-              </label>
-              <label className={labelClass}>
-                Sahkan Kata Laluan
-                <input className={inputClass} value={form.confirm_password} onChange={(event) => onChange("confirm_password", event.target.value)} placeholder="Sahkan kata laluan" type="password" required={!isEdit || Boolean(form.password)} />
-              </label>
               {isEdit ? <p className="md:col-span-2 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-800">Biarkan medan kata laluan kosong untuk mengekalkan kata laluan semasa.</p> : null}
             </div>
           </div>
 
-          <footer className="flex justify-end gap-3 border-t border-slate-200 bg-slate-50 px-7 py-4">
+          <footer className="shrink-0 flex justify-end gap-3 border-t border-slate-200 bg-slate-50 px-7 py-4">
             <button className="rounded-md border border-slate-300 bg-white px-5 py-2 font-bold text-slate-600 hover:bg-slate-50" type="button" onClick={onClose}>Batal</button>
             <button className="rounded-md bg-emerald-700 px-5 py-2 font-bold text-white hover:bg-emerald-800 disabled:opacity-60" disabled={saving} type="submit">{saving ? "Menyimpan..." : "Simpan"}</button>
           </footer>
@@ -177,7 +230,8 @@ export default function SuperAdminAdministratorsPanel({ accountType = "admin" })
       full_name: account.first_name || "",
       email: account.email || "",
       mobile_number: account.mobile_number || "",
-      department: account.department === "HRM" ? departmentOptions[0] : account.department || (config.hasDepartment ? departmentOptions[0] : ""),
+      department: normalizeDepartment(account.department) || (config.hasDepartment ? departmentOptions[0] : ""),
+      department_role: account.department_role || "",
       password: "",
       confirm_password: "",
     });
@@ -207,7 +261,10 @@ export default function SuperAdminAdministratorsPanel({ accountType = "admin" })
         email: form.email,
         mobile_number: form.mobile_number,
       };
-      if (config.hasDepartment) payload.department = form.department;
+      if (config.hasDepartment) {
+        payload.department = form.department;
+        payload.department_role = form.department_role;
+      }
       if (form.password) payload.password = form.password;
       await apiRequest(editingAccount ? `${config.endpoint}${editingAccount.id}/` : config.endpoint, { method: editingAccount ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
       closeModal();
@@ -271,17 +328,19 @@ export default function SuperAdminAdministratorsPanel({ accountType = "admin" })
                 <th className="w-20 px-5 py-3.5">No.</th>
                 <th className="px-5 py-3.5">Nama</th>
                 <th className="px-5 py-3.5">Emel</th>
+                {config.hasDepartment ? <th className="px-5 py-3.5">Peranan</th> : null}
                 <th className="px-5 py-3.5">Nombor Telefon</th>
                 <th className="px-5 py-3.5">Tindakan</th>
               </tr>
             </thead>
             <tbody>
-              {loading ? <tr><td className="px-5 py-6 text-slate-500" colSpan="5">Memuatkan {config.accountLabel}...</td></tr> : null}
+              {loading ? <tr><td className="px-5 py-6 text-slate-500" colSpan={config.hasDepartment ? 6 : 5}>Memuatkan {config.accountLabel}...</td></tr> : null}
               {!loading && visibleAccounts.length ? visibleAccounts.map((account, index) => (
                 <tr className="border-t border-slate-100" key={account.id}>
                   <td className="px-5 py-3.5 font-semibold text-slate-500">{pageStart + index + 1}</td>
                   <td className="px-5 py-3.5 text-sm font-bold text-slate-900">{display(account.first_name)}</td>
                   <td className="px-5 py-3.5 text-sm text-slate-600">{display(account.email)}</td>
+                  {config.hasDepartment ? <td className="px-5 py-3.5 text-sm text-slate-600">{display(account.department_role)}</td> : null}
                   <td className="px-5 py-3.5 text-sm text-slate-600">{display(account.mobile_number)}</td>
                   <td className="px-5 py-3.5">
                     <div className="flex gap-2">
@@ -297,7 +356,7 @@ export default function SuperAdminAdministratorsPanel({ accountType = "admin" })
                   </td>
                 </tr>
               )) : null}
-              {!loading && !visibleAccounts.length ? <tr><td className="px-5 py-6 text-slate-500" colSpan="5">Tiada akaun {config.accountLabel} ditemui.</td></tr> : null}
+              {!loading && !visibleAccounts.length ? <tr><td className="px-5 py-6 text-slate-500" colSpan={config.hasDepartment ? 6 : 5}>Tiada akaun {config.accountLabel} ditemui.</td></tr> : null}
             </tbody>
           </table>
         </div>
