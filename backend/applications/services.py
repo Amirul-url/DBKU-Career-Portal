@@ -35,11 +35,12 @@ def build_application_review_notification(application, next_status):
             ),
         },
         "rejected": {
-            "title": "Status Permohonan Dikemas Kini",
+            "title": "Permohonan Tidak Layak",
             "message": (
                 f"Permohonan anda dengan No. rujukan {application.reference_no} "
-                "telah dikemas kini. Sila log masuk ke Portal Kerjaya DBKU "
-                "untuk menyemak status permohonan."
+                "telah ditanda tidak layak. Permohonan ini tidak boleh dikemaskini "
+                "semula. Sila buat permohonan baharu sekiranya ingin memohon "
+                "semula melalui Portal Kerjaya DBKU."
             ),
         },
     }
