@@ -180,6 +180,15 @@ function Badge({ status }) {
   );
 }
 
+function getSidebarApplicationBadgeCount(item, metrics) {
+  if (item?.panel !== "applications" || !item?.vacancyType) return 0;
+  return metrics?.[item.vacancyType]?.new || 0;
+}
+
+function formatSidebarBadgeCount(count) {
+  return count > 99 ? "99+" : String(count);
+}
+
 export default function AdminHrmPage() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -420,9 +429,9 @@ export default function AdminHrmPage() {
           </button>
         </div>
         <nav className={`space-y-1 py-5 ${isSidebarOpen ? "px-4" : "px-3"}`}>
-          {adminNavItems.map((item, index) =>
-            item.kind === "section" ? (
-              isSidebarOpen ? (
+          {adminNavItems.map((item, index) => {
+            if (item.kind === "section") {
+              return isSidebarOpen ? (
                 <p
                   className="px-4 pb-2 pt-4 text-[13px] font-bold text-slate-400"
                   key={item.label}
@@ -431,12 +440,16 @@ export default function AdminHrmPage() {
                 </p>
               ) : (
                 <div className="h-6" key={item.label} />
-              )
-            ) : (
+              );
+            }
+
+            const sidebarBadgeCount = getSidebarApplicationBadgeCount(item, dashboardMetrics);
+
+            return (
               <NavLink
                 className={({ isActive }) => {
                   const isDetailActive = panel === "application-detail" && item.to === ADMIN_ROUTES.applications.internship;
-                  return `flex w-full items-center rounded-md py-3 text-left text-[14px] font-bold ${isSidebarOpen ? "gap-4 px-4" : "justify-center px-0"} ${isActive || isDetailActive ? "bg-emerald-50 text-slate-950" : "text-slate-950"}`;
+                  return `relative flex w-full items-center rounded-md py-3 text-left text-[14px] font-bold ${isSidebarOpen ? "gap-4 px-4" : "justify-center px-0"} ${isActive || isDetailActive ? "bg-emerald-50 text-slate-950" : "text-slate-950"}`;
                 }}
                 end
                 key={`${item.label}-${index}`}
@@ -453,13 +466,33 @@ export default function AdminHrmPage() {
               >
                 <Icon>{item.icon}</Icon>
                 {isSidebarOpen ? (
-                  item.label
+                  <>
+                    <span className="min-w-0 flex-1">{item.label}</span>
+                    {sidebarBadgeCount > 0 ? (
+                      <span
+                        className="hrm-sidebar-badge"
+                        aria-label={`${sidebarBadgeCount} permohonan baharu`}
+                      >
+                        {formatSidebarBadgeCount(sidebarBadgeCount)}
+                      </span>
+                    ) : null}
+                  </>
                 ) : (
-                  <span className="sr-only">{item.label}</span>
+                  <>
+                    <span className="sr-only">{item.label}</span>
+                    {sidebarBadgeCount > 0 ? (
+                      <span
+                        className="hrm-sidebar-badge collapsed"
+                        aria-label={`${sidebarBadgeCount} permohonan baharu`}
+                      >
+                        {formatSidebarBadgeCount(sidebarBadgeCount)}
+                      </span>
+                    ) : null}
+                  </>
                 )}
               </NavLink>
-            ),
-          )}
+            );
+          })}
         </nav>
       </aside>
       <main

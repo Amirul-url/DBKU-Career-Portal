@@ -13,3 +13,9 @@ test("HRM application action labels match the department review workflow", () =>
   assert.doesNotMatch(source, />\s*Senarai pendek\s*</);
   assert.doesNotMatch(source, />\s*Tolak\s*</);
 });
+
+test("HRM sidebar shows red badges for new application counts", () => {
+  assert.match(source, /getSidebarApplicationBadgeCount\(item, dashboardMetrics\)/);
+  assert.match(source, /className="hrm-sidebar-badge"/);
+  assert.match(source, /aria-label=\{`\$\{sidebarBadgeCount\} permohonan baharu`\}/);
+});
