@@ -10203,7 +10203,7 @@ body:has(.applicant-profile-page) {
 
 .hrm-internship-applications-table th:nth-child(3),
 .hrm-internship-applications-table td:nth-child(3) {
-  width: 330px;
+  width: 285px;
 }
 
 .hrm-internship-applications-table th:nth-child(4),
@@ -10214,7 +10214,7 @@ body:has(.applicant-profile-page) {
 
 .hrm-internship-applications-table th:nth-child(5),
 .hrm-internship-applications-table td:nth-child(5) {
-  width: 110px;
+  width: 155px;
   text-align: center;
 }
 
