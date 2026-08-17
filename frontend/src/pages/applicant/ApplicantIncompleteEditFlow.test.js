@@ -62,4 +62,16 @@ test("applicant rejected internship applications can apply again", () => {
   );
   assert.match(formSource, /activeSavedDraft\?\.studentInfo/);
   assert.match(formSource, /purpose:[\s\S]*"new-application"/);
+  assert.match(listSource, /reapplyAllowedApplicationStatuses = new Set\(\["rejected", "withdrawn"\]\)/);
+  assert.match(listSource, /function shouldHideLocalDraftForApplication/);
+  assert.match(
+    listSource,
+    /isInternshipApplication\(application\)[\s\S]*!reapplyAllowedApplicationStatuses\.has\(status\)/,
+  );
+  assert.match(
+    listSource,
+    /const hasBlockingInternshipApplication = applications\.some\(shouldHideLocalDraftForApplication\)/,
+  );
+  assert.match(listSource, /hasBlockingInternshipApplication \? applications : \[localDraftApplication, \.\.\.applications\]/);
+  assert.doesNotMatch(listSource, /hasInternshipApplication \? applications/);
 });

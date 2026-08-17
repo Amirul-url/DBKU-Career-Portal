@@ -18,6 +18,7 @@ const statusLabels = {
 };
 
 const getInternshipDraftStorageKey = (user) => `dbku_internship_student_info_manual_${user?.id || user?.email || "guest"}`;
+const reapplyAllowedApplicationStatuses = new Set(["rejected", "withdrawn"]);
 const APPLICATIONS_PER_PAGE = 5;
 
 function formatDate(value) {
@@ -80,6 +81,11 @@ function isInternshipApplication(application) {
     || vacancy.vacancy_type === "internship"
     || vacancy.type === "Latihan Industri"
     || vacancy.category === "Latihan Industri";
+}
+
+function shouldHideLocalDraftForApplication(application) {
+  const status = application.status || "draft";
+  return isInternshipApplication(application) && !reapplyAllowedApplicationStatuses.has(status);
 }
 
 function EmptyState({ actionLabel, actionTo, icon, message, title }) {
@@ -401,8 +407,8 @@ export default function ApplicantPortalListPage({ page }) {
   const displayApplications = useMemo(() => {
     if (!isApplicationsPage || !localDraftApplication) return applications;
 
-    const hasInternshipApplication = applications.some(isInternshipApplication);
-    return hasInternshipApplication ? applications : [localDraftApplication, ...applications];
+    const hasBlockingInternshipApplication = applications.some(shouldHideLocalDraftForApplication);
+    return hasBlockingInternshipApplication ? applications : [localDraftApplication, ...applications];
   }, [applications, isApplicationsPage, localDraftApplication]);
 
   const loadApplications = useCallback(() => {
