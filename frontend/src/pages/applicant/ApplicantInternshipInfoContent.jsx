@@ -57,6 +57,15 @@ function isInternshipApplication(application) {
     || vacancy.category === "Latihan Industri";
 }
 
+const reapplyAllowedApplicationStatuses = new Set(["rejected", "withdrawn"]);
+
+function isBlockingInternshipApplication(application) {
+  const status = application?.status || "draft";
+  return isInternshipApplication(application)
+    && status !== "draft"
+    && !reapplyAllowedApplicationStatuses.has(status);
+}
+
 function getApplicationRows(data) {
   if (Array.isArray(data)) return data;
   if (Array.isArray(data?.results)) return data.results;
@@ -80,9 +89,7 @@ export default function ApplicantInternshipInfoContent() {
       .then((data) => {
         if (!isMounted) return;
         const applications = getApplicationRows(data);
-        setHasSubmittedInternshipApplication(applications.some((application) =>
-          isInternshipApplication(application) && application.status !== "draft",
-        ));
+        setHasSubmittedInternshipApplication(applications.some(isBlockingInternshipApplication));
       })
       .catch(() => {
         if (isMounted) setHasSubmittedInternshipApplication(false);
