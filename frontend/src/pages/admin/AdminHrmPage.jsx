@@ -626,29 +626,37 @@ export default function AdminHrmPage() {
                 <Stat icon="stars" label="Disenarai pendek" value={summaryMetrics.shortlist} tone="mint" />
                 <Stat icon="notifications" label="Permohonan baharu" value={summaryMetrics.newApplications} tone="amber" />
               </div>
-              <div className={`hrm-grid hrm-dashboard-grid ${isHrmWorkspace ? "" : "department-dashboard"}`}>
-                <RecentApplicationsPanel
-                  applications={overallMetrics.applications}
-                  onOpenApplications={(vacancyType) => openFilteredPanel(
-                    vacancyType === "internship" ? "Permohonan Latihan Industri" : "Permohonan Jawatan DBKU",
-                    "Permohonan",
-                    vacancyType,
-                  )}
-                  onReview={setReview}
-                />
-                {isHrmWorkspace ? <aside className="hrm-dashboard-side">
-                  <DashboardChannelsPanel
-                    channels={dashboardTypes.map((item) => ({
-                      ...item,
-                      metrics: dashboardMetrics[item.type],
-                      onCreate: item.type === "job" ? () => openCreatePanel("Tambah Jawatan DBKU", item.type) : null,
-                      onManage: item.type === "job" ? () => openFilteredPanel("Urus Jawatan DBKU", "Urus Jawatan", item.type) : null,
-                      onViewApplications: () => openFilteredPanel(item.applicationsLabel, "Permohonan", item.type),
-                    }))}
+              {isHrmWorkspace ? (
+                <div className="hrm-grid hrm-dashboard-grid">
+                  <RecentApplicationsPanel
+                    applications={overallMetrics.applications}
+                    onOpenApplications={(vacancyType) => openFilteredPanel(
+                      vacancyType === "internship" ? "Permohonan Latihan Industri" : "Permohonan Jawatan DBKU",
+                      "Permohonan",
+                      vacancyType,
+                    )}
+                    onReview={setReview}
                   />
-                  <StatusSummaryPanel applications={overallMetrics.applications} />
-                </aside> : null}
-              </div>
+                  <aside className="hrm-dashboard-side">
+                    <DashboardChannelsPanel
+                      channels={dashboardTypes.map((item) => ({
+                        ...item,
+                        metrics: dashboardMetrics[item.type],
+                        onCreate: item.type === "job" ? () => openCreatePanel("Tambah Jawatan DBKU", item.type) : null,
+                        onManage: item.type === "job" ? () => openFilteredPanel("Urus Jawatan DBKU", "Urus Jawatan", item.type) : null,
+                        onViewApplications: () => openFilteredPanel(item.applicationsLabel, "Permohonan", item.type),
+                      }))}
+                    />
+                    <StatusSummaryPanel applications={overallMetrics.applications} />
+                  </aside>
+                </div>
+              ) : (
+                <DepartmentDashboardPanel
+                  applications={overallMetrics.applications}
+                  departmentName={user?.department || "bahagian anda"}
+                  onViewApplications={() => navigate(ADMIN_ROUTES.applications.internship)}
+                />
+              )}
             </>
           )}
           {panel === "advanced-create" && (
@@ -1019,6 +1027,48 @@ function Stat({ icon, label, value, tone }) {
         <strong>{value}</strong>
       </div>
     </article>
+  );
+}
+function DepartmentDashboardPanel({ applications, departmentName, onViewApplications }) {
+  const hasApplications = applications.length > 0;
+  const latestApplication = applications[0];
+
+  return (
+    <section className="hrm-card department-dashboard-panel">
+      <div>
+        <span className="department-dashboard-icon">
+          <Icon>{hasApplications ? "assignment" : "inbox"}</Icon>
+        </span>
+        <div>
+          <h2>Permohonan latihan industri bahagian</h2>
+          <p>
+            {hasApplications
+              ? `${applications.length} permohonan sedang dihantar kepada ${departmentName}.`
+              : `Belum ada permohonan yang dihantar kepada ${departmentName}.`}
+          </p>
+        </div>
+      </div>
+      {latestApplication ? (
+        <dl>
+          <div>
+            <dt>Permohonan terkini</dt>
+            <dd>{latestApplication.applicant_name || "Pemohon"}</dd>
+          </div>
+          <div>
+            <dt>Status</dt>
+            <dd><Badge status={latestApplication.status} /></dd>
+          </div>
+          <div>
+            <dt>Tarikh</dt>
+            <dd>{dateValue(getApplicationDateValue(latestApplication))}</dd>
+          </div>
+        </dl>
+      ) : null}
+      <button className="hrm-primary" type="button" onClick={onViewApplications}>
+        <Icon>visibility</Icon>
+        Lihat Permohonan
+      </button>
+    </section>
   );
 }
 function RecentApplicationsPanel({ applications, onOpenApplications, onReview }) {

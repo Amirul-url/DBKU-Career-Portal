@@ -29,6 +29,13 @@ test("admin workspace labels and navigation follow the signed-in department", ()
   assert.doesNotMatch(source, />Papan pemuka HRM<\/h1>/);
 });
 
+test("department dashboards use a simple panel without the recent applications table", () => {
+  assert.match(source, /function DepartmentDashboardPanel/);
+  assert.match(source, /isHrmWorkspace \? \(\s*<div className="hrm-grid hrm-dashboard-grid">[\s\S]*<RecentApplicationsPanel/);
+  assert.match(source, /\) : \(\s*<DepartmentDashboardPanel/);
+  assert.match(source, />\s*Lihat Permohonan\s*</);
+});
+
 test("HRM review can assign internship applications to a department dashboard", () => {
   assert.match(source, /assigned_department: assignedDepartment/);
   assert.match(source, />\s*Hantar kepada bahagian\s*</);
