@@ -19,7 +19,7 @@ export const adminNavItems = [
   { icon: "group", label: "Akaun Pemohon", panel: "applicants", to: ADMIN_ROUTES.applicants },
   { kind: "section", label: "JAWATAN DBKU" },
   { icon: "add_circle", label: "Tambah Jawatan DBKU", panel: "create", to: ADMIN_ROUTES.create.job, vacancyType: "job" },
-  { icon: "work_history", label: "Urus Jawatan DBKU", panel: "manage", to: ADMIN_ROUTES.manage.job, vacancyType: "job" },
+  { icon: "work_history", label: "Jawatan Kosong DBKU", panel: "manage", to: ADMIN_ROUTES.manage.job, vacancyType: "job" },
   { icon: "group", label: "Permohonan Jawatan DBKU", panel: "applications", to: ADMIN_ROUTES.applications.job, vacancyType: "job" },
   { kind: "section", label: "LATIHAN INDUSTRI" },
   { icon: "group", label: "Permohonan Latihan Industri", panel: "applications", to: ADMIN_ROUTES.applications.internship, vacancyType: "internship" },

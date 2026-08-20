@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const source = readFileSync(new URL("./AdminHrmPage.jsx", import.meta.url), "utf8");
+const adminRoutesSource = readFileSync(new URL("../../modules/admin/adminRoutes.js", import.meta.url), "utf8");
 
 test("HRM application action labels match the department review workflow", () => {
   assert.match(source, />\s*Hantar ke Bahagian\s*</);
@@ -34,6 +35,8 @@ test("admin workspace labels and navigation follow the signed-in department", ()
 });
 
 test("department job management is read-only", () => {
+  assert.match(adminRoutesSource, /label: "Jawatan Kosong DBKU"/);
+  assert.doesNotMatch(adminRoutesSource, /label: "Urus Jawatan DBKU"/);
   assert.match(source, /onDelete=\{isHrmWorkspace \? requestDeleteJob : null\}/);
   assert.match(source, /onEdit=\{isHrmWorkspace \? openJobEdit : null\}/);
   assert.match(source, /\{isHrmWorkspace \? \(\s*<button[\s\S]*Tambah \{activeOpportunityLabel\}/);
