@@ -1937,18 +1937,14 @@ function buildDepartmentDecisionPayload(application, user, values) {
 function DepartmentDecisionConfirmModal({ isSaving, onCancel, onConfirm }) {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/45 p-5" role="presentation">
-      <section className="w-full max-w-lg overflow-hidden rounded-xl bg-white shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="department-decision-confirm-title">
-        <header className="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.12em] text-emerald-700">Pengesahan</p>
-            <h2 id="department-decision-confirm-title" className="mt-1 text-2xl font-bold text-slate-950">Hantar kepada HRM?</h2>
-          </div>
+      <section className="w-full max-w-lg overflow-hidden rounded-xl bg-white shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="department-decision-confirm-message">
+        <header className="flex justify-end px-6 pt-5">
           <button className="rounded-md p-2 text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60" type="button" onClick={onCancel} aria-label="Tutup" disabled={isSaving}>
             <Icon>close</Icon>
           </button>
         </header>
-        <div className="px-6 py-5">
-          <p className="text-sm leading-6 text-slate-600">
+        <div className="px-6 pb-5 pt-2">
+          <p id="department-decision-confirm-message" className="text-sm leading-6 text-slate-600">
             Anda yakin mahu menghantar keputusan bahagian ini kepada HRM?
           </p>
           <footer className="mt-6 flex justify-end gap-3">

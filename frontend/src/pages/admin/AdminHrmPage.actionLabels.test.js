@@ -105,7 +105,8 @@ test("HRM and department decision tabs keep draft selections in local state unti
   assert.match(source, /await onSaveDecision\(application, buildDepartmentDecisionPayload/);
   assert.doesNotMatch(source, /window\.alert/);
   assert.match(source, /function DepartmentDecisionConfirmModal/);
-  assert.match(source, /Hantar kepada HRM\?/);
+  assert.doesNotMatch(source, />Pengesahan<\/p>/);
+  assert.doesNotMatch(source, /<h2[^>]*>Hantar kepada HRM\?<\/h2>/);
   assert.match(source, /Anda yakin mahu menghantar keputusan bahagian ini kepada HRM\?/);
   assert.match(source, />\s*Tidak\s*</);
   assert.match(source, />\s*\{isSaving \? "Menghantar\.\.\." : "Ya"\}\s*</);
