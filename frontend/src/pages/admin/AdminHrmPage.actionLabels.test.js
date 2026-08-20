@@ -49,6 +49,12 @@ test("department and HRM internship rows mark pending decision tasks as new", ()
   assert.match(source, /<Badge status=\{displayStatus\} \/>/);
 });
 
+test("internship application table uses icon-only view actions", () => {
+  assert.match(source, /<button className="view" type="button" aria-label="Lihat" title="Lihat" onClick=\{\(\) => onView\(application\)\}>/);
+  assert.doesNotMatch(source, /className="view app-view-action"/);
+  assert.doesNotMatch(source, /<Icon>visibility<\/Icon>\s*Lihat\s*<\/button>/);
+});
+
 test("admin workspace labels and navigation follow the signed-in department", () => {
   assert.match(source, /getDepartmentWorkspaceLabel\(user\)/);
   assert.match(source, /getAdminShellRoleLabel\(user\)/);

@@ -1773,9 +1773,8 @@ function InternshipApplicationsPanel({ applications, isHrmWorkspace, onView }) {
                     </td>
                     <td>
                       <div className="hrm-actions hrm-internship-actions">
-                        <button className="view app-view-action" type="button" onClick={() => onView(application)}>
+                        <button className="view" type="button" aria-label="Lihat" title="Lihat" onClick={() => onView(application)}>
                           <Icon>visibility</Icon>
-                          Lihat
                         </button>
                       </div>
                     </td>
