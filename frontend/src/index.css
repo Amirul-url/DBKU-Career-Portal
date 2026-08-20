@@ -5460,6 +5460,7 @@ body:has(.applicant-profile-page) {
 
 .profile-main-nav a {
   flex: 0 0 auto;
+  position: relative;
   min-height: 42px;
   border-radius: 8px;
   padding: 10px 12px;
@@ -5492,6 +5493,35 @@ body:has(.applicant-profile-page) {
 .profile-main-nav a.active .profile-section-icon,
 .profile-main-nav a:hover .profile-section-icon {
   background: transparent;
+}
+
+.profile-nav-badge {
+  display: inline-flex;
+  min-width: 22px;
+  height: 22px;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  border: 2px solid #ffffff;
+  border-radius: 999px;
+  background: #dc2626;
+  padding: 0 6px;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 0 6px 14px rgba(220, 38, 38, .22);
+}
+
+.profile-nav-badge.collapsed {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 18px;
+  height: 18px;
+  margin-left: 0;
+  padding: 0 5px;
+  font-size: 10px;
 }
 
 .applicant-list-shell {
@@ -5850,6 +5880,27 @@ body:has(.applicant-profile-page) {
   color: var(--profile-ink);
   font-size: 14px;
   font-weight: 400;
+}
+
+.applicant-reference-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  white-space: nowrap;
+}
+
+.applicant-new-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #ffeded;
+  padding: 5px 10px;
+  color: #bd3a3a;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .applicant-table-action {

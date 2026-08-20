@@ -93,6 +93,10 @@ function hasOrganizationFeedbackBeenSent(application) {
   return Boolean(application?.profile_data?.organization_feedback_release?.sent_to_applicant_at);
 }
 
+function hasNewOrganizationFeedbackForApplicant(application) {
+  return (application?.status || "") === "accepted" && hasOrganizationFeedbackBeenSent(application);
+}
+
 function getApplicantVisibleStatus(status, application = null) {
   return status === "accepted" && !hasOrganizationFeedbackBeenSent(application) ? "screening" : status;
 }
@@ -216,13 +220,19 @@ function ApplicationList({ applications, loading }) {
                 const vacancy = application.vacancy_detail || {};
                 const status = application.status || "draft";
                 const visibleStatus = getApplicantVisibleStatus(status, application);
+                const showNewFeedbackBadge = hasNewOrganizationFeedbackForApplicant(application);
                 const shouldContinueApplication = application.isLocalDraft || status === "draft" || status === "incomplete";
                 const actionTarget = status === "incomplete"
                   ? APPLICANT_ROUTES.internshipApplicationEdit(application.id)
                   : APPLICANT_ROUTES.internshipApplication;
                 return (
                   <tr key={application.id}>
-                    <td>{formatReferenceNo(application)}</td>
+                    <td>
+                      <span className="applicant-reference-cell">
+                        {showNewFeedbackBadge ? <span className="applicant-new-badge">Baharu</span> : null}
+                        <span>{formatReferenceNo(application)}</span>
+                      </span>
+                    </td>
                     <td>{vacancy.title || "Jawatan DBKU"}</td>
                     <td>{formatDate(getApplicationDate(application))}</td>
                     <td>
@@ -425,6 +435,10 @@ export default function ApplicantPortalListPage({ page }) {
     const hasBlockingInternshipApplication = applications.some(shouldHideLocalDraftForApplication);
     return hasBlockingInternshipApplication ? applications : [localDraftApplication, ...applications];
   }, [applications, isApplicationsPage, localDraftApplication]);
+  const newApplicationFeedbackCount = useMemo(
+    () => (isApplicationsPage ? displayApplications.filter(hasNewOrganizationFeedbackForApplicant).length : 0),
+    [displayApplications, isApplicationsPage],
+  );
 
   const loadApplications = useCallback(() => {
     if (!user || user.role !== "applicant" || !isApplicationsPage) return undefined;
@@ -504,7 +518,11 @@ export default function ApplicantPortalListPage({ page }) {
 
   return (
     <div className={`applicant-profile-page ${sidebarOpen ? "sidebar-open" : "sidebar-collapsed"}`}>
-      <ProfileSidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
+      <ProfileSidebar
+        applicationBadgeCount={newApplicationFeedbackCount}
+        isOpen={sidebarOpen}
+        onToggle={toggleSidebar}
+      />
       <div className="profile-main-area">
         <ProfileContentHeader displayName={displayName} email={email} photoUrl={user.profile_photo_url} />
         <main className="profile-shell applicant-list-shell">

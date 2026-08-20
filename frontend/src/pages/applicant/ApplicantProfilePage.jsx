@@ -5,7 +5,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { apiRequest, clearAuthSession, getCurrentUser, getStoredUser, recordLogoutActivity, resolveMediaUrl, updateCurrentUser } from "../../lib/authApi";
 import { countryCallingCodes, defaultCountryCallingCode } from "../../lib/countryCallingCodes";
-import { applicantSidebarNavItems, getApplicantSectionId } from "../../modules/applicant/applicantRoutes";
+import { APPLICANT_ROUTES, applicantSidebarNavItems, getApplicantSectionId } from "../../modules/applicant/applicantRoutes";
 import { useApplicantSidebarState } from "../../modules/applicant/useApplicantSidebarState";
 import { Icon } from "./ApplicantAuthShared";
 
@@ -1805,7 +1805,7 @@ export function ApplicantPersonalReadOnlyView({ applicant, profile }) {
   return <div className="personal-edit-panel"><div className="personal-edit-form"><ProfileFormRow label="Foto Profil"><div className="personal-photo-upload"><div className="personal-photo-preview">{photo ? <img src={photo} alt="" /> : name.charAt(0)}</div><div><strong>Foto profil pemohon</strong><p>Paparan baca sahaja.</p></div></div></ProfileFormRow><ProfileFormRow label="Maklumat Peribadi">{field("Nama Penuh", name)}{field("Nombor Kad Pengenalan", details.identificationNumber || applicant.mykad_number)}<div className="personal-date-group"><span>Tarikh Lahir</span><div><label>Hari<input readOnly value={value(details.birthDay)} /></label><label>Bulan<input readOnly value={value(details.birthMonth)} /></label><label>Tahun<input readOnly value={value(details.birthYear)} /></label></div></div>{field("Bangsa", details.race)}<fieldset className="personal-radio-group"><legend>Kewarganegaraan</legend><div>{citizenshipOptions.map((item) => <label key={item}><input type="radio" checked={details.citizenship === item} readOnly />{item}</label>)}</div></fieldset><fieldset className="personal-radio-group"><legend>Jantina</legend><div>{["Perempuan", "Lelaki"].map((item) => <label key={item}><input type="radio" checked={details.gender === item} readOnly />{item}</label>)}</div></fieldset></ProfileFormRow><ProfileFormRow label="Aksesibiliti dan Kesihatan"><div className="personal-helper-copy">Maklumat kesihatan pemohon adalah sulit.</div><fieldset className="personal-radio-group"><legend>Adakah anda mempunyai sebarang masalah kesihatan?</legend><div>{["Ya", "Tidak"].map((item) => <label key={item}><input type="radio" checked={details.hasHealthIssue === item} readOnly />{item}</label>)}</div></fieldset><fieldset className="personal-radio-group"><legend>Adakah anda mempunyai sebarang ketidakupayaan?</legend><div>{["Ya", "Tidak"].map((item) => <label key={item}><input type="radio" checked={details.hasDisability === item} readOnly />{item}</label>)}</div></fieldset></ProfileFormRow><ProfileFormRow label="Alamat"><ApplicantAddressMap address={details.address || applicant.address} latitude={details.latitude} longitude={details.longitude} onLocationChange={() => {}} readOnly /></ProfileFormRow><ProfileFormRow label="Butiran Hubungan">{field("Alamat E-mel", email)}<PersonalField label="Nombor Telefon Bimbit Utama" noIndicator><ProfilePhoneInput value={details.primaryPhone || applicant.mobile_number} onChange={() => {}} readOnly /></PersonalField><PersonalField label="Nombor Telefon Bimbit Lain" noIndicator><ProfilePhoneInput value={details.secondaryPhone} onChange={() => {}} readOnly /></PersonalField></ProfileFormRow><ProfileFormRow label="Resume"><div className="personal-profile-tip"><header><span><Icon>emoji_objects</Icon></span><strong>Tingkatkan ketampakan profil anda.</strong></header><p>Resume dan pautan video resume pemohon tersedia untuk semakan.</p></div><div className="personal-button-row">{resumeUrl ? <a className="personal-primary-button" href={resumeUrl} target="_blank" rel="noreferrer">Muat Turun Resume</a> : null}{videoResumeUrl ? <a className="personal-primary-button" href={videoResumeUrl} target="_blank" rel="noreferrer">Buka Link Video Resume</a> : null}</div>{field("LinkedIn", details.linkedIn)}</ProfileFormRow></div></div>;
 }
 
-export function ProfileSidebar({ isOpen, onToggle }) {
+export function ProfileSidebar({ applicationBadgeCount = 0, isOpen, onToggle }) {
   const location = useLocation();
 
   return (
@@ -1833,8 +1833,18 @@ export function ProfileSidebar({ isOpen, onToggle }) {
       </div>
 
       <nav className="profile-main-nav">
-        {applicantSidebarNavItems.map((item) => (
-          item.to ? (
+        {applicantSidebarNavItems.map((item) => {
+          const badgeCount = item.to === APPLICANT_ROUTES.applications ? applicationBadgeCount : 0;
+          const badge = badgeCount > 0 ? (
+            <span
+              className={`profile-nav-badge${isOpen ? "" : " collapsed"}`}
+              aria-label={`${badgeCount} maklumbalas baharu`}
+            >
+              {badgeCount}
+            </span>
+          ) : null;
+
+          return item.to ? (
             <NavLink
               to={item.to}
               end={item.end}
@@ -1849,6 +1859,7 @@ export function ProfileSidebar({ isOpen, onToggle }) {
                 <Icon>{item.icon}</Icon>
               </span>
               {isOpen ? <strong>{item.label}</strong> : <span className="sr-only">{item.label}</span>}
+              {badge}
             </NavLink>
           ) : (
             <a href={item.href} key={item.label} title={!isOpen ? item.label : undefined}>
@@ -1856,9 +1867,10 @@ export function ProfileSidebar({ isOpen, onToggle }) {
                 <Icon>{item.icon}</Icon>
               </span>
               {isOpen ? <strong>{item.label}</strong> : <span className="sr-only">{item.label}</span>}
+              {badge}
             </a>
-          )
-        ))}
+          );
+        })}
       </nav>
     </aside>
   );

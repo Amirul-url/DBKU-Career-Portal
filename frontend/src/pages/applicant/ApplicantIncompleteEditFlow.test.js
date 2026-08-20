@@ -4,6 +4,7 @@ import test from "node:test";
 
 const routesSource = readFileSync(new URL("../../modules/applicant/applicantRoutes.js", import.meta.url), "utf8");
 const listSource = readFileSync(new URL("./ApplicantPortalListPage.jsx", import.meta.url), "utf8");
+const profileSource = readFileSync(new URL("./ApplicantProfilePage.jsx", import.meta.url), "utf8");
 const viewSource = readFileSync(new URL("./ApplicantApplicationViewPage.jsx", import.meta.url), "utf8");
 const formSource = readFileSync(new URL("./ApplicantInternshipApplicationPage.jsx", import.meta.url), "utf8");
 const infoSource = readFileSync(new URL("./ApplicantInternshipInfoContent.jsx", import.meta.url), "utf8");
@@ -48,6 +49,20 @@ test("applicant accepted applications stay hidden behind review status until HRM
   assert.match(viewSource, /extraTabs=\{organizationFeedbackSent \? \[organizationFeedbackTab\] : \[\]\}/);
   assert.match(viewSource, /maskAcceptedStatus=\{!organizationFeedbackSent\}/);
   assert.match(viewSource, /function ApplicantOrganizationFeedbackTab/);
+});
+
+test("applicant organization feedback notification shows red badges", () => {
+  assert.match(listSource, /function hasNewOrganizationFeedbackForApplicant\(application\)/);
+  assert.match(listSource, /\(application\?\.status \|\| ""\) === "accepted" && hasOrganizationFeedbackBeenSent\(application\)/);
+  assert.match(listSource, /const newApplicationFeedbackCount = useMemo/);
+  assert.match(listSource, /displayApplications\.filter\(hasNewOrganizationFeedbackForApplicant\)\.length/);
+  assert.match(listSource, /applicationBadgeCount=\{newApplicationFeedbackCount\}/);
+  assert.match(listSource, /className="applicant-reference-cell"/);
+  assert.match(listSource, /className="applicant-new-badge">Baharu/);
+  assert.match(profileSource, /export function ProfileSidebar\(\{ applicationBadgeCount = 0, isOpen, onToggle \}\)/);
+  assert.match(profileSource, /item\.to === APPLICANT_ROUTES\.applications \? applicationBadgeCount : 0/);
+  assert.match(profileSource, /className=\{`profile-nav-badge\$\{isOpen \? "" : " collapsed"\}`\}/);
+  assert.match(profileSource, /aria-label=\{`\$\{badgeCount\} maklumbalas baharu`\}/);
 });
 
 test("applicant rejected internship applications can apply again", () => {
