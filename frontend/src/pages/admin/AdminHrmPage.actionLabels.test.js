@@ -12,7 +12,7 @@ test("HRM application action labels match the department review workflow", () =>
   assert.match(source, /reviewWithAssessment\("incomplete", "Tidak Lengkap"\)/);
   assert.match(source, /onReview\(app\.id, "incomplete"\)/);
   assert.doesNotMatch(source, />\s*Senarai pendek\s*</);
-  assert.doesNotMatch(source, />\s*Tolak\s*</);
+  assert.doesNotMatch(source, /className="reject"[\s\S]*>\s*Tolak\s*</);
 });
 
 test("HRM sidebar shows red badges for new application counts", () => {
@@ -75,7 +75,9 @@ test("department decision tab replaces HRM review for department workspaces", ()
   assert.match(source, /department_decision: decision/);
   assert.match(source, /function DepartmentDecisionTab/);
   assert.match(source, /Syor Bahagian/);
-  assert.match(source, /Pilih Sokong atau Tidak Sokong/);
+  assert.match(source, /Sila pilih/);
+  assert.match(source, /Terima/);
+  assert.match(source, /Tolak/);
   assert.match(source, /Hantar ke HRM/);
   assert.match(source, /\.\.\.\(isHrmWorkspace \? \[hrmReviewTab\] : \[\]\)/);
   assert.match(source, /\.\.\.\(shouldShowDepartmentDecision \? \[departmentDecisionTab\] : \[\]\)/);

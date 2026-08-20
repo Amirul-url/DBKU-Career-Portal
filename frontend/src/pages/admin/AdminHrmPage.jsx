@@ -1977,9 +1977,9 @@ function DepartmentDecisionTab({ application, isReadOnly = false, onSaveDecision
             value={recommendation}
             onChange={(event) => setRecommendation(event.target.value)}
           >
-            <option value="">Pilih Sokong atau Tidak Sokong</option>
-            <option value="Sokong">Sokong</option>
-            <option value="Tidak Sokong">Tidak Sokong</option>
+            <option value="">Sila pilih</option>
+            <option value="Terima">Terima</option>
+            <option value="Tolak">Tolak</option>
           </select>
         </label>
         <label>
