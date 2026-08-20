@@ -632,7 +632,7 @@ export default function AdminHrmPage() {
               <div className="hrm-grid hrm-dashboard-grid">
                 <RecentApplicationsPanel
                   applications={overallMetrics.applications}
-                  applicationLinks={isHrmWorkspace ? undefined : [{ type: "internship", label: "Latihan Industri" }]}
+                  applicationLinks={isHrmWorkspace ? undefined : []}
                   onOpenApplications={(vacancyType) => {
                     if (!isHrmWorkspace || vacancyType === "internship") {
                       navigate(ADMIN_ROUTES.applications.internship);
@@ -655,7 +655,7 @@ export default function AdminHrmPage() {
                       metrics: dashboardMetrics[item.type],
                       onCreate: isHrmWorkspace && item.type === "job" ? () => openCreatePanel("Tambah Jawatan DBKU", item.type) : null,
                       onManage: isHrmWorkspace && item.type === "job" ? () => openFilteredPanel("Urus Jawatan DBKU", "Urus Jawatan", item.type) : null,
-                      onViewApplications: () => openFilteredPanel(item.applicationsLabel, "Permohonan", item.type),
+                      onViewApplications: isHrmWorkspace ? () => openFilteredPanel(item.applicationsLabel, "Permohonan", item.type) : null,
                     }))}
                   />
                   <StatusSummaryPanel applications={overallMetrics.applications} />
@@ -1169,7 +1169,7 @@ function DashboardChannelsPanel({ channels, subtitle = "Ringkasan jawatan DBKU d
                 </button>
               ) : null}
               {channel.onManage ? <button onClick={channel.onManage} type="button">Urus</button> : null}
-              <button onClick={channel.onViewApplications} type="button">Permohonan</button>
+              {channel.onViewApplications ? <button onClick={channel.onViewApplications} type="button">Permohonan</button> : null}
             </footer>
           </article>
         ))}

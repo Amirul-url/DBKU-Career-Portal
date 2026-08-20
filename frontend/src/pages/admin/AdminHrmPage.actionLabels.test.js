@@ -48,8 +48,10 @@ test("department job management is read-only", () => {
 
 test("department dashboards keep the HRM layout without HRM-only workflow links", () => {
   assert.match(source, /<div className="hrm-grid hrm-dashboard-grid">[\s\S]*<RecentApplicationsPanel/);
-  assert.match(source, /applicationLinks=\{isHrmWorkspace \? undefined : \[\{ type: "internship", label: "Latihan Industri" \}\]\}/);
+  assert.match(source, /applicationLinks=\{isHrmWorkspace \? undefined : \[\]\}/);
   assert.match(source, /title=\{isHrmWorkspace \? "Saluran pengambilan" : "Ringkasan bahagian"\}/);
+  assert.match(source, /onViewApplications: isHrmWorkspace \? \(\) => openFilteredPanel\(item\.applicationsLabel, "Permohonan", item\.type\) : null/);
+  assert.match(source, /\{channel\.onViewApplications \? <button onClick=\{channel\.onViewApplications\} type="button">Permohonan<\/button> : null\}/);
   assert.doesNotMatch(source, /function DepartmentDashboardPanel/);
 });
 
