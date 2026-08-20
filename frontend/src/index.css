@@ -10065,7 +10065,7 @@ body:has(.applicant-profile-page) {
 
 .hrm-internship-applications-card {
   overflow: hidden;
-  border: 1px solid #c9f5de;
+  border: 0;
   border-radius: 8px;
   background: #ffffff;
 }
@@ -10218,6 +10218,14 @@ body:has(.applicant-profile-page) {
 .hrm-internship-applications-table {
   min-width: 1040px;
   table-layout: fixed;
+}
+
+.hrm-internship-applications-card .applicant-applications-table-wrap {
+  border-top: 1px solid #c9f5de;
+}
+
+.hrm-internship-applications-card .applicant-table-pagination {
+  border-top: 1px solid #c9f5de;
 }
 
 .hrm-internship-applications-table th:nth-child(1),
