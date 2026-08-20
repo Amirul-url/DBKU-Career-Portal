@@ -318,7 +318,7 @@ export default function AdminHrmPage() {
     const updatedApplication = await apiRequest(`/applications/${application.id}/`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ profile_data: profileData }),
+      body: JSON.stringify({ profile_data: profileData, status: "accepted" }),
     });
     setApplications((current) =>
       current.map((item) => (String(item.id) === String(updatedApplication.id) ? updatedApplication : item)),
@@ -1070,6 +1070,7 @@ export default function AdminHrmPage() {
                 navigate(ADMIN_ROUTES.applications.internship);
               }}
               onSaveAssessment={saveHrmAssessment}
+              onDepartmentDecisionSubmitted={() => navigate(ADMIN_ROUTES.applications.internship)}
               onSaveDepartmentDecision={saveDepartmentDecision}
               user={user}
             />
@@ -1939,7 +1940,7 @@ function buildDepartmentDecisionPayload(application, user, values) {
     submitted_by: user?.full_name || user?.name || user?.email || "",
   };
 }
-function DepartmentDecisionTab({ application, isReadOnly = false, onSaveDecision, user }) {
+function DepartmentDecisionTab({ application, isReadOnly = false, onSaveDecision, onSubmitted, user }) {
   const savedDecision = getSavedDepartmentDecision(application);
   const [recommendation, setRecommendation] = useState(savedDecision.recommendation || "");
   const [remarks, setRemarks] = useState(savedDecision.remarks || "");
@@ -1957,7 +1958,8 @@ function DepartmentDecisionTab({ application, isReadOnly = false, onSaveDecision
     setMessage("");
     try {
       await onSaveDecision(application, buildDepartmentDecisionPayload(application, user, { recommendation, remarks }));
-      setMessage("Keputusan bahagian telah dihantar kepada HRM.");
+      window.alert("Keputusan bahagian berjaya dihantar kepada HRM.");
+      onSubmitted?.();
     } catch (error) {
       setMessage(error.message || "Keputusan bahagian gagal dihantar.");
     } finally {
@@ -2022,6 +2024,7 @@ function InternshipApplicationDetailPage({
   isHrmWorkspace,
   loading,
   onBack,
+  onDepartmentDecisionSubmitted,
   onReview,
   onSaveAssessment,
   onSaveDepartmentDecision,
@@ -2044,6 +2047,7 @@ function InternshipApplicationDetailPage({
         error={!loading && !application ? "Permohonan tidak ditemui." : ""}
         extraTabs={extraTabs}
         loading={loading}
+        maskAcceptedStatus={false}
         onBack={onBack}
         onTabChange={setActiveTab}
         renderExtraTabContent={(tab) =>
@@ -2060,6 +2064,7 @@ function InternshipApplicationDetailPage({
               isReadOnly={isHrmWorkspace}
               key={application?.id || "department-decision"}
               onSaveDecision={onSaveDepartmentDecision}
+              onSubmitted={onDepartmentDecisionSubmitted}
               user={user}
             />
           ) : null

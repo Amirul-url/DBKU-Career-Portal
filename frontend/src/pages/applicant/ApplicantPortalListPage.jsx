@@ -11,6 +11,7 @@ const statusLabels = {
   draft: "Draf",
   incomplete: "Tidak Lengkap",
   rejected: "Ditolak",
+  accepted: "Dalam semakan",
   screening: "Dalam semakan",
   shortlisted: "Disenarai pendek",
   submitted: "Dihantar",
@@ -86,6 +87,10 @@ function isInternshipApplication(application) {
 function shouldHideLocalDraftForApplication(application) {
   const status = application.status || "draft";
   return isInternshipApplication(application) && !reapplyAllowedApplicationStatuses.has(status);
+}
+
+function getApplicantVisibleStatus(status) {
+  return status === "accepted" ? "screening" : status;
 }
 
 function EmptyState({ actionLabel, actionTo, icon, message, title }) {
@@ -201,6 +206,7 @@ function ApplicationList({ applications, loading }) {
               paginatedApplications.map((application) => {
                 const vacancy = application.vacancy_detail || {};
                 const status = application.status || "draft";
+                const visibleStatus = getApplicantVisibleStatus(status);
                 const shouldContinueApplication = application.isLocalDraft || status === "draft" || status === "incomplete";
                 const actionTarget = status === "incomplete"
                   ? APPLICANT_ROUTES.internshipApplicationEdit(application.id)
@@ -211,7 +217,7 @@ function ApplicationList({ applications, loading }) {
                     <td>{vacancy.title || "Jawatan DBKU"}</td>
                     <td>{formatDate(getApplicationDate(application))}</td>
                     <td>
-                      <span className={`applicant-status-pill ${status}`}>
+                      <span className={`applicant-status-pill ${visibleStatus}`}>
                         {statusLabels[status] || status}
                       </span>
                     </td>

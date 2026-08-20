@@ -31,6 +31,16 @@ test("applicant rejected applications use Ditolak status label", () => {
   assert.doesNotMatch(viewSource, /Tidak berjaya/);
 });
 
+test("applicant accepted applications stay hidden behind review status until HRM notification", () => {
+  assert.match(listSource, /accepted: "Dalam semakan"/);
+  assert.match(viewSource, /accepted: "Dalam semakan"/);
+  assert.match(listSource, /function getApplicantVisibleStatus\(status\)/);
+  assert.match(listSource, /status === "accepted" \? "screening" : status/);
+  assert.match(viewSource, /maskAcceptedStatus = true/);
+  assert.match(viewSource, /maskAcceptedStatus && status === "accepted" \? "screening" : status/);
+  assert.match(viewSource, /!maskAcceptedStatus && status === "accepted"\) return "Diterima"/);
+});
+
 test("applicant rejected internship applications can apply again", () => {
   assert.match(routesSource, /internshipApplicationNew: "\/profile\/internship-application\?new=1"/);
   assert.match(infoSource, /reapplyAllowedApplicationStatuses = new Set\(\["rejected", "withdrawn"\]\)/);

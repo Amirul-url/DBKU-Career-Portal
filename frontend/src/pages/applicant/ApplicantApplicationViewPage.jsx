@@ -14,11 +14,21 @@ const statusLabels = {
   draft: "Draf",
   incomplete: "Tidak Lengkap",
   rejected: "Ditolak",
+  accepted: "Dalam semakan",
   screening: "Dalam semakan",
   shortlisted: "Disenarai pendek",
   submitted: "Dihantar",
   withdrawn: "Ditarik balik",
 };
+
+function getApplicantVisibleStatus(status, maskAcceptedStatus = true) {
+  return maskAcceptedStatus && status === "accepted" ? "screening" : status;
+}
+
+function getReadOnlyStatusLabel(status, maskAcceptedStatus) {
+  if (!maskAcceptedStatus && status === "accepted") return "Diterima";
+  return statusLabels[status] || status;
+}
 
 const documentFields = [
   { field: "universityLetterFile", label: "Surat rasmi daripada institusi / kolej / universiti" },
@@ -317,6 +327,7 @@ export function InternshipApplicationReadOnlyPanel({
   error = "",
   extraTabs = [],
   loading = false,
+  maskAcceptedStatus = true,
   onBack,
   onTabChange,
   renderExtraTabContent,
@@ -329,6 +340,7 @@ export function InternshipApplicationReadOnlyPanel({
   };
   const vacancy = application?.vacancy_detail || {};
   const status = application?.status || "draft";
+  const visibleStatus = getApplicantVisibleStatus(status, maskAcceptedStatus);
   const panelTabs = [...infoTabs, ...extraTabs];
 
   const renderPersonalFields = () => (
@@ -409,7 +421,9 @@ export function InternshipApplicationReadOnlyPanel({
                 </div>
                 <div>
                   <span>Status</span>
-                  <strong className={`applicant-status-pill ${status}`}>{statusLabels[status] || status}</strong>
+                  <strong className={`applicant-status-pill ${visibleStatus}`}>
+                    {getReadOnlyStatusLabel(status, maskAcceptedStatus)}
+                  </strong>
                 </div>
               </section>
               {status === "incomplete" ? (

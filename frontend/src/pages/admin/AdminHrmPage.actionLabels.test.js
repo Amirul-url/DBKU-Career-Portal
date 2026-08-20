@@ -72,6 +72,7 @@ test("HRM review can assign internship applications to a department dashboard", 
 test("department decision tab replaces HRM review for department workspaces", () => {
   assert.match(source, /const departmentDecisionTab = "Keputusan Bahagian"/);
   assert.match(source, /profile_data: profileData/);
+  assert.match(source, /status: "accepted"/);
   assert.match(source, /department_decision: decision/);
   assert.match(source, /function DepartmentDecisionTab/);
   assert.match(source, /Syor Bahagian/);
@@ -82,6 +83,7 @@ test("department decision tab replaces HRM review for department workspaces", ()
   assert.match(source, /\.\.\.\(isHrmWorkspace \? \[hrmReviewTab\] : \[\]\)/);
   assert.match(source, /\.\.\.\(shouldShowDepartmentDecision \? \[departmentDecisionTab\] : \[\]\)/);
   assert.match(source, /isReadOnly=\{isHrmWorkspace\}/);
+  assert.match(source, /maskAcceptedStatus=\{false\}/);
 });
 
 test("HRM and department decision tabs keep draft selections in local state until submitted", () => {
@@ -93,4 +95,7 @@ test("HRM and department decision tabs keep draft selections in local state unti
   assert.match(source, /const chooseDecision = \(item\) => \{\s*const nextDecision = decision === item \? "" : item;\s*setDecision\(nextDecision\);\s*\};/);
   assert.match(source, /const chooseEducationLevel = \(item\) => \{\s*const nextEducationLevel = educationLevel === item \? "" : item;\s*setEducationLevel\(nextEducationLevel\);\s*\};/);
   assert.match(source, /await onSaveDecision\(application, buildDepartmentDecisionPayload/);
+  assert.match(source, /window\.alert\("Keputusan bahagian berjaya dihantar kepada HRM\."\)/);
+  assert.match(source, /onSubmitted\?\.\(\)/);
+  assert.match(source, /onDepartmentDecisionSubmitted=\{\(\) => navigate\(ADMIN_ROUTES\.applications\.internship\)\}/);
 });
