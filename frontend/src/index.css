@@ -10482,7 +10482,14 @@ body:has(.applicant-profile-page) {
   color: #0f172a;
   font: inherit;
   line-height: 35px;
+  outline: 0;
   resize: vertical;
+}
+
+.department-decision-form textarea:focus {
+  border: 0;
+  box-shadow: none;
+  outline: 0;
 }
 
 .department-decision-form select:disabled,
