@@ -240,8 +240,9 @@ export default function AdminHrmPage() {
   const visibleAdminNavItems = useMemo(
     () => isHrmWorkspace ? adminNavItems : adminNavItems.filter((item) =>
       item.panel === "dashboard" ||
-      (item.kind === "section" && item.label === "LATIHAN INDUSTRI") ||
-      (item.panel === "applications" && item.vacancyType === "internship")
+      item.panel === "applicants" ||
+      (item.kind === "section" && ["PEMOHON", "JAWATAN DBKU", "LATIHAN INDUSTRI"].includes(item.label)) ||
+      (item.panel === "applications" && ["job", "internship"].includes(item.vacancyType))
     ),
     [isHrmWorkspace],
   );
