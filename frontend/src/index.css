@@ -10478,6 +10478,7 @@ body:has(.applicant-profile-page) {
       transparent 34px,
       #1f2937 35px
     );
+  background-attachment: local;
   padding: 8px 0;
   color: #0f172a;
   font: inherit;
