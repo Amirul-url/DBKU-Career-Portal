@@ -1965,7 +1965,9 @@ function DepartmentDecisionTab({ application, isReadOnly = false, onSaveDecision
   const [message, setMessage] = useState("");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const canSubmit = Boolean(!isReadOnly && recommendation && remarks.trim() && application && onSaveDecision);
+  const isSubmitted = Boolean(savedDecision.submitted_at);
+  const isLocked = isReadOnly || isSubmitted;
+  const canSubmit = Boolean(!isLocked && recommendation && remarks.trim() && application && onSaveDecision);
 
   const requestSubmitDecision = () => {
     if (!canSubmit) {
@@ -1996,7 +1998,7 @@ function DepartmentDecisionTab({ application, isReadOnly = false, onSaveDecision
         <label>
           <span>Syor Bahagian</span>
           <select
-            disabled={isReadOnly}
+            disabled={isLocked}
             value={recommendation}
             onChange={(event) => setRecommendation(event.target.value)}
           >
@@ -2008,7 +2010,7 @@ function DepartmentDecisionTab({ application, isReadOnly = false, onSaveDecision
         <label>
           <span>Ulasan <b>*</b></span>
           <textarea
-            disabled={isReadOnly}
+            disabled={isLocked}
             placeholder="Masukkan ulasan bahagian untuk semakan HRM"
             value={remarks}
             onChange={(event) => setRemarks(event.target.value)}
@@ -2026,7 +2028,7 @@ function DepartmentDecisionTab({ application, isReadOnly = false, onSaveDecision
         </dl>
         {message ? <p className="department-decision-message">{message}</p> : null}
       </div>
-      {!isReadOnly ? (
+      {!isLocked ? (
         <footer className="hrm-application-detail-actions">
           <button
             className="hrm-primary"

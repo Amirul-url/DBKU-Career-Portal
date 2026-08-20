@@ -88,6 +88,10 @@ test("department decision tab replaces HRM review for department workspaces", ()
   assert.match(source, /Terima/);
   assert.match(source, /Tolak/);
   assert.match(source, /Hantar ke HRM/);
+  assert.match(source, /const isSubmitted = Boolean\(savedDecision\.submitted_at\)/);
+  assert.match(source, /const isLocked = isReadOnly \|\| isSubmitted/);
+  assert.match(source, /disabled=\{isLocked\}/);
+  assert.match(source, /\{!isLocked \? \(/);
   assert.match(source, /\.\.\.\(isHrmWorkspace \? \[hrmReviewTab\] : \[\]\)/);
   assert.match(source, /\.\.\.\(shouldShowDepartmentDecision \? \[departmentDecisionTab\] : \[\]\)/);
   assert.match(source, /isReadOnly=\{isHrmWorkspace\}/);
