@@ -10945,10 +10945,11 @@ body:has(.applicant-profile-page) {
   border-radius: 6px;
   background: #ffffff;
   color: #020617;
-  font: inherit;
-  font-weight: 700;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
   line-height: 1.35;
-  padding: 10px 12px;
+  padding: 8px 10px;
   text-align: center;
 }
 
