@@ -230,11 +230,12 @@ a {
   margin-left: auto;
 }
 
-.hrm-manage-filters label {
+.applicant-table-controls.hrm-manage-filters label {
   min-width: 0;
 }
 
-.hrm-manage-filters select {
+.applicant-table-controls.hrm-manage-filters select {
+  min-width: 0;
   width: 100%;
 }
 
