@@ -80,7 +80,7 @@ test("HRM review can assign internship applications to a department dashboard", 
 test("department decision tab replaces HRM review for department workspaces", () => {
   assert.match(source, /const departmentDecisionTab = "Keputusan Bahagian"/);
   assert.match(source, /profile_data: profileData/);
-  assert.match(source, /status: "accepted"/);
+  assert.match(source, /status: decision\.recommendation === "Tolak" \? "rejected" : "accepted"/);
   assert.match(source, /department_decision: decision/);
   assert.match(source, /function DepartmentDecisionTab/);
   assert.match(source, /Syor Bahagian/);
@@ -92,6 +92,15 @@ test("department decision tab replaces HRM review for department workspaces", ()
   assert.match(source, /\.\.\.\(shouldShowDepartmentDecision \? \[departmentDecisionTab\] : \[\]\)/);
   assert.match(source, /isReadOnly=\{isHrmWorkspace\}/);
   assert.match(source, /maskAcceptedStatus=\{false\}/);
+});
+
+test("HRM assessment saves do not change the application status before review action", () => {
+  const assessmentStart = source.indexOf("const saveHrmAssessment = async");
+  const decisionStart = source.indexOf("const saveDepartmentDecision = async");
+  assert.ok(assessmentStart >= 0);
+  assert.ok(decisionStart > assessmentStart);
+  const assessmentSource = source.slice(assessmentStart, decisionStart);
+  assert.doesNotMatch(assessmentSource, /status:/);
 });
 
 test("HRM and department decision tabs keep draft selections in local state until submitted", () => {

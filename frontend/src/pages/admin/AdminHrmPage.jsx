@@ -318,7 +318,7 @@ export default function AdminHrmPage() {
     const updatedApplication = await apiRequest(`/applications/${application.id}/`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ profile_data: profileData, status: "accepted" }),
+      body: JSON.stringify({ profile_data: profileData }),
     });
     setApplications((current) =>
       current.map((item) => (String(item.id) === String(updatedApplication.id) ? updatedApplication : item)),
@@ -335,7 +335,10 @@ export default function AdminHrmPage() {
     const updatedApplication = await apiRequest(`/applications/${application.id}/`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ profile_data: profileData }),
+      body: JSON.stringify({
+        profile_data: profileData,
+        status: decision.recommendation === "Tolak" ? "rejected" : "accepted",
+      }),
     });
     setApplications((current) =>
       current.map((item) => (String(item.id) === String(updatedApplication.id) ? updatedApplication : item)),
