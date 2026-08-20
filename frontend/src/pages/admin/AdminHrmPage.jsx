@@ -1814,12 +1814,10 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
   const chooseDecision = (item) => {
     const nextDecision = decision === item ? "" : item;
     setDecision(nextDecision);
-    saveAssessment({ decision: nextDecision, educationLevel });
   };
   const chooseEducationLevel = (item) => {
     const nextEducationLevel = educationLevel === item ? "" : item;
     setEducationLevel(nextEducationLevel);
-    saveAssessment({ decision, educationLevel: nextEducationLevel });
   };
   const reviewWithAssessment = async (status, nextDecision = decision) => {
     if (!application) return;

@@ -83,3 +83,14 @@ test("department decision tab replaces HRM review for department workspaces", ()
   assert.match(source, /\.\.\.\(shouldShowDepartmentDecision \? \[departmentDecisionTab\] : \[\]\)/);
   assert.match(source, /isReadOnly=\{isHrmWorkspace\}/);
 });
+
+test("HRM and department decision tabs keep draft selections in local state until submitted", () => {
+  assert.match(source, /const \[decision, setDecision\] = useState\(savedAssessment\.decision \|\| ""\)/);
+  assert.match(source, /const \[educationLevel, setEducationLevel\] = useState/);
+  assert.match(source, /const \[recommendation, setRecommendation\] = useState/);
+  assert.match(source, /const \[remarks, setRemarks\] = useState/);
+  assert.match(source, /const isSaved = await saveAssessment\(\{ decision: nextDecision, educationLevel \}\)/);
+  assert.match(source, /const chooseDecision = \(item\) => \{\s*const nextDecision = decision === item \? "" : item;\s*setDecision\(nextDecision\);\s*\};/);
+  assert.match(source, /const chooseEducationLevel = \(item\) => \{\s*const nextEducationLevel = educationLevel === item \? "" : item;\s*setEducationLevel\(nextEducationLevel\);\s*\};/);
+  assert.match(source, /await onSaveDecision\(application, buildDepartmentDecisionPayload/);
+});
