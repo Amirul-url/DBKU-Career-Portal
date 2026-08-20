@@ -2431,7 +2431,10 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
           <thead>
             <tr>
               <th>Nama Pelajar</th>
-              <th>Tempoh Latihan Industri / Praktikal</th>
+              <th>
+                Tempoh Latihan Industri / Praktikal
+                <span className="organization-feedback-required" aria-hidden="true">*</span>
+              </th>
               <th>Program</th>
               <th>Bahagian Ditempatkan</th>
             </tr>
@@ -2449,6 +2452,7 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
                   disabled={isSentToApplicant}
                   onChange={(event) => setFeedbackInternshipPeriod(event.target.value)}
                   placeholder="Contoh: 16 Mac 2026 - 29 Ogos 2026"
+                  required
                   type="text"
                   value={feedbackInternshipPeriod}
                 />
@@ -2462,8 +2466,11 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
       <section className="organization-feedback-section" aria-label="Dokumen maklumbalas organisasi">
         <div className="organization-feedback-section-header">
           <div className="organization-feedback-section-title">
-            <h3>Dokumen maklumbalas organisasi</h3>
-            <p>Muat naik fail PDF untuk dihantar kepada pemohon. Saiz fail maksimum 15MB.</p>
+            <h3>
+              Dokumen maklumbalas organisasi
+              <span className="organization-feedback-required" aria-hidden="true">*</span>
+            </h3>
+            <p>Wajib muat naik sekurang-kurangnya 1 fail PDF untuk dihantar kepada pemohon. Saiz fail maksimum 15MB.</p>
           </div>
           <div className="organization-feedback-section-actions">
             <button
@@ -2576,7 +2583,6 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
           disabled={isBusy || isSentToApplicant}
           onClick={requestSendToApplicant}
         >
-          <Icon>send</Icon>
           {isSendingToApplicant ? "Menghantar..." : isSentToApplicant ? "Telah dihantar kepada pemohon" : "Hantar ke Pemohon"}
         </button>
       </footer>

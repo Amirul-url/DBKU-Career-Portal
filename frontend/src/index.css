@@ -10624,6 +10624,11 @@ body:has(.applicant-profile-page) {
   line-height: 1.2;
 }
 
+.organization-feedback-required {
+  margin-left: 4px;
+  color: #dc2626;
+}
+
 .organization-feedback-section-title p {
   margin: 6px 0 0;
   color: #52685b;

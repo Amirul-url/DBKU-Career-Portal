@@ -186,7 +186,7 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, />\s*Tidak\s*</);
   assert.match(source, />\s*\{isSaving \? "Menghantar\.\.\." : "Ya"\}\s*</);
   assert.match(source, /Dokumen maklumbalas organisasi/);
-  assert.match(source, /Muat naik fail PDF untuk dihantar kepada pemohon\. Saiz fail maksimum 15MB\./);
+  assert.match(source, /Wajib muat naik sekurang-kurangnya 1 fail PDF untuk dihantar kepada pemohon\. Saiz fail maksimum 15MB\./);
   assert.match(source, /className="organization-feedback-section"/);
   assert.match(source, /className="organization-feedback-section-header"/);
   assert.match(source, /className="organization-feedback-add"/);
@@ -215,8 +215,10 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /const \[feedbackInternshipPeriod, setFeedbackInternshipPeriod\] = useState/);
   assert.match(source, /const \[feedbackRelease, setFeedbackRelease\] = useState\(\(\) => getOrganizationFeedbackRelease\(application\)\)/);
   assert.match(source, /const \[showSendConfirmModal, setShowSendConfirmModal\] = useState\(false\)/);
+  assert.match(source, /className="organization-feedback-required"/);
   assert.match(source, /className="organization-feedback-period-input"/);
   assert.match(source, /placeholder="Contoh: 16 Mac 2026 - 29 Ogos 2026"/);
+  assert.match(source, /required/);
   assert.match(source, /onChange=\{\(event\) => setFeedbackInternshipPeriod\(event\.target\.value\)\}/);
   assert.match(source, /key=\{`\$\{application\?\.id \|\| "organization-feedback"\}-\$\{application\?\.updated_at \|\| ""\}`\}/);
   assert.match(source, /const clearFeedbackInput = \(\) => \{/);
@@ -246,4 +248,5 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /Program/);
   assert.match(source, /Bahagian Ditempatkan/);
   assert.match(source, /No\. Kad Pengenalan:/);
+  assert.doesNotMatch(source, /<Icon>send<\/Icon>/);
 });
