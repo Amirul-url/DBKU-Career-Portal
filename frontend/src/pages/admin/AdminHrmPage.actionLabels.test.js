@@ -40,6 +40,7 @@ test("department job management is read-only", () => {
   assert.match(source, /activeManageOpportunityLabel = activeVacancyType === "job" \? "Jawatan Kosong DBKU" : activeOpportunityLabel/);
   assert.match(source, />Senarai \{activeManageOpportunityLabel\}<\/h1>/);
   assert.doesNotMatch(source, /<h2>\{activeManageOpportunityLabel\} disiarkan<\/h2>/);
+  assert.doesNotMatch(source, /rekod \{activeManageOpportunityLabel\.toLowerCase\(\)\}/);
   assert.match(source, /const \[jobMonthFilter, setJobMonthFilter\] = useState\("all"\)/);
   assert.match(source, /const \[jobYearFilter, setJobYearFilter\] = useState\("all"\)/);
   assert.match(source, /className="applicant-table-toolbar hrm-manage-toolbar"/);

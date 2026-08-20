@@ -965,14 +965,6 @@ export default function AdminHrmPage() {
                 ) : null}
               </div>
               <section className="hrm-card hrm-table-card">
-                <header>
-                  <div>
-                    <p>
-                      {filteredJobs.length} rekod {activeManageOpportunityLabel.toLowerCase()}
-                      {isJobFilterActive ? ` daripada ${activeMetrics.jobs.length}` : ""}
-                    </p>
-                  </div>
-                </header>
                 <div className="applicant-table-toolbar hrm-manage-toolbar">
                   <div className="applicant-table-controls hrm-manage-filters">
                     <label>
