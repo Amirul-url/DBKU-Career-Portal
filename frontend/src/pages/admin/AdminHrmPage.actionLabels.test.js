@@ -68,3 +68,16 @@ test("HRM review can assign internship applications to a department dashboard", 
   assert.match(source, /<\/div>\s*<label className="hrm-assignment-target">/);
   assert.match(source, /disabled=\{!application \|\| isFinal \|\| isSavingAssessment \|\| !assignedDepartment\}/);
 });
+
+test("department decision tab replaces HRM review for department workspaces", () => {
+  assert.match(source, /const departmentDecisionTab = "Keputusan Bahagian"/);
+  assert.match(source, /profile_data: profileData/);
+  assert.match(source, /department_decision: decision/);
+  assert.match(source, /function DepartmentDecisionTab/);
+  assert.match(source, /Syor Bahagian/);
+  assert.match(source, /Pilih Sokong atau Tidak Sokong/);
+  assert.match(source, /Hantar ke HRM/);
+  assert.match(source, /\.\.\.\(isHrmWorkspace \? \[hrmReviewTab\] : \[\]\)/);
+  assert.match(source, /\.\.\.\(shouldShowDepartmentDecision \? \[departmentDecisionTab\] : \[\]\)/);
+  assert.match(source, /isReadOnly=\{isHrmWorkspace\}/);
+});

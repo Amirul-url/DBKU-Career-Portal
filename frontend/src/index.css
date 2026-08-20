@@ -10434,6 +10434,96 @@ body:has(.applicant-profile-page) {
   grid-row: 1;
 }
 
+.department-decision-panel {
+  max-width: 1120px;
+}
+
+.department-decision-form {
+  display: grid;
+  gap: 16px;
+  color: #020617;
+}
+
+.department-decision-form label {
+  display: grid;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.department-decision-form label span b {
+  color: #dc2626;
+}
+
+.department-decision-form select {
+  width: min(420px, 100%);
+  min-height: 40px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  padding: 0 12px;
+  color: #0f172a;
+  font: inherit;
+  font-weight: 600;
+}
+
+.department-decision-form textarea {
+  min-height: 330px;
+  border: 0;
+  border-radius: 0;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 34px,
+      #1f2937 35px
+    );
+  padding: 8px 0;
+  color: #0f172a;
+  font: inherit;
+  line-height: 35px;
+  resize: vertical;
+}
+
+.department-decision-form select:disabled,
+.department-decision-form textarea:disabled {
+  background-color: #f8fafc;
+  color: #334155;
+  opacity: 1;
+}
+
+.department-decision-form dl {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.department-decision-form dl div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.department-decision-form dt {
+  min-width: 88px;
+  color: #64748b;
+}
+
+.department-decision-form dd {
+  margin: 0;
+  color: #0f172a;
+}
+
+.department-decision-message {
+  margin: 0;
+  color: #047857;
+  font-size: 13px;
+  font-weight: 800;
+}
+
 @media (max-width: 900px) {
   .hrm-assessment-grid,
   .hrm-assessment-options {

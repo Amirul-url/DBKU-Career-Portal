@@ -85,6 +85,7 @@ const statusClass = {
   draft: "slate",
 };
 const hrmReviewTab = "Semakan HRM";
+const departmentDecisionTab = "Keputusan Bahagian";
 const dateValue = (value) =>
   value
     ? new Date(value).toLocaleDateString("ms-MY", {
@@ -322,6 +323,24 @@ export default function AdminHrmPage() {
     setApplications((current) =>
       current.map((item) => (String(item.id) === String(updatedApplication.id) ? updatedApplication : item)),
     );
+    return updatedApplication;
+  };
+  const saveDepartmentDecision = async (application, decision) => {
+    if (!application) return null;
+
+    const profileData = {
+      ...(application.profile_data || {}),
+      department_decision: decision,
+    };
+    const updatedApplication = await apiRequest(`/applications/${application.id}/`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ profile_data: profileData }),
+    });
+    setApplications((current) =>
+      current.map((item) => (String(item.id) === String(updatedApplication.id) ? updatedApplication : item)),
+    );
+    setNotice("Keputusan bahagian telah dihantar kepada HRM.");
     return updatedApplication;
   };
   const openJobView = (job) => {
@@ -1043,6 +1062,7 @@ export default function AdminHrmPage() {
           {panel === "application-detail" && (
             <InternshipApplicationDetailPage
               application={selectedApplication}
+              isHrmWorkspace={isHrmWorkspace}
               loading={loading}
               onBack={() => navigate(ADMIN_ROUTES.applications.internship)}
               onReview={async (id, status, options) => {
@@ -1050,6 +1070,8 @@ export default function AdminHrmPage() {
                 navigate(ADMIN_ROUTES.applications.internship);
               }}
               onSaveAssessment={saveHrmAssessment}
+              onSaveDepartmentDecision={saveDepartmentDecision}
+              user={user}
             />
           )}
         </section>
@@ -1905,8 +1927,114 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
     </div>
   );
 }
-function InternshipApplicationDetailPage({ application, loading, onBack, onReview, onSaveAssessment }) {
+function getSavedDepartmentDecision(application) {
+  return application?.profile_data?.department_decision || {};
+}
+function buildDepartmentDecisionPayload(application, user, values) {
+  const savedDecision = getSavedDepartmentDecision(application);
+  return {
+    ...savedDecision,
+    department: application?.assigned_department || user?.department || "",
+    recommendation: values.recommendation || "",
+    remarks: values.remarks || "",
+    submitted_at: new Date().toISOString(),
+    submitted_by: user?.full_name || user?.name || user?.email || "",
+  };
+}
+function DepartmentDecisionTab({ application, isReadOnly = false, onSaveDecision, user }) {
+  const savedDecision = getSavedDepartmentDecision(application);
+  const [recommendation, setRecommendation] = useState(savedDecision.recommendation || "");
+  const [remarks, setRemarks] = useState(savedDecision.remarks || "");
+  const [message, setMessage] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const canSubmit = Boolean(!isReadOnly && recommendation && remarks.trim() && application && onSaveDecision);
+
+  const submitDecision = async () => {
+    if (!canSubmit) {
+      setMessage("Sila pilih syor dan isi ulasan sebelum hantar kepada HRM.");
+      return;
+    }
+
+    setIsSaving(true);
+    setMessage("");
+    try {
+      await onSaveDecision(application, buildDepartmentDecisionPayload(application, user, { recommendation, remarks }));
+      setMessage("Keputusan bahagian telah dihantar kepada HRM.");
+    } catch (error) {
+      setMessage(error.message || "Keputusan bahagian gagal dihantar.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="department-decision-panel">
+      <div className="department-decision-form" aria-label="Borang keputusan bahagian">
+        <label>
+          <span>Syor Bahagian</span>
+          <select
+            disabled={isReadOnly}
+            value={recommendation}
+            onChange={(event) => setRecommendation(event.target.value)}
+          >
+            <option value="">Pilih Sokong atau Tidak Sokong</option>
+            <option value="Sokong">Sokong</option>
+            <option value="Tidak Sokong">Tidak Sokong</option>
+          </select>
+        </label>
+        <label>
+          <span>Ulasan <b>*</b></span>
+          <textarea
+            disabled={isReadOnly}
+            placeholder="Masukkan ulasan bahagian untuk semakan HRM"
+            value={remarks}
+            onChange={(event) => setRemarks(event.target.value)}
+          />
+        </label>
+        <dl>
+          <div>
+            <dt>Bahagian</dt>
+            <dd>{savedDecision.department || application?.assigned_department || user?.department || "Belum dihantar"}</dd>
+          </div>
+          <div>
+            <dt>Tarikh Hantar</dt>
+            <dd>{dateValue(savedDecision.submitted_at)}</dd>
+          </div>
+        </dl>
+        {message ? <p className="department-decision-message">{message}</p> : null}
+      </div>
+      {!isReadOnly ? (
+        <footer className="hrm-application-detail-actions">
+          <button
+            className="hrm-primary"
+            type="button"
+            disabled={isSaving || !canSubmit}
+            onClick={submitDecision}
+          >
+            <Icon>check_circle</Icon>
+            {isSaving ? "Menghantar..." : "Hantar ke HRM"}
+          </button>
+        </footer>
+      ) : null}
+    </div>
+  );
+}
+function InternshipApplicationDetailPage({
+  application,
+  isHrmWorkspace,
+  loading,
+  onBack,
+  onReview,
+  onSaveAssessment,
+  onSaveDepartmentDecision,
+  user,
+}) {
   const [activeTab, setActiveTab] = useState("Maklumat Peribadi Pemohon");
+  const shouldShowDepartmentDecision = !isHrmWorkspace || Boolean(application?.assigned_department);
+  const extraTabs = [
+    ...(isHrmWorkspace ? [hrmReviewTab] : []),
+    ...(shouldShowDepartmentDecision ? [departmentDecisionTab] : []),
+  ];
 
   return (
     <section className="hrm-application-detail-page">
@@ -1916,7 +2044,7 @@ function InternshipApplicationDetailPage({ application, loading, onBack, onRevie
         backLabel="Kembali"
         className="hrm-application-direct-panel"
         error={!loading && !application ? "Permohonan tidak ditemui." : ""}
-        extraTabs={[hrmReviewTab]}
+        extraTabs={extraTabs}
         loading={loading}
         onBack={onBack}
         onTabChange={setActiveTab}
@@ -1927,6 +2055,14 @@ function InternshipApplicationDetailPage({ application, loading, onBack, onRevie
               key={application?.id || "hrm-assessment"}
               onReview={onReview}
               onSaveAssessment={onSaveAssessment}
+            />
+          ) : tab === departmentDecisionTab ? (
+            <DepartmentDecisionTab
+              application={application}
+              isReadOnly={isHrmWorkspace}
+              key={application?.id || "department-decision"}
+              onSaveDecision={onSaveDepartmentDecision}
+              user={user}
             />
           ) : null
         }
