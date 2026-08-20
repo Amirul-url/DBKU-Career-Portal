@@ -188,6 +188,16 @@ const getJobDisplayStatus = (job) => {
   if (isOpen) return "active";
   return job.status === "open" ? "expired" : "closed";
 };
+function getJobDateParts(job) {
+  const value = job?.created_at || "";
+  if (!value) return { month: "", year: "" };
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return { month: "", year: "" };
+  return {
+    month: String(date.getMonth() + 1),
+    year: String(date.getFullYear()),
+  };
+}
 const getJobStatusText = (job) => {
   const displayStatus = getJobDisplayStatus(job);
   if (displayStatus === "active") return "Aktif";
@@ -228,7 +238,9 @@ export default function AdminHrmPage() {
   const [jobActionForm, setJobActionForm] = useState({});
   const [jobActionSaving, setJobActionSaving] = useState(false);
   const [jobDeleteTarget, setJobDeleteTarget] = useState(null);
+  const [jobMonthFilter, setJobMonthFilter] = useState("all");
   const [jobStatusFilter, setJobStatusFilter] = useState("all");
+  const [jobYearFilter, setJobYearFilter] = useState("all");
   const routeState = getAdminRouteState(location.pathname);
   const [jobForm, setJobForm] = useState(() => createEmptyJobForm(routeState.vacancyType || "job"));
   const panel = routeState.panel || "dashboard";
@@ -425,9 +437,18 @@ export default function AdminHrmPage() {
   const activeMetrics = dashboardMetrics[activeVacancyType] || dashboardMetrics.job;
   const overallMetrics = dashboardMetrics.all;
   const summaryMetrics = dashboardMetrics.summary;
-  const filteredJobs = activeMetrics.jobs.filter((job) =>
-    jobStatusFilter === "all" ? true : getJobDisplayStatus(job) === jobStatusFilter,
-  );
+  const jobYearOptions = Array.from(
+    new Set(activeMetrics.jobs.map((job) => getJobDateParts(job).year).filter(Boolean)),
+  ).sort((first, second) => Number(second) - Number(first));
+  const isJobFilterActive = jobMonthFilter !== "all" || jobStatusFilter !== "all" || jobYearFilter !== "all";
+  const filteredJobs = activeMetrics.jobs.filter((job) => {
+    const jobDate = getJobDateParts(job);
+    return (
+      (jobMonthFilter === "all" || jobDate.month === jobMonthFilter) &&
+      (jobYearFilter === "all" || jobDate.year === jobYearFilter) &&
+      (jobStatusFilter === "all" || getJobDisplayStatus(job) === jobStatusFilter)
+    );
+  });
   const filteredApplications = activeMetrics.applications;
   const selectedApplication = activeApplicationId
     ? activeMetrics.applications.find((application) => String(application.id) === String(activeApplicationId))
@@ -924,26 +945,50 @@ export default function AdminHrmPage() {
                   <div>
                     <p>
                       {filteredJobs.length} rekod {activeManageOpportunityLabel.toLowerCase()}
-                      {jobStatusFilter !== "all" ? ` daripada ${activeMetrics.jobs.length}` : ""}
+                      {isJobFilterActive ? ` daripada ${activeMetrics.jobs.length}` : ""}
                     </p>
                   </div>
-                  <label className="hrm-status-filter">
-                    <span>Status</span>
-                    <select value={jobStatusFilter} onChange={(event) => setJobStatusFilter(event.target.value)}>
-                      {jobStatusOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                  <div className="hrm-manage-tools">
+                    <label>
+                      <span>Bulan</span>
+                      <select value={jobMonthFilter} onChange={(event) => setJobMonthFilter(event.target.value)}>
+                        <option value="all">Semua</option>
+                        {monthFilterOptions.map((month) => (
+                          <option key={month.value} value={month.value}>
+                            {month.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      <span>Tahun</span>
+                      <select value={jobYearFilter} onChange={(event) => setJobYearFilter(event.target.value)}>
+                        <option value="all">Semua</option>
+                        {jobYearOptions.map((year) => (
+                          <option key={year} value={year}>
+                            {year}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      <span>Status</span>
+                      <select value={jobStatusFilter} onChange={(event) => setJobStatusFilter(event.target.value)}>
+                        {jobStatusOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
                 </header>
                 <JobManagementTable
                   jobs={filteredJobs}
                   applications={applications}
                   emptyMessage={
-                    activeMetrics.jobs.length && jobStatusFilter !== "all"
-                      ? `Tiada ${activeManageOpportunityLabel.toLowerCase()} dengan status ini.`
+                    activeMetrics.jobs.length && isJobFilterActive
+                      ? `Tiada ${activeManageOpportunityLabel.toLowerCase()} dengan filter ini.`
                       : ""
                   }
                   itemLabel={activeManageOpportunityLabel.toLowerCase()}

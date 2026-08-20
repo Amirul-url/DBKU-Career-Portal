@@ -208,6 +208,39 @@ a {
   box-shadow: 0 0 0 3px #dcf6e7;
 }
 
+.hrm-manage-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.hrm-manage-tools label {
+  display: grid;
+  gap: 5px;
+  color: #52685b;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.hrm-manage-tools select {
+  min-width: 148px;
+  border: 1px solid #cfe0d6;
+  border-radius: 7px;
+  background: #fff;
+  padding: 8px 28px 8px 10px;
+  color: #1c3024;
+  font: inherit;
+  font-size: 12px;
+  outline: 0;
+}
+
+.hrm-manage-tools select:focus {
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px #dcf6e7;
+}
+
 .hrm-sticky-topbar,
 .profile-content-header,
 .superadmin-topbar,
