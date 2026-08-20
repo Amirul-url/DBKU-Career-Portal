@@ -218,15 +218,15 @@ a {
 .applicant-table-controls.hrm-manage-filters {
   display: grid;
   grid-template-columns:
-    minmax(145px, 0.55fr)
-    minmax(135px, 0.5fr)
-    minmax(165px, 0.65fr)
+    145px
+    145px
+    170px
     auto;
   align-items: end;
   justify-content: stretch;
   gap: 12px;
-  width: min(100%, 760px);
-  max-width: 760px;
+  width: auto;
+  max-width: 100%;
   margin-left: auto;
 }
 
