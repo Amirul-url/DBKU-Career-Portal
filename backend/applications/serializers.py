@@ -21,6 +21,7 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
     passportPhotoFile = serializers.FileField(required=False, write_only=True)
     bankAccountFile = serializers.FileField(required=False, write_only=True)
     organizationFeedbackDocument = serializers.FileField(required=False, write_only=True)
+    clearOrganizationFeedbackDocument = serializers.BooleanField(required=False, write_only=True)
 
     document_upload_fields = {
         "universityLetterFile": ("internship_university_letter", "internship_university_letter_original_name"),
@@ -50,6 +51,7 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
             "passportPhotoFile",
             "bankAccountFile",
             "organizationFeedbackDocument",
+            "clearOrganizationFeedbackDocument",
             "profile_data",
             "latest_remark",
             "assigned_department",
@@ -150,9 +152,24 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
         instance.profile_data = profile_data
         return instance
 
+    def clear_organization_feedback_document(self, instance):
+        if instance.organization_feedback_document:
+            instance.organization_feedback_document.delete(save=False)
+        instance.organization_feedback_document = ""
+        instance.organization_feedback_document_original_name = ""
+
+        profile_data = dict(instance.profile_data or {})
+        profile_data.pop("organization_feedback", None)
+        documents = dict(profile_data.get("documents") or {})
+        documents.pop("organizationFeedbackDocument", None)
+        profile_data["documents"] = documents
+        instance.profile_data = profile_data
+        return instance
+
     def create(self, validated_data):
         user = self.context["request"].user
         uploads = self.pop_document_uploads(validated_data)
+        validated_data.pop("clearOrganizationFeedbackDocument", None)
         application = CandidateApplication.objects.create(applicant=user, **validated_data)
         self.apply_document_uploads(application, uploads)
         if uploads:
@@ -161,11 +178,14 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         uploads = self.pop_document_uploads(validated_data)
+        clear_organization_feedback_document = validated_data.pop("clearOrganizationFeedbackDocument", False)
         new_status = validated_data.get("status")
         if new_status == "submitted" and instance.status == "draft" and not instance.submitted_at:
             validated_data["submitted_at"] = timezone.now()
         instance = super().update(instance, validated_data)
+        if clear_organization_feedback_document:
+            self.clear_organization_feedback_document(instance)
         self.apply_document_uploads(instance, uploads)
-        if uploads:
+        if uploads or clear_organization_feedback_document:
             instance.save()
         return instance

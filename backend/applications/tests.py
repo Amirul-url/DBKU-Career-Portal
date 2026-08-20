@@ -159,6 +159,49 @@ class CandidateApplicationReferenceNoTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("organizationFeedbackDocument", response.data)
 
+    def test_hrm_can_clear_uploaded_organization_feedback_document(self):
+        applicant = self.create_applicant("clear-feedback-target@example.com")
+        hrm = self.user_model.objects.create_user(
+            username="hrm-clear-feedback@example.com",
+            email="hrm-clear-feedback@example.com",
+            password="Password123!",
+            role="admin",
+            department="Bahagian Pengurusan Sumber Manusia (HRM)",
+        )
+        application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=self.vacancy,
+            status="accepted",
+        )
+        uploaded_file = SimpleUploadedFile(
+            "maklumbalas.pdf",
+            b"%PDF-1.4\n% test\n",
+            content_type="application/pdf",
+        )
+        client = APIClient()
+        client.force_authenticate(user=hrm)
+        upload_response = client.patch(
+            f"/api/applications/{application.id}/",
+            {"organizationFeedbackDocument": uploaded_file},
+            format="multipart",
+        )
+
+        self.assertEqual(upload_response.status_code, 200)
+        self.assertIn("organizationFeedbackDocument", upload_response.data["document_files"])
+
+        clear_response = client.patch(
+            f"/api/applications/{application.id}/",
+            {"clearOrganizationFeedbackDocument": True},
+            format="json",
+        )
+
+        self.assertEqual(clear_response.status_code, 200)
+        self.assertNotIn("organizationFeedbackDocument", clear_response.data["document_files"])
+        application.refresh_from_db()
+        self.assertFalse(application.organization_feedback_document)
+        self.assertEqual(application.organization_feedback_document_original_name, "")
+        self.assertNotIn("organization_feedback", application.profile_data)
+
     def test_staff_application_list_excludes_drafts(self):
         applicant = self.create_applicant("hidden-draft@example.com")
         staff = self.user_model.objects.create_user(

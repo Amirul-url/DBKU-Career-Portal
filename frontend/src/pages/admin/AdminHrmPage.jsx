@@ -410,6 +410,20 @@ export default function AdminHrmPage() {
     setNotice("Dokumen maklumbalas organisasi telah dimuat naik.");
     return updatedApplication;
   };
+  const deleteOrganizationFeedbackDocument = async (application) => {
+    if (!application) return null;
+
+    const updatedApplication = await apiRequest(`/applications/${application.id}/`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clearOrganizationFeedbackDocument: true }),
+    });
+    setApplications((current) =>
+      current.map((item) => (String(item.id) === String(updatedApplication.id) ? updatedApplication : item)),
+    );
+    setNotice("Dokumen maklumbalas organisasi telah dihapuskan.");
+    return updatedApplication;
+  };
   const openJobView = (job) => {
     setSelectedJob(job);
     setJobModalMode("view");
@@ -1134,6 +1148,7 @@ export default function AdminHrmPage() {
               onSaveAssessment={saveHrmAssessment}
               onDepartmentDecisionSubmitted={() => navigate(ADMIN_ROUTES.applications.internship)}
               onSaveDepartmentDecision={saveDepartmentDecision}
+              onDeleteOrganizationFeedbackDocument={deleteOrganizationFeedbackDocument}
               onSaveOrganizationFeedbackDocument={saveOrganizationFeedbackDocument}
               user={user}
             />
@@ -2177,11 +2192,12 @@ function DepartmentDecisionTab({ application, isReadOnly = false, onSaveDecision
     </div>
   );
 }
-function OrganizationFeedbackTab({ application, onSaveDocument }) {
+function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument }) {
   const [feedbackFile, setFeedbackFile] = useState(null);
   const [fileInputKey, setFileInputKey] = useState(0);
   const [message, setMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const studentName = getInternshipStudentName(application);
   const identityNo = getInternshipStudentIdentityNo(application);
   const internshipPeriod = getInternshipPeriod(application);
@@ -2232,6 +2248,21 @@ function OrganizationFeedbackTab({ application, onSaveDocument }) {
     }
   };
 
+  const deleteUploadedDocument = async () => {
+    if (!existingFeedbackDocument?.url || !onDeleteDocument) return;
+
+    setIsDeleting(true);
+    setMessage("");
+    try {
+      await onDeleteDocument(application);
+      setMessage("Dokumen maklumbalas organisasi telah dihapuskan.");
+    } catch (error) {
+      setMessage(error.message || "Dokumen maklumbalas organisasi gagal dihapuskan.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="organization-feedback-panel">
       <section className="organization-feedback-upload" aria-label="Muat naik dokumen maklumbalas organisasi">
@@ -2275,10 +2306,21 @@ function OrganizationFeedbackTab({ application, onSaveDocument }) {
         </div>
       ) : null}
       {existingFeedbackDocument?.url ? (
-        <a className="organization-feedback-current" href={existingFeedbackDocument.url} target="_blank" rel="noreferrer">
-          <Icon>description</Icon>
-          {existingFeedbackDocument.name || "Dokumen maklumbalas organisasi"}
-        </a>
+        <div className="organization-feedback-current-row">
+          <a className="organization-feedback-current" href={existingFeedbackDocument.url} target="_blank" rel="noreferrer">
+            <Icon>description</Icon>
+            {existingFeedbackDocument.name || "Dokumen maklumbalas organisasi"}
+          </a>
+          <button
+            className="organization-feedback-remove"
+            type="button"
+            disabled={isDeleting}
+            onClick={deleteUploadedDocument}
+            aria-label="Hapus dokumen dimuat naik"
+          >
+            <Icon>delete</Icon>
+          </button>
+        </div>
       ) : null}
       {message ? <p className="organization-feedback-message">{message}</p> : null}
       <div className="organization-feedback-table-wrap">
@@ -2316,6 +2358,7 @@ function InternshipApplicationDetailPage({
   onReview,
   onSaveAssessment,
   onSaveDepartmentDecision,
+  onDeleteOrganizationFeedbackDocument,
   onSaveOrganizationFeedbackDocument,
   user,
 }) {
@@ -2361,6 +2404,7 @@ function InternshipApplicationDetailPage({
             <OrganizationFeedbackTab
               application={application}
               key={application?.id || "organization-feedback"}
+              onDeleteDocument={onDeleteOrganizationFeedbackDocument}
               onSaveDocument={onSaveOrganizationFeedbackDocument}
             />
           ) : null

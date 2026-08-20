@@ -190,6 +190,11 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /className="organization-feedback-selected-row"/);
   assert.match(source, /className="organization-feedback-remove"/);
   assert.match(source, /aria-label="Buang fail dipilih"/);
+  assert.match(source, /const deleteOrganizationFeedbackDocument = async/);
+  assert.match(source, /clearOrganizationFeedbackDocument: true/);
+  assert.match(source, /className="organization-feedback-current-row"/);
+  assert.match(source, /aria-label="Hapus dokumen dimuat naik"/);
+  assert.match(source, /onDeleteDocument=\{onDeleteOrganizationFeedbackDocument\}/);
   assert.match(source, /\{feedbackFile \? \(\s*<div className="organization-feedback-selected-row">/);
   assert.match(source, /const saveOrganizationFeedbackDocument = async/);
   assert.match(source, /organization_feedback:/);
