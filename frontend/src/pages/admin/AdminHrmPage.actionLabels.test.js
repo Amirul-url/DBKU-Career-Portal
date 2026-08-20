@@ -16,9 +16,22 @@ test("HRM application action labels match the department review workflow", () =>
 });
 
 test("HRM sidebar shows red badges for new application counts", () => {
-  assert.match(source, /getSidebarApplicationBadgeCount\(item, dashboardMetrics\)/);
+  assert.match(source, /getSidebarApplicationBadgeCount\(item, dashboardMetrics, \{ isHrmWorkspace \}\)/);
   assert.match(source, /className="hrm-sidebar-badge"/);
   assert.match(source, /aria-label=\{`\$\{sidebarBadgeCount\} permohonan baharu`\}/);
+});
+
+test("department sidebar and internship rows mark unsent department decisions as new", () => {
+  assert.match(source, /department_new: "Baharu"/);
+  assert.match(source, /department_new: "red"/);
+  assert.match(source, /function hasSubmittedDepartmentDecision\(application\)/);
+  assert.match(source, /function isDepartmentPendingDecisionApplication\(application\)/);
+  assert.match(source, /return Boolean\(application\?\.assigned_department && !hasSubmittedDepartmentDecision\(application\)\)/);
+  assert.match(source, /if \(!isHrmWorkspace\) \{\s*const applications = metrics\?\.\[item\.vacancyType\]\?\.applications \|\| \[\];\s*return applications\.filter\(isDepartmentPendingDecisionApplication\)\.length;\s*\}/);
+  assert.match(source, /function getInternshipApplicationDisplayStatus\(application, isHrmWorkspace\)/);
+  assert.match(source, /return "department_new"/);
+  assert.match(source, /isHrmWorkspace=\{isHrmWorkspace\}/);
+  assert.match(source, /<Badge status=\{displayStatus\} \/>/);
 });
 
 test("admin workspace labels and navigation follow the signed-in department", () => {

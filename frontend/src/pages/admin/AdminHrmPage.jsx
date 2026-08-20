@@ -61,6 +61,7 @@ function getAdminShellRoleLabel(user) {
 }
 
 const statusLabel = {
+  department_new: "Baharu",
   submitted: "Baharu",
   screening: "Saringan",
   incomplete: "Tidak Lengkap",
@@ -73,6 +74,7 @@ const statusLabel = {
   draft: "Draf",
 };
 const statusClass = {
+  department_new: "red",
   submitted: "blue",
   screening: "amber",
   incomplete: "amber",
@@ -214,8 +216,25 @@ function Badge({ status }) {
   );
 }
 
-function getSidebarApplicationBadgeCount(item, metrics) {
+function hasSubmittedDepartmentDecision(application) {
+  return Boolean(application?.profile_data?.department_decision?.submitted_at);
+}
+
+function isDepartmentPendingDecisionApplication(application) {
+  return Boolean(application?.assigned_department && !hasSubmittedDepartmentDecision(application));
+}
+
+function getInternshipApplicationDisplayStatus(application, isHrmWorkspace) {
+  if (!isHrmWorkspace && isDepartmentPendingDecisionApplication(application)) return "department_new";
+  return application?.status || "submitted";
+}
+
+function getSidebarApplicationBadgeCount(item, metrics, { isHrmWorkspace = true } = {}) {
   if (item?.panel !== "applications" || !item?.vacancyType) return 0;
+  if (!isHrmWorkspace) {
+    const applications = metrics?.[item.vacancyType]?.applications || [];
+    return applications.filter(isDepartmentPendingDecisionApplication).length;
+  }
   return metrics?.[item.vacancyType]?.new || 0;
 }
 
@@ -528,7 +547,7 @@ export default function AdminHrmPage() {
               );
             }
 
-            const sidebarBadgeCount = getSidebarApplicationBadgeCount(item, dashboardMetrics);
+            const sidebarBadgeCount = getSidebarApplicationBadgeCount(item, dashboardMetrics, { isHrmWorkspace });
 
             return (
               <NavLink
@@ -1045,6 +1064,7 @@ export default function AdminHrmPage() {
                 {activeVacancyType === "internship" ? (
                   <InternshipApplicationsPanel
                     applications={filteredApplications}
+                    isHrmWorkspace={isHrmWorkspace}
                     onView={(application) => navigate(`${ADMIN_ROUTES.applications.internship}/${application.id}`)}
                   />
                 ) : (
@@ -1574,7 +1594,7 @@ function InstitutionSearchFilter({ onChange, options, value }) {
     </div>
   );
 }
-function InternshipApplicationsPanel({ applications, onView }) {
+function InternshipApplicationsPanel({ applications, isHrmWorkspace, onView }) {
   const rowsPerPage = 5;
   const [institutionFilter, setInstitutionFilter] = useState("all");
   const [monthFilter, setMonthFilter] = useState("all");
@@ -1598,21 +1618,22 @@ function InternshipApplicationsPanel({ applications, onView }) {
     return Array.from(years).sort((first, second) => Number(second) - Number(first));
   }, [applications]);
   const statusOptions = useMemo(() => {
-    const statuses = new Set(applications.map((application) => application.status || "submitted"));
+    const statuses = new Set(applications.map((application) => getInternshipApplicationDisplayStatus(application, isHrmWorkspace)));
     return Array.from(statuses);
-  }, [applications]);
+  }, [applications, isHrmWorkspace]);
   const filteredApplications = useMemo(() => {
     return applications.filter((application) => {
       const institution = getInternshipInstitution(application);
       const applicationDate = getApplicationDateParts(application);
+      const displayStatus = getInternshipApplicationDisplayStatus(application, isHrmWorkspace);
       return (
         (institutionFilter === "all" || institution === institutionFilter) &&
         (monthFilter === "all" || applicationDate.month === monthFilter) &&
         (yearFilter === "all" || applicationDate.year === yearFilter) &&
-        (statusFilter === "all" || (application.status || "submitted") === statusFilter)
+        (statusFilter === "all" || displayStatus === statusFilter)
       );
     });
-  }, [applications, institutionFilter, monthFilter, statusFilter, yearFilter]);
+  }, [applications, institutionFilter, isHrmWorkspace, monthFilter, statusFilter, yearFilter]);
   const totalPages = Math.max(1, Math.ceil(filteredApplications.length / rowsPerPage));
   const activePage = Math.min(currentPage, totalPages);
   const startIndex = (activePage - 1) * rowsPerPage;
@@ -1713,14 +1734,16 @@ function InternshipApplicationsPanel({ applications, onView }) {
           </thead>
           <tbody>
             {visibleApplications.length ? (
-              visibleApplications.map((application) => (
+              visibleApplications.map((application) => {
+                const displayStatus = getInternshipApplicationDisplayStatus(application, isHrmWorkspace);
+                return (
                   <tr key={application.id}>
                     <td>{formatReferenceNo(application)}</td>
                     <td className="hrm-internship-candidate-name">{application.applicant_name || "Pemohon"}</td>
                     <td>{getInternshipInstitution(application)}</td>
                     <td>{dateValue(getApplicationDateValue(application))}</td>
                     <td>
-                      <Badge status={application.status} />
+                      <Badge status={displayStatus} />
                     </td>
                     <td>
                       <div className="hrm-actions hrm-internship-actions">
@@ -1731,7 +1754,8 @@ function InternshipApplicationsPanel({ applications, onView }) {
                       </div>
                     </td>
                   </tr>
-              ))
+                );
+              })
             ) : (
               <tr>
                 <td className="applicant-table-empty" colSpan="6">
