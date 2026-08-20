@@ -2179,6 +2179,7 @@ function DepartmentDecisionTab({ application, isReadOnly = false, onSaveDecision
 }
 function OrganizationFeedbackTab({ application, onSaveDocument }) {
   const [feedbackFile, setFeedbackFile] = useState(null);
+  const [fileInputKey, setFileInputKey] = useState(0);
   const [message, setMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const studentName = getInternshipStudentName(application);
@@ -2187,10 +2188,34 @@ function OrganizationFeedbackTab({ application, onSaveDocument }) {
   const program = getInternshipProgram(application);
   const placementDepartment = getInternshipPlacementDepartment(application);
   const existingFeedbackDocument = application?.document_files?.organizationFeedbackDocument;
+  const isPdfFile = (file) => file?.type === "application/pdf" || file?.name?.toLowerCase().endsWith(".pdf");
+
+  const clearFeedbackFile = () => {
+    setFeedbackFile(null);
+    setFileInputKey((current) => current + 1);
+  };
+
+  const selectFeedbackFile = (event) => {
+    const selectedFile = event.target.files?.[0] || null;
+    if (!selectedFile) return;
+
+    if (!isPdfFile(selectedFile)) {
+      clearFeedbackFile();
+      setMessage("Format fail mesti PDF sahaja.");
+      return;
+    }
+
+    setMessage("");
+    setFeedbackFile(selectedFile);
+  };
 
   const saveDocument = async () => {
     if (!feedbackFile || !onSaveDocument) {
       setMessage("Sila pilih dokumen maklumbalas organisasi terlebih dahulu.");
+      return;
+    }
+    if (!isPdfFile(feedbackFile)) {
+      setMessage("Format fail mesti PDF sahaja.");
       return;
     }
 
@@ -2198,7 +2223,7 @@ function OrganizationFeedbackTab({ application, onSaveDocument }) {
     setMessage("");
     try {
       await onSaveDocument(application, feedbackFile);
-      setFeedbackFile(null);
+      clearFeedbackFile();
       setMessage("Dokumen maklumbalas organisasi telah dimuat naik.");
     } catch (error) {
       setMessage(error.message || "Dokumen maklumbalas organisasi gagal dimuat naik.");
@@ -2212,26 +2237,40 @@ function OrganizationFeedbackTab({ application, onSaveDocument }) {
       <section className="organization-feedback-upload" aria-label="Muat naik dokumen maklumbalas organisasi">
         <div>
           <strong>Dokumen maklumbalas organisasi (DBKU)</strong>
-          <p>Muat naik dokumen maklumbalas organisasi untuk dihantar kepada pemohon.</p>
+          <p>Muat naik dokumen maklumbalas organisasi untuk dihantar kepada pemohon. Format fail mesti PDF sahaja.</p>
         </div>
-        <label className="organization-feedback-file">
-          <Icon>upload_file</Icon>
-          <span>{feedbackFile?.name || "Pilih dokumen"}</span>
-          <input
-            type="file"
-            accept="application/pdf,image/png,image/jpeg"
-            onChange={(event) => setFeedbackFile(event.target.files?.[0] || null)}
-          />
-        </label>
-        <button
-          className="organization-feedback-submit"
-          type="button"
-          disabled={isSaving || !feedbackFile}
-          onClick={saveDocument}
-        >
-          <Icon>upload</Icon>
-          {isSaving ? "Memuat naik..." : "Muat naik"}
-        </button>
+        <div className="organization-feedback-actions">
+          <label className="organization-feedback-file">
+            <Icon>upload_file</Icon>
+            <span>Pilih PDF</span>
+            <input
+              key={fileInputKey}
+              type="file"
+              accept="application/pdf,.pdf"
+              onChange={selectFeedbackFile}
+            />
+          </label>
+          {feedbackFile ? (
+            <>
+              <div className="organization-feedback-selected">
+                <Icon>description</Icon>
+                <span>{feedbackFile.name}</span>
+                <button type="button" onClick={clearFeedbackFile} aria-label="Buang fail dipilih">
+                  <Icon>delete</Icon>
+                </button>
+              </div>
+              <button
+                className="organization-feedback-submit"
+                type="button"
+                disabled={isSaving}
+                onClick={saveDocument}
+              >
+                <Icon>upload</Icon>
+                {isSaving ? "Memuat naik..." : "Muat naik"}
+              </button>
+            </>
+          ) : null}
+        </div>
       </section>
       {existingFeedbackDocument?.url ? (
         <a className="organization-feedback-current" href={existingFeedbackDocument.url} target="_blank" rel="noreferrer">

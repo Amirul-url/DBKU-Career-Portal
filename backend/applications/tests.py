@@ -128,6 +128,37 @@ class CandidateApplicationReferenceNoTests(TestCase):
         self.assertEqual(response.data["document_files"]["universityLetterFile"]["name"], "surat-institusi.pdf")
         self.assertIn("/media/internship_documents/", response.data["document_files"]["universityLetterFile"]["url"])
 
+    def test_organization_feedback_document_must_be_pdf(self):
+        applicant = self.create_applicant("feedback-target@example.com")
+        hrm = self.user_model.objects.create_user(
+            username="hrm-feedback@example.com",
+            email="hrm-feedback@example.com",
+            password="Password123!",
+            role="admin",
+            department="Bahagian Pengurusan Sumber Manusia (HRM)",
+        )
+        application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=self.vacancy,
+            status="accepted",
+        )
+        uploaded_file = SimpleUploadedFile(
+            "maklumbalas.png",
+            b"not a pdf",
+            content_type="image/png",
+        )
+        client = APIClient()
+        client.force_authenticate(user=hrm)
+
+        response = client.patch(
+            f"/api/applications/{application.id}/",
+            {"organizationFeedbackDocument": uploaded_file},
+            format="multipart",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("organizationFeedbackDocument", response.data)
+
     def test_staff_application_list_excludes_drafts(self):
         applicant = self.create_applicant("hidden-draft@example.com")
         staff = self.user_model.objects.create_user(

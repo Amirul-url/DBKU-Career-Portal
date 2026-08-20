@@ -10629,10 +10629,19 @@ body:has(.applicant-profile-page) {
   line-height: 1.45;
 }
 
+.organization-feedback-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  min-width: 0;
+}
+
 .organization-feedback-file {
   position: relative;
   display: inline-flex;
-  min-width: 220px;
+  min-width: 160px;
   max-width: 360px;
   min-height: 44px;
   align-items: center;
@@ -10660,6 +10669,42 @@ body:has(.applicant-profile-page) {
   inset: 0;
   cursor: pointer;
   opacity: 0;
+}
+
+.organization-feedback-selected {
+  display: inline-flex;
+  max-width: 300px;
+  min-height: 44px;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 0 8px 0 12px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.organization-feedback-selected > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.organization-feedback-selected button {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fff1f2;
+  color: #dc2626;
+  cursor: pointer;
 }
 
 .organization-feedback-submit {
@@ -10768,9 +10813,18 @@ body:has(.applicant-profile-page) {
     flex-direction: column;
   }
 
+  .organization-feedback-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .organization-feedback-file {
     max-width: none;
     width: 100%;
+  }
+
+  .organization-feedback-selected {
+    max-width: none;
   }
 }
 

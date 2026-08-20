@@ -181,9 +181,14 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /\.\.\.\(isHrmWorkspace \? \[organizationFeedbackTab\] : \[\]\)/);
   assert.match(source, /function OrganizationFeedbackTab/);
   assert.match(source, /Dokumen maklumbalas organisasi \(DBKU\)/);
-  assert.match(source, /Muat naik dokumen maklumbalas organisasi untuk dihantar kepada pemohon/);
+  assert.match(source, /Muat naik dokumen maklumbalas organisasi untuk dihantar kepada pemohon\. Format fail mesti PDF sahaja\./);
+  assert.match(source, /Format fail mesti PDF sahaja\./);
   assert.match(source, /type="file"/);
-  assert.match(source, /accept="application\/pdf,image\/png,image\/jpeg"/);
+  assert.match(source, /accept="application\/pdf,\.pdf"/);
+  assert.match(source, /const isPdfFile = \(file\) => file\?\.type === "application\/pdf" \|\| file\?\.name\?\.toLowerCase\(\)\.endsWith\("\.pdf"\)/);
+  assert.match(source, /const clearFeedbackFile = \(\) => \{/);
+  assert.match(source, /aria-label="Buang fail dipilih"/);
+  assert.match(source, /\{feedbackFile \? \(\s*<>/);
   assert.match(source, /const saveOrganizationFeedbackDocument = async/);
   assert.match(source, /organization_feedback:/);
   assert.match(source, /payload\.append\("organizationFeedbackDocument", file\)/);

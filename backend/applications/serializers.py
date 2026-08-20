@@ -96,6 +96,13 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("Format profile_data tidak sah.") from error
         return value
 
+    def validate_organizationFeedbackDocument(self, value):
+        is_pdf_content = getattr(value, "content_type", "") == "application/pdf"
+        is_pdf_name = value.name.lower().endswith(".pdf")
+        if not (is_pdf_content or is_pdf_name):
+            raise serializers.ValidationError("Format fail mesti PDF sahaja.")
+        return value
+
     def validate(self, attrs):
         attrs = super().validate(attrs)
         if self.instance:
