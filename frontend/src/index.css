@@ -10267,7 +10267,14 @@ body:has(.applicant-profile-page) {
 
 .hrm-internship-applications-table th:nth-child(1),
 .hrm-internship-applications-table td:nth-child(1) {
-  width: 150px;
+  width: 170px;
+  white-space: nowrap;
+}
+
+.hrm-reference-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   white-space: nowrap;
 }
 

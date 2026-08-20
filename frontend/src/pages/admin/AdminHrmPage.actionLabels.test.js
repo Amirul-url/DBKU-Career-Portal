@@ -26,19 +26,26 @@ test("HRM sidebar shows red badges for new application counts", () => {
 test("department and HRM internship rows mark pending decision tasks as new", () => {
   assert.match(source, /department_new: "Baharu"/);
   assert.match(source, /hrm_department_new: "Baharu"/);
+  assert.match(source, /hrm_department_accepted: "Diterima Bahagian"/);
+  assert.match(source, /hrm_department_rejected: "Ditolak Bahagian"/);
   assert.match(source, /department_new: "red"/);
   assert.match(source, /hrm_department_new: "red"/);
+  assert.match(source, /hrm_department_accepted: "green"/);
   assert.match(source, /function hasSubmittedDepartmentDecision\(application\)/);
   assert.match(source, /function isDepartmentPendingDecisionApplication\(application\)/);
   assert.match(source, /function isHrmPendingDepartmentDecisionApplication\(application\)/);
+  assert.match(source, /function getHrmDepartmentDecisionStatus\(application\)/);
   assert.match(source, /return Boolean\(application\?\.assigned_department && !hasSubmittedDepartmentDecision\(application\)\)/);
   assert.match(source, /return Boolean\(hasSubmittedDepartmentDecision\(application\) && \["accepted", "rejected"\]\.includes\(application\?\.status\)\)/);
   assert.match(source, /const applications = metrics\?\.\[item\.vacancyType\]\?\.applications \|\| \[\]/);
   assert.match(source, /if \(!isHrmWorkspace\) \{\s*return applications\.filter\(isDepartmentPendingDecisionApplication\)\.length;\s*\}/);
   assert.match(source, /function getInternshipApplicationDisplayStatus\(application, isHrmWorkspace\)/);
-  assert.match(source, /return "hrm_department_new"/);
+  assert.match(source, /return getHrmDepartmentDecisionStatus\(application\)/);
   assert.match(source, /return "department_new"/);
   assert.match(source, /isHrmWorkspace=\{isHrmWorkspace\}/);
+  assert.match(source, /const showHrmNewBadge = isHrmWorkspace && isHrmPendingDepartmentDecisionApplication\(application\)/);
+  assert.match(source, /className="hrm-reference-cell"/);
+  assert.match(source, /<Badge status="hrm_department_new" \/>/);
   assert.match(source, /<Badge status=\{displayStatus\} \/>/);
 });
 

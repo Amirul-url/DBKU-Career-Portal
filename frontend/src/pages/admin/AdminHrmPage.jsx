@@ -63,6 +63,8 @@ function getAdminShellRoleLabel(user) {
 const statusLabel = {
   department_new: "Baharu",
   hrm_department_new: "Baharu",
+  hrm_department_accepted: "Diterima Bahagian",
+  hrm_department_rejected: "Ditolak Bahagian",
   submitted: "Baharu",
   screening: "Saringan",
   incomplete: "Tidak Lengkap",
@@ -77,6 +79,8 @@ const statusLabel = {
 const statusClass = {
   department_new: "red",
   hrm_department_new: "red",
+  hrm_department_accepted: "green",
+  hrm_department_rejected: "red",
   submitted: "blue",
   screening: "amber",
   incomplete: "amber",
@@ -230,8 +234,14 @@ function isHrmPendingDepartmentDecisionApplication(application) {
   return Boolean(hasSubmittedDepartmentDecision(application) && ["accepted", "rejected"].includes(application?.status));
 }
 
+function getHrmDepartmentDecisionStatus(application) {
+  if (application?.status === "accepted") return "hrm_department_accepted";
+  if (application?.status === "rejected") return "hrm_department_rejected";
+  return application?.status || "submitted";
+}
+
 function getInternshipApplicationDisplayStatus(application, isHrmWorkspace) {
-  if (isHrmWorkspace && isHrmPendingDepartmentDecisionApplication(application)) return "hrm_department_new";
+  if (isHrmWorkspace && isHrmPendingDepartmentDecisionApplication(application)) return getHrmDepartmentDecisionStatus(application);
   if (!isHrmWorkspace && isDepartmentPendingDecisionApplication(application)) return "department_new";
   return application?.status || "submitted";
 }
@@ -1746,9 +1756,15 @@ function InternshipApplicationsPanel({ applications, isHrmWorkspace, onView }) {
             {visibleApplications.length ? (
               visibleApplications.map((application) => {
                 const displayStatus = getInternshipApplicationDisplayStatus(application, isHrmWorkspace);
+                const showHrmNewBadge = isHrmWorkspace && isHrmPendingDepartmentDecisionApplication(application);
                 return (
                   <tr key={application.id}>
-                    <td>{formatReferenceNo(application)}</td>
+                    <td>
+                      <div className="hrm-reference-cell">
+                        <span>{formatReferenceNo(application)}</span>
+                        {showHrmNewBadge ? <Badge status="hrm_department_new" /> : null}
+                      </div>
+                    </td>
                     <td className="hrm-internship-candidate-name">{application.applicant_name || "Pemohon"}</td>
                     <td>{getInternshipInstitution(application)}</td>
                     <td>{dateValue(getApplicationDateValue(application))}</td>
