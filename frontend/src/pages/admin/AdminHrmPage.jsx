@@ -242,6 +242,7 @@ export default function AdminHrmPage() {
       item.panel === "dashboard" ||
       item.panel === "applicants" ||
       (item.kind === "section" && ["PEMOHON", "JAWATAN DBKU", "LATIHAN INDUSTRI"].includes(item.label)) ||
+      (item.panel === "manage" && item.vacancyType === "job") ||
       (item.panel === "applications" && ["job", "internship"].includes(item.vacancyType))
     ),
     [isHrmWorkspace],
@@ -905,15 +906,17 @@ export default function AdminHrmPage() {
                   <h1 className="text-3xl font-bold text-slate-950">Senarai {activeOpportunityLabel}</h1>
                   <p>Semak semua iklan {activeOpportunityLabel.toLowerCase()} yang telah disiarkan.</p>
                 </div>
-                <button
-                  className="hrm-primary"
-                  type="button"
-                  onClick={() => {
-                    openCreatePanel(activeVacancyType === "internship" ? "Tambah Latihan Industri" : "Tambah Jawatan DBKU", activeVacancyType);
-                  }}
-                >
-                  <Icon>add_circle</Icon>Tambah {activeOpportunityLabel}
-                </button>
+                {isHrmWorkspace ? (
+                  <button
+                    className="hrm-primary"
+                    type="button"
+                    onClick={() => {
+                      openCreatePanel(activeVacancyType === "internship" ? "Tambah Latihan Industri" : "Tambah Jawatan DBKU", activeVacancyType);
+                    }}
+                  >
+                    <Icon>add_circle</Icon>Tambah {activeOpportunityLabel}
+                  </button>
+                ) : null}
               </div>
               <section className="hrm-card hrm-table-card">
                 <header>
@@ -944,8 +947,8 @@ export default function AdminHrmPage() {
                       : ""
                   }
                   itemLabel={activeOpportunityLabel.toLowerCase()}
-                  onDelete={requestDeleteJob}
-                  onEdit={openJobEdit}
+                  onDelete={isHrmWorkspace ? requestDeleteJob : null}
+                  onEdit={isHrmWorkspace ? openJobEdit : null}
                   onView={openJobView}
                 />
               </section>
@@ -1253,12 +1256,16 @@ function JobManagementTable({ jobs, applications, emptyMessage = "", itemLabel =
                     <button className="view" type="button" aria-label="Lihat" title="Lihat" onClick={() => onView(job)}>
                       <Icon>visibility</Icon>
                     </button>
-                    <button className="edit" type="button" aria-label="Kemaskini" title="Kemaskini" onClick={() => onEdit(job)}>
-                      <Icon>edit</Icon>
-                    </button>
-                    <button className="delete" type="button" aria-label="Padam" title="Padam" onClick={() => onDelete(job)}>
-                      <Icon>delete</Icon>
-                    </button>
+                    {onEdit ? (
+                      <button className="edit" type="button" aria-label="Kemaskini" title="Kemaskini" onClick={() => onEdit(job)}>
+                        <Icon>edit</Icon>
+                      </button>
+                    ) : null}
+                    {onDelete ? (
+                      <button className="delete" type="button" aria-label="Padam" title="Padam" onClick={() => onDelete(job)}>
+                        <Icon>delete</Icon>
+                      </button>
+                    ) : null}
                   </div>
                 </td>
               </tr>

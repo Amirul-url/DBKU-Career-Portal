@@ -27,9 +27,18 @@ test("admin workspace labels and navigation follow the signed-in department", ()
   assert.match(source, /isHrmWorkspace \? adminNavItems : adminNavItems\.filter/);
   assert.match(source, /item\.panel === "applicants"/);
   assert.match(source, /\["PEMOHON", "JAWATAN DBKU", "LATIHAN INDUSTRI"\]\.includes\(item\.label\)/);
+  assert.match(source, /item\.panel === "manage" && item\.vacancyType === "job"/);
   assert.match(source, /\["job", "internship"\]\.includes\(item\.vacancyType\)/);
   assert.doesNotMatch(source, />Pentadbir HRM<\/p>/);
   assert.doesNotMatch(source, />Papan pemuka HRM<\/h1>/);
+});
+
+test("department job management is read-only", () => {
+  assert.match(source, /onDelete=\{isHrmWorkspace \? requestDeleteJob : null\}/);
+  assert.match(source, /onEdit=\{isHrmWorkspace \? openJobEdit : null\}/);
+  assert.match(source, /\{isHrmWorkspace \? \(\s*<button[\s\S]*Tambah \{activeOpportunityLabel\}/);
+  assert.match(source, /\{onEdit \? \(/);
+  assert.match(source, /\{onDelete \? \(/);
 });
 
 test("department dashboards keep the HRM layout without HRM-only workflow links", () => {
