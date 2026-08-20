@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   apiRequest,
@@ -2193,8 +2193,11 @@ function DepartmentDecisionTab({ application, isReadOnly = false, onSaveDecision
   );
 }
 function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument }) {
+  const existingFeedbackDocument = application?.document_files?.organizationFeedbackDocument;
   const [feedbackFile, setFeedbackFile] = useState(null);
   const [fileInputKey, setFileInputKey] = useState(0);
+  const feedbackFileInputRef = useRef(null);
+  const [showDocumentRow, setShowDocumentRow] = useState(Boolean(existingFeedbackDocument?.url));
   const [message, setMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -2203,12 +2206,19 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
   const internshipPeriod = getInternshipPeriod(application);
   const program = getInternshipProgram(application);
   const placementDepartment = getInternshipPlacementDepartment(application);
-  const existingFeedbackDocument = application?.document_files?.organizationFeedbackDocument;
   const isPdfFile = (file) => file?.type === "application/pdf" || file?.name?.toLowerCase().endsWith(".pdf");
+
+  const addDocumentRow = () => {
+    setMessage("");
+    setShowDocumentRow(true);
+  };
 
   const clearFeedbackFile = () => {
     setFeedbackFile(null);
     setFileInputKey((current) => current + 1);
+    if (feedbackFileInputRef.current) {
+      feedbackFileInputRef.current.value = "";
+    }
   };
 
   const selectFeedbackFile = (event) => {
@@ -2223,14 +2233,19 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
 
     setMessage("");
     setFeedbackFile(selectedFile);
+    void uploadDocument(selectedFile);
   };
 
-  const saveDocument = async () => {
-    if (!feedbackFile || !onSaveDocument) {
+  const uploadFeedbackFile = () => {
+    feedbackFileInputRef.current?.click();
+  };
+
+  const uploadDocument = async (fileToUpload) => {
+    if (!fileToUpload || !onSaveDocument) {
       setMessage("Sila pilih dokumen maklumbalas organisasi terlebih dahulu.");
       return;
     }
-    if (!isPdfFile(feedbackFile)) {
+    if (!isPdfFile(fileToUpload)) {
       setMessage("Format fail mesti PDF sahaja.");
       return;
     }
@@ -2238,7 +2253,7 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
     setIsSaving(true);
     setMessage("");
     try {
-      await onSaveDocument(application, feedbackFile);
+      await onSaveDocument(application, fileToUpload);
       clearFeedbackFile();
       setMessage("Dokumen maklumbalas organisasi telah dimuat naik.");
     } catch (error) {
@@ -2248,7 +2263,13 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
     }
   };
 
-  const deleteUploadedDocument = async () => {
+  const deleteFeedbackFile = async () => {
+    if (feedbackFile) {
+      clearFeedbackFile();
+      setMessage("Fail dipilih telah dibuang.");
+      return;
+    }
+
     if (!existingFeedbackDocument?.url || !onDeleteDocument) return;
 
     setIsDeleting(true);
@@ -2263,66 +2284,144 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
     }
   };
 
+  const removeDocumentRow = async () => {
+    if (existingFeedbackDocument?.url) {
+      await deleteFeedbackFile();
+    }
+
+    clearFeedbackFile();
+    setShowDocumentRow(false);
+    setMessage("");
+  };
+
+  const uploadedFileLabel =
+    existingFeedbackDocument?.name || application?.profile_data?.organization_feedback?.file_name || "Dokumen maklumbalas organisasi";
+  const uploadedFileSize = existingFeedbackDocument?.size || application?.profile_data?.organization_feedback?.file_size || "";
+  const hasDocumentRow = showDocumentRow || Boolean(existingFeedbackDocument?.url) || Boolean(feedbackFile);
+
   return (
     <div className="organization-feedback-panel">
-      <section className="organization-feedback-upload" aria-label="Muat naik dokumen maklumbalas organisasi">
-        <div className="organization-feedback-copy">
-          <strong>Dokumen maklumbalas organisasi (DBKU)</strong>
-          <p>Muat naik dokumen maklumbalas organisasi untuk dihantar kepada pemohon. Format fail mesti PDF sahaja.</p>
+      <section className="organization-feedback-section" aria-label="Dokumen maklumbalas organisasi">
+        <div className="organization-feedback-section-header">
+          <div className="organization-feedback-section-title">
+            <h3>Dokumen maklumbalas organisasi (DBKU)</h3>
+            <p>PDF sahaja. Saiz fail maksimum 15MB.</p>
+          </div>
+          <div className="organization-feedback-section-actions">
+            <button
+              className="organization-feedback-add"
+              type="button"
+              disabled={isSaving || isDeleting || showDocumentRow}
+              onClick={addDocumentRow}
+            >
+              <Icon>add</Icon>
+              <span>Tambah Dokumen</span>
+            </button>
+          </div>
         </div>
-        <div className="organization-feedback-actions">
-          <label className="organization-feedback-file">
-            <Icon>upload_file</Icon>
-            <span>Pilih PDF</span>
-            <input
-              key={fileInputKey}
-              type="file"
-              accept="application/pdf,.pdf"
-              onChange={selectFeedbackFile}
-            />
-          </label>
+        {message ? <p className="organization-feedback-message">{message}</p> : null}
+        <div className="organization-feedback-table-wrap">
+          <table className="organization-feedback-document-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Format</th>
+                <th>Lampiran</th>
+                <th>Tindakan</th>
+              </tr>
+            </thead>
+            <tbody>
+              {hasDocumentRow ? (
+                <tr className={feedbackFile ? "organization-feedback-row-selected" : ""}>
+                  <td>1</td>
+                  <td>PDF</td>
+                  <td>
+                    <div className="organization-feedback-attachment-cell">
+                      {feedbackFile ? (
+                        <div className="organization-feedback-attachment-chip">
+                          <Icon>description</Icon>
+                          <span>{feedbackFile.name}</span>
+                          <button type="button" onClick={clearFeedbackFile} aria-label="Buang fail dipilih">
+                            <Icon>delete</Icon>
+                          </button>
+                        </div>
+                      ) : existingFeedbackDocument?.url ? (
+                        <>
+                          <a
+                            className="organization-feedback-attachment-link"
+                            href={existingFeedbackDocument.url}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            <Icon>description</Icon>
+                            <span>{uploadedFileLabel}</span>
+                          </a>
+                          {uploadedFileSize ? (
+                            <p className="organization-feedback-attachment-size">{uploadedFileSize}</p>
+                          ) : null}
+                        </>
+                      ) : (
+                        <p className="organization-feedback-empty">Tiada fail dipilih.</p>
+                      )}
+                      <p className="organization-feedback-attachment-hint">Saiz fail maksimum: 15MB</p>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="organization-feedback-row-actions">
+                      <button
+                        className="organization-feedback-icon-button organization-feedback-icon-button-upload"
+                        type="button"
+                        disabled={isSaving || isDeleting}
+                        onClick={uploadFeedbackFile}
+                        aria-label="Pilih fail"
+                        title="Pilih fail"
+                      >
+                        <Icon>upload</Icon>
+                      </button>
+                      {existingFeedbackDocument?.url ? (
+                        <a
+                          className="organization-feedback-icon-button organization-feedback-icon-button-download"
+                          href={existingFeedbackDocument.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          aria-label="Muat turun fail"
+                          title="Muat turun fail"
+                        >
+                          <Icon>download</Icon>
+                        </a>
+                      ) : null}
+                      {(feedbackFile || existingFeedbackDocument?.url) ? (
+                        <button
+                          className="organization-feedback-icon-button organization-feedback-icon-button-remove-file"
+                          type="button"
+                          disabled={isSaving || isDeleting}
+                          onClick={deleteFeedbackFile}
+                          aria-label="Buang fail"
+                          title="Buang fail"
+                        >
+                          <Icon>close</Icon>
+                        </button>
+                      ) : null}
+                      <button
+                        className="organization-feedback-row-delete"
+                        type="button"
+                        disabled={isSaving || isDeleting}
+                        onClick={removeDocumentRow}
+                      >
+                        Padam baris
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                <tr className="organization-feedback-empty-row">
+                  <td colSpan={4}>--Tiada rekod--</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </section>
-      {feedbackFile ? (
-        <div className="organization-feedback-selected-row">
-          <div className="organization-feedback-selected">
-            <Icon>description</Icon>
-            <span>{feedbackFile.name}</span>
-          </div>
-          <div className="organization-feedback-selected-actions">
-            <button className="organization-feedback-remove" type="button" onClick={clearFeedbackFile} aria-label="Buang fail dipilih">
-              <Icon>delete</Icon>
-            </button>
-            <button
-              className="organization-feedback-submit"
-              type="button"
-              disabled={isSaving}
-              onClick={saveDocument}
-            >
-              <Icon>upload</Icon>
-              {isSaving ? "Memuat naik..." : "Muat naik"}
-            </button>
-          </div>
-        </div>
-      ) : null}
-      {existingFeedbackDocument?.url ? (
-        <div className="organization-feedback-current-row">
-          <a className="organization-feedback-current" href={existingFeedbackDocument.url} target="_blank" rel="noreferrer">
-            <Icon>description</Icon>
-            {existingFeedbackDocument.name || "Dokumen maklumbalas organisasi"}
-          </a>
-          <button
-            className="organization-feedback-remove"
-            type="button"
-            disabled={isDeleting}
-            onClick={deleteUploadedDocument}
-            aria-label="Hapus dokumen dimuat naik"
-          >
-            <Icon>delete</Icon>
-          </button>
-        </div>
-      ) : null}
-      {message ? <p className="organization-feedback-message">{message}</p> : null}
       <div className="organization-feedback-table-wrap">
         <table className="organization-feedback-table">
           <thead>
@@ -2346,6 +2445,14 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
           </tbody>
         </table>
       </div>
+      <input
+        key={fileInputKey}
+        ref={feedbackFileInputRef}
+        type="file"
+        accept="application/pdf,.pdf"
+        className="organization-feedback-hidden-input"
+        onChange={selectFeedbackFile}
+      />
     </div>
   );
 }
