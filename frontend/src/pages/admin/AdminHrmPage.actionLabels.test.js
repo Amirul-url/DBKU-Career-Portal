@@ -45,7 +45,7 @@ test("department and HRM internship rows mark pending decision tasks as new", ()
   assert.match(source, /isHrmWorkspace=\{isHrmWorkspace\}/);
   assert.match(source, /const showHrmNewBadge = isHrmWorkspace && isHrmPendingDepartmentDecisionApplication\(application\)/);
   assert.match(source, /className="hrm-reference-cell"/);
-  assert.match(source, /<Badge status="hrm_department_new" \/>/);
+  assert.match(source, /<Badge status="hrm_department_new" \/> : null\}\s*<span>\{formatReferenceNo\(application\)\}<\/span>/);
   assert.match(source, /<Badge status=\{displayStatus\} \/>/);
 });
 

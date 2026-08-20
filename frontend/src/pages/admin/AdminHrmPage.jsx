@@ -1761,8 +1761,8 @@ function InternshipApplicationsPanel({ applications, isHrmWorkspace, onView }) {
                   <tr key={application.id}>
                     <td>
                       <div className="hrm-reference-cell">
-                        <span>{formatReferenceNo(application)}</span>
                         {showHrmNewBadge ? <Badge status="hrm_department_new" /> : null}
+                        <span>{formatReferenceNo(application)}</span>
                       </div>
                     </td>
                     <td className="hrm-internship-candidate-name">{application.applicant_name || "Pemohon"}</td>
