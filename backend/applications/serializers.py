@@ -89,6 +89,8 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
         documents = {}
         request = self.context.get("request")
         for public_field, (file_field, original_name_field) in self.document_upload_fields.items():
+            if public_field == "organizationFeedbackDocument" and not self.can_view_organization_feedback_documents(obj):
+                continue
             uploaded_file = getattr(obj, file_field)
             if not uploaded_file:
                 continue
@@ -101,9 +103,21 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
                 "url": url,
             }
         organization_feedback_documents = self.serialize_organization_feedback_documents(obj)
-        if organization_feedback_documents:
+        if organization_feedback_documents and self.can_view_organization_feedback_documents(obj):
             documents["organizationFeedbackDocuments"] = organization_feedback_documents
         return documents
+
+    def can_view_organization_feedback_documents(self, obj):
+        request = self.context.get("request")
+        user = getattr(request, "user", None)
+        if not request or not user or not getattr(user, "is_authenticated", False):
+            return True
+        if getattr(user, "role", "") in {"admin", "superadmin"}:
+            return True
+
+        profile_data = dict(obj.profile_data or {})
+        feedback_release = profile_data.get("organization_feedback_release") or {}
+        return bool(feedback_release.get("sent_to_applicant_at"))
 
     def build_absolute_file_url(self, file_path):
         url = default_storage.url(file_path)
@@ -316,6 +330,7 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
         else:
             profile_data.pop("organization_feedback_documents", None)
             profile_data.pop("organization_feedback", None)
+            profile_data.pop("organization_feedback_release", None)
 
         instance.profile_data = profile_data
         return instance
@@ -335,6 +350,7 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
                 default_storage.delete(file_path)
         profile_data.pop("organization_feedback_documents", None)
         profile_data.pop("organization_feedback", None)
+        profile_data.pop("organization_feedback_release", None)
         documents = dict(profile_data.get("documents") or {})
         documents.pop("organizationFeedbackDocument", None)
         profile_data["documents"] = documents

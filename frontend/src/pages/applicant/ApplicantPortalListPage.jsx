@@ -89,8 +89,17 @@ function shouldHideLocalDraftForApplication(application) {
   return isInternshipApplication(application) && !reapplyAllowedApplicationStatuses.has(status);
 }
 
-function getApplicantVisibleStatus(status) {
-  return status === "accepted" ? "screening" : status;
+function hasOrganizationFeedbackBeenSent(application) {
+  return Boolean(application?.profile_data?.organization_feedback_release?.sent_to_applicant_at);
+}
+
+function getApplicantVisibleStatus(status, application = null) {
+  return status === "accepted" && !hasOrganizationFeedbackBeenSent(application) ? "screening" : status;
+}
+
+function getApplicantStatusLabel(status, application = null) {
+  if (status === "accepted" && hasOrganizationFeedbackBeenSent(application)) return "Diterima";
+  return statusLabels[getApplicantVisibleStatus(status, application)] || status;
 }
 
 function EmptyState({ actionLabel, actionTo, icon, message, title }) {
@@ -112,13 +121,13 @@ function ApplicationList({ applications, loading }) {
   const [currentPage, setCurrentPage] = useState(1);
 
   const statusOptions = useMemo(() => {
-    const statuses = new Set(applications.map((application) => application.status || "draft"));
+    const statuses = new Set(applications.map((application) => getApplicantVisibleStatus(application.status || "draft", application)));
     return Array.from(statuses);
   }, [applications]);
 
   const filteredApplications = useMemo(() => {
     return applications
-      .filter((application) => statusFilter === "all" || (application.status || "draft") === statusFilter)
+      .filter((application) => statusFilter === "all" || getApplicantVisibleStatus(application.status || "draft", application) === statusFilter)
       .sort((firstApplication, secondApplication) => {
         const firstTime = new Date(getApplicationDate(firstApplication)).getTime() || 0;
         const secondTime = new Date(getApplicationDate(secondApplication)).getTime() || 0;
@@ -169,7 +178,7 @@ function ApplicationList({ applications, loading }) {
               <option value="all">Semua status</option>
               {statusOptions.map((status) => (
                 <option key={status} value={status}>
-                  {statusLabels[status] || status}
+                  {status === "accepted" ? "Diterima" : statusLabels[status] || status}
                 </option>
               ))}
             </select>
@@ -206,7 +215,7 @@ function ApplicationList({ applications, loading }) {
               paginatedApplications.map((application) => {
                 const vacancy = application.vacancy_detail || {};
                 const status = application.status || "draft";
-                const visibleStatus = getApplicantVisibleStatus(status);
+                const visibleStatus = getApplicantVisibleStatus(status, application);
                 const shouldContinueApplication = application.isLocalDraft || status === "draft" || status === "incomplete";
                 const actionTarget = status === "incomplete"
                   ? APPLICANT_ROUTES.internshipApplicationEdit(application.id)
@@ -218,7 +227,7 @@ function ApplicationList({ applications, loading }) {
                     <td>{formatDate(getApplicationDate(application))}</td>
                     <td>
                       <span className={`applicant-status-pill ${visibleStatus}`}>
-                        {statusLabels[status] || status}
+                        {getApplicantStatusLabel(status, application)}
                       </span>
                     </td>
                     <td>

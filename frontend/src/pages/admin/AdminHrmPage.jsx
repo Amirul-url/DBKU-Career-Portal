@@ -423,6 +423,31 @@ export default function AdminHrmPage() {
     setNotice("Dokumen maklumbalas organisasi telah dihapuskan.");
     return updatedApplication;
   };
+  const sendOrganizationFeedbackToApplicant = async (application, feedback = {}) => {
+    if (!application) return null;
+
+    const currentProfileData = application.profile_data || {};
+    const profileData = {
+      ...currentProfileData,
+      organization_feedback_release: {
+        ...(currentProfileData.organization_feedback_release || {}),
+        internship_period: feedback.internshipPeriod || "",
+        sent_at_label: dateValue(feedback.sentAt),
+        sent_by: user?.full_name || user?.email || "",
+        sent_to_applicant_at: feedback.sentAt || new Date().toISOString(),
+      },
+    };
+    const updatedApplication = await apiRequest(`/applications/${application.id}/`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ profile_data: profileData }),
+    });
+    setApplications((current) =>
+      current.map((item) => (String(item.id) === String(updatedApplication.id) ? updatedApplication : item)),
+    );
+    setNotice("Maklumbalas organisasi telah dihantar kepada pemohon.");
+    return updatedApplication;
+  };
   const openJobView = (job) => {
     setSelectedJob(job);
     setJobModalMode("view");
@@ -1149,6 +1174,7 @@ export default function AdminHrmPage() {
               onSaveDepartmentDecision={saveDepartmentDecision}
               onDeleteOrganizationFeedbackDocument={deleteOrganizationFeedbackDocument}
               onSaveOrganizationFeedbackDocument={saveOrganizationFeedbackDocument}
+              onSendOrganizationFeedbackToApplicant={sendOrganizationFeedbackToApplicant}
               user={user}
             />
           )}
@@ -1656,6 +1682,16 @@ function getOrganizationFeedbackDocuments(application) {
     uploadedAt: legacyDocument.uploaded_at || legacyDocument.uploadedAt || "",
   }];
 }
+function getOrganizationFeedbackRelease(application) {
+  const release = application?.profile_data?.organization_feedback_release;
+  return release && typeof release === "object" ? release : {};
+}
+function getOrganizationFeedbackPeriodValue(application) {
+  const releasePeriod = String(getOrganizationFeedbackRelease(application).internship_period || "").trim();
+  if (releasePeriod) return releasePeriod;
+  const period = getInternshipPeriod(application);
+  return period === "Belum ditetapkan" ? "" : period;
+}
 function InstitutionSearchFilter({ onChange, options, value }) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -2134,6 +2170,27 @@ function DepartmentDecisionConfirmModal({ isSaving, onCancel, onConfirm }) {
     </div>
   );
 }
+function OrganizationFeedbackSendConfirmModal({ isSaving, onCancel, onConfirm }) {
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/45 p-5" role="presentation">
+      <section className="w-full max-w-lg overflow-hidden rounded-xl bg-white shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="organization-feedback-confirm-message">
+        <div className="px-6 py-5">
+          <p id="organization-feedback-confirm-message" className="text-sm leading-6 text-slate-600">
+            Anda yakin mahu menghantar maklumbalas organisasi ini kepada pemohon?
+          </p>
+          <footer className="mt-6 flex justify-end gap-3">
+            <button className="rounded-md border border-slate-300 px-4 py-2 font-bold text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-70" type="button" onClick={onCancel} disabled={isSaving}>
+              Tidak
+            </button>
+            <button className="inline-flex items-center gap-2 rounded-md bg-emerald-700 px-4 py-2 font-bold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-70" type="button" onClick={onConfirm} disabled={isSaving}>
+              {isSaving ? "Menghantar..." : "Ya"}
+            </button>
+          </footer>
+        </div>
+      </section>
+    </div>
+  );
+}
 function DepartmentDecisionTab({ application, isReadOnly = false, onSaveDecision, onSubmitted, user }) {
   const savedDecision = getSavedDepartmentDecision(application);
   const [recommendation, setRecommendation] = useState(savedDecision.recommendation || "");
@@ -2227,25 +2284,27 @@ function DepartmentDecisionTab({ application, isReadOnly = false, onSaveDecision
     </div>
   );
 }
-function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument }) {
+function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument, onSendToApplicant }) {
   const [feedbackDocuments, setFeedbackDocuments] = useState(() => getOrganizationFeedbackDocuments(application));
-  const [feedbackInternshipPeriod, setFeedbackInternshipPeriod] = useState(() => {
-    const period = getInternshipPeriod(application);
-    return period === "Belum ditetapkan" ? "" : period;
-  });
+  const [feedbackInternshipPeriod, setFeedbackInternshipPeriod] = useState(() => getOrganizationFeedbackPeriodValue(application));
+  const [feedbackRelease, setFeedbackRelease] = useState(() => getOrganizationFeedbackRelease(application));
   const [fileInputKey, setFileInputKey] = useState(0);
   const feedbackFileInputRef = useRef(null);
   const [message, setMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isSendingToApplicant, setIsSendingToApplicant] = useState(false);
   const [deletingDocumentId, setDeletingDocumentId] = useState("");
+  const [showSendConfirmModal, setShowSendConfirmModal] = useState(false);
   const studentName = getInternshipStudentName(application);
   const identityNo = getInternshipStudentIdentityNo(application);
   const program = getInternshipProgram(application);
   const placementDepartment = getInternshipPlacementDepartment(application);
+  const isSentToApplicant = Boolean(feedbackRelease.sent_to_applicant_at);
   const isPdfFile = (file) => file?.type === "application/pdf" || file?.name?.toLowerCase().endsWith(".pdf");
-  const isBusy = isSaving || Boolean(deletingDocumentId);
+  const isBusy = isSaving || isSendingToApplicant || Boolean(deletingDocumentId);
 
   const addDocumentRow = () => {
+    if (isSentToApplicant) return;
     setMessage("");
     feedbackFileInputRef.current?.click();
   };
@@ -2258,6 +2317,7 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
   };
 
   const selectFeedbackFile = (event) => {
+    if (isSentToApplicant) return;
     const selectedFiles = Array.from(event.target.files || []);
     if (!selectedFiles.length) return;
 
@@ -2277,6 +2337,10 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
   };
 
   const uploadDocuments = async (filesToUpload) => {
+    if (isSentToApplicant) {
+      setMessage("Maklumbalas organisasi telah dihantar kepada pemohon dan tidak boleh dikemaskini.");
+      return;
+    }
     const selectedFiles = Array.isArray(filesToUpload) ? filesToUpload.filter(Boolean) : [filesToUpload].filter(Boolean);
     if (!selectedFiles.length || !onSaveDocument) {
       setMessage("Sila pilih dokumen maklumbalas organisasi terlebih dahulu.");
@@ -2306,7 +2370,7 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
   };
 
   const deleteFeedbackFile = async (document) => {
-    if (!document?.id || !onDeleteDocument) return;
+    if (!document?.id || !onDeleteDocument || isSentToApplicant) return;
 
     setDeletingDocumentId(document.id);
     setMessage("");
@@ -2323,6 +2387,41 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
 
   const removeDocumentRow = async (document) => {
     await deleteFeedbackFile(document);
+  };
+  const requestSendToApplicant = () => {
+    const trimmedPeriod = feedbackInternshipPeriod.trim();
+    if (isSentToApplicant) return;
+    if (!trimmedPeriod) {
+      setMessage("Sila isi tempoh latihan industri / praktikal sebelum hantar kepada pemohon.");
+      return;
+    }
+    if (!feedbackDocuments.length) {
+      setMessage("Sila tambah sekurang-kurangnya satu fail maklumbalas organisasi sebelum hantar kepada pemohon.");
+      return;
+    }
+    setMessage("");
+    setShowSendConfirmModal(true);
+  };
+  const sendToApplicant = async () => {
+    if (!onSendToApplicant) return;
+
+    setIsSendingToApplicant(true);
+    setMessage("");
+    try {
+      const sentAt = new Date().toISOString();
+      const updatedApplication = await onSendToApplicant(application, {
+        internshipPeriod: feedbackInternshipPeriod.trim(),
+        sentAt,
+      });
+      setFeedbackRelease(getOrganizationFeedbackRelease(updatedApplication || application));
+      setFeedbackDocuments(getOrganizationFeedbackDocuments(updatedApplication || application));
+      setShowSendConfirmModal(false);
+      setMessage("Maklumbalas organisasi telah dihantar kepada pemohon.");
+    } catch (error) {
+      setMessage(error.message || "Maklumbalas organisasi gagal dihantar kepada pemohon.");
+    } finally {
+      setIsSendingToApplicant(false);
+    }
   };
 
   return (
@@ -2347,6 +2446,7 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
                 <input
                   aria-label="Tempoh latihan industri atau praktikal"
                   className="organization-feedback-period-input"
+                  disabled={isSentToApplicant}
                   onChange={(event) => setFeedbackInternshipPeriod(event.target.value)}
                   placeholder="Contoh: 16 Mac 2026 - 29 Ogos 2026"
                   type="text"
@@ -2369,7 +2469,7 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
             <button
               className="organization-feedback-add"
               type="button"
-              disabled={isBusy}
+              disabled={isBusy || isSentToApplicant}
               onClick={addDocumentRow}
             >
               <Icon>add_circle</Icon>
@@ -2436,7 +2536,7 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
                         <button
                           className="organization-feedback-icon-button organization-feedback-icon-button-remove-file"
                           type="button"
-                          disabled={isBusy}
+                          disabled={isBusy || isSentToApplicant}
                           onClick={() => deleteFeedbackFile(document)}
                           aria-label="Buang fail"
                           title="Buang fail"
@@ -2446,7 +2546,7 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
                         <button
                           className="organization-feedback-row-delete"
                           type="button"
-                          disabled={isBusy}
+                          disabled={isBusy || isSentToApplicant}
                           onClick={() => removeDocumentRow(document)}
                         >
                           Padam baris
@@ -2464,6 +2564,22 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
           </table>
         </div>
       </section>
+      <footer className="organization-feedback-send-actions">
+        {isSentToApplicant ? (
+          <p className="organization-feedback-sent-note">
+            Maklumbalas organisasi telah dihantar kepada pemohon pada {dateValue(feedbackRelease.sent_to_applicant_at)}.
+          </p>
+        ) : null}
+        <button
+          className="hrm-primary organization-feedback-send"
+          type="button"
+          disabled={isBusy || isSentToApplicant}
+          onClick={requestSendToApplicant}
+        >
+          <Icon>send</Icon>
+          {isSendingToApplicant ? "Menghantar..." : isSentToApplicant ? "Telah dihantar kepada pemohon" : "Hantar ke Pemohon"}
+        </button>
+      </footer>
       <input
         key={fileInputKey}
         ref={feedbackFileInputRef}
@@ -2473,6 +2589,13 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
         multiple
         onChange={selectFeedbackFile}
       />
+      {showSendConfirmModal ? (
+        <OrganizationFeedbackSendConfirmModal
+          isSaving={isSendingToApplicant}
+          onCancel={() => setShowSendConfirmModal(false)}
+          onConfirm={sendToApplicant}
+        />
+      ) : null}
     </div>
   );
 }
@@ -2487,6 +2610,7 @@ function InternshipApplicationDetailPage({
   onSaveDepartmentDecision,
   onDeleteOrganizationFeedbackDocument,
   onSaveOrganizationFeedbackDocument,
+  onSendOrganizationFeedbackToApplicant,
   user,
 }) {
   const [activeTab, setActiveTab] = useState("Maklumat Peribadi Pemohon");
@@ -2533,6 +2657,7 @@ function InternshipApplicationDetailPage({
               key={`${application?.id || "organization-feedback"}-${application?.updated_at || ""}`}
               onDeleteDocument={onDeleteOrganizationFeedbackDocument}
               onSaveDocument={onSaveOrganizationFeedbackDocument}
+              onSendToApplicant={onSendOrganizationFeedbackToApplicant}
             />
           ) : null
         }

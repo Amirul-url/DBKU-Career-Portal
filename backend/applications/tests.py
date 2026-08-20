@@ -258,6 +258,67 @@ class CandidateApplicationReferenceNoTests(TestCase):
         self.assertEqual(len(remaining_documents), 1)
         self.assertEqual(remaining_documents[0]["name"], "maklumbalas-kedua.pdf")
 
+    def test_applicant_only_sees_organization_feedback_documents_after_hrm_sends(self):
+        applicant = self.create_applicant("released-feedback-target@example.com")
+        hrm = self.user_model.objects.create_user(
+            username="hrm-release-feedback@example.com",
+            email="hrm-release-feedback@example.com",
+            password="Password123!",
+            role="admin",
+            department="Bahagian Pengurusan Sumber Manusia (HRM)",
+        )
+        application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=self.vacancy,
+            status="accepted",
+        )
+        uploaded_file = SimpleUploadedFile(
+            "maklumbalas-pemohon.pdf",
+            b"%PDF-1.4\n% released\n",
+            content_type="application/pdf",
+        )
+        hrm_client = APIClient()
+        hrm_client.force_authenticate(user=hrm)
+
+        upload_response = hrm_client.patch(
+            f"/api/applications/{application.id}/",
+            {"organizationFeedbackDocuments": [uploaded_file]},
+            format="multipart",
+        )
+
+        self.assertEqual(upload_response.status_code, 200)
+        self.assertIn("organizationFeedbackDocuments", upload_response.data["document_files"])
+
+        applicant_client = APIClient()
+        applicant_client.force_authenticate(user=applicant)
+        hidden_response = applicant_client.get(f"/api/applications/{application.id}/")
+
+        self.assertEqual(hidden_response.status_code, 200)
+        self.assertNotIn("organizationFeedbackDocuments", hidden_response.data["document_files"])
+
+        application.refresh_from_db()
+        profile_data = dict(application.profile_data or {})
+        profile_data["organization_feedback_release"] = {
+            "internship_period": "16 Mac 2026 - 29 Ogos 2026",
+            "sent_to_applicant_at": "2026-08-20T08:00:00+08:00",
+        }
+        release_response = hrm_client.patch(
+            f"/api/applications/{application.id}/",
+            {"profile_data": profile_data},
+            format="json",
+        )
+
+        self.assertEqual(release_response.status_code, 200)
+        released_response = applicant_client.get(f"/api/applications/{application.id}/")
+        self.assertEqual(released_response.status_code, 200)
+        documents = released_response.data["document_files"]["organizationFeedbackDocuments"]
+        self.assertEqual(len(documents), 1)
+        self.assertEqual(documents[0]["name"], "maklumbalas-pemohon.pdf")
+        self.assertEqual(
+            released_response.data["profile_data"]["organization_feedback_release"]["internship_period"],
+            "16 Mac 2026 - 29 Ogos 2026",
+        )
+
     def test_staff_application_list_excludes_drafts(self):
         applicant = self.create_applicant("hidden-draft@example.com")
         staff = self.user_model.objects.create_user(

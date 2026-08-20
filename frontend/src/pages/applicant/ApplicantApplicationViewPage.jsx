@@ -9,6 +9,7 @@ import { ApplicantAddressMap, ProfileContentHeader, ProfileSidebar } from "./App
 
 const personalInfoTab = "Maklumat Peribadi Pemohon";
 const infoTabs = [personalInfoTab, "Maklumat Akademik", "Dokumen Sokongan"];
+const organizationFeedbackTab = "Maklumbalas Organisasi";
 
 const statusLabels = {
   draft: "Draf",
@@ -28,6 +29,15 @@ function getApplicantVisibleStatus(status, maskAcceptedStatus = true) {
 function getReadOnlyStatusLabel(status, maskAcceptedStatus) {
   if (!maskAcceptedStatus && status === "accepted") return "Diterima";
   return statusLabels[status] || status;
+}
+
+function getOrganizationFeedbackRelease(application) {
+  const release = application?.profile_data?.organization_feedback_release;
+  return release && typeof release === "object" ? release : {};
+}
+
+function hasOrganizationFeedbackBeenSent(application) {
+  return Boolean(getOrganizationFeedbackRelease(application).sent_to_applicant_at);
 }
 
 const documentFields = [
@@ -279,6 +289,66 @@ function renderDocumentRow(document, documents, studentInfo) {
   );
 }
 
+function getOrganizationFeedbackDocuments(application) {
+  const documentFiles = application?.document_files || {};
+  const documents = documentFiles.organizationFeedbackDocuments;
+  if (Array.isArray(documents) && documents.length) {
+    return documents.map((document, index) => ({
+      id: document.id || String(index + 1),
+      name: document.name || "Dokumen maklumbalas organisasi",
+      url: resolveMediaUrl(document.url || ""),
+    }));
+  }
+
+  const legacyDocument = documentFiles.organizationFeedbackDocument;
+  if (!legacyDocument?.url) return [];
+
+  return [{
+    id: "legacy",
+    name: legacyDocument.name || "Dokumen maklumbalas organisasi",
+    url: resolveMediaUrl(legacyDocument.url || ""),
+  }];
+}
+
+function ApplicantOrganizationFeedbackTab({ application }) {
+  const release = getOrganizationFeedbackRelease(application);
+  const documents = getOrganizationFeedbackDocuments(application);
+  const internshipPeriod = release.internship_period || "Belum ditetapkan";
+
+  return (
+    <div className="student-personal-table-wrap">
+      <table className="student-personal-table student-readonly-table">
+        <tbody>
+          {renderReadOnlyRow("organizationFeedbackPeriod", "Tempoh Latihan Industri / Praktikal", internshipPeriod)}
+          {renderReadOnlyRow("organizationFeedbackDate", "Tarikh Maklumbalas", formatDate(release.sent_to_applicant_at))}
+          {documents.length ? (
+            documents.map((document, index) =>
+              renderReadOnlyContentRow(
+                `organizationFeedbackDocument-${document.id || index}`,
+                `Dokumen ${index + 1}`,
+                <div className="student-readonly-document-cell">
+                  <span className="student-readonly-value uploaded">{document.name}</span>
+                  <button
+                    className="app-view-action"
+                    disabled={!document.url}
+                    type="button"
+                    onClick={() => openDocumentFile(document)}
+                  >
+                    <Icon>visibility</Icon>
+                    Lihat
+                  </button>
+                </div>,
+              ),
+            )
+          ) : (
+            renderReadOnlyRow("organizationFeedbackDocuments", "Dokumen", "Tiada dokumen maklumbalas organisasi.")
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function renderPhoneRow(key, label, value) {
   const phone = splitPhoneNumber(value);
   return renderReadOnlyContentRow(
@@ -474,6 +544,7 @@ export default function ApplicantApplicationViewPage() {
   const [error, setError] = useState("");
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
   const email = user?.email || "Belum dikemaskini";
+  const organizationFeedbackSent = hasOrganizationFeedbackBeenSent(application);
 
   useEffect(() => {
     if (!user) {
@@ -537,9 +608,14 @@ export default function ApplicantApplicationViewPage() {
             activeInfoTab={activeInfoTab}
             application={application}
             error={error}
+            extraTabs={organizationFeedbackSent ? [organizationFeedbackTab] : []}
             loading={loading}
+            maskAcceptedStatus={!organizationFeedbackSent}
             onBack={exitApplicationView}
             onTabChange={setActiveInfoTab}
+            renderExtraTabContent={(tab) =>
+              tab === organizationFeedbackTab ? <ApplicantOrganizationFeedbackTab application={application} /> : null
+            }
           />
         </main>
       </div>

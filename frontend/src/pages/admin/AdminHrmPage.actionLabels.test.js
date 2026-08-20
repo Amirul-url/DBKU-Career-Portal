@@ -180,6 +180,11 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /const organizationFeedbackTab = "Maklumbalas Organisasi"/);
   assert.match(source, /\.\.\.\(isHrmWorkspace \? \[organizationFeedbackTab\] : \[\]\)/);
   assert.match(source, /function OrganizationFeedbackTab/);
+  assert.match(source, /function OrganizationFeedbackSendConfirmModal/);
+  assert.match(source, /Anda yakin mahu menghantar maklumbalas organisasi ini kepada pemohon\?/);
+  assert.match(source, /Hantar ke Pemohon/);
+  assert.match(source, />\s*Tidak\s*</);
+  assert.match(source, />\s*\{isSaving \? "Menghantar\.\.\." : "Ya"\}\s*</);
   assert.match(source, /Dokumen maklumbalas organisasi/);
   assert.match(source, /Muat naik fail PDF untuk dihantar kepada pemohon\. Saiz fail maksimum 15MB\./);
   assert.match(source, /className="organization-feedback-section"/);
@@ -208,6 +213,8 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /function getOrganizationFeedbackDocuments\(application\)/);
   assert.match(source, /const \[feedbackDocuments, setFeedbackDocuments\] = useState\(\(\) => getOrganizationFeedbackDocuments\(application\)\)/);
   assert.match(source, /const \[feedbackInternshipPeriod, setFeedbackInternshipPeriod\] = useState/);
+  assert.match(source, /const \[feedbackRelease, setFeedbackRelease\] = useState\(\(\) => getOrganizationFeedbackRelease\(application\)\)/);
+  assert.match(source, /const \[showSendConfirmModal, setShowSendConfirmModal\] = useState\(false\)/);
   assert.match(source, /className="organization-feedback-period-input"/);
   assert.match(source, /placeholder="Contoh: 16 Mac 2026 - 29 Ogos 2026"/);
   assert.match(source, /onChange=\{\(event\) => setFeedbackInternshipPeriod\(event\.target\.value\)\}/);
@@ -226,6 +233,13 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /payload\.append\("organizationFeedbackDocuments", file\)/);
   assert.match(source, /onSaveOrganizationFeedbackDocument=\{saveOrganizationFeedbackDocument\}/);
   assert.match(source, /onSaveDocument=\{onSaveOrganizationFeedbackDocument\}/);
+  assert.match(source, /const sendOrganizationFeedbackToApplicant = async/);
+  assert.match(source, /organization_feedback_release:/);
+  assert.match(source, /sent_to_applicant_at:/);
+  assert.match(source, /onSendOrganizationFeedbackToApplicant=\{sendOrganizationFeedbackToApplicant\}/);
+  assert.match(source, /onSendToApplicant=\{onSendOrganizationFeedbackToApplicant\}/);
+  assert.match(source, /await onSendToApplicant\(application, \{/);
+  assert.match(source, /setFeedbackRelease\(getOrganizationFeedbackRelease\(updatedApplication \|\| application\)\)/);
   assert.match(source, /application\?\.document_files\?\.organizationFeedbackDocuments/);
   assert.match(source, /Nama Pelajar/);
   assert.match(source, /Tempoh Latihan Industri \/ Praktikal/);

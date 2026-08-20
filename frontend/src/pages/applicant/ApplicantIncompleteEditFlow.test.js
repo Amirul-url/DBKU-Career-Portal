@@ -34,11 +34,20 @@ test("applicant rejected applications use Ditolak status label", () => {
 test("applicant accepted applications stay hidden behind review status until HRM notification", () => {
   assert.match(listSource, /accepted: "Dalam semakan"/);
   assert.match(viewSource, /accepted: "Dalam semakan"/);
-  assert.match(listSource, /function getApplicantVisibleStatus\(status\)/);
-  assert.match(listSource, /status === "accepted" \? "screening" : status/);
+  assert.match(listSource, /function hasOrganizationFeedbackBeenSent\(application\)/);
+  assert.match(listSource, /function getApplicantVisibleStatus\(status, application = null\)/);
+  assert.match(listSource, /status === "accepted" && !hasOrganizationFeedbackBeenSent\(application\) \? "screening" : status/);
+  assert.match(listSource, /function getApplicantStatusLabel\(status, application = null\)/);
+  assert.match(listSource, /status === "accepted" && hasOrganizationFeedbackBeenSent\(application\)\) return "Diterima"/);
+  assert.match(listSource, /getApplicantStatusLabel\(status, application\)/);
   assert.match(viewSource, /maskAcceptedStatus = true/);
   assert.match(viewSource, /maskAcceptedStatus && status === "accepted" \? "screening" : status/);
   assert.match(viewSource, /!maskAcceptedStatus && status === "accepted"\) return "Diterima"/);
+  assert.match(viewSource, /const organizationFeedbackTab = "Maklumbalas Organisasi"/);
+  assert.match(viewSource, /function hasOrganizationFeedbackBeenSent\(application\)/);
+  assert.match(viewSource, /extraTabs=\{organizationFeedbackSent \? \[organizationFeedbackTab\] : \[\]\}/);
+  assert.match(viewSource, /maskAcceptedStatus=\{!organizationFeedbackSent\}/);
+  assert.match(viewSource, /function ApplicantOrganizationFeedbackTab/);
 });
 
 test("applicant rejected internship applications can apply again", () => {

@@ -10830,6 +10830,25 @@ body:has(.applicant-profile-page) {
   font-weight: 800;
 }
 
+.organization-feedback-send-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.organization-feedback-sent-note {
+  margin: 0;
+  color: #047857;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.organization-feedback-send:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
 .organization-feedback-row-actions {
   display: flex;
   flex-wrap: nowrap;
@@ -10962,6 +10981,12 @@ body:has(.applicant-profile-page) {
   border-color: #059669;
   box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.14);
   outline: none;
+}
+
+.organization-feedback-period-input:disabled {
+  background: #f8fafc;
+  color: #475569;
+  cursor: not-allowed;
 }
 
 @media (max-width: 900px) {
