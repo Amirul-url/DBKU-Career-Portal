@@ -32,11 +32,12 @@ test("department and HRM internship rows mark pending decision tasks as new", ()
   assert.match(source, /hrm_department_new: "red"/);
   assert.match(source, /hrm_department_accepted: "green"/);
   assert.match(source, /function hasSubmittedDepartmentDecision\(application\)/);
+  assert.match(source, /function hasOrganizationFeedbackBeenSent\(application\)/);
   assert.match(source, /function isDepartmentPendingDecisionApplication\(application\)/);
   assert.match(source, /function isHrmPendingDepartmentDecisionApplication\(application\)/);
   assert.match(source, /function getHrmDepartmentDecisionStatus\(application\)/);
   assert.match(source, /return Boolean\(application\?\.assigned_department && !hasSubmittedDepartmentDecision\(application\)\)/);
-  assert.match(source, /return Boolean\(hasSubmittedDepartmentDecision\(application\) && \["accepted", "rejected"\]\.includes\(application\?\.status\)\)/);
+  assert.match(source, /!\s*hasOrganizationFeedbackBeenSent\(application\)/);
   assert.match(source, /const applications = metrics\?\.\[item\.vacancyType\]\?\.applications \|\| \[\]/);
   assert.match(source, /if \(!isHrmWorkspace\) \{\s*return applications\.filter\(isDepartmentPendingDecisionApplication\)\.length;\s*\}/);
   assert.match(source, /function getInternshipApplicationDisplayStatus\(application, isHrmWorkspace\)/);
@@ -240,8 +241,11 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /sent_to_applicant_at:/);
   assert.match(source, /onSendOrganizationFeedbackToApplicant=\{sendOrganizationFeedbackToApplicant\}/);
   assert.match(source, /onSendToApplicant=\{onSendOrganizationFeedbackToApplicant\}/);
+  assert.match(source, /onOrganizationFeedbackSent=\{\(\) => navigate\(ADMIN_ROUTES\.applications\.internship\)\}/);
+  assert.match(source, /onSubmitted=\{onOrganizationFeedbackSent\}/);
   assert.match(source, /await onSendToApplicant\(application, \{/);
   assert.match(source, /setFeedbackRelease\(getOrganizationFeedbackRelease\(updatedApplication \|\| application\)\)/);
+  assert.match(source, /onSubmitted\?\.\(\)/);
   assert.match(source, /application\?\.document_files\?\.organizationFeedbackDocuments/);
   assert.match(source, /Nama Pelajar/);
   assert.match(source, /Tempoh Latihan Industri \/ Praktikal/);

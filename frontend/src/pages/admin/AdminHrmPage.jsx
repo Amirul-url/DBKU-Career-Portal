@@ -227,12 +227,20 @@ function hasSubmittedDepartmentDecision(application) {
   return Boolean(application?.profile_data?.department_decision?.submitted_at);
 }
 
+function hasOrganizationFeedbackBeenSent(application) {
+  return Boolean(getOrganizationFeedbackRelease(application).sent_to_applicant_at);
+}
+
 function isDepartmentPendingDecisionApplication(application) {
   return Boolean(application?.assigned_department && !hasSubmittedDepartmentDecision(application));
 }
 
 function isHrmPendingDepartmentDecisionApplication(application) {
-  return Boolean(hasSubmittedDepartmentDecision(application) && ["accepted", "rejected"].includes(application?.status));
+  return Boolean(
+    hasSubmittedDepartmentDecision(application) &&
+      ["accepted", "rejected"].includes(application?.status) &&
+      !hasOrganizationFeedbackBeenSent(application),
+  );
 }
 
 function getHrmDepartmentDecisionStatus(application) {
@@ -1173,6 +1181,7 @@ export default function AdminHrmPage() {
               onDepartmentDecisionSubmitted={() => navigate(ADMIN_ROUTES.applications.internship)}
               onSaveDepartmentDecision={saveDepartmentDecision}
               onDeleteOrganizationFeedbackDocument={deleteOrganizationFeedbackDocument}
+              onOrganizationFeedbackSent={() => navigate(ADMIN_ROUTES.applications.internship)}
               onSaveOrganizationFeedbackDocument={saveOrganizationFeedbackDocument}
               onSendOrganizationFeedbackToApplicant={sendOrganizationFeedbackToApplicant}
               user={user}
@@ -2284,7 +2293,7 @@ function DepartmentDecisionTab({ application, isReadOnly = false, onSaveDecision
     </div>
   );
 }
-function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument, onSendToApplicant }) {
+function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument, onSendToApplicant, onSubmitted }) {
   const [feedbackDocuments, setFeedbackDocuments] = useState(() => getOrganizationFeedbackDocuments(application));
   const [feedbackInternshipPeriod, setFeedbackInternshipPeriod] = useState(() => getOrganizationFeedbackPeriodValue(application));
   const [feedbackRelease, setFeedbackRelease] = useState(() => getOrganizationFeedbackRelease(application));
@@ -2417,6 +2426,7 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
       setFeedbackDocuments(getOrganizationFeedbackDocuments(updatedApplication || application));
       setShowSendConfirmModal(false);
       setMessage("Maklumbalas organisasi telah dihantar kepada pemohon.");
+      onSubmitted?.();
     } catch (error) {
       setMessage(error.message || "Maklumbalas organisasi gagal dihantar kepada pemohon.");
     } finally {
@@ -2615,6 +2625,7 @@ function InternshipApplicationDetailPage({
   onSaveAssessment,
   onSaveDepartmentDecision,
   onDeleteOrganizationFeedbackDocument,
+  onOrganizationFeedbackSent,
   onSaveOrganizationFeedbackDocument,
   onSendOrganizationFeedbackToApplicant,
   user,
@@ -2664,6 +2675,7 @@ function InternshipApplicationDetailPage({
               onDeleteDocument={onDeleteOrganizationFeedbackDocument}
               onSaveDocument={onSaveOrganizationFeedbackDocument}
               onSendToApplicant={onSendOrganizationFeedbackToApplicant}
+              onSubmitted={onOrganizationFeedbackSent}
             />
           ) : null
         }
