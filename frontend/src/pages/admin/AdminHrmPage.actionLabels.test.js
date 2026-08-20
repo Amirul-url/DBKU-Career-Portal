@@ -104,11 +104,12 @@ test("HRM and department decision tabs keep draft selections in local state unti
   assert.match(source, /const chooseEducationLevel = \(item\) => \{\s*const nextEducationLevel = educationLevel === item \? "" : item;\s*setEducationLevel\(nextEducationLevel\);\s*\};/);
   assert.match(source, /await onSaveDecision\(application, buildDepartmentDecisionPayload/);
   assert.doesNotMatch(source, /window\.alert/);
-  assert.match(source, /function DepartmentDecisionSuccessModal/);
-  assert.match(source, /Keputusan dihantar/);
-  assert.match(source, />\s*OK\s*</);
-  assert.match(source, /setShowSuccessModal\(true\)/);
-  assert.match(source, /const closeSuccessModal = \(\) => \{/);
+  assert.match(source, /function DepartmentDecisionConfirmModal/);
+  assert.match(source, /Hantar kepada HRM\?/);
+  assert.match(source, /Anda yakin mahu menghantar keputusan bahagian ini kepada HRM\?/);
+  assert.match(source, />\s*Tidak\s*</);
+  assert.match(source, />\s*\{isSaving \? "Menghantar\.\.\." : "Ya"\}\s*</);
+  assert.match(source, /setShowConfirmModal\(true\)/);
   assert.match(source, /onSubmitted\?\.\(\)/);
   assert.match(source, /onDepartmentDecisionSubmitted=\{\(\) => navigate\(ADMIN_ROUTES\.applications\.internship\)\}/);
 });

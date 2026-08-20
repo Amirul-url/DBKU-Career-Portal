@@ -1934,26 +1934,29 @@ function buildDepartmentDecisionPayload(application, user, values) {
     submitted_by: user?.full_name || user?.name || user?.email || "",
   };
 }
-function DepartmentDecisionSuccessModal({ onClose }) {
+function DepartmentDecisionConfirmModal({ isSaving, onCancel, onConfirm }) {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/45 p-5" role="presentation">
-      <section className="w-full max-w-lg overflow-hidden rounded-xl bg-white shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="department-decision-success-title">
+      <section className="w-full max-w-lg overflow-hidden rounded-xl bg-white shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="department-decision-confirm-title">
         <header className="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.12em] text-emerald-700">Berjaya</p>
-            <h2 id="department-decision-success-title" className="mt-1 text-2xl font-bold text-slate-950">Keputusan dihantar</h2>
+            <p className="text-xs font-black uppercase tracking-[0.12em] text-emerald-700">Pengesahan</p>
+            <h2 id="department-decision-confirm-title" className="mt-1 text-2xl font-bold text-slate-950">Hantar kepada HRM?</h2>
           </div>
-          <button className="rounded-md p-2 text-slate-500 hover:bg-slate-100" type="button" onClick={onClose} aria-label="Tutup">
+          <button className="rounded-md p-2 text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60" type="button" onClick={onCancel} aria-label="Tutup" disabled={isSaving}>
             <Icon>close</Icon>
           </button>
         </header>
         <div className="px-6 py-5">
           <p className="text-sm leading-6 text-slate-600">
-            Keputusan bahagian telah berjaya dihantar kepada HRM untuk tindakan seterusnya.
+            Anda yakin mahu menghantar keputusan bahagian ini kepada HRM?
           </p>
           <footer className="mt-6 flex justify-end gap-3">
-            <button className="inline-flex items-center gap-2 rounded-md bg-emerald-700 px-4 py-2 font-bold text-white hover:bg-emerald-800" type="button" onClick={onClose}>
-              OK
+            <button className="rounded-md border border-slate-300 px-4 py-2 font-bold text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-70" type="button" onClick={onCancel} disabled={isSaving}>
+              Tidak
+            </button>
+            <button className="inline-flex items-center gap-2 rounded-md bg-emerald-700 px-4 py-2 font-bold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-70" type="button" onClick={onConfirm} disabled={isSaving}>
+              {isSaving ? "Menghantar..." : "Ya"}
             </button>
           </footer>
         </div>
@@ -1966,25 +1969,26 @@ function DepartmentDecisionTab({ application, isReadOnly = false, onSaveDecision
   const [recommendation, setRecommendation] = useState(savedDecision.recommendation || "");
   const [remarks, setRemarks] = useState(savedDecision.remarks || "");
   const [message, setMessage] = useState("");
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const canSubmit = Boolean(!isReadOnly && recommendation && remarks.trim() && application && onSaveDecision);
-  const closeSuccessModal = () => {
-    setShowSuccessModal(false);
-    onSubmitted?.();
-  };
 
-  const submitDecision = async () => {
+  const requestSubmitDecision = () => {
     if (!canSubmit) {
       setMessage("Sila pilih syor dan isi ulasan sebelum hantar kepada HRM.");
       return;
     }
+    setMessage("");
+    setShowConfirmModal(true);
+  };
 
+  const submitDecision = async () => {
     setIsSaving(true);
     setMessage("");
     try {
       await onSaveDecision(application, buildDepartmentDecisionPayload(application, user, { recommendation, remarks }));
-      setShowSuccessModal(true);
+      setShowConfirmModal(false);
+      onSubmitted?.();
     } catch (error) {
       setMessage(error.message || "Keputusan bahagian gagal dihantar.");
     } finally {
@@ -2034,14 +2038,20 @@ function DepartmentDecisionTab({ application, isReadOnly = false, onSaveDecision
             className="hrm-primary"
             type="button"
             disabled={isSaving || !canSubmit}
-            onClick={submitDecision}
+            onClick={requestSubmitDecision}
           >
             <Icon>check_circle</Icon>
             {isSaving ? "Menghantar..." : "Hantar ke HRM"}
           </button>
         </footer>
       ) : null}
-      {showSuccessModal ? <DepartmentDecisionSuccessModal onClose={closeSuccessModal} /> : null}
+      {showConfirmModal ? (
+        <DepartmentDecisionConfirmModal
+          isSaving={isSaving}
+          onCancel={() => setShowConfirmModal(false)}
+          onConfirm={submitDecision}
+        />
+      ) : null}
     </div>
   );
 }
