@@ -187,8 +187,10 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /accept="application\/pdf,\.pdf"/);
   assert.match(source, /const isPdfFile = \(file\) => file\?\.type === "application\/pdf" \|\| file\?\.name\?\.toLowerCase\(\)\.endsWith\("\.pdf"\)/);
   assert.match(source, /const clearFeedbackFile = \(\) => \{/);
+  assert.match(source, /className="organization-feedback-selected-row"/);
+  assert.match(source, /className="organization-feedback-remove"/);
   assert.match(source, /aria-label="Buang fail dipilih"/);
-  assert.match(source, /\{feedbackFile \? \(\s*<>/);
+  assert.match(source, /\{feedbackFile \? \(\s*<div className="organization-feedback-selected-row">/);
   assert.match(source, /const saveOrganizationFeedbackDocument = async/);
   assert.match(source, /organization_feedback:/);
   assert.match(source, /payload\.append\("organizationFeedbackDocument", file\)/);

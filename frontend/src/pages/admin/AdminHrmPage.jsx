@@ -2235,7 +2235,7 @@ function OrganizationFeedbackTab({ application, onSaveDocument }) {
   return (
     <div className="organization-feedback-panel">
       <section className="organization-feedback-upload" aria-label="Muat naik dokumen maklumbalas organisasi">
-        <div>
+        <div className="organization-feedback-copy">
           <strong>Dokumen maklumbalas organisasi (DBKU)</strong>
           <p>Muat naik dokumen maklumbalas organisasi untuk dihantar kepada pemohon. Format fail mesti PDF sahaja.</p>
         </div>
@@ -2250,28 +2250,30 @@ function OrganizationFeedbackTab({ application, onSaveDocument }) {
               onChange={selectFeedbackFile}
             />
           </label>
-          {feedbackFile ? (
-            <>
-              <div className="organization-feedback-selected">
-                <Icon>description</Icon>
-                <span>{feedbackFile.name}</span>
-                <button type="button" onClick={clearFeedbackFile} aria-label="Buang fail dipilih">
-                  <Icon>delete</Icon>
-                </button>
-              </div>
-              <button
-                className="organization-feedback-submit"
-                type="button"
-                disabled={isSaving}
-                onClick={saveDocument}
-              >
-                <Icon>upload</Icon>
-                {isSaving ? "Memuat naik..." : "Muat naik"}
-              </button>
-            </>
-          ) : null}
         </div>
       </section>
+      {feedbackFile ? (
+        <div className="organization-feedback-selected-row">
+          <div className="organization-feedback-selected">
+            <Icon>description</Icon>
+            <span>{feedbackFile.name}</span>
+          </div>
+          <div className="organization-feedback-selected-actions">
+            <button className="organization-feedback-remove" type="button" onClick={clearFeedbackFile} aria-label="Buang fail dipilih">
+              <Icon>delete</Icon>
+            </button>
+            <button
+              className="organization-feedback-submit"
+              type="button"
+              disabled={isSaving}
+              onClick={saveDocument}
+            >
+              <Icon>upload</Icon>
+              {isSaving ? "Memuat naik..." : "Muat naik"}
+            </button>
+          </div>
+        </div>
+      ) : null}
       {existingFeedbackDocument?.url ? (
         <a className="organization-feedback-current" href={existingFeedbackDocument.url} target="_blank" rel="noreferrer">
           <Icon>description</Icon>
