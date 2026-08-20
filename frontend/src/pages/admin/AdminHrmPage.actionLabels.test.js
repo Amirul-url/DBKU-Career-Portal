@@ -207,6 +207,10 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /const isPdfFile = \(file\) => file\?\.type === "application\/pdf" \|\| file\?\.name\?\.toLowerCase\(\)\.endsWith\("\.pdf"\)/);
   assert.match(source, /function getOrganizationFeedbackDocuments\(application\)/);
   assert.match(source, /const \[feedbackDocuments, setFeedbackDocuments\] = useState\(\(\) => getOrganizationFeedbackDocuments\(application\)\)/);
+  assert.match(source, /const \[feedbackInternshipPeriod, setFeedbackInternshipPeriod\] = useState/);
+  assert.match(source, /className="organization-feedback-period-input"/);
+  assert.match(source, /placeholder="Contoh: 16 Mac 2026 - 29 Ogos 2026"/);
+  assert.match(source, /onChange=\{\(event\) => setFeedbackInternshipPeriod\(event\.target\.value\)\}/);
   assert.match(source, /key=\{`\$\{application\?\.id \|\| "organization-feedback"\}-\$\{application\?\.updated_at \|\| ""\}`\}/);
   assert.match(source, /const clearFeedbackInput = \(\) => \{/);
   assert.match(source, /const selectedFiles = Array\.from\(event\.target\.files \|\| \[\]\)/);

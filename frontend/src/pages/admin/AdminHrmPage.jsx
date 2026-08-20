@@ -2229,6 +2229,10 @@ function DepartmentDecisionTab({ application, isReadOnly = false, onSaveDecision
 }
 function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument }) {
   const [feedbackDocuments, setFeedbackDocuments] = useState(() => getOrganizationFeedbackDocuments(application));
+  const [feedbackInternshipPeriod, setFeedbackInternshipPeriod] = useState(() => {
+    const period = getInternshipPeriod(application);
+    return period === "Belum ditetapkan" ? "" : period;
+  });
   const [fileInputKey, setFileInputKey] = useState(0);
   const feedbackFileInputRef = useRef(null);
   const [message, setMessage] = useState("");
@@ -2236,7 +2240,6 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
   const [deletingDocumentId, setDeletingDocumentId] = useState("");
   const studentName = getInternshipStudentName(application);
   const identityNo = getInternshipStudentIdentityNo(application);
-  const internshipPeriod = getInternshipPeriod(application);
   const program = getInternshipProgram(application);
   const placementDepartment = getInternshipPlacementDepartment(application);
   const isPdfFile = (file) => file?.type === "application/pdf" || file?.name?.toLowerCase().endsWith(".pdf");
@@ -2340,7 +2343,16 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
                 <strong>{studentName}</strong>
                 <span>No. Kad Pengenalan: {identityNo}</span>
               </td>
-              <td>{internshipPeriod}</td>
+              <td>
+                <input
+                  aria-label="Tempoh latihan industri atau praktikal"
+                  className="organization-feedback-period-input"
+                  onChange={(event) => setFeedbackInternshipPeriod(event.target.value)}
+                  placeholder="Contoh: 16 Mac 2026 - 29 Ogos 2026"
+                  type="text"
+                  value={feedbackInternshipPeriod}
+                />
+              </td>
               <td>{program}</td>
               <td>{placementDepartment}</td>
             </tr>

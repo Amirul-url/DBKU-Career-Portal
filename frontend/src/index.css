@@ -10939,6 +10939,30 @@ body:has(.applicant-profile-page) {
   font-weight: 700;
 }
 
+.organization-feedback-period-input {
+  width: min(100%, 280px);
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #020617;
+  font: inherit;
+  font-weight: 700;
+  line-height: 1.35;
+  padding: 10px 12px;
+  text-align: center;
+}
+
+.organization-feedback-period-input::placeholder {
+  color: #64748b;
+  opacity: 1;
+}
+
+.organization-feedback-period-input:focus {
+  border-color: #059669;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.14);
+  outline: none;
+}
+
 @media (max-width: 900px) {
   .organization-feedback-section-header {
     flex-direction: column;
