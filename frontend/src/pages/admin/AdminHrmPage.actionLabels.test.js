@@ -29,11 +29,11 @@ test("admin workspace labels and navigation follow the signed-in department", ()
   assert.doesNotMatch(source, />Papan pemuka HRM<\/h1>/);
 });
 
-test("department dashboards use a simple panel without the recent applications table", () => {
-  assert.match(source, /function DepartmentDashboardPanel/);
-  assert.match(source, /isHrmWorkspace \? \(\s*<div className="hrm-grid hrm-dashboard-grid">[\s\S]*<RecentApplicationsPanel/);
-  assert.match(source, /\) : \(\s*<DepartmentDashboardPanel/);
-  assert.match(source, />\s*Lihat Permohonan\s*</);
+test("department dashboards keep the HRM layout without HRM-only workflow links", () => {
+  assert.match(source, /<div className="hrm-grid hrm-dashboard-grid">[\s\S]*<RecentApplicationsPanel/);
+  assert.match(source, /applicationLinks=\{isHrmWorkspace \? undefined : \[\{ type: "internship", label: "Latihan Industri" \}\]\}/);
+  assert.match(source, /title=\{isHrmWorkspace \? "Saluran pengambilan" : "Ringkasan bahagian"\}/);
+  assert.doesNotMatch(source, /function DepartmentDashboardPanel/);
 });
 
 test("HRM review can assign internship applications to a department dashboard", () => {
