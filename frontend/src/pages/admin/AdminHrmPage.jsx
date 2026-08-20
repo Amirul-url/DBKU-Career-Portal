@@ -1958,7 +1958,6 @@ function DepartmentDecisionTab({ application, isReadOnly = false, onSaveDecision
     setMessage("");
     try {
       await onSaveDecision(application, buildDepartmentDecisionPayload(application, user, { recommendation, remarks }));
-      window.alert("Keputusan bahagian berjaya dihantar kepada HRM.");
       onSubmitted?.();
     } catch (error) {
       setMessage(error.message || "Keputusan bahagian gagal dihantar.");

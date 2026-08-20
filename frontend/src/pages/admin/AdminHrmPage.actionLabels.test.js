@@ -95,7 +95,7 @@ test("HRM and department decision tabs keep draft selections in local state unti
   assert.match(source, /const chooseDecision = \(item\) => \{\s*const nextDecision = decision === item \? "" : item;\s*setDecision\(nextDecision\);\s*\};/);
   assert.match(source, /const chooseEducationLevel = \(item\) => \{\s*const nextEducationLevel = educationLevel === item \? "" : item;\s*setEducationLevel\(nextEducationLevel\);\s*\};/);
   assert.match(source, /await onSaveDecision\(application, buildDepartmentDecisionPayload/);
-  assert.match(source, /window\.alert\("Keputusan bahagian berjaya dihantar kepada HRM\."\)/);
+  assert.doesNotMatch(source, /window\.alert/);
   assert.match(source, /onSubmitted\?\.\(\)/);
   assert.match(source, /onDepartmentDecisionSubmitted=\{\(\) => navigate\(ADMIN_ROUTES\.applications\.internship\)\}/);
 });
