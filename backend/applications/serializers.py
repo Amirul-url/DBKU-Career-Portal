@@ -20,6 +20,7 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
     resumeFile = serializers.FileField(required=False, write_only=True)
     passportPhotoFile = serializers.FileField(required=False, write_only=True)
     bankAccountFile = serializers.FileField(required=False, write_only=True)
+    organizationFeedbackDocument = serializers.FileField(required=False, write_only=True)
 
     document_upload_fields = {
         "universityLetterFile": ("internship_university_letter", "internship_university_letter_original_name"),
@@ -27,6 +28,7 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
         "resumeFile": ("internship_resume", "internship_resume_original_name"),
         "passportPhotoFile": ("internship_passport_photo", "internship_passport_photo_original_name"),
         "bankAccountFile": ("internship_bank_account", "internship_bank_account_original_name"),
+        "organizationFeedbackDocument": ("organization_feedback_document", "organization_feedback_document_original_name"),
     }
 
     class Meta:
@@ -47,6 +49,7 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
             "resumeFile",
             "passportPhotoFile",
             "bankAccountFile",
+            "organizationFeedbackDocument",
             "profile_data",
             "latest_remark",
             "assigned_department",

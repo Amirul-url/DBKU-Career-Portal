@@ -94,6 +94,7 @@ const statusClass = {
 };
 const hrmReviewTab = "Semakan HRM";
 const departmentDecisionTab = "Keputusan Bahagian";
+const organizationFeedbackTab = "Maklumbalas Organisasi";
 const dateValue = (value) =>
   value
     ? new Date(value).toLocaleDateString("ms-MY", {
@@ -383,6 +384,30 @@ export default function AdminHrmPage() {
       current.map((item) => (String(item.id) === String(updatedApplication.id) ? updatedApplication : item)),
     );
     setNotice("Keputusan bahagian telah dihantar kepada HRM.");
+    return updatedApplication;
+  };
+  const saveOrganizationFeedbackDocument = async (application, file) => {
+    if (!application || !file) return null;
+
+    const profileData = {
+      ...(application.profile_data || {}),
+      organization_feedback: {
+        file_name: file.name,
+        uploaded_at: new Date().toISOString(),
+      },
+    };
+    const payload = new FormData();
+    payload.append("profile_data", JSON.stringify(profileData));
+    payload.append("organizationFeedbackDocument", file);
+
+    const updatedApplication = await apiRequest(`/applications/${application.id}/`, {
+      method: "PATCH",
+      body: payload,
+    });
+    setApplications((current) =>
+      current.map((item) => (String(item.id) === String(updatedApplication.id) ? updatedApplication : item)),
+    );
+    setNotice("Dokumen maklumbalas organisasi telah dimuat naik.");
     return updatedApplication;
   };
   const openJobView = (job) => {
@@ -1109,6 +1134,7 @@ export default function AdminHrmPage() {
               onSaveAssessment={saveHrmAssessment}
               onDepartmentDecisionSubmitted={() => navigate(ADMIN_ROUTES.applications.internship)}
               onSaveDepartmentDecision={saveDepartmentDecision}
+              onSaveOrganizationFeedbackDocument={saveOrganizationFeedbackDocument}
               user={user}
             />
           )}
@@ -1536,6 +1562,49 @@ function getInternshipStudentInfo(application) {
 }
 function getInternshipInstitution(application) {
   return getInternshipStudentInfo(application).institution || "Belum diisi";
+}
+function getInternshipStudentName(application) {
+  const studentInfo = getInternshipStudentInfo(application);
+  return studentInfo.name || application?.applicant_name || "Belum diisi";
+}
+function getInternshipStudentIdentityNo(application) {
+  const studentInfo = getInternshipStudentInfo(application);
+  return studentInfo.icNo || studentInfo.identificationNumber || application?.applicant_detail?.mykad_number || "Belum diisi";
+}
+function getInternshipProgram(application) {
+  return getInternshipStudentInfo(application).program || "Belum diisi";
+}
+function getInternshipPlacementDepartment(application) {
+  const department =
+    application?.assigned_department ||
+    getSavedDepartmentDecision(application).department ||
+    application?.profile_data?.internship_vacancy?.division ||
+    application?.vacancy_detail?.division ||
+    "Belum ditetapkan";
+  return String(department).replace(/\s*\([^)]+\)\s*$/, "");
+}
+function getFirstAvailableDateValue(...values) {
+  return values.find((value) => String(value || "").trim()) || "";
+}
+function getInternshipPeriod(application) {
+  const studentInfo = getInternshipStudentInfo(application);
+  const startDate = getFirstAvailableDateValue(
+    studentInfo.trainingStartDate,
+    studentInfo.training_start_date,
+    studentInfo.internshipStartDate,
+    studentInfo.internship_start_date,
+    studentInfo.practicalStartDate,
+  );
+  const endDate = getFirstAvailableDateValue(
+    studentInfo.trainingEndDate,
+    studentInfo.training_end_date,
+    studentInfo.internshipEndDate,
+    studentInfo.internship_end_date,
+    studentInfo.practicalEndDate,
+  );
+
+  if (startDate && endDate) return `${dateValue(startDate)} - ${dateValue(endDate)}`;
+  return studentInfo.trainingPeriod || studentInfo.internshipPeriod || "Belum ditetapkan";
 }
 function InstitutionSearchFilter({ onChange, options, value }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -2100,6 +2169,95 @@ function DepartmentDecisionTab({ application, isReadOnly = false, onSaveDecision
     </div>
   );
 }
+function OrganizationFeedbackTab({ application, onSaveDocument }) {
+  const [feedbackFile, setFeedbackFile] = useState(null);
+  const [message, setMessage] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const studentName = getInternshipStudentName(application);
+  const identityNo = getInternshipStudentIdentityNo(application);
+  const internshipPeriod = getInternshipPeriod(application);
+  const program = getInternshipProgram(application);
+  const placementDepartment = getInternshipPlacementDepartment(application);
+  const existingFeedbackDocument = application?.document_files?.organizationFeedbackDocument;
+
+  const saveDocument = async () => {
+    if (!feedbackFile || !onSaveDocument) {
+      setMessage("Sila pilih dokumen maklumbalas organisasi terlebih dahulu.");
+      return;
+    }
+
+    setIsSaving(true);
+    setMessage("");
+    try {
+      await onSaveDocument(application, feedbackFile);
+      setFeedbackFile(null);
+      setMessage("Dokumen maklumbalas organisasi telah dimuat naik.");
+    } catch (error) {
+      setMessage(error.message || "Dokumen maklumbalas organisasi gagal dimuat naik.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="organization-feedback-panel">
+      <section className="organization-feedback-upload" aria-label="Muat naik dokumen maklumbalas organisasi">
+        <div>
+          <strong>Dokumen maklumbalas organisasi (DBKU)</strong>
+          <p>Muat naik dokumen maklumbalas organisasi untuk dihantar kepada pemohon.</p>
+        </div>
+        <label className="organization-feedback-file">
+          <Icon>upload_file</Icon>
+          <span>{feedbackFile?.name || "Pilih dokumen"}</span>
+          <input
+            type="file"
+            accept="application/pdf,image/png,image/jpeg"
+            onChange={(event) => setFeedbackFile(event.target.files?.[0] || null)}
+          />
+        </label>
+        <button
+          className="organization-feedback-submit"
+          type="button"
+          disabled={isSaving || !feedbackFile}
+          onClick={saveDocument}
+        >
+          <Icon>upload</Icon>
+          {isSaving ? "Memuat naik..." : "Muat naik"}
+        </button>
+      </section>
+      {existingFeedbackDocument?.url ? (
+        <a className="organization-feedback-current" href={existingFeedbackDocument.url} target="_blank" rel="noreferrer">
+          <Icon>description</Icon>
+          {existingFeedbackDocument.name || "Dokumen maklumbalas organisasi"}
+        </a>
+      ) : null}
+      {message ? <p className="organization-feedback-message">{message}</p> : null}
+      <div className="organization-feedback-table-wrap">
+        <table className="organization-feedback-table">
+          <thead>
+            <tr>
+              <th>Nama Pelajar</th>
+              <th>Tempoh Latihan Industri / Praktikal</th>
+              <th>Program</th>
+              <th>Bahagian Ditempatkan</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <strong>{studentName}</strong>
+                <span>No. Kad Pengenalan: {identityNo}</span>
+              </td>
+              <td>{internshipPeriod}</td>
+              <td>{program}</td>
+              <td>{placementDepartment}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
 function InternshipApplicationDetailPage({
   application,
   isHrmWorkspace,
@@ -2109,6 +2267,7 @@ function InternshipApplicationDetailPage({
   onReview,
   onSaveAssessment,
   onSaveDepartmentDecision,
+  onSaveOrganizationFeedbackDocument,
   user,
 }) {
   const [activeTab, setActiveTab] = useState("Maklumat Peribadi Pemohon");
@@ -2116,6 +2275,7 @@ function InternshipApplicationDetailPage({
   const extraTabs = [
     ...(isHrmWorkspace ? [hrmReviewTab] : []),
     ...(shouldShowDepartmentDecision ? [departmentDecisionTab] : []),
+    ...(isHrmWorkspace ? [organizationFeedbackTab] : []),
   ];
 
   return (
@@ -2147,6 +2307,12 @@ function InternshipApplicationDetailPage({
               onSaveDecision={onSaveDepartmentDecision}
               onSubmitted={onDepartmentDecisionSubmitted}
               user={user}
+            />
+          ) : tab === organizationFeedbackTab ? (
+            <OrganizationFeedbackTab
+              application={application}
+              key={application?.id || "organization-feedback"}
+              onSaveDocument={onSaveOrganizationFeedbackDocument}
             />
           ) : null
         }

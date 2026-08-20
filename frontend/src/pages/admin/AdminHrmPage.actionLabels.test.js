@@ -162,3 +162,24 @@ test("HRM and department decision tabs keep draft selections in local state unti
   assert.match(source, /onSubmitted\?\.\(\)/);
   assert.match(source, /onDepartmentDecisionSubmitted=\{\(\) => navigate\(ADMIN_ROUTES\.applications\.internship\)\}/);
 });
+
+test("HRM detail includes an organization feedback document tab", () => {
+  assert.match(source, /const organizationFeedbackTab = "Maklumbalas Organisasi"/);
+  assert.match(source, /\.\.\.\(isHrmWorkspace \? \[organizationFeedbackTab\] : \[\]\)/);
+  assert.match(source, /function OrganizationFeedbackTab/);
+  assert.match(source, /Dokumen maklumbalas organisasi \(DBKU\)/);
+  assert.match(source, /Muat naik dokumen maklumbalas organisasi untuk dihantar kepada pemohon/);
+  assert.match(source, /type="file"/);
+  assert.match(source, /accept="application\/pdf,image\/png,image\/jpeg"/);
+  assert.match(source, /const saveOrganizationFeedbackDocument = async/);
+  assert.match(source, /organization_feedback:/);
+  assert.match(source, /payload\.append\("organizationFeedbackDocument", file\)/);
+  assert.match(source, /onSaveOrganizationFeedbackDocument=\{saveOrganizationFeedbackDocument\}/);
+  assert.match(source, /onSaveDocument=\{onSaveOrganizationFeedbackDocument\}/);
+  assert.match(source, /application\?\.document_files\?\.organizationFeedbackDocument/);
+  assert.match(source, /Nama Pelajar/);
+  assert.match(source, /Tempoh Latihan Industri \/ Praktikal/);
+  assert.match(source, /Program/);
+  assert.match(source, /Bahagian Ditempatkan/);
+  assert.match(source, /No\. Kad Pengenalan:/);
+});

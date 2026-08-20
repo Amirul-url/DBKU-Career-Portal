@@ -41,6 +41,8 @@ class CandidateApplication(models.Model):
     internship_passport_photo_original_name = models.CharField(max_length=255, blank=True)
     internship_bank_account = models.FileField(upload_to="internship_documents/", blank=True)
     internship_bank_account_original_name = models.CharField(max_length=255, blank=True)
+    organization_feedback_document = models.FileField(upload_to="organization_feedback_documents/", blank=True)
+    organization_feedback_document_original_name = models.CharField(max_length=255, blank=True)
     profile_data = models.JSONField(default=dict, blank=True)
     latest_remark = models.TextField(blank=True)
     assigned_department = models.CharField(max_length=120, blank=True)
