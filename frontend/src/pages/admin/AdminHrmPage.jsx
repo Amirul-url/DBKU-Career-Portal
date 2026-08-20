@@ -1909,6 +1909,8 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
   const [assignedDepartment, setAssignedDepartment] = useState(application?.assigned_department || "");
   const [isSavingAssessment, setIsSavingAssessment] = useState(false);
   const isFinal = application ? ["shortlisted", "rejected"].includes(application.status) : false;
+  const isAssignedToDepartment = Boolean(application?.assigned_department);
+  const isAssessmentLocked = isFinal || isAssignedToDepartment;
   const decisions = ["Layak", "Tidak Layak", "Tidak Lengkap"];
   const educationLevels = ["Ijazah", "Diploma", "STPM", "Matrikulasi", "SPM / SPMV"];
   const departmentAssignmentOptions = dbkuDepartments
@@ -1928,15 +1930,17 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
     }
   };
   const chooseDecision = (item) => {
+    if (isAssessmentLocked) return;
     const nextDecision = decision === item ? "" : item;
     setDecision(nextDecision);
   };
   const chooseEducationLevel = (item) => {
+    if (isAssessmentLocked) return;
     const nextEducationLevel = educationLevel === item ? "" : item;
     setEducationLevel(nextEducationLevel);
   };
   const reviewWithAssessment = async (status, nextDecision = decision) => {
-    if (!application) return;
+    if (!application || isAssessmentLocked) return;
 
     setDecision(nextDecision);
     const isSaved = await saveAssessment({ decision: nextDecision, educationLevel });
@@ -1963,6 +1967,7 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
                     <span>{item}</span>
                     <input
                       checked={decision === item}
+                      disabled={isAssessmentLocked}
                       type="checkbox"
                       onChange={() => chooseDecision(item)}
                     />
@@ -1976,6 +1981,7 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
                     <span>{item}</span>
                     <input
                       checked={educationLevel === item}
+                      disabled={isAssessmentLocked}
                       type="checkbox"
                       onChange={() => chooseEducationLevel(item)}
                     />
@@ -2005,39 +2011,41 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
       </div>
       <label className="hrm-assignment-target">
         <span>Hantar kepada bahagian</span>
-        <select value={assignedDepartment} onChange={(event) => setAssignedDepartment(event.target.value)}>
+        <select disabled={isAssessmentLocked} value={assignedDepartment} onChange={(event) => setAssignedDepartment(event.target.value)}>
           <option value="">Sila pilih bahagian</option>
           {departmentAssignmentOptions.map((department) => (
             <option key={department} value={department}>{department}</option>
           ))}
         </select>
       </label>
-      <footer className="hrm-application-detail-actions">
-        <button
-          className="hrm-primary"
-          type="button"
-          disabled={!application || isFinal || isSavingAssessment || !assignedDepartment}
-          onClick={() => reviewWithAssessment("shortlisted", "Layak")}
-        >
-          Hantar ke Bahagian
-        </button>
-        <button
-          className="hrm-secondary"
-          type="button"
-          disabled={!application || isFinal || isSavingAssessment}
-          onClick={() => reviewWithAssessment("incomplete", "Tidak Lengkap")}
-        >
-          Tidak Lengkap
-        </button>
-        <button
-          className="hrm-danger"
-          type="button"
-          disabled={!application || isFinal || isSavingAssessment}
-          onClick={() => reviewWithAssessment("rejected", "Tidak Layak")}
-        >
-          Tidak Layak
-        </button>
-      </footer>
+      {!isAssessmentLocked ? (
+        <footer className="hrm-application-detail-actions">
+          <button
+            className="hrm-primary"
+            type="button"
+            disabled={!application || isSavingAssessment || !assignedDepartment}
+            onClick={() => reviewWithAssessment("shortlisted", "Layak")}
+          >
+            Hantar ke Bahagian
+          </button>
+          <button
+            className="hrm-secondary"
+            type="button"
+            disabled={!application || isSavingAssessment}
+            onClick={() => reviewWithAssessment("incomplete", "Tidak Lengkap")}
+          >
+            Tidak Lengkap
+          </button>
+          <button
+            className="hrm-danger"
+            type="button"
+            disabled={!application || isSavingAssessment}
+            onClick={() => reviewWithAssessment("rejected", "Tidak Layak")}
+          >
+            Tidak Layak
+          </button>
+        </footer>
+      ) : null}
     </div>
   );
 }

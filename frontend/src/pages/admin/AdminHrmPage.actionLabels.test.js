@@ -108,7 +108,8 @@ test("HRM review can assign internship applications to a department dashboard", 
   assert.match(source, /assigned_department: assignedDepartment/);
   assert.match(source, />\s*Hantar kepada bahagian\s*</);
   assert.match(source, /<\/div>\s*<label className="hrm-assignment-target">/);
-  assert.match(source, /disabled=\{!application \|\| isFinal \|\| isSavingAssessment \|\| !assignedDepartment\}/);
+  assert.match(source, /const isAssessmentLocked = isFinal \|\| isAssignedToDepartment/);
+  assert.match(source, /disabled=\{!application \|\| isSavingAssessment \|\| !assignedDepartment\}/);
 });
 
 test("department decision tab replaces HRM review for department workspaces", () => {
@@ -141,14 +142,26 @@ test("HRM assessment saves do not change the application status before review ac
   assert.doesNotMatch(assessmentSource, /status:/);
 });
 
+test("HRM assessment locks after the application is sent to a department", () => {
+  assert.match(source, /const isAssignedToDepartment = Boolean\(application\?\.assigned_department\)/);
+  assert.match(source, /const isAssessmentLocked = isFinal \|\| isAssignedToDepartment/);
+  assert.match(source, /if \(isAssessmentLocked\) return;\s*const nextDecision = decision === item \? "" : item;/);
+  assert.match(source, /if \(isAssessmentLocked\) return;\s*const nextEducationLevel = educationLevel === item \? "" : item;/);
+  assert.match(source, /if \(!application \|\| isAssessmentLocked\) return;/);
+  assert.match(source, /disabled=\{isAssessmentLocked\}[\s\S]*type="checkbox"/);
+  assert.match(source, /<select disabled=\{isAssessmentLocked\} value=\{assignedDepartment\}/);
+  assert.match(source, /\{!isAssessmentLocked \? \(\s*<footer className="hrm-application-detail-actions">/);
+  assert.doesNotMatch(source, /disabled=\{!application \|\| isFinal \|\| isSavingAssessment/);
+});
+
 test("HRM and department decision tabs keep draft selections in local state until submitted", () => {
   assert.match(source, /const \[decision, setDecision\] = useState\(savedAssessment\.decision \|\| ""\)/);
   assert.match(source, /const \[educationLevel, setEducationLevel\] = useState/);
   assert.match(source, /const \[recommendation, setRecommendation\] = useState/);
   assert.match(source, /const \[remarks, setRemarks\] = useState/);
   assert.match(source, /const isSaved = await saveAssessment\(\{ decision: nextDecision, educationLevel \}\)/);
-  assert.match(source, /const chooseDecision = \(item\) => \{\s*const nextDecision = decision === item \? "" : item;\s*setDecision\(nextDecision\);\s*\};/);
-  assert.match(source, /const chooseEducationLevel = \(item\) => \{\s*const nextEducationLevel = educationLevel === item \? "" : item;\s*setEducationLevel\(nextEducationLevel\);\s*\};/);
+  assert.match(source, /const chooseDecision = \(item\) => \{\s*if \(isAssessmentLocked\) return;\s*const nextDecision = decision === item \? "" : item;\s*setDecision\(nextDecision\);\s*\};/);
+  assert.match(source, /const chooseEducationLevel = \(item\) => \{\s*if \(isAssessmentLocked\) return;\s*const nextEducationLevel = educationLevel === item \? "" : item;\s*setEducationLevel\(nextEducationLevel\);\s*\};/);
   assert.match(source, /await onSaveDecision\(application, buildDepartmentDecisionPayload/);
   assert.doesNotMatch(source, /window\.alert/);
   assert.match(source, /function DepartmentDecisionConfirmModal/);
