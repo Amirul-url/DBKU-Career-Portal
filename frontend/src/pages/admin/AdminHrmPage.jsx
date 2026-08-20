@@ -421,6 +421,7 @@ export default function AdminHrmPage() {
   if (location.pathname === "/admin") return <Navigate to="dashboard" replace />;
   if (!isKnownRoute) return <Navigate to="/admin/dashboard" replace />;
   const activeOpportunityLabel = opportunityTypeLabels[activeVacancyType] || opportunityTypeLabels.job;
+  const activeManageOpportunityLabel = activeVacancyType === "job" ? "Jawatan Kosong DBKU" : activeOpportunityLabel;
   const activeMetrics = dashboardMetrics[activeVacancyType] || dashboardMetrics.job;
   const overallMetrics = dashboardMetrics.all;
   const summaryMetrics = dashboardMetrics.summary;
@@ -903,8 +904,8 @@ export default function AdminHrmPage() {
             <>
               <div className="hrm-heading">
                 <div>
-                  <h1 className="text-3xl font-bold text-slate-950">Senarai {activeOpportunityLabel}</h1>
-                  <p>Semak semua iklan {activeOpportunityLabel.toLowerCase()} yang telah disiarkan.</p>
+                  <h1 className="text-3xl font-bold text-slate-950">Senarai {activeManageOpportunityLabel}</h1>
+                  <p>Semak semua iklan {activeManageOpportunityLabel.toLowerCase()} yang telah disiarkan.</p>
                 </div>
                 {isHrmWorkspace ? (
                   <button
@@ -914,16 +915,16 @@ export default function AdminHrmPage() {
                       openCreatePanel(activeVacancyType === "internship" ? "Tambah Latihan Industri" : "Tambah Jawatan DBKU", activeVacancyType);
                     }}
                   >
-                    <Icon>add_circle</Icon>Tambah {activeOpportunityLabel}
+                    <Icon>add_circle</Icon>Tambah {activeManageOpportunityLabel}
                   </button>
                 ) : null}
               </div>
               <section className="hrm-card hrm-table-card">
                 <header>
                   <div>
-                    <h2>{activeOpportunityLabel} disiarkan</h2>
+                    <h2>{activeManageOpportunityLabel} disiarkan</h2>
                     <p>
-                      {filteredJobs.length} rekod {activeOpportunityLabel.toLowerCase()}
+                      {filteredJobs.length} rekod {activeManageOpportunityLabel.toLowerCase()}
                       {jobStatusFilter !== "all" ? ` daripada ${activeMetrics.jobs.length}` : ""}
                     </p>
                   </div>
@@ -943,10 +944,10 @@ export default function AdminHrmPage() {
                   applications={applications}
                   emptyMessage={
                     activeMetrics.jobs.length && jobStatusFilter !== "all"
-                      ? `Tiada ${activeOpportunityLabel.toLowerCase()} dengan status ini.`
+                      ? `Tiada ${activeManageOpportunityLabel.toLowerCase()} dengan status ini.`
                       : ""
                   }
-                  itemLabel={activeOpportunityLabel.toLowerCase()}
+                  itemLabel={activeManageOpportunityLabel.toLowerCase()}
                   onDelete={isHrmWorkspace ? requestDeleteJob : null}
                   onEdit={isHrmWorkspace ? openJobEdit : null}
                   onView={openJobView}

@@ -37,9 +37,11 @@ test("admin workspace labels and navigation follow the signed-in department", ()
 test("department job management is read-only", () => {
   assert.match(adminRoutesSource, /label: "Jawatan Kosong DBKU"/);
   assert.doesNotMatch(adminRoutesSource, /label: "Urus Jawatan DBKU"/);
+  assert.match(source, /activeManageOpportunityLabel = activeVacancyType === "job" \? "Jawatan Kosong DBKU" : activeOpportunityLabel/);
+  assert.match(source, />Senarai \{activeManageOpportunityLabel\}<\/h1>/);
   assert.match(source, /onDelete=\{isHrmWorkspace \? requestDeleteJob : null\}/);
   assert.match(source, /onEdit=\{isHrmWorkspace \? openJobEdit : null\}/);
-  assert.match(source, /\{isHrmWorkspace \? \(\s*<button[\s\S]*Tambah \{activeOpportunityLabel\}/);
+  assert.match(source, /\{isHrmWorkspace \? \(\s*<button[\s\S]*Tambah \{activeManageOpportunityLabel\}/);
   assert.match(source, /\{onEdit \? \(/);
   assert.match(source, /\{onDelete \? \(/);
 });
