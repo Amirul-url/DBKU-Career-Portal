@@ -191,10 +191,12 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /Tiada fail dipilih\./);
   assert.match(source, /Saiz fail maksimum: 15MB/);
   assert.match(source, /className="organization-feedback-row-actions"/);
-  assert.match(source, /organization-feedback-icon-button organization-feedback-icon-button-upload/);
-  assert.match(source, /organization-feedback-icon-button organization-feedback-icon-button-download/);
+  assert.match(source, /organization-feedback-icon-button organization-feedback-icon-button-view/);
   assert.match(source, /organization-feedback-icon-button organization-feedback-icon-button-remove-file/);
+  assert.match(source, /<Icon>visibility<\/Icon>/);
+  assert.match(source, /<Icon>delete<\/Icon>/);
   assert.match(source, />\s*Padam baris\s*</);
+  assert.doesNotMatch(source, /organization-feedback-icon-button-download/);
   assert.match(source, /--Tiada rekod--/);
   assert.match(source, /type="file"/);
   assert.match(source, /accept="application\/pdf,\.pdf"/);

@@ -2236,7 +2236,12 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
     void uploadDocument(selectedFile);
   };
 
-  const uploadFeedbackFile = () => {
+  const openFeedbackDocumentAction = () => {
+    if (existingFeedbackDocument?.url) {
+      window.open(existingFeedbackDocument.url, "_blank", "noreferrer");
+      return;
+    }
+
     feedbackFileInputRef.current?.click();
   };
 
@@ -2314,7 +2319,7 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
               disabled={isSaving || isDeleting || showDocumentRow}
               onClick={addDocumentRow}
             >
-              <Icon>add</Icon>
+              <Icon>add_circle</Icon>
               <span>Tambah Dokumen</span>
             </button>
           </div>
@@ -2322,6 +2327,12 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
         {message ? <p className="organization-feedback-message">{message}</p> : null}
         <div className="organization-feedback-table-wrap">
           <table className="organization-feedback-document-table">
+            <colgroup>
+              <col className="organization-feedback-col-index" />
+              <col className="organization-feedback-col-format" />
+              <col />
+              <col className="organization-feedback-col-actions" />
+            </colgroup>
             <thead>
               <tr>
                 <th>#</th>
@@ -2369,27 +2380,15 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
                   <td>
                     <div className="organization-feedback-row-actions">
                       <button
-                        className="organization-feedback-icon-button organization-feedback-icon-button-upload"
+                        className="organization-feedback-icon-button organization-feedback-icon-button-view"
                         type="button"
                         disabled={isSaving || isDeleting}
-                        onClick={uploadFeedbackFile}
-                        aria-label="Pilih fail"
-                        title="Pilih fail"
+                        onClick={openFeedbackDocumentAction}
+                        aria-label={existingFeedbackDocument?.url ? "Lihat fail" : "Pilih fail"}
+                        title={existingFeedbackDocument?.url ? "Lihat fail" : "Pilih fail"}
                       >
-                        <Icon>upload</Icon>
+                        <Icon>visibility</Icon>
                       </button>
-                      {existingFeedbackDocument?.url ? (
-                        <a
-                          className="organization-feedback-icon-button organization-feedback-icon-button-download"
-                          href={existingFeedbackDocument.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          aria-label="Muat turun fail"
-                          title="Muat turun fail"
-                        >
-                          <Icon>download</Icon>
-                        </a>
-                      ) : null}
                       {(feedbackFile || existingFeedbackDocument?.url) ? (
                         <button
                           className="organization-feedback-icon-button organization-feedback-icon-button-remove-file"
@@ -2399,7 +2398,7 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
                           aria-label="Buang fail"
                           title="Buang fail"
                         >
-                          <Icon>close</Icon>
+                          <Icon>delete</Icon>
                         </button>
                       ) : null}
                       <button
