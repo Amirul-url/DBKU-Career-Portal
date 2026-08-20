@@ -19,16 +19,24 @@ test("HRM sidebar shows red badges for new application counts", () => {
   assert.match(source, /getSidebarApplicationBadgeCount\(item, dashboardMetrics, \{ isHrmWorkspace \}\)/);
   assert.match(source, /className="hrm-sidebar-badge"/);
   assert.match(source, /aria-label=\{`\$\{sidebarBadgeCount\} permohonan baharu`\}/);
+  assert.match(source, /isHrmPendingDepartmentDecisionApplication\(application\)/);
+  assert.match(source, /\(application\?\.status \|\| "submitted"\) === "submitted"/);
 });
 
-test("department sidebar and internship rows mark unsent department decisions as new", () => {
+test("department and HRM internship rows mark pending decision tasks as new", () => {
   assert.match(source, /department_new: "Baharu"/);
+  assert.match(source, /hrm_department_new: "Baharu"/);
   assert.match(source, /department_new: "red"/);
+  assert.match(source, /hrm_department_new: "red"/);
   assert.match(source, /function hasSubmittedDepartmentDecision\(application\)/);
   assert.match(source, /function isDepartmentPendingDecisionApplication\(application\)/);
+  assert.match(source, /function isHrmPendingDepartmentDecisionApplication\(application\)/);
   assert.match(source, /return Boolean\(application\?\.assigned_department && !hasSubmittedDepartmentDecision\(application\)\)/);
-  assert.match(source, /if \(!isHrmWorkspace\) \{\s*const applications = metrics\?\.\[item\.vacancyType\]\?\.applications \|\| \[\];\s*return applications\.filter\(isDepartmentPendingDecisionApplication\)\.length;\s*\}/);
+  assert.match(source, /return Boolean\(hasSubmittedDepartmentDecision\(application\) && \["accepted", "rejected"\]\.includes\(application\?\.status\)\)/);
+  assert.match(source, /const applications = metrics\?\.\[item\.vacancyType\]\?\.applications \|\| \[\]/);
+  assert.match(source, /if \(!isHrmWorkspace\) \{\s*return applications\.filter\(isDepartmentPendingDecisionApplication\)\.length;\s*\}/);
   assert.match(source, /function getInternshipApplicationDisplayStatus\(application, isHrmWorkspace\)/);
+  assert.match(source, /return "hrm_department_new"/);
   assert.match(source, /return "department_new"/);
   assert.match(source, /isHrmWorkspace=\{isHrmWorkspace\}/);
   assert.match(source, /<Badge status=\{displayStatus\} \/>/);

@@ -62,6 +62,7 @@ function getAdminShellRoleLabel(user) {
 
 const statusLabel = {
   department_new: "Baharu",
+  hrm_department_new: "Baharu",
   submitted: "Baharu",
   screening: "Saringan",
   incomplete: "Tidak Lengkap",
@@ -75,6 +76,7 @@ const statusLabel = {
 };
 const statusClass = {
   department_new: "red",
+  hrm_department_new: "red",
   submitted: "blue",
   screening: "amber",
   incomplete: "amber",
@@ -224,18 +226,26 @@ function isDepartmentPendingDecisionApplication(application) {
   return Boolean(application?.assigned_department && !hasSubmittedDepartmentDecision(application));
 }
 
+function isHrmPendingDepartmentDecisionApplication(application) {
+  return Boolean(hasSubmittedDepartmentDecision(application) && ["accepted", "rejected"].includes(application?.status));
+}
+
 function getInternshipApplicationDisplayStatus(application, isHrmWorkspace) {
+  if (isHrmWorkspace && isHrmPendingDepartmentDecisionApplication(application)) return "hrm_department_new";
   if (!isHrmWorkspace && isDepartmentPendingDecisionApplication(application)) return "department_new";
   return application?.status || "submitted";
 }
 
 function getSidebarApplicationBadgeCount(item, metrics, { isHrmWorkspace = true } = {}) {
   if (item?.panel !== "applications" || !item?.vacancyType) return 0;
+  const applications = metrics?.[item.vacancyType]?.applications || [];
   if (!isHrmWorkspace) {
-    const applications = metrics?.[item.vacancyType]?.applications || [];
     return applications.filter(isDepartmentPendingDecisionApplication).length;
   }
-  return metrics?.[item.vacancyType]?.new || 0;
+  return applications.filter((application) =>
+    (application?.status || "submitted") === "submitted" ||
+    isHrmPendingDepartmentDecisionApplication(application)
+  ).length;
 }
 
 function formatSidebarBadgeCount(count) {
