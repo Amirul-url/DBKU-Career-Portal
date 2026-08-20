@@ -10338,6 +10338,22 @@ body:has(.applicant-profile-page) {
   white-space: nowrap;
 }
 
+.hrm-internship-actions .view {
+  display: inline-grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  background: #eff6ff;
+  padding: 0;
+  color: #1769aa;
+}
+
+.hrm-internship-actions .view .app-svg-icon {
+  font-size: 17px;
+}
+
 .hrm-application-detail-page {
   overflow: hidden;
   border-radius: 8px;
