@@ -10938,13 +10938,13 @@ body:has(.applicant-profile-page) {
 
 .organization-feedback-table th {
   background: #e5e7eb;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 900;
   line-height: 1.2;
 }
 
 .organization-feedback-table td {
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 600;
   line-height: 1.35;
 }
@@ -10970,7 +10970,7 @@ body:has(.applicant-profile-page) {
   background: #ffffff;
   color: #020617;
   font-family: inherit;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 600;
   line-height: 1.35;
   padding: 8px 10px;
