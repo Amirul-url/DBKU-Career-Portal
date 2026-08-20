@@ -1938,12 +1938,7 @@ function DepartmentDecisionConfirmModal({ isSaving, onCancel, onConfirm }) {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/45 p-5" role="presentation">
       <section className="w-full max-w-lg overflow-hidden rounded-xl bg-white shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="department-decision-confirm-message">
-        <header className="flex justify-end px-6 pt-5">
-          <button className="rounded-md p-2 text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60" type="button" onClick={onCancel} aria-label="Tutup" disabled={isSaving}>
-            <Icon>close</Icon>
-          </button>
-        </header>
-        <div className="px-6 pb-5 pt-2">
+        <div className="px-6 py-5">
           <p id="department-decision-confirm-message" className="text-sm leading-6 text-slate-600">
             Anda yakin mahu menghantar keputusan bahagian ini kepada HRM?
           </p>
