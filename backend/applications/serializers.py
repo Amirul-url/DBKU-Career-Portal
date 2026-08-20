@@ -1,6 +1,10 @@
 import json
+import os
+from uuid import uuid4
 
+from django.core.files.storage import default_storage
 from django.utils import timezone
+from django.utils.text import get_valid_filename
 from rest_framework import serializers
 
 from jobs.serializers import VacancySerializer
@@ -21,7 +25,13 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
     passportPhotoFile = serializers.FileField(required=False, write_only=True)
     bankAccountFile = serializers.FileField(required=False, write_only=True)
     organizationFeedbackDocument = serializers.FileField(required=False, write_only=True)
+    organizationFeedbackDocuments = serializers.ListField(
+        child=serializers.FileField(),
+        required=False,
+        write_only=True,
+    )
     clearOrganizationFeedbackDocument = serializers.BooleanField(required=False, write_only=True)
+    clearOrganizationFeedbackDocumentId = serializers.CharField(required=False, write_only=True, allow_blank=True)
 
     document_upload_fields = {
         "universityLetterFile": ("internship_university_letter", "internship_university_letter_original_name"),
@@ -51,7 +61,9 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
             "passportPhotoFile",
             "bankAccountFile",
             "organizationFeedbackDocument",
+            "organizationFeedbackDocuments",
             "clearOrganizationFeedbackDocument",
+            "clearOrganizationFeedbackDocumentId",
             "profile_data",
             "latest_remark",
             "assigned_department",
@@ -88,6 +100,65 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
                 "name": getattr(obj, original_name_field) or uploaded_file.name.rsplit("/", 1)[-1],
                 "url": url,
             }
+        organization_feedback_documents = self.serialize_organization_feedback_documents(obj)
+        if organization_feedback_documents:
+            documents["organizationFeedbackDocuments"] = organization_feedback_documents
+        return documents
+
+    def build_absolute_file_url(self, file_path):
+        url = default_storage.url(file_path)
+        request = self.context.get("request")
+        if request:
+            return request.build_absolute_uri(url)
+        return url
+
+    def format_file_size(self, size):
+        try:
+            size = int(size)
+        except (TypeError, ValueError):
+            size = 0
+
+        if size <= 0:
+            return ""
+        if size < 1024:
+            return f"{size} B"
+        if size < 1024 * 1024:
+            return f"{size / 1024:.1f} KB"
+        return f"{size / (1024 * 1024):.1f} MB"
+
+    def serialize_organization_feedback_documents(self, obj):
+        profile_data = dict(obj.profile_data or {})
+        stored_documents = profile_data.get("organization_feedback_documents") or []
+        documents = []
+
+        for index, document in enumerate(stored_documents, start=1):
+            if not isinstance(document, dict):
+                continue
+            file_path = document.get("path")
+            if not file_path:
+                continue
+            size = document.get("size") or 0
+            documents.append({
+                "id": document.get("id") or str(index),
+                "name": document.get("name") or os.path.basename(file_path),
+                "url": self.build_absolute_file_url(file_path),
+                "size": size,
+                "size_label": self.format_file_size(size),
+                "uploaded_at": document.get("uploaded_at") or "",
+            })
+
+        if not documents and obj.organization_feedback_document:
+            size = getattr(obj.organization_feedback_document, "size", 0) or 0
+            documents.append({
+                "id": "legacy",
+                "name": obj.organization_feedback_document_original_name
+                or obj.organization_feedback_document.name.rsplit("/", 1)[-1],
+                "url": self.build_absolute_file_url(obj.organization_feedback_document.name),
+                "size": size,
+                "size_label": self.format_file_size(size),
+                "uploaded_at": profile_data.get("organization_feedback", {}).get("uploaded_at", ""),
+            })
+
         return documents
 
     def validate_profile_data(self, value):
@@ -99,6 +170,14 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
         return value
 
     def validate_organizationFeedbackDocument(self, value):
+        return self.validate_organization_feedback_pdf(value)
+
+    def validate_organizationFeedbackDocuments(self, value):
+        for uploaded_file in value:
+            self.validate_organization_feedback_pdf(uploaded_file)
+        return value
+
+    def validate_organization_feedback_pdf(self, value):
         is_pdf_content = getattr(value, "content_type", "") == "application/pdf"
         is_pdf_name = value.name.lower().endswith(".pdf")
         if not (is_pdf_content or is_pdf_name):
@@ -135,6 +214,21 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
                 uploads[public_field] = uploaded_file
         return uploads
 
+    def pop_organization_feedback_document_uploads(self, validated_data):
+        uploads = list(validated_data.pop("organizationFeedbackDocuments", []) or [])
+        request = self.context.get("request")
+
+        if request:
+            request_files = []
+            for field_name in ("organizationFeedbackDocuments", "organizationFeedbackDocuments[]"):
+                request_files.extend(request.FILES.getlist(field_name))
+            for uploaded_file in request_files:
+                if uploaded_file not in uploads:
+                    self.validate_organization_feedback_pdf(uploaded_file)
+                    uploads.append(uploaded_file)
+
+        return uploads
+
     def apply_document_uploads(self, instance, uploads):
         if not uploads:
             return instance
@@ -152,6 +246,80 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
         instance.profile_data = profile_data
         return instance
 
+    def save_organization_feedback_documents(self, instance, uploads):
+        if not uploads:
+            return instance
+
+        profile_data = dict(instance.profile_data or {})
+        documents = [
+            document
+            for document in profile_data.get("organization_feedback_documents", [])
+            if isinstance(document, dict)
+        ]
+
+        for uploaded_file in uploads:
+            safe_name = get_valid_filename(uploaded_file.name or "maklumbalas-organisasi.pdf")
+            _, extension = os.path.splitext(safe_name)
+            extension = extension or ".pdf"
+            document_id = uuid4().hex
+            saved_path = default_storage.save(
+                f"organization_feedback_documents/{document_id}{extension}",
+                uploaded_file,
+            )
+            documents.append({
+                "id": document_id,
+                "name": uploaded_file.name,
+                "path": saved_path,
+                "size": getattr(uploaded_file, "size", 0) or 0,
+                "uploaded_at": timezone.now().isoformat(),
+            })
+
+        profile_data["organization_feedback_documents"] = documents
+        latest_document = documents[-1]
+        profile_data["organization_feedback"] = {
+            "file_name": latest_document.get("name", ""),
+            "uploaded_at": latest_document.get("uploaded_at", ""),
+        }
+        instance.profile_data = profile_data
+        return instance
+
+    def delete_organization_feedback_document_by_id(self, instance, document_id):
+        if not document_id:
+            return instance
+
+        if document_id == "legacy":
+            return self.clear_organization_feedback_document(instance)
+
+        profile_data = dict(instance.profile_data or {})
+        documents = []
+        removed_document = None
+        for document in profile_data.get("organization_feedback_documents", []) or []:
+            if not isinstance(document, dict):
+                continue
+            if document.get("id") == document_id:
+                removed_document = document
+                continue
+            documents.append(document)
+
+        if removed_document:
+            file_path = removed_document.get("path")
+            if file_path and default_storage.exists(file_path):
+                default_storage.delete(file_path)
+
+        if documents:
+            profile_data["organization_feedback_documents"] = documents
+            latest_document = documents[-1]
+            profile_data["organization_feedback"] = {
+                "file_name": latest_document.get("name", ""),
+                "uploaded_at": latest_document.get("uploaded_at", ""),
+            }
+        else:
+            profile_data.pop("organization_feedback_documents", None)
+            profile_data.pop("organization_feedback", None)
+
+        instance.profile_data = profile_data
+        return instance
+
     def clear_organization_feedback_document(self, instance):
         if instance.organization_feedback_document:
             instance.organization_feedback_document.delete(save=False)
@@ -159,6 +327,13 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
         instance.organization_feedback_document_original_name = ""
 
         profile_data = dict(instance.profile_data or {})
+        for document in profile_data.get("organization_feedback_documents", []) or []:
+            if not isinstance(document, dict):
+                continue
+            file_path = document.get("path")
+            if file_path and default_storage.exists(file_path):
+                default_storage.delete(file_path)
+        profile_data.pop("organization_feedback_documents", None)
         profile_data.pop("organization_feedback", None)
         documents = dict(profile_data.get("documents") or {})
         documents.pop("organizationFeedbackDocument", None)
@@ -169,23 +344,36 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = self.context["request"].user
         uploads = self.pop_document_uploads(validated_data)
+        organization_feedback_document_uploads = self.pop_organization_feedback_document_uploads(validated_data)
         validated_data.pop("clearOrganizationFeedbackDocument", None)
+        validated_data.pop("clearOrganizationFeedbackDocumentId", None)
         application = CandidateApplication.objects.create(applicant=user, **validated_data)
         self.apply_document_uploads(application, uploads)
-        if uploads:
+        self.save_organization_feedback_documents(application, organization_feedback_document_uploads)
+        if uploads or organization_feedback_document_uploads:
             application.save()
         return application
 
     def update(self, instance, validated_data):
         uploads = self.pop_document_uploads(validated_data)
+        organization_feedback_document_uploads = self.pop_organization_feedback_document_uploads(validated_data)
         clear_organization_feedback_document = validated_data.pop("clearOrganizationFeedbackDocument", False)
+        clear_organization_feedback_document_id = validated_data.pop("clearOrganizationFeedbackDocumentId", "")
         new_status = validated_data.get("status")
         if new_status == "submitted" and instance.status == "draft" and not instance.submitted_at:
             validated_data["submitted_at"] = timezone.now()
         instance = super().update(instance, validated_data)
         if clear_organization_feedback_document:
             self.clear_organization_feedback_document(instance)
+        elif clear_organization_feedback_document_id:
+            self.delete_organization_feedback_document_by_id(instance, clear_organization_feedback_document_id)
         self.apply_document_uploads(instance, uploads)
-        if uploads or clear_organization_feedback_document:
+        self.save_organization_feedback_documents(instance, organization_feedback_document_uploads)
+        if (
+            uploads
+            or organization_feedback_document_uploads
+            or clear_organization_feedback_document
+            or clear_organization_feedback_document_id
+        ):
             instance.save()
         return instance

@@ -197,10 +197,66 @@ class CandidateApplicationReferenceNoTests(TestCase):
 
         self.assertEqual(clear_response.status_code, 200)
         self.assertNotIn("organizationFeedbackDocument", clear_response.data["document_files"])
+        self.assertNotIn("organizationFeedbackDocuments", clear_response.data["document_files"])
         application.refresh_from_db()
         self.assertFalse(application.organization_feedback_document)
         self.assertEqual(application.organization_feedback_document_original_name, "")
         self.assertNotIn("organization_feedback", application.profile_data)
+
+    def test_hrm_can_upload_multiple_organization_feedback_documents(self):
+        applicant = self.create_applicant("multi-feedback-target@example.com")
+        hrm = self.user_model.objects.create_user(
+            username="hrm-multi-feedback@example.com",
+            email="hrm-multi-feedback@example.com",
+            password="Password123!",
+            role="admin",
+            department="Bahagian Pengurusan Sumber Manusia (HRM)",
+        )
+        application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=self.vacancy,
+            status="accepted",
+        )
+        first_file = SimpleUploadedFile(
+            "maklumbalas-pertama.pdf",
+            b"%PDF-1.4\n% first\n",
+            content_type="application/pdf",
+        )
+        second_file = SimpleUploadedFile(
+            "maklumbalas-kedua.pdf",
+            b"%PDF-1.4\n% second\n",
+            content_type="application/pdf",
+        )
+        client = APIClient()
+        client.force_authenticate(user=hrm)
+
+        response = client.patch(
+            f"/api/applications/{application.id}/",
+            {"organizationFeedbackDocuments": [first_file, second_file]},
+            format="multipart",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        documents = response.data["document_files"]["organizationFeedbackDocuments"]
+        self.assertEqual(len(documents), 2)
+        self.assertEqual([document["name"] for document in documents], ["maklumbalas-pertama.pdf", "maklumbalas-kedua.pdf"])
+        self.assertIn("/media/organization_feedback_documents/", documents[0]["url"])
+        self.assertIn("size_label", documents[0])
+        self.assertNotIn("organizationFeedbackDocument", response.data["document_files"])
+
+        application.refresh_from_db()
+        self.assertEqual(len(application.profile_data["organization_feedback_documents"]), 2)
+
+        delete_response = client.patch(
+            f"/api/applications/{application.id}/",
+            {"clearOrganizationFeedbackDocumentId": documents[0]["id"]},
+            format="json",
+        )
+
+        self.assertEqual(delete_response.status_code, 200)
+        remaining_documents = delete_response.data["document_files"]["organizationFeedbackDocuments"]
+        self.assertEqual(len(remaining_documents), 1)
+        self.assertEqual(remaining_documents[0]["name"], "maklumbalas-kedua.pdf")
 
     def test_staff_application_list_excludes_drafts(self):
         applicant = self.create_applicant("hidden-draft@example.com")
