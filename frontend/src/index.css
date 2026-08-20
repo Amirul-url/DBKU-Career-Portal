@@ -239,6 +239,43 @@ a {
   width: 100%;
 }
 
+.hrm-job-management-table th {
+  color: #52615a;
+  font-size: 11px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.hrm-job-management-table td {
+  color: var(--profile-ink);
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.hrm-job-management-table .hrm-badge {
+  font-size: 11px;
+}
+
+.hrm-job-management-pagination {
+  padding: 20px 26px;
+  color: #52615a;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.hrm-job-management-pagination button {
+  width: 42px;
+  height: 42px;
+  border-color: #d9e8df;
+  border-radius: 8px;
+  color: #8ccdaf;
+}
+
+.hrm-job-management-pagination strong {
+  color: var(--profile-ink);
+  font-size: 14px;
+}
+
 .hrm-sticky-topbar,
 .profile-content-header,
 .superadmin-topbar,

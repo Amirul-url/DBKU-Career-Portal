@@ -1292,7 +1292,7 @@ function JobManagementTable({ jobs, applications, emptyMessage = "", itemLabel =
   return (
     <>
     <div className="hrm-table-wrap">
-      <table>
+      <table className="hrm-job-management-table">
         <thead>
           <tr>
             <th>Bil.</th>
@@ -1346,7 +1346,7 @@ function JobManagementTable({ jobs, applications, emptyMessage = "", itemLabel =
         </tbody>
       </table>
     </div>
-    <footer className="hrm-pagination">
+    <footer className="hrm-pagination hrm-job-management-pagination">
       <span>
         Memaparkan {visibleStart}-{visibleEnd} daripada {jobs.length} rekod
       </span>
