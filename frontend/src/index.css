@@ -10693,7 +10693,7 @@ body:has(.applicant-profile-page) {
 }
 
 .organization-feedback-col-actions {
-  width: 188px;
+  width: 220px;
 }
 
 .organization-feedback-document-table th,
@@ -10840,12 +10840,16 @@ body:has(.applicant-profile-page) {
 
 .organization-feedback-icon-button {
   display: inline-flex;
-  width: 36px;
-  height: 36px;
+  box-sizing: border-box;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
   align-items: center;
   justify-content: center;
   border-radius: 8px;
+  padding: 0;
   cursor: pointer;
+  line-height: 1;
   text-decoration: none;
 }
 
@@ -10873,13 +10877,13 @@ body:has(.applicant-profile-page) {
 
 .organization-feedback-row-delete {
   display: inline-flex;
-  min-height: 36px;
+  min-height: 42px;
   align-items: center;
   justify-content: center;
   border: 1px solid #d5dde6;
   border-radius: 8px;
   background: #ffffff;
-  padding: 0 10px;
+  padding: 0 9px;
   color: #334155;
   font: inherit;
   font-size: 12px;
