@@ -208,15 +208,14 @@ a {
   box-shadow: 0 0 0 3px #dcf6e7;
 }
 
-.hrm-manage-toolbar {
-  display: grid;
-  grid-template-columns: 1fr;
-  align-items: start;
-  gap: 0;
-  padding: 20px 28px 24px;
+.applicant-table-toolbar.hrm-manage-toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 20px 34px 24px 28px;
 }
 
-.hrm-manage-filters {
+.applicant-table-controls.hrm-manage-filters {
   display: grid;
   grid-template-columns:
     minmax(145px, 0.55fr)
@@ -226,9 +225,9 @@ a {
   align-items: end;
   justify-content: stretch;
   gap: 12px;
-  width: 100%;
+  width: min(100%, 760px);
   max-width: 760px;
-  justify-self: end;
+  margin-left: auto;
 }
 
 .hrm-manage-filters label {
