@@ -228,6 +228,7 @@ a {
   gap: 12px;
   width: 100%;
   max-width: 760px;
+  justify-self: end;
 }
 
 .hrm-manage-filters label {
