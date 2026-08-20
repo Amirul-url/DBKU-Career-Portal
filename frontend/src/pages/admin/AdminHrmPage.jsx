@@ -2228,7 +2228,7 @@ function DepartmentDecisionTab({ application, isReadOnly = false, onSaveDecision
   );
 }
 function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument }) {
-  const feedbackDocuments = getOrganizationFeedbackDocuments(application);
+  const [feedbackDocuments, setFeedbackDocuments] = useState(() => getOrganizationFeedbackDocuments(application));
   const [fileInputKey, setFileInputKey] = useState(0);
   const feedbackFileInputRef = useRef(null);
   const [message, setMessage] = useState("");
@@ -2287,7 +2287,8 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
     setIsSaving(true);
     setMessage("");
     try {
-      await onSaveDocument(application, selectedFiles);
+      const updatedApplication = await onSaveDocument(application, selectedFiles);
+      setFeedbackDocuments(getOrganizationFeedbackDocuments(updatedApplication || application));
       clearFeedbackInput();
       setMessage(
         selectedFiles.length > 1
@@ -2307,7 +2308,8 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
     setDeletingDocumentId(document.id);
     setMessage("");
     try {
-      await onDeleteDocument(application, document.id);
+      const updatedApplication = await onDeleteDocument(application, document.id);
+      setFeedbackDocuments(getOrganizationFeedbackDocuments(updatedApplication || application));
       setMessage("Dokumen maklumbalas organisasi telah dihapuskan.");
     } catch (error) {
       setMessage(error.message || "Dokumen maklumbalas organisasi gagal dihapuskan.");
@@ -2516,7 +2518,7 @@ function InternshipApplicationDetailPage({
           ) : tab === organizationFeedbackTab ? (
             <OrganizationFeedbackTab
               application={application}
-              key={application?.id || "organization-feedback"}
+              key={`${application?.id || "organization-feedback"}-${application?.updated_at || ""}`}
               onDeleteDocument={onDeleteOrganizationFeedbackDocument}
               onSaveDocument={onSaveOrganizationFeedbackDocument}
             />

@@ -206,10 +206,13 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /multiple/);
   assert.match(source, /const isPdfFile = \(file\) => file\?\.type === "application\/pdf" \|\| file\?\.name\?\.toLowerCase\(\)\.endsWith\("\.pdf"\)/);
   assert.match(source, /function getOrganizationFeedbackDocuments\(application\)/);
+  assert.match(source, /const \[feedbackDocuments, setFeedbackDocuments\] = useState\(\(\) => getOrganizationFeedbackDocuments\(application\)\)/);
+  assert.match(source, /key=\{`\$\{application\?\.id \|\| "organization-feedback"\}-\$\{application\?\.updated_at \|\| ""\}`\}/);
   assert.match(source, /const clearFeedbackInput = \(\) => \{/);
   assert.match(source, /const selectedFiles = Array\.from\(event\.target\.files \|\| \[\]\)/);
   assert.match(source, /void uploadDocuments\(selectedFiles\);/);
   assert.match(source, /await onSaveDocument\(application, selectedFiles\);/);
+  assert.match(source, /setFeedbackDocuments\(getOrganizationFeedbackDocuments\(updatedApplication \|\| application\)\)/);
   assert.match(source, /const deleteOrganizationFeedbackDocument = async/);
   assert.match(source, /clearOrganizationFeedbackDocument: true/);
   assert.match(source, /clearOrganizationFeedbackDocumentId: documentId/);
