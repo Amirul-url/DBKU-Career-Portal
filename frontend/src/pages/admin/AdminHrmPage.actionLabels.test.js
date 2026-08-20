@@ -193,6 +193,9 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /className="organization-feedback-row-actions"/);
   assert.match(source, /organization-feedback-icon-button organization-feedback-icon-button-view/);
   assert.match(source, /organization-feedback-icon-button organization-feedback-icon-button-remove-file/);
+  assert.ok(
+    source.indexOf('className="organization-feedback-table"') < source.indexOf('className="organization-feedback-document-table"'),
+  );
   assert.match(source, /<Icon>visibility<\/Icon>/);
   assert.match(source, /<Icon>delete<\/Icon>/);
   assert.match(source, />\s*Padam baris\s*</);

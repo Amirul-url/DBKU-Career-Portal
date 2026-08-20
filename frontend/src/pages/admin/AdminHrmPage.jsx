@@ -2322,6 +2322,29 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
 
   return (
     <div className="organization-feedback-panel">
+      <div className="organization-feedback-table-wrap">
+        <table className="organization-feedback-table">
+          <thead>
+            <tr>
+              <th>Nama Pelajar</th>
+              <th>Tempoh Latihan Industri / Praktikal</th>
+              <th>Program</th>
+              <th>Bahagian Ditempatkan</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <strong>{studentName}</strong>
+                <span>No. Kad Pengenalan: {identityNo}</span>
+              </td>
+              <td>{internshipPeriod}</td>
+              <td>{program}</td>
+              <td>{placementDepartment}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <section className="organization-feedback-section" aria-label="Dokumen maklumbalas organisasi">
         <div className="organization-feedback-section-header">
           <div className="organization-feedback-section-title">
@@ -2427,29 +2450,6 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
           </table>
         </div>
       </section>
-      <div className="organization-feedback-table-wrap">
-        <table className="organization-feedback-table">
-          <thead>
-            <tr>
-              <th>Nama Pelajar</th>
-              <th>Tempoh Latihan Industri / Praktikal</th>
-              <th>Program</th>
-              <th>Bahagian Ditempatkan</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>
-                <strong>{studentName}</strong>
-                <span>No. Kad Pengenalan: {identityNo}</span>
-              </td>
-              <td>{internshipPeriod}</td>
-              <td>{program}</td>
-              <td>{placementDepartment}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
       <input
         key={fileInputKey}
         ref={feedbackFileInputRef}
