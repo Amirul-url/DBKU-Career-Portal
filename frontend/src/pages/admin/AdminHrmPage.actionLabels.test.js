@@ -62,6 +62,11 @@ test("department dashboards keep the HRM layout without HRM-only workflow links"
   assert.doesNotMatch(source, /function DepartmentDashboardPanel/);
 });
 
+test("internship application list does not repeat the page title inside the table card", () => {
+  assert.match(source, /activeVacancyType !== "internship" \? \(/);
+  assert.match(source, /<h2>Permohonan \{activeOpportunityLabel\}<\/h2>/);
+});
+
 test("HRM review can assign internship applications to a department dashboard", () => {
   assert.match(source, /assigned_department: assignedDepartment/);
   assert.match(source, />\s*Hantar kepada bahagian\s*</);

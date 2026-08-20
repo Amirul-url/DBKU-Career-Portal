@@ -1039,12 +1039,14 @@ export default function AdminHrmPage() {
                 </div>
               </div>
               <section className="hrm-card hrm-table-card">
-                <header>
-                  <div>
-                    <h2>Permohonan {activeOpportunityLabel}</h2>
-                    <p>{filteredApplications.length} permohonan direkodkan</p>
-                  </div>
-                </header>
+                {activeVacancyType !== "internship" ? (
+                  <header>
+                    <div>
+                      <h2>Permohonan {activeOpportunityLabel}</h2>
+                      <p>{filteredApplications.length} permohonan direkodkan</p>
+                    </div>
+                  </header>
+                ) : null}
                 {activeVacancyType === "internship" ? (
                   <InternshipApplicationsPanel
                     applications={filteredApplications}
