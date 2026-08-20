@@ -208,37 +208,34 @@ a {
   box-shadow: 0 0 0 3px #dcf6e7;
 }
 
-.hrm-manage-tools {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: end;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-.hrm-manage-tools label {
+.hrm-manage-toolbar {
   display: grid;
-  gap: 5px;
-  color: #52685b;
-  font-size: 12px;
-  font-weight: 850;
+  grid-template-columns: 1fr;
+  align-items: start;
+  gap: 0;
+  padding: 20px 28px 24px;
 }
 
-.hrm-manage-tools select {
-  min-width: 148px;
-  border: 1px solid #cfe0d6;
-  border-radius: 7px;
-  background: #fff;
-  padding: 8px 28px 8px 10px;
-  color: #1c3024;
-  font: inherit;
-  font-size: 12px;
-  outline: 0;
+.hrm-manage-filters {
+  display: grid;
+  grid-template-columns:
+    minmax(145px, 0.55fr)
+    minmax(135px, 0.5fr)
+    minmax(165px, 0.65fr)
+    auto;
+  align-items: end;
+  justify-content: stretch;
+  gap: 12px;
+  width: 100%;
+  max-width: 760px;
 }
 
-.hrm-manage-tools select:focus {
-  border-color: #16a34a;
-  box-shadow: 0 0 0 3px #dcf6e7;
+.hrm-manage-filters label {
+  min-width: 0;
+}
+
+.hrm-manage-filters select {
+  width: 100%;
 }
 
 .hrm-sticky-topbar,
@@ -10543,7 +10540,13 @@ body:has(.applicant-profile-page) {
     justify-content: stretch;
   }
 
+  .hrm-manage-filters {
+    grid-template-columns: 1fr;
+    justify-content: stretch;
+  }
+
   .hrm-internship-filters label,
+  .hrm-manage-filters label,
   .hrm-filter-reset {
     width: 100%;
   }

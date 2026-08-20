@@ -441,6 +441,11 @@ export default function AdminHrmPage() {
     new Set(activeMetrics.jobs.map((job) => getJobDateParts(job).year).filter(Boolean)),
   ).sort((first, second) => Number(second) - Number(first));
   const isJobFilterActive = jobMonthFilter !== "all" || jobStatusFilter !== "all" || jobYearFilter !== "all";
+  const resetJobFilters = () => {
+    setJobMonthFilter("all");
+    setJobYearFilter("all");
+    setJobStatusFilter("all");
+  };
   const filteredJobs = activeMetrics.jobs.filter((job) => {
     const jobDate = getJobDateParts(job);
     return (
@@ -948,7 +953,9 @@ export default function AdminHrmPage() {
                       {isJobFilterActive ? ` daripada ${activeMetrics.jobs.length}` : ""}
                     </p>
                   </div>
-                  <div className="hrm-manage-tools">
+                </header>
+                <div className="applicant-table-toolbar hrm-manage-toolbar">
+                  <div className="applicant-table-controls hrm-manage-filters">
                     <label>
                       <span>Bulan</span>
                       <select value={jobMonthFilter} onChange={(event) => setJobMonthFilter(event.target.value)}>
@@ -976,13 +983,16 @@ export default function AdminHrmPage() {
                       <select value={jobStatusFilter} onChange={(event) => setJobStatusFilter(event.target.value)}>
                         {jobStatusOptions.map((option) => (
                           <option key={option.value} value={option.value}>
-                            {option.label}
+                            {option.value === "all" ? "Semua" : option.label}
                           </option>
                         ))}
                       </select>
                     </label>
+                    <button className="hrm-filter-reset" type="button" onClick={resetJobFilters}>
+                      Set semula
+                    </button>
                   </div>
-                </header>
+                </div>
                 <JobManagementTable
                   jobs={filteredJobs}
                   applications={applications}
