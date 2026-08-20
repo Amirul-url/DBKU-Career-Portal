@@ -2325,8 +2325,8 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
       <section className="organization-feedback-section" aria-label="Dokumen maklumbalas organisasi">
         <div className="organization-feedback-section-header">
           <div className="organization-feedback-section-title">
-            <h3>Dokumen maklumbalas organisasi (DBKU)</h3>
-            <p>PDF sahaja. Saiz fail maksimum 15MB.</p>
+            <h3>Fail maklumbalas kepada pemohon</h3>
+            <p>Sila muat naik fail maklumbalas organisasi untuk dihantar kepada pemohon. Format PDF sahaja. Saiz fail maksimum 15MB.</p>
           </div>
           <div className="organization-feedback-section-actions">
             <button

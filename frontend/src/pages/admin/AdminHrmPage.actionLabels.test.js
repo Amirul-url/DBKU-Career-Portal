@@ -180,8 +180,8 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /const organizationFeedbackTab = "Maklumbalas Organisasi"/);
   assert.match(source, /\.\.\.\(isHrmWorkspace \? \[organizationFeedbackTab\] : \[\]\)/);
   assert.match(source, /function OrganizationFeedbackTab/);
-  assert.match(source, /Dokumen maklumbalas organisasi \(DBKU\)/);
-  assert.match(source, /PDF sahaja\. Saiz fail maksimum 15MB\./);
+  assert.match(source, /Fail maklumbalas kepada pemohon/);
+  assert.match(source, /Sila muat naik fail maklumbalas organisasi untuk dihantar kepada pemohon\. Format PDF sahaja\. Saiz fail maksimum 15MB\./);
   assert.match(source, /className="organization-feedback-section"/);
   assert.match(source, /className="organization-feedback-section-header"/);
   assert.match(source, /className="organization-feedback-add"/);
