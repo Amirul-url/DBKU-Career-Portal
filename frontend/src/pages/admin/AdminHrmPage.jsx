@@ -922,7 +922,6 @@ export default function AdminHrmPage() {
               <section className="hrm-card hrm-table-card">
                 <header>
                   <div>
-                    <h2>{activeManageOpportunityLabel} disiarkan</h2>
                     <p>
                       {filteredJobs.length} rekod {activeManageOpportunityLabel.toLowerCase()}
                       {jobStatusFilter !== "all" ? ` daripada ${activeMetrics.jobs.length}` : ""}
