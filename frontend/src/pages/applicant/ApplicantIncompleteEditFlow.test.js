@@ -9,6 +9,7 @@ const profileSource = readFileSync(new URL("./ApplicantProfilePage.jsx", import.
 const viewSource = readFileSync(new URL("./ApplicantApplicationViewPage.jsx", import.meta.url), "utf8");
 const formSource = readFileSync(new URL("./ApplicantInternshipApplicationPage.jsx", import.meta.url), "utf8");
 const infoSource = readFileSync(new URL("./ApplicantInternshipInfoContent.jsx", import.meta.url), "utf8");
+const decisionCopySource = readFileSync(new URL("../../modules/internship/internshipDecisionCopy.js", import.meta.url), "utf8");
 
 test("applicant incomplete applications can be reopened for editing", () => {
   assert.match(routesSource, /internshipApplicationEdit: \(id\) => `\/profile\/internship-application\?application=\$\{id\}`/);
@@ -43,7 +44,9 @@ test("applicant rejected internship applications show application decision reaso
   assert.match(viewSource, /function hasHrmFinalRejectionDecision\(application\)/);
   assert.match(viewSource, /function ApplicantHrmDecisionTab\(\{ application \}\)/);
   assert.match(viewSource, /aria-label="Alasan keputusan permohonan"/);
-  assert.match(viewSource, /Dukacita dimaklumkan bahawa permohonan saudara\/i untuk menjalani latihan industri di Dewan Bandaraya Kuching Utara \(DBKU\) telah diterima dan diteliti/);
+  assert.match(decisionCopySource, /Dukacita dimaklumkan bahawa permohonan saudara\/i untuk menjalani latihan industri di Dewan Bandaraya Kuching Utara \(DBKU\) telah diterima dan diteliti/);
+  assert.match(decisionCopySource, /normalizeHrmFinalRejectionRemarks/);
+  assert.match(viewSource, /normalizeHrmFinalRejectionRemarks\(finalDecision\.remarks \|\| hrmFinalRejectionMessage\)/);
   assert.doesNotMatch(viewSource, /Sukacita dimaklumkan bahawa permohonan saudara\/i/);
   assert.match(viewSource, /\.\.\.\(hasHrmFinalRejectionDecision\(application\) \? \[hrmDecisionTab\] : \[\]\)/);
   assert.match(viewSource, /tab === hrmDecisionTab \? \(\s*<ApplicantHrmDecisionTab application=\{application\} \/>/);

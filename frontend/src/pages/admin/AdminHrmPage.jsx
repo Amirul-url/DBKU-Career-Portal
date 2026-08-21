@@ -13,6 +13,10 @@ import {
   internshipLifecycleStatusClasses,
   internshipLifecycleStatusLabels,
 } from "../../modules/internship/internshipLifecycleStatus";
+import {
+  hrmFinalRejectionMessage,
+  normalizeHrmFinalRejectionRemarks,
+} from "../../modules/internship/internshipDecisionCopy";
 import { InternshipApplicationReadOnlyPanel } from "../applicant/ApplicantApplicationViewPage";
 import { Icon } from "../applicant/ApplicantAuthShared";
 import SuperAdminApplicantsPanel from "./SuperAdminApplicantsPanel";
@@ -108,13 +112,6 @@ const departmentDecisionTab = "Keputusan Bahagian";
 const hrmFinalDecisionTab = "Keputusan Akhir HRM";
 const organizationFeedbackTab = "Maklumbalas Organisasi";
 const applicantConfirmationTab = "Pengesahan Pemohon";
-const hrmFinalRejectionMessage = `Dukacita dimaklumkan bahawa permohonan saudara/i untuk menjalani latihan industri di Dewan Bandaraya Kuching Utara (DBKU) telah diterima dan diteliti oleh pihak kami.
-
-Walau bagaimanapun, setelah mengambil kira keperluan semasa serta kapasiti penempatan pelatih, dukacita dimaklumkan bahawa pihak DBKU tidak dapat mempertimbangkan permohonan tersebut buat masa ini.
-
-Pihak DBKU merakamkan setinggi-tinggi penghargaan atas minat dan kepercayaan saudara/i untuk menjalani latihan industri bersama DBKU. Kami memohon maaf atas segala kesulitan yang mungkin timbul dan berharap saudara/i akan memperoleh peluang latihan industri yang bersesuaian pada masa akan datang.
-
-Sekian, terima kasih.`;
 const applicantDetailTabs = ["Maklumat Peribadi Pemohon", "Maklumat Akademik", "Dokumen Sokongan"];
 const organizationFeedbackReportDefaults = {
   date: "",
@@ -2409,19 +2406,20 @@ function DepartmentDecisionTab({ application, isReadOnly = false, onSaveDecision
 function buildHrmFinalDecisionPayload(application, user, remarks) {
   const savedFinalDecision = getSavedHrmFinalDecision(application);
   const departmentDecision = getSavedDepartmentDecision(application);
+  const normalizedRemarks = normalizeHrmFinalRejectionRemarks(remarks);
   return {
     ...savedFinalDecision,
     decision: "Tolak",
     department_recommendation: departmentDecision.recommendation || "",
     department_remarks: departmentDecision.remarks || "",
-    remarks: remarks.trim(),
+    remarks: normalizedRemarks,
     submitted_at: new Date().toISOString(),
     submitted_by: user?.full_name || user?.name || user?.email || "",
   };
 }
 function HrmFinalDecisionTab({ application, onSaveFinalDecision, onSubmitted, user }) {
   const finalDecision = getSavedHrmFinalDecision(application);
-  const [finalRemarks, setFinalRemarks] = useState(finalDecision.remarks || hrmFinalRejectionMessage);
+  const [finalRemarks, setFinalRemarks] = useState(() => normalizeHrmFinalRejectionRemarks(finalDecision.remarks || hrmFinalRejectionMessage));
   const [message, setMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const isFinalized = Boolean(finalDecision.submitted_at) || ["accepted", "rejected"].includes(application?.status);

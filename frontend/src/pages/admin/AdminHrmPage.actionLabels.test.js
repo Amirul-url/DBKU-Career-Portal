@@ -5,6 +5,7 @@ import test from "node:test";
 const source = readFileSync(new URL("./AdminHrmPage.jsx", import.meta.url), "utf8");
 const cssSource = readFileSync(new URL("../../index.css", import.meta.url), "utf8");
 const adminRoutesSource = readFileSync(new URL("../../modules/admin/adminRoutes.js", import.meta.url), "utf8");
+const decisionCopySource = readFileSync(new URL("../../modules/internship/internshipDecisionCopy.js", import.meta.url), "utf8");
 
 test("HRM application action labels match the department review workflow", () => {
   assert.match(source, /submitted: "Menunggu Semakan HRM"/);
@@ -201,8 +202,9 @@ test("department decision tab replaces HRM review for department workspaces", ()
 
 test("HRM makes the final internship decision after department recommendation", () => {
   assert.match(source, /const hrmFinalDecisionTab = "Keputusan Akhir HRM"/);
-  assert.match(source, /const hrmFinalRejectionMessage = `/);
-  assert.match(source, /Dukacita dimaklumkan bahawa permohonan saudara\/i untuk menjalani latihan industri di Dewan Bandaraya Kuching Utara \(DBKU\) telah diterima dan diteliti/);
+  assert.match(source, /hrmFinalRejectionMessage,[\s\S]*normalizeHrmFinalRejectionRemarks/);
+  assert.match(decisionCopySource, /Dukacita dimaklumkan bahawa permohonan saudara\/i untuk menjalani latihan industri di Dewan Bandaraya Kuching Utara \(DBKU\) telah diterima dan diteliti/);
+  assert.match(decisionCopySource, /normalizeHrmFinalRejectionRemarks/);
   assert.doesNotMatch(source, /Sukacita dimaklumkan bahawa permohonan saudara\/i/);
   assert.match(source, /function HrmFinalDecisionTab/);
   assert.match(source, /const saveHrmFinalDecision = async/);
@@ -215,7 +217,8 @@ test("HRM makes the final internship decision after department recommendation", 
   assert.match(source, /const \[finalRemarks, setFinalRemarks\] = useState/);
   assert.match(source, /<textarea[\s\S]*value=\{finalRemarks\}[\s\S]*onChange=\{\(event\) => setFinalRemarks\(event\.target\.value\)\}/);
   assert.match(source, /buildHrmFinalDecisionPayload\(application, user, finalRemarks\)/);
-  assert.match(source, /remarks: remarks\.trim\(\)/);
+  assert.match(source, /const normalizedRemarks = normalizeHrmFinalRejectionRemarks\(remarks\)/);
+  assert.match(source, /remarks: normalizedRemarks/);
   assert.doesNotMatch(source, /Terima Permohonan/);
   assert.doesNotMatch(source, /: "Tolak Permohonan"/);
   assert.match(source, /: "Hantar ke Pemohon"/);

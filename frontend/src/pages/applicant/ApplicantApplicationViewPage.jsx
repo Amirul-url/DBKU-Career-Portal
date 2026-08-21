@@ -8,6 +8,10 @@ import {
   getApplicantAgreedInternshipStatus,
   internshipLifecycleStatusLabels,
 } from "../../modules/internship/internshipLifecycleStatus";
+import {
+  hrmFinalRejectionMessage,
+  normalizeHrmFinalRejectionRemarks,
+} from "../../modules/internship/internshipDecisionCopy";
 import { Icon } from "./ApplicantAuthShared";
 import { ApplicantAddressMap, ProfileContentHeader, ProfileSidebar } from "./ApplicantProfilePage";
 
@@ -16,13 +20,6 @@ const infoTabs = [personalInfoTab, "Maklumat Akademik", "Dokumen Sokongan"];
 const organizationFeedbackTab = "Maklumbalas Organisasi";
 const applicantConfirmationTab = "Pengesahan Pemohon";
 const hrmDecisionTab = "Keputusan Permohonan";
-const hrmFinalRejectionMessage = `Dukacita dimaklumkan bahawa permohonan saudara/i untuk menjalani latihan industri di Dewan Bandaraya Kuching Utara (DBKU) telah diterima dan diteliti oleh pihak kami.
-
-Walau bagaimanapun, setelah mengambil kira keperluan semasa serta kapasiti penempatan pelatih, dukacita dimaklumkan bahawa pihak DBKU tidak dapat mempertimbangkan permohonan tersebut buat masa ini.
-
-Pihak DBKU merakamkan setinggi-tinggi penghargaan atas minat dan kepercayaan saudara/i untuk menjalani latihan industri bersama DBKU. Kami memohon maaf atas segala kesulitan yang mungkin timbul dan berharap saudara/i akan memperoleh peluang latihan industri yang bersesuaian pada masa akan datang.
-
-Sekian, terima kasih.`;
 const organizationFeedbackReportDefaults = {
   date: "",
   time: "8.00 pagi",
@@ -848,7 +845,7 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
 
 function ApplicantHrmDecisionTab({ application }) {
   const finalDecision = getSavedHrmFinalDecision(application);
-  const decisionMessage = finalDecision.remarks || hrmFinalRejectionMessage;
+  const decisionMessage = normalizeHrmFinalRejectionRemarks(finalDecision.remarks || hrmFinalRejectionMessage);
 
   return (
     <div className="applicant-confirmation-panel applicant-hrm-decision-panel">
