@@ -2348,7 +2348,6 @@ function DepartmentDecisionTab({ application, isReadOnly = false, onSaveDecision
             disabled={isSaving || !canSubmit}
             onClick={requestSubmitDecision}
           >
-            <Icon>check_circle</Icon>
             {isSaving ? "Menghantar..." : "Hantar ke HRM"}
           </button>
         </footer>

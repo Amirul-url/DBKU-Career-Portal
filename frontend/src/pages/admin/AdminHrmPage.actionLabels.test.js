@@ -165,6 +165,12 @@ test("department decision tab replaces HRM review for department workspaces", ()
   assert.match(source, /Terima/);
   assert.match(source, /Tolak/);
   assert.match(source, /Hantar ke HRM/);
+  const departmentDecisionTabStart = source.indexOf("function DepartmentDecisionTab");
+  const hrmFinalDecisionPayloadStart = source.indexOf("function buildHrmFinalDecisionPayload");
+  assert.ok(departmentDecisionTabStart >= 0);
+  assert.ok(hrmFinalDecisionPayloadStart > departmentDecisionTabStart);
+  const departmentDecisionTabSource = source.slice(departmentDecisionTabStart, hrmFinalDecisionPayloadStart);
+  assert.doesNotMatch(departmentDecisionTabSource, /<Icon>check_circle<\/Icon>[\s\S]*Hantar ke HRM/);
   assert.match(source, /const isSubmitted = Boolean\(savedDecision\.submitted_at\)/);
   assert.match(source, /const isLocked = isReadOnly \|\| isSubmitted/);
   assert.match(source, /disabled=\{isLocked\}/);
