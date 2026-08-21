@@ -11045,6 +11045,7 @@ body:has(.applicant-profile-page) {
 
 .organization-feedback-report-note p {
   margin: 0 0 14px;
+  text-align: justify;
 }
 
 .organization-feedback-report-details {
@@ -11106,6 +11107,7 @@ body:has(.applicant-profile-page) {
 
 .organization-feedback-confirmation-note p {
   margin: 0 0 12px;
+  text-align: justify;
 }
 
 .organization-feedback-confirmation-note p:last-child {
@@ -11165,6 +11167,7 @@ body:has(.applicant-profile-page) {
 
 .organization-feedback-intro p {
   margin: 0 0 10px;
+  text-align: justify;
 }
 
 .organization-feedback-intro p:last-child {
