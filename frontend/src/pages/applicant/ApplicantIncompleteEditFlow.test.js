@@ -58,6 +58,8 @@ test("applicant organization feedback notification shows red badges", () => {
   assert.match(listSource, /const newApplicationFeedbackCount = useMemo/);
   assert.match(listSource, /displayApplications\.filter\(hasNewOrganizationFeedbackForApplicant\)\.length/);
   assert.match(listSource, /applicationBadgeCount=\{newApplicationFeedbackCount\}/);
+  assert.match(listSource, /className="applicant-applications-table applicant-profile-applications-table"/);
+  assert.match(listSource, /className="applicant-reference-col"/);
   assert.match(listSource, /className="applicant-reference-cell"/);
   assert.match(listSource, /className="applicant-new-badge">Baharu/);
   assert.match(profileSource, /export function ProfileSidebar\(\{ applicationBadgeCount = 0, isOpen, onToggle \}\)/);
@@ -65,9 +67,10 @@ test("applicant organization feedback notification shows red badges", () => {
   assert.match(profileSource, /className=\{`profile-nav-badge\$\{isOpen \? "" : " collapsed"\}`\}/);
   assert.match(profileSource, /aria-label=\{`\$\{badgeCount\} maklumbalas baharu`\}/);
   assert.match(cssSource, /\.applicant-applications-table th:first-child,\s*\.applicant-applications-table td:first-child \{[\s\S]*min-width: 270px;[\s\S]*text-align: center;/);
-  assert.match(cssSource, /\.applicant-reference-cell \{[\s\S]*display: grid;[\s\S]*grid-template-columns: 76px minmax\(max-content, 1fr\) 76px;[\s\S]*text-align: center;/);
-  assert.match(cssSource, /\.applicant-reference-cell > span:last-child \{[\s\S]*grid-column: 2;[\s\S]*justify-self: center;/);
-  assert.match(cssSource, /\.applicant-new-badge \{[\s\S]*grid-column: 1;[\s\S]*justify-self: start;/);
+  assert.match(cssSource, /\.applicant-profile-applications-table \{[\s\S]*table-layout: fixed;/);
+  assert.match(cssSource, /\.applicant-profile-applications-table \.applicant-reference-col \{[\s\S]*width: 230px;/);
+  assert.match(cssSource, /\.applicant-profile-applications-table th:first-child,\s*\.applicant-profile-applications-table td:first-child \{[\s\S]*width: 230px;[\s\S]*min-width: 0;[\s\S]*max-width: 230px;/);
+  assert.match(cssSource, /\.applicant-reference-cell \{[\s\S]*display: inline-flex;[\s\S]*gap: 14px;[\s\S]*text-align: center;/);
 });
 
 test("applicant rejected internship applications can apply again", () => {

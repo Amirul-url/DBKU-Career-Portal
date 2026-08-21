@@ -204,7 +204,14 @@ function ApplicationList({ applications, loading }) {
       </div>
 
       <div className="applicant-applications-table-wrap">
-        <table className="applicant-applications-table">
+        <table className="applicant-applications-table applicant-profile-applications-table">
+          <colgroup>
+            <col className="applicant-reference-col" />
+            <col />
+            <col className="applicant-date-col" />
+            <col className="applicant-status-col" />
+            <col className="applicant-action-col" />
+          </colgroup>
           <thead>
             <tr>
               <th>No. Rujukan</th>

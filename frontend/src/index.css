@@ -5889,27 +5889,50 @@ body:has(.applicant-profile-page) {
   text-align: center;
 }
 
+.applicant-profile-applications-table {
+  table-layout: fixed;
+}
+
+.applicant-profile-applications-table .applicant-reference-col {
+  width: 230px;
+}
+
+.applicant-profile-applications-table .applicant-date-col {
+  width: 15%;
+}
+
+.applicant-profile-applications-table .applicant-status-col {
+  width: 13%;
+}
+
+.applicant-profile-applications-table .applicant-action-col {
+  width: 15%;
+}
+
+.applicant-profile-applications-table th:first-child,
+.applicant-profile-applications-table td:first-child {
+  width: 230px;
+  min-width: 0;
+  max-width: 230px;
+  padding-right: 12px;
+  padding-left: 12px;
+}
+
 .applicant-reference-cell {
-  display: grid;
-  grid-template-columns: 76px minmax(max-content, 1fr) 76px;
+  display: inline-flex;
   align-items: center;
-  width: 100%;
+  justify-content: center;
+  gap: 14px;
+  width: auto;
   min-height: 26px;
   text-align: center;
   white-space: nowrap;
 }
 
-.applicant-reference-cell > span:last-child {
-  grid-column: 2;
-  justify-self: center;
-}
-
 .applicant-new-badge {
   display: inline-flex;
-  grid-column: 1;
   align-items: center;
   justify-content: center;
-  justify-self: start;
   border-radius: 999px;
   background: #ffeded;
   padding: 5px 10px;
