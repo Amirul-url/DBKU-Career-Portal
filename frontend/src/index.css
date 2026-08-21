@@ -7333,6 +7333,38 @@ body:has(.applicant-profile-page) {
   display: none;
 }
 
+.student-info-photo-card-readonly {
+  margin-top: 8px;
+  margin-bottom: 40px;
+}
+
+.student-passport-upload-readonly {
+  cursor: default;
+}
+
+.student-passport-readonly-meta {
+  display: inline-flex;
+  max-width: min(100%, 360px);
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.student-passport-readonly-meta span {
+  min-width: 0;
+  max-width: 280px;
+  overflow: hidden;
+  border: 1px solid #bdebd1;
+  border-radius: 7px;
+  background: #f0fdf4;
+  color: #047857;
+  padding: 9px 12px;
+  font-size: 12px;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .student-passport-actions {
   display: flex;
   flex-wrap: wrap;

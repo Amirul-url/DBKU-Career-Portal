@@ -204,6 +204,23 @@ test("internship personal tab shows passport upload before personal details tabl
   );
 });
 
+test("read-only internship view shows passport photo before personal details table", () => {
+  assert.match(viewSource, /function getPassportPhotoDocument\(documents, studentInfo\)/);
+  assert.match(viewSource, /function renderReadOnlyPassportPhoto\(documents, studentInfo\)/);
+  assert.match(viewSource, /className="student-info-photo-card student-info-photo-card-readonly"/);
+  assert.match(viewSource, /className="student-passport-upload student-passport-upload-readonly"/);
+  assert.match(viewSource, /src=\{passportPhoto\.url\}/);
+  assert.match(viewSource, /alt="Gambar pasport pemohon"/);
+  assert.match(viewSource, /openDocumentFile\(passportPhoto\)/);
+  assert.match(viewSource, /renderReadOnlyPassportPhoto\(documents, studentInfo\)/);
+  assert.match(cssSource, /\.student-info-photo-card-readonly \{/);
+  assert.match(cssSource, /\.student-passport-readonly-meta \{/);
+  assert.ok(
+    viewSource.indexOf("{renderReadOnlyPassportPhoto(documents, studentInfo)}") <
+      viewSource.indexOf('<div className="student-personal-table-wrap">'),
+  );
+});
+
 test("internship uploaded documents stay in form local state until submission", () => {
   assert.match(formSource, /function getDraftStudentInfo\(studentInfo = \{\}\)/);
   assert.match(formSource, /const draftStudentInfo = \{ \.\.\.studentInfo \};/);

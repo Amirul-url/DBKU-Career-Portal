@@ -299,6 +299,56 @@ function openDocumentFile(file) {
   window.open(file.url || getLegacyDocumentPreviewUrl(file.name), "_blank", "noopener,noreferrer");
 }
 
+function getPassportPhotoDocument(documents, studentInfo) {
+  return normalizeDocumentFile(
+    documents.passportPhotoFile,
+    studentInfo.passportPhotoFile,
+    studentInfo.passportPhotoFileUrl,
+  );
+}
+
+function renderReadOnlyPassportPhoto(documents, studentInfo) {
+  const passportPhoto = getPassportPhotoDocument(documents, studentInfo);
+  const hasPreview = Boolean(passportPhoto.url);
+  const hasFile = hasPreview || passportPhoto.isLegacyNameOnly;
+  const fileName = hasFile ? passportPhoto.name : "Gambar pasport belum tersedia";
+
+  return (
+    <section className="student-info-photo-card student-info-photo-card-readonly" aria-label="Gambar pasport pemohon">
+      <div className="student-passport-upload student-passport-upload-readonly">
+        {hasPreview ? (
+          <img src={passportPhoto.url} alt="Gambar pasport pemohon" />
+        ) : (
+          <span>
+            <Icon>image</Icon>
+            <b>
+              Gambar<br />pasport
+            </b>
+            <small>3.5 cm x 5.0 cm</small>
+          </span>
+        )}
+      </div>
+      <div className="student-passport-readonly-meta">
+        <span title={fileName}>{fileName}</span>
+        <button
+          aria-label={`Lihat ${fileName}`}
+          className="organization-feedback-icon-button organization-feedback-icon-button-view"
+          disabled={!hasFile}
+          onClick={() => openDocumentFile(passportPhoto)}
+          title="Lihat fail"
+          type="button"
+        >
+          <Icon>visibility</Icon>
+        </button>
+      </div>
+      <p>
+        <strong>Nota</strong>
+        <span>Sila pastikan gambar yang dimuatnaik adalah dalam format .jpg</span>
+      </p>
+    </section>
+  );
+}
+
 function renderDocumentRow(document, documents, studentInfo) {
   const file = normalizeDocumentFile(
     documents[document.field],
@@ -865,29 +915,32 @@ export function InternshipApplicationReadOnlyPanel({
   );
 
   const renderPersonalFields = () => (
-    <div className="student-personal-table-wrap">
-      <table className="student-personal-table student-readonly-table">
-        <tbody>
-          {personalRows.slice(0, 2).map(([field, label]) => renderReadOnlyRow(field, label, studentInfo[field]))}
-          {renderPhoneRow("phone", "No. Telefon Bimbit/ Telefon Rumah", studentInfo.phone)}
-          <tr className="map-row">
-            <th scope="row">Alamat Surat Menyurat</th>
-            <td>
-              <ApplicantAddressMap
-                address={studentInfo.address}
-                latitude={studentInfo.latitude}
-                longitude={studentInfo.longitude}
-                onLocationChange={() => {}}
-                readOnly
-              />
-            </td>
-          </tr>
-          {personalRows.slice(3, 5).map(([field, label]) => renderReadOnlyRow(field, label, studentInfo[field]))}
-          {renderDateOfBirthRow(studentInfo.birthDate)}
-          {personalRows.slice(6).map(([field, label]) => renderReadOnlyRow(field, label, studentInfo[field]))}
-        </tbody>
-      </table>
-    </div>
+    <>
+      {renderReadOnlyPassportPhoto(documents, studentInfo)}
+      <div className="student-personal-table-wrap">
+        <table className="student-personal-table student-readonly-table">
+          <tbody>
+            {personalRows.slice(0, 2).map(([field, label]) => renderReadOnlyRow(field, label, studentInfo[field]))}
+            {renderPhoneRow("phone", "No. Telefon Bimbit/ Telefon Rumah", studentInfo.phone)}
+            <tr className="map-row">
+              <th scope="row">Alamat Surat Menyurat</th>
+              <td>
+                <ApplicantAddressMap
+                  address={studentInfo.address}
+                  latitude={studentInfo.latitude}
+                  longitude={studentInfo.longitude}
+                  onLocationChange={() => {}}
+                  readOnly
+                />
+              </td>
+            </tr>
+            {personalRows.slice(3, 5).map(([field, label]) => renderReadOnlyRow(field, label, studentInfo[field]))}
+            {renderDateOfBirthRow(studentInfo.birthDate)}
+            {personalRows.slice(6).map(([field, label]) => renderReadOnlyRow(field, label, studentInfo[field]))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 
   const renderAcademicFields = () => (
