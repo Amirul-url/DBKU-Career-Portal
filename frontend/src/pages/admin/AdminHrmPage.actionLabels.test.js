@@ -77,6 +77,12 @@ test("internship filter reset button has breathing room after status filter", ()
   assert.match(cssSource, /@media \(max-width: 900px\) \{[\s\S]*\.hrm-filter-reset \{[\s\S]*margin-left: 0;/);
 });
 
+test("application table pagination centers page count with buttons", () => {
+  assert.match(source, /<footer className="applicant-table-pagination">[\s\S]*<strong>\{activePage\} \/ \{totalPages\}<\/strong>/);
+  assert.match(cssSource, /\.applicant-table-pagination div \{[\s\S]*display: flex;[\s\S]*align-items: center;/);
+  assert.match(cssSource, /\.applicant-table-pagination strong \{[\s\S]*display: inline-flex;[\s\S]*height: 38px;[\s\S]*align-items: center;/);
+});
+
 test("admin workspace labels and navigation follow the signed-in department", () => {
   assert.match(source, /getDepartmentWorkspaceLabel\(user\)/);
   assert.match(source, /getAdminShellRoleLabel\(user\)/);

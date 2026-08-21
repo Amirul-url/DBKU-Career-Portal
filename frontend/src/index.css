@@ -6066,7 +6066,14 @@ body:has(.applicant-profile-page) {
 
 .applicant-table-pagination div {
   display: flex;
+  align-items: center;
   gap: 8px;
+}
+
+.applicant-table-pagination strong {
+  display: inline-flex;
+  height: 38px;
+  align-items: center;
 }
 
 .applicant-table-pagination button {
