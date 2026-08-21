@@ -73,7 +73,7 @@ const statusLabel = {
   applicant_agreed: "Pemohon Bersetuju",
   internship_active: internshipLifecycleStatusLabels.internship_active,
   internship_completed: internshipLifecycleStatusLabels.internship_completed,
-  submitted: "Baharu",
+  submitted: "Menunggu Semakan HRM",
   screening: "Saringan",
   incomplete: "Tidak Lengkap",
   shortlisted: "Disenarai pendek",
