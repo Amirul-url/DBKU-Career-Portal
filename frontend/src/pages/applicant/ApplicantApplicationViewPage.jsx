@@ -1032,6 +1032,11 @@ export default function ApplicantApplicationViewPage() {
     navigate(APPLICANT_ROUTES.applications);
   };
 
+  function handleApplicantConfirmationSent(updatedApplication) {
+    setApplication(updatedApplication);
+    navigate(APPLICANT_ROUTES.applications);
+  }
+
   if (!user || user.role !== "applicant") {
     return null;
   }
@@ -1055,7 +1060,7 @@ export default function ApplicantApplicationViewPage() {
               tab === organizationFeedbackTab ? (
                 <ApplicantOrganizationFeedbackTab application={application} onNext={() => setActiveInfoTab(applicantConfirmationTab)} />
               ) : tab === applicantConfirmationTab ? (
-                <ApplicantConfirmationTab application={application} onConfirmed={setApplication} />
+                <ApplicantConfirmationTab application={application} onConfirmed={handleApplicantConfirmationSent} />
               ) : null
             }
           />

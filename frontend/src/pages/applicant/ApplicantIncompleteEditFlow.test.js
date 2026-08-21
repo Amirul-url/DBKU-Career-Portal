@@ -168,6 +168,10 @@ test("applicant can submit acceptance confirmation after organization feedback",
   assert.match(cssSource, /background: transparent;/);
   assert.match(cssSource, /padding: 0;/);
   assert.match(viewSource, /\/confirm-offer\//);
+  assert.match(viewSource, /function handleApplicantConfirmationSent\(updatedApplication\)/);
+  assert.match(viewSource, /setApplication\(updatedApplication\)/);
+  assert.match(viewSource, /navigate\(APPLICANT_ROUTES\.applications\)/);
+  assert.match(viewSource, /onConfirmed=\{handleApplicantConfirmationSent\}/);
   assert.match(viewSource, />\s*Seterusnya\s*</);
   assert.match(viewSource, />\s*Hantar\s*</);
   assert.match(cssSource, /\.applicant-confirmation-panel/);
