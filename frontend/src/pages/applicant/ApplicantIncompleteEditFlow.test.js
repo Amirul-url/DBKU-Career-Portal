@@ -202,6 +202,16 @@ test("internship personal tab shows passport upload before personal details tabl
   );
 });
 
+test("internship uploaded documents stay in form local state until submission", () => {
+  assert.match(formSource, /function getDraftStudentInfo\(studentInfo = \{\}\)/);
+  assert.match(formSource, /const draftStudentInfo = \{ \.\.\.studentInfo \};/);
+  assert.match(formSource, /documentFields\.forEach\(\(\{ field \}\) => \{/);
+  assert.match(formSource, /delete draftStudentInfo\[field\];/);
+  assert.match(formSource, /studentInfo: getDraftStudentInfo\(studentInfo\)/);
+  assert.match(formSource, /const \[documentFiles, setDocumentFiles\] = useState\(\{\}\)/);
+  assert.match(formSource, /const \[passportPhotoPreviewUrl, setPassportPhotoPreviewUrl\] = useState\(""\)/);
+});
+
 test("applicant rejected internship applications can apply again", () => {
   assert.match(routesSource, /internshipApplicationNew: "\/profile\/internship-application\?new=1"/);
   assert.match(infoSource, /reapplyAllowedApplicationStatuses = new Set\(\["rejected", "withdrawn"\]\)/);

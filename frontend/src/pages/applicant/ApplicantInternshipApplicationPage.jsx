@@ -572,6 +572,14 @@ function normalizeStudentInfoDraft(studentInfo = {}, user = null) {
   };
 }
 
+function getDraftStudentInfo(studentInfo = {}) {
+  const draftStudentInfo = { ...studentInfo };
+  documentFields.forEach(({ field }) => {
+    delete draftStudentInfo[field];
+  });
+  return draftStudentInfo;
+}
+
 function loadStudentInfoDraft(user) {
   if (typeof window === "undefined") {
     return null;
@@ -755,7 +763,7 @@ export default function ApplicantInternshipApplicationPage() {
       saveStudentInfoDraft(user, {
         purpose: isStartingNewApplication || savedDraft?.purpose === "new-application" ? "new-application" : "manual",
         savedAt: new Date().toISOString(),
-        studentInfo,
+        studentInfo: getDraftStudentInfo(studentInfo),
       });
     }
   }, [isStartingNewApplication, savedDraft?.purpose, studentInfo, user]);
