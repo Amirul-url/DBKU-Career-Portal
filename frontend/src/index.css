@@ -10497,6 +10497,14 @@ body:has(.applicant-profile-page) {
   text-align: center;
 }
 
+.hrm-internship-applications-table .hrm-badge {
+  max-width: 122px;
+  justify-content: center;
+  text-align: center;
+  white-space: normal;
+  line-height: 1.25;
+}
+
 .hrm-internship-applications-table th:nth-child(6),
 .hrm-internship-applications-table td:nth-child(6) {
   width: 9%;

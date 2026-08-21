@@ -54,6 +54,7 @@ test("department and HRM internship rows mark pending decision tasks as new", ()
 
 test("internship application table uses icon-only view actions", () => {
   assert.match(source, /<button className="view" type="button" aria-label="Lihat" title="Lihat" onClick=\{\(\) => onView\(application\)\}>/);
+  assert.match(cssSource, /\.hrm-internship-applications-table \.hrm-badge \{[\s\S]*max-width: 122px;[\s\S]*text-align: center;[\s\S]*white-space: normal;/);
   assert.doesNotMatch(source, /className="view app-view-action"/);
   assert.doesNotMatch(source, /<Icon>visibility<\/Icon>\s*Lihat\s*<\/button>/);
 });
