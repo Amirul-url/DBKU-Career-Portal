@@ -46,6 +46,9 @@ test("applicant accepted applications stay hidden behind review status until HRM
   assert.match(viewSource, /maskAcceptedStatus && status === "accepted" \? "screening" : status/);
   assert.match(viewSource, /!maskAcceptedStatus && status === "accepted"\) return "Diterima"/);
   assert.match(viewSource, /const organizationFeedbackTab = "Maklumbalas Organisasi"/);
+  assert.match(viewSource, /tabGroups = \[\]/);
+  assert.match(viewSource, /student-info-tabs-grouped/);
+  assert.match(viewSource, /panelTabs\.map\(renderTabButton\)/);
   assert.match(viewSource, /function hasOrganizationFeedbackBeenSent\(application\)/);
   assert.match(viewSource, /extraTabs=\{organizationFeedbackSent \? \[organizationFeedbackTab\] : \[\]\}/);
   assert.match(viewSource, /maskAcceptedStatus=\{!organizationFeedbackSent\}/);

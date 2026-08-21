@@ -6719,6 +6719,33 @@ body:has(.applicant-profile-page) {
   box-shadow: 0 8px 18px rgba(17, 24, 39, .04);
 }
 
+.student-info-tabs-grouped {
+  gap: 18px;
+  align-items: flex-start;
+}
+
+.student-info-tab-group {
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.student-info-tab-group-label {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.student-info-tab-group-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 .student-info-form {
   padding-top: 18px;
 }

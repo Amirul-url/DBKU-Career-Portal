@@ -525,6 +525,7 @@ export function InternshipApplicationReadOnlyPanel({
   onBack,
   onTabChange,
   renderExtraTabContent,
+  tabGroups = [],
 }) {
   const profileData = application?.profile_data || {};
   const studentInfo = profileData.student_info || {};
@@ -536,6 +537,23 @@ export function InternshipApplicationReadOnlyPanel({
   const status = application?.status || "draft";
   const visibleStatus = getApplicantVisibleStatus(status, maskAcceptedStatus);
   const panelTabs = [...infoTabs, ...extraTabs];
+  const groupedTabs = tabGroups
+    .map((group) => ({
+      ...group,
+      tabs: (group.tabs || []).filter((tab) => panelTabs.includes(tab)),
+    }))
+    .filter((group) => group.tabs.length);
+
+  const renderTabButton = (tab) => (
+    <button
+      className={activeInfoTab === tab ? "active" : ""}
+      key={tab}
+      type="button"
+      onClick={() => onTabChange(tab)}
+    >
+      {tab}
+    </button>
+  );
 
   const renderPersonalFields = () => (
     <div className="student-personal-table-wrap">
@@ -629,17 +647,18 @@ export function InternshipApplicationReadOnlyPanel({
                 </div>
               ) : null}
 
-              <nav className="student-info-tabs" aria-label="Bahagian permohonan latihan industri">
-                {panelTabs.map((tab) => (
-                  <button
-                    className={activeInfoTab === tab ? "active" : ""}
-                    key={tab}
-                    type="button"
-                    onClick={() => onTabChange(tab)}
-                  >
-                    {tab}
-                  </button>
-                ))}
+              <nav
+                className={`student-info-tabs${groupedTabs.length ? " student-info-tabs-grouped" : ""}`}
+                aria-label="Bahagian permohonan latihan industri"
+              >
+                {groupedTabs.length
+                  ? groupedTabs.map((group) => (
+                      <div className="student-info-tab-group" key={group.label}>
+                        <span className="student-info-tab-group-label">{group.label}</span>
+                        <div className="student-info-tab-group-items">{group.tabs.map(renderTabButton)}</div>
+                      </div>
+                    ))
+                  : panelTabs.map(renderTabButton)}
               </nav>
 
               <section className="student-info-form">

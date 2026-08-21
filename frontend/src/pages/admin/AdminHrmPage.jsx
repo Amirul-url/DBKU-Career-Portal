@@ -95,6 +95,7 @@ const statusClass = {
 const hrmReviewTab = "Semakan HRM";
 const departmentDecisionTab = "Keputusan Bahagian";
 const organizationFeedbackTab = "Maklumbalas Organisasi";
+const applicantDetailTabs = ["Maklumat Peribadi Pemohon", "Maklumat Akademik", "Dokumen Sokongan"];
 const organizationFeedbackReportDefaults = {
   date: "",
   time: "8.00 pagi",
@@ -2726,6 +2727,10 @@ function InternshipApplicationDetailPage({
     ...(shouldShowDepartmentDecision ? [departmentDecisionTab] : []),
     ...(isHrmWorkspace ? [organizationFeedbackTab] : []),
   ];
+  const detailTabGroups = [
+    { label: "Pemohon", tabs: applicantDetailTabs },
+    { label: "Dalaman", tabs: extraTabs },
+  ];
 
   return (
     <section className="hrm-application-detail-page">
@@ -2740,6 +2745,7 @@ function InternshipApplicationDetailPage({
         maskAcceptedStatus={false}
         onBack={onBack}
         onTabChange={setActiveTab}
+        tabGroups={detailTabGroups}
         renderExtraTabContent={(tab) =>
           tab === hrmReviewTab ? (
             <HrmInternshipAssessmentTab
