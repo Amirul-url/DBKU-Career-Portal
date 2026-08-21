@@ -213,6 +213,9 @@ test("HRM makes the final internship decision after department recommendation", 
   assert.match(source, /const nextStatus = "rejected"/);
   assert.match(source, /onSaveFinalDecision=\{saveHrmFinalDecision\}/);
   assert.match(source, /\.\.\.\(shouldShowHrmFinalDecision \? \[hrmFinalDecisionTab\] : \[\]\)/);
+  assert.match(source, /const hasFinalDecision = hasSubmittedHrmFinalDecision\(application\)/);
+  assert.match(source, /const needsFinalDecision =[\s\S]*application\?\.status === "shortlisted"/);
+  assert.match(source, /const shouldShowHrmFinalDecision = isHrmWorkspace && \(needsFinalDecision \|\| hasFinalDecision\)/);
   assert.match(source, /\.\.\.\(shouldShowOrganizationFeedback \? \[organizationFeedbackTab\] : \[\]\)/);
   assert.match(source, /const \[finalRemarks, setFinalRemarks\] = useState/);
   assert.match(source, /<textarea[\s\S]*value=\{finalRemarks\}[\s\S]*onChange=\{\(event\) => setFinalRemarks\(event\.target\.value\)\}/);

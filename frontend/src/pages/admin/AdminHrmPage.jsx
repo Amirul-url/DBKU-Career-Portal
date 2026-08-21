@@ -2982,11 +2982,12 @@ function InternshipApplicationDetailPage({
 }) {
   const [activeTab, setActiveTab] = useState("Maklumat Peribadi Pemohon");
   const shouldShowDepartmentDecision = !isHrmWorkspace || Boolean(application?.assigned_department);
-  const shouldShowHrmFinalDecision =
-    isHrmWorkspace &&
+  const hasFinalDecision = hasSubmittedHrmFinalDecision(application);
+  const needsFinalDecision =
     hasSubmittedDepartmentDecision(application) &&
-    !hasSubmittedHrmFinalDecision(application) &&
+    !hasFinalDecision &&
     application?.status === "shortlisted";
+  const shouldShowHrmFinalDecision = isHrmWorkspace && (needsFinalDecision || hasFinalDecision);
   const shouldShowOrganizationFeedback = isHrmWorkspace && application?.status === "accepted";
   const extraTabs = [
     ...(isHrmWorkspace ? [hrmReviewTab] : []),
