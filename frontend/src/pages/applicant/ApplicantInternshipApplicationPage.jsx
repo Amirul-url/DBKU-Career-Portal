@@ -9,6 +9,7 @@ import { ApplicantAddressMap, ProfileContentHeader, ProfileSidebar } from "./App
 
 const personalInfoTab = "Maklumat Peribadi Pemohon";
 const infoTabs = [personalInfoTab, "Maklumat Akademik", "Dokumen Sokongan"];
+const requiredInfoTabs = [personalInfoTab, "Maklumat Akademik", "Dokumen Sokongan"];
 const editableApplicationStatuses = new Set(["draft", "incomplete"]);
 
 const academicLevelOptions = [
@@ -626,14 +627,14 @@ function isTabComplete(tab, studentInfo) {
 }
 
 function getFirstIncompleteTab(studentInfo) {
-  return infoTabs.find((tab) => !isTabComplete(tab, studentInfo)) || personalInfoTab;
+  return requiredInfoTabs.find((tab) => !isTabComplete(tab, studentInfo)) || personalInfoTab;
 }
 
 function getMissingApplicationFields(studentInfo) {
   const missingFields = [];
   const errors = {};
 
-  infoTabs.forEach((tab) => {
+  requiredInfoTabs.forEach((tab) => {
     (requiredFieldsByTab[tab] || []).forEach(([field, label]) => {
       if (!String(studentInfo[field] || "").trim()) {
         missingFields.push(`${tab}: ${label}`);
@@ -1282,8 +1283,8 @@ export default function ApplicantInternshipApplicationPage() {
   );
 
   const nextInfoTab = infoTabs[infoTabs.indexOf(activeInfoTab) + 1] || null;
-  const applicationMissingFields = getMissingApplicationFields(studentInfo).missingFields;
-  const isApplicationReadyToSubmit = declarationAccepted && !applicationMissingFields.length;
+  const requiredInfoTabsComplete = requiredInfoTabs.every((tab) => isTabComplete(tab, studentInfo));
+  const isApplicationReadyToSubmit = declarationAccepted && requiredInfoTabsComplete;
 
   return (
     <div className={`applicant-profile-page ${sidebarOpen ? "sidebar-open" : "sidebar-collapsed"}`}>

@@ -212,6 +212,15 @@ test("internship uploaded documents stay in form local state until submission", 
   assert.match(formSource, /const \[passportPhotoPreviewUrl, setPassportPhotoPreviewUrl\] = useState\(""\)/);
 });
 
+test("internship submission requires all mandatory info tabs", () => {
+  assert.match(formSource, /const requiredInfoTabs = \[personalInfoTab, "Maklumat Akademik", "Dokumen Sokongan"\]/);
+  assert.match(formSource, /requiredInfoTabs\.find\(\(tab\) => !isTabComplete\(tab, studentInfo\)\)/);
+  assert.match(formSource, /requiredInfoTabs\.forEach\(\(tab\) => \{/);
+  assert.match(formSource, /const requiredInfoTabsComplete = requiredInfoTabs\.every\(\(tab\) => isTabComplete\(tab, studentInfo\)\)/);
+  assert.match(formSource, /const isApplicationReadyToSubmit = declarationAccepted && requiredInfoTabsComplete/);
+  assert.match(formSource, /disabled=\{!isApplicationReadyToSubmit \|\| isSubmittingApplication\}/);
+});
+
 test("applicant rejected internship applications can apply again", () => {
   assert.match(routesSource, /internshipApplicationNew: "\/profile\/internship-application\?new=1"/);
   assert.match(infoSource, /reapplyAllowedApplicationStatuses = new Set\(\["rejected", "withdrawn"\]\)/);
