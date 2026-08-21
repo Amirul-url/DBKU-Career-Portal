@@ -530,7 +530,12 @@ function ApplicantOrganizationFeedbackTab({ application, onNext }) {
 function ApplicantConfirmationSendConfirmModal({ isSaving, onCancel, onConfirm }) {
   return (
     <div className="profile-confirm-overlay" role="presentation">
-      <section className="profile-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="applicant-confirmation-send-title">
+      <section
+        className="profile-confirm-dialog applicant-confirmation-send-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="applicant-confirmation-send-title"
+      >
         <h2 id="applicant-confirmation-send-title">Hantar pengesahan?</h2>
         <p>Anda yakin mahu menghantar pengesahan penerimaan tawaran ini?</p>
         <div>

@@ -162,7 +162,11 @@ test("applicant can submit acceptance confirmation after organization feedback",
   assert.match(viewSource, /Dengan ini, saya mengesahkan penerimaan tawaran menjalani latihan industri di Dewan Bandaraya Kuching Utara \(DBKU\)/);
   assert.match(viewSource, /Sekian, terima kasih atas perhatian dan kerjasama pihak puan\./);
   assert.match(viewSource, /function ApplicantConfirmationSendConfirmModal/);
+  assert.match(viewSource, /profile-confirm-dialog applicant-confirmation-send-dialog/);
   assert.match(viewSource, /Anda yakin mahu menghantar pengesahan penerimaan tawaran ini\?/);
+  assert.match(cssSource, /\.applicant-confirmation-send-dialog h2 \{/);
+  assert.match(cssSource, /background: transparent;/);
+  assert.match(cssSource, /padding: 0;/);
   assert.match(viewSource, /\/confirm-offer\//);
   assert.match(viewSource, />\s*Seterusnya\s*</);
   assert.match(viewSource, />\s*Hantar\s*</);
