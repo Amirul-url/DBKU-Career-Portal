@@ -15,6 +15,14 @@ const personalInfoTab = "Maklumat Peribadi Pemohon";
 const infoTabs = [personalInfoTab, "Maklumat Akademik", "Dokumen Sokongan"];
 const organizationFeedbackTab = "Maklumbalas Organisasi";
 const applicantConfirmationTab = "Pengesahan Pemohon";
+const hrmDecisionTab = "Keputusan HRM";
+const hrmFinalRejectionMessage = `Sukacita dimaklumkan bahawa permohonan saudara/saudari untuk menjalani latihan industri di Dewan Bandaraya Kota Kinabalu (DBKU) telah diterima dan diteliti oleh pihak kami.
+
+Walau bagaimanapun, setelah mengambil kira keperluan semasa serta kapasiti penempatan pelatih, dukacita dimaklumkan bahawa pihak DBKU tidak dapat mempertimbangkan permohonan tersebut buat masa ini.
+
+Pihak DBKU merakamkan setinggi-tinggi penghargaan atas minat dan kepercayaan saudara/saudari untuk menjalani latihan industri bersama DBKU. Kami memohon maaf atas segala kesulitan yang mungkin timbul dan berharap saudara/saudari akan memperoleh peluang latihan industri yang bersesuaian pada masa akan datang.
+
+Sekian, terima kasih.`;
 const organizationFeedbackReportDefaults = {
   date: "",
   time: "8.00 pagi",
@@ -92,6 +100,16 @@ function getOrganizationFeedbackConfirmationDate(application) {
 
 function hasOrganizationFeedbackBeenSent(application) {
   return Boolean(getOrganizationFeedbackRelease(application).sent_to_applicant_at);
+}
+
+function getSavedHrmFinalDecision(application) {
+  const decision = application?.profile_data?.hrm_final_decision;
+  return decision && typeof decision === "object" ? decision : {};
+}
+
+function hasHrmFinalRejectionDecision(application) {
+  const decision = getSavedHrmFinalDecision(application);
+  return (application?.status || "") === "rejected" && (decision.decision === "Tolak" || Boolean(decision.remarks));
 }
 
 const documentFields = [
@@ -828,6 +846,21 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
   );
 }
 
+function ApplicantHrmDecisionTab({ application }) {
+  const finalDecision = getSavedHrmFinalDecision(application);
+  const decisionMessage = finalDecision.remarks || hrmFinalRejectionMessage;
+
+  return (
+    <div className="applicant-confirmation-panel applicant-hrm-decision-panel">
+      <section className="applicant-confirmation-statement" aria-label="Alasan keputusan HRM">
+        {decisionMessage.split("\n\n").map((paragraph) => (
+          <p key={paragraph}>{paragraph}</p>
+        ))}
+      </section>
+    </div>
+  );
+}
+
 function renderPhoneRow(key, label, value) {
   const phone = splitPhoneNumber(value);
   return renderReadOnlyContentRow(
@@ -1048,6 +1081,10 @@ export default function ApplicantApplicationViewPage() {
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
   const email = user?.email || "Belum dikemaskini";
   const organizationFeedbackSent = hasOrganizationFeedbackBeenSent(application);
+  const applicantExtraTabs = [
+    ...(hasHrmFinalRejectionDecision(application) ? [hrmDecisionTab] : []),
+    ...(organizationFeedbackSent ? [organizationFeedbackTab, applicantConfirmationTab] : []),
+  ];
 
   useEffect(() => {
     if (!user) {
@@ -1116,13 +1153,15 @@ export default function ApplicantApplicationViewPage() {
             activeInfoTab={activeInfoTab}
             application={application}
             error={error}
-            extraTabs={organizationFeedbackSent ? [organizationFeedbackTab, applicantConfirmationTab] : []}
+            extraTabs={applicantExtraTabs}
             loading={loading}
             maskAcceptedStatus={!organizationFeedbackSent}
             onBack={exitApplicationView}
             onTabChange={setActiveInfoTab}
             renderExtraTabContent={(tab) =>
-              tab === organizationFeedbackTab ? (
+              tab === hrmDecisionTab ? (
+                <ApplicantHrmDecisionTab application={application} />
+              ) : tab === organizationFeedbackTab ? (
                 <ApplicantOrganizationFeedbackTab application={application} onNext={() => setActiveInfoTab(applicantConfirmationTab)} />
               ) : tab === applicantConfirmationTab ? (
                 <ApplicantConfirmationTab application={application} onConfirmed={handleApplicantConfirmationSent} />

@@ -195,16 +195,19 @@ test("department decision tab replaces HRM review for department workspaces", ()
 
 test("HRM makes the final internship decision after department recommendation", () => {
   assert.match(source, /const hrmFinalDecisionTab = "Keputusan Akhir HRM"/);
+  assert.match(source, /const hrmFinalRejectionMessage = `/);
+  assert.match(source, /Dewan Bandaraya Kota Kinabalu \(DBKU\) telah diterima dan diteliti/);
   assert.match(source, /function HrmFinalDecisionTab/);
   assert.match(source, /const saveHrmFinalDecision = async/);
   assert.match(source, /hrm_final_decision: finalDecision/);
   assert.match(source, /status: nextStatus/);
-  assert.match(source, /finalDecision\.decision === "Tolak" \? "rejected" : "accepted"/);
+  assert.match(source, /const nextStatus = "rejected"/);
   assert.match(source, /onSaveFinalDecision=\{saveHrmFinalDecision\}/);
   assert.match(source, /\.\.\.\(shouldShowHrmFinalDecision \? \[hrmFinalDecisionTab\] : \[\]\)/);
   assert.match(source, /\.\.\.\(shouldShowOrganizationFeedback \? \[organizationFeedbackTab\] : \[\]\)/);
-  assert.match(source, /"Terima Permohonan"/);
-  assert.match(source, />\s*Tolak Permohonan\s*</);
+  assert.match(source, /remarks: hrmFinalRejectionMessage/);
+  assert.doesNotMatch(source, /Terima Permohonan/);
+  assert.match(source, /: "Tolak Permohonan"/);
 });
 
 test("HRM assessment saves do not change the application status before review action", () => {

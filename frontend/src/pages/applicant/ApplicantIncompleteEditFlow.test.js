@@ -33,6 +33,15 @@ test("applicant rejected applications use Ditolak status label", () => {
   assert.doesNotMatch(viewSource, /Tidak berjaya/);
 });
 
+test("applicant rejected internship applications show HRM final decision reason", () => {
+  assert.match(viewSource, /const hrmDecisionTab = "Keputusan HRM"/);
+  assert.match(viewSource, /function hasHrmFinalRejectionDecision\(application\)/);
+  assert.match(viewSource, /function ApplicantHrmDecisionTab\(\{ application \}\)/);
+  assert.match(viewSource, /Dewan Bandaraya Kota Kinabalu \(DBKU\) telah diterima dan diteliti/);
+  assert.match(viewSource, /\.\.\.\(hasHrmFinalRejectionDecision\(application\) \? \[hrmDecisionTab\] : \[\]\)/);
+  assert.match(viewSource, /tab === hrmDecisionTab \? \(\s*<ApplicantHrmDecisionTab application=\{application\} \/>/);
+});
+
 test("applicant accepted applications stay hidden behind review status until HRM notification", () => {
   assert.match(listSource, /accepted: "Dalam semakan"/);
   assert.match(viewSource, /accepted: "Dalam semakan"/);
@@ -50,7 +59,9 @@ test("applicant accepted applications stay hidden behind review status until HRM
   assert.match(viewSource, /student-info-tabs-grouped/);
   assert.match(viewSource, /panelTabs\.map\(renderTabButton\)/);
   assert.match(viewSource, /function hasOrganizationFeedbackBeenSent\(application\)/);
-  assert.match(viewSource, /extraTabs=\{organizationFeedbackSent \? \[organizationFeedbackTab, applicantConfirmationTab\] : \[\]\}/);
+  assert.match(viewSource, /const applicantExtraTabs = \[/);
+  assert.match(viewSource, /\.\.\.\(organizationFeedbackSent \? \[organizationFeedbackTab, applicantConfirmationTab\] : \[\]\)/);
+  assert.match(viewSource, /extraTabs=\{applicantExtraTabs\}/);
   assert.match(viewSource, /maskAcceptedStatus=\{!organizationFeedbackSent\}/);
   assert.match(viewSource, /function ApplicantOrganizationFeedbackTab/);
   assert.match(viewSource, /function getApplicantFeedbackPlacementDepartment\(application\)/);
@@ -155,7 +166,9 @@ test("applicant can submit acceptance confirmation after organization feedback",
   assert.match(viewSource, /applicant_agreed: "Pengesahan Dihantar"/);
   assert.match(listSource, /getApplicantAgreedInternshipStatus\(application\)/);
   assert.match(listSource, /applicant_agreed: "Pengesahan Dihantar"/);
-  assert.match(viewSource, /extraTabs=\{organizationFeedbackSent \? \[organizationFeedbackTab, applicantConfirmationTab\] : \[\]\}/);
+  assert.match(viewSource, /const applicantExtraTabs = \[/);
+  assert.match(viewSource, /\.\.\.\(organizationFeedbackSent \? \[organizationFeedbackTab, applicantConfirmationTab\] : \[\]\)/);
+  assert.match(viewSource, /extraTabs=\{applicantExtraTabs\}/);
   assert.match(viewSource, /function ApplicantConfirmationTab/);
   assert.match(viewSource, /Muat Naik Dokumen/);
   assert.match(viewSource, /Dokumen pengesahan pemohon[\s\S]*organization-feedback-required/);

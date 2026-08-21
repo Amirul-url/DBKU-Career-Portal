@@ -108,6 +108,13 @@ const departmentDecisionTab = "Keputusan Bahagian";
 const hrmFinalDecisionTab = "Keputusan Akhir HRM";
 const organizationFeedbackTab = "Maklumbalas Organisasi";
 const applicantConfirmationTab = "Pengesahan Pemohon";
+const hrmFinalRejectionMessage = `Sukacita dimaklumkan bahawa permohonan saudara/saudari untuk menjalani latihan industri di Dewan Bandaraya Kota Kinabalu (DBKU) telah diterima dan diteliti oleh pihak kami.
+
+Walau bagaimanapun, setelah mengambil kira keperluan semasa serta kapasiti penempatan pelatih, dukacita dimaklumkan bahawa pihak DBKU tidak dapat mempertimbangkan permohonan tersebut buat masa ini.
+
+Pihak DBKU merakamkan setinggi-tinggi penghargaan atas minat dan kepercayaan saudara/saudari untuk menjalani latihan industri bersama DBKU. Kami memohon maaf atas segala kesulitan yang mungkin timbul dan berharap saudara/saudari akan memperoleh peluang latihan industri yang bersesuaian pada masa akan datang.
+
+Sekian, terima kasih.`;
 const applicantDetailTabs = ["Maklumat Peribadi Pemohon", "Maklumat Akademik", "Dokumen Sokongan"];
 const organizationFeedbackReportDefaults = {
   date: "",
@@ -470,7 +477,7 @@ export default function AdminHrmPage() {
   const saveHrmFinalDecision = async (application, finalDecision) => {
     if (!application) return null;
 
-    const nextStatus = finalDecision.decision === "Tolak" ? "rejected" : "accepted";
+    const nextStatus = "rejected";
     const updatedApplication = await apiRequest(`/applications/${application.id}/review/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -482,7 +489,7 @@ export default function AdminHrmPage() {
     setApplications((current) =>
       current.map((item) => (String(item.id) === String(updatedApplication.id) ? updatedApplication : item)),
     );
-    setNotice(nextStatus === "accepted" ? "Keputusan akhir HRM telah menerima permohonan." : "Keputusan akhir HRM telah menolak permohonan.");
+    setNotice("Keputusan akhir HRM telah menolak permohonan.");
     return updatedApplication;
   };
   const saveOrganizationFeedbackDocument = async (application, files) => {
@@ -2405,33 +2412,33 @@ function DepartmentDecisionTab({ application, isReadOnly = false, onSaveDecision
     </div>
   );
 }
-function buildHrmFinalDecisionPayload(application, user, decision) {
+function buildHrmFinalDecisionPayload(application, user) {
   const savedFinalDecision = getSavedHrmFinalDecision(application);
   const departmentDecision = getSavedDepartmentDecision(application);
   return {
     ...savedFinalDecision,
-    decision,
+    decision: "Tolak",
     department_recommendation: departmentDecision.recommendation || "",
     department_remarks: departmentDecision.remarks || "",
+    remarks: hrmFinalRejectionMessage,
     submitted_at: new Date().toISOString(),
     submitted_by: user?.full_name || user?.name || user?.email || "",
   };
 }
 function HrmFinalDecisionTab({ application, onSaveFinalDecision, onSubmitted, user }) {
-  const departmentDecision = getSavedDepartmentDecision(application);
   const finalDecision = getSavedHrmFinalDecision(application);
   const [message, setMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const isFinalized = Boolean(finalDecision.submitted_at) || ["accepted", "rejected"].includes(application?.status);
   const canSubmit = Boolean(application && onSaveFinalDecision && hasSubmittedDepartmentDecision(application) && !isFinalized);
 
-  const submitFinalDecision = async (decision) => {
+  const submitFinalDecision = async () => {
     if (!canSubmit) return;
 
     setMessage("");
     setIsSaving(true);
     try {
-      await onSaveFinalDecision(application, buildHrmFinalDecisionPayload(application, user, decision));
+      await onSaveFinalDecision(application, buildHrmFinalDecisionPayload(application, user));
       onSubmitted?.();
     } catch (error) {
       setMessage(error.message || "Keputusan akhir HRM gagal dihantar.");
@@ -2443,38 +2450,22 @@ function HrmFinalDecisionTab({ application, onSaveFinalDecision, onSubmitted, us
   return (
     <div className="department-decision-panel">
       <div className="department-decision-form" aria-label="Keputusan akhir HRM">
-        <label>
-          <span>Syor Bahagian</span>
-          <input readOnly value={departmentDecision.recommendation || "Belum diterima"} />
-        </label>
-        <label>
-          <span>Ulasan Bahagian</span>
-          <textarea readOnly rows={4} value={departmentDecision.remarks || ""} />
-        </label>
-        {finalDecision.submitted_at ? (
-          <p className="organization-feedback-sent-note">
-            Keputusan akhir HRM telah dihantar: {finalDecision.decision || statusLabel[application?.status] || application?.status}.
-          </p>
-        ) : null}
+        <section className="organization-feedback-confirmation-note" aria-label="Alasan keputusan akhir HRM">
+          {hrmFinalRejectionMessage.split("\n\n").map((paragraph) => (
+            <p key={paragraph}>{paragraph}</p>
+          ))}
+        </section>
         {message ? <p className="organization-feedback-message">{message}</p> : null}
       </div>
       {!isFinalized ? (
         <footer className="hrm-application-detail-actions">
           <button
-            className="hrm-primary"
-            disabled={!canSubmit || isSaving}
-            onClick={() => submitFinalDecision("Terima")}
-            type="button"
-          >
-            {isSaving ? "Menghantar..." : "Terima Permohonan"}
-          </button>
-          <button
             className="hrm-danger"
             disabled={!canSubmit || isSaving}
-            onClick={() => submitFinalDecision("Tolak")}
+            onClick={submitFinalDecision}
             type="button"
           >
-            Tolak Permohonan
+            {isSaving ? "Menghantar..." : "Tolak Permohonan"}
           </button>
         </footer>
       ) : null}
