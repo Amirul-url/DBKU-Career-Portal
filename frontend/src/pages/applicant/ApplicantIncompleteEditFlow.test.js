@@ -37,7 +37,7 @@ test("applicant rejected internship applications show HRM final decision reason"
   assert.match(viewSource, /const hrmDecisionTab = "Keputusan HRM"/);
   assert.match(viewSource, /function hasHrmFinalRejectionDecision\(application\)/);
   assert.match(viewSource, /function ApplicantHrmDecisionTab\(\{ application \}\)/);
-  assert.match(viewSource, /Dewan Bandaraya Kota Kinabalu \(DBKU\) telah diterima dan diteliti/);
+  assert.match(viewSource, /saudara\/i untuk menjalani latihan industri di Dewan Bandaraya Kuching Utara \(DBKU\) telah diterima dan diteliti/);
   assert.match(viewSource, /\.\.\.\(hasHrmFinalRejectionDecision\(application\) \? \[hrmDecisionTab\] : \[\]\)/);
   assert.match(viewSource, /tab === hrmDecisionTab \? \(\s*<ApplicantHrmDecisionTab application=\{application\} \/>/);
 });
