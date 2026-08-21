@@ -185,7 +185,8 @@ test("internship personal tab shows passport upload before personal details tabl
   assert.match(formSource, /function renderPassportPhotoUpload/);
   assert.match(formSource, /className="student-info-photo-card"/);
   assert.match(formSource, /className="student-passport-upload"/);
-  assert.match(formSource, /Muat Naik<br \/>gambar<br \/>pasport\{renderRequiredLabel\("", true\)\}/);
+  assert.doesNotMatch(formSource, /Muat Naik<br \/>gambar<br \/>pasport\{renderRequiredLabel\("", true\)\}/);
+  assert.match(formSource, /<strong>Nota\{renderRequiredLabel\("", true\)\}<\/strong>/);
   assert.match(formSource, /Muat Naik\s*<br \/>gambar\s*<br \/>pasport/);
   assert.match(formSource, /3\.5 cm x 5\.0 cm/);
   assert.match(formSource, /accept="\.jpg,\s*\.jpeg,\s*image\/jpeg"/);

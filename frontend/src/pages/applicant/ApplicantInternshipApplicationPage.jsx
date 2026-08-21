@@ -1132,7 +1132,7 @@ export default function ApplicantInternshipApplicationPage() {
             <span>
               <Icon>upload</Icon>
               <b>
-                Muat Naik<br />gambar<br />pasport{renderRequiredLabel("", true)}
+                Muat Naik<br />gambar<br />pasport
               </b>
               <small>3.5 cm x 5.0 cm</small>
             </span>
@@ -1149,7 +1149,7 @@ export default function ApplicantInternshipApplicationPage() {
           </button>
         </div>
         <p>
-          <strong>Nota</strong>
+          <strong>Nota{renderRequiredLabel("", true)}</strong>
           <span>Sila pastikan gambar yang dimuatnaik adalah dalam format .jpg</span>
         </p>
       </section>
