@@ -379,13 +379,13 @@ function getApplicantFeedbackPlacementDepartment(application) {
 }
 
 function ApplicantOrganizationFeedbackTab({ application, onNext }) {
-  const release = getOrganizationFeedbackRelease(application);
-  const documents = getOrganizationFeedbackDocuments(application);
-  const internshipPeriod = release.internship_period || "Belum ditetapkan";
-  const reportDate = getOrganizationFeedbackReportValue(application, "date");
-  const reportTime = getOrganizationFeedbackReportValue(application, "time");
-  const reportPlace = getOrganizationFeedbackReportValue(application, "place");
-  const confirmationDate = getOrganizationFeedbackConfirmationDate(application);
+  const [feedbackRelease] = useState(() => getOrganizationFeedbackRelease(application));
+  const [feedbackDocuments] = useState(() => getOrganizationFeedbackDocuments(application));
+  const [feedbackReportDate] = useState(() => getOrganizationFeedbackReportValue(application, "date"));
+  const [feedbackReportTime] = useState(() => getOrganizationFeedbackReportValue(application, "time"));
+  const [feedbackReportPlace] = useState(() => getOrganizationFeedbackReportValue(application, "place"));
+  const [feedbackConfirmationDate] = useState(() => getOrganizationFeedbackConfirmationDate(application));
+  const internshipPeriod = feedbackRelease.internship_period || "Belum ditetapkan";
   const studentName = getInternshipStudentName(application);
   const identityNo = getInternshipStudentIdentityNo(application);
   const program = getInternshipProgram(application);
@@ -428,14 +428,14 @@ function ApplicantOrganizationFeedbackTab({ application, onNext }) {
         <dl className="organization-feedback-report-details">
           <dt>Tarikh</dt>
           <dd>:</dd>
-          <dd>{reportDate}</dd>
+          <dd>{feedbackReportDate}</dd>
           <dt>Masa</dt>
           <dd>:</dd>
-          <dd>{reportTime}</dd>
+          <dd>{feedbackReportTime}</dd>
           <dt>Tempat</dt>
           <dd>:</dd>
           <dd>
-            {reportPlace.split("\n").map((line, index) => (
+            {feedbackReportPlace.split("\n").map((line, index) => (
               <span key={`${line}-${index}`}>{line}</span>
             ))}
           </dd>
@@ -446,7 +446,7 @@ function ApplicantOrganizationFeedbackTab({ application, onNext }) {
         <p>
           Sila buat pengesahan secara bertulis <strong>(seperti di Lampiran II)</strong>, kemudian sila muat naik dokumen
           pengesahan tersebut kepada Dewan Bandaraya Kuching Utara dan sebelum atau pada{" "}
-          <span className="organization-feedback-confirmation-date">{confirmationDate}</span>. Sekiranya pihak kami tidak
+          <span className="organization-feedback-confirmation-date">{feedbackConfirmationDate}</span>. Sekiranya pihak kami tidak
           menerima sebarang maklumbalas selepas tarikh tersebut, maka kami beranggapan bahawa anda telah menolak tawaran
           tersebut. Sebarang surat-menyurat selepas tarikh tersebut tidak akan dilayan.
         </p>
@@ -473,8 +473,8 @@ function ApplicantOrganizationFeedbackTab({ application, onNext }) {
             </tr>
           </thead>
           <tbody>
-            {documents.length ? (
-              documents.map((document, index) => (
+            {feedbackDocuments.length ? (
+              feedbackDocuments.map((document, index) => (
                 <tr key={`organizationFeedbackDocument-${document.id || index}`}>
                   <td>{index + 1}</td>
                   <td>PDF</td>
@@ -547,14 +547,17 @@ function ApplicantConfirmationSendConfirmModal({ isSaving, onCancel, onConfirm }
 
 function ApplicantConfirmationTab({ application, onConfirmed }) {
   const [selectedFiles, setSelectedFiles] = useState([]);
-  const [savedDocuments, setSavedDocuments] = useState(() => getApplicantConfirmationDocuments(application));
+  const [confirmationState, setConfirmationState] = useState(() => ({
+    isAgreed: hasApplicantAgreedToOffer(application),
+    documents: getApplicantConfirmationDocuments(application),
+  }));
   const [fileInputKey, setFileInputKey] = useState(0);
   const [message, setMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const isAgreed = hasApplicantAgreedToOffer(application);
+  const isAgreed = confirmationState.isAgreed;
   const documents = isAgreed
-    ? savedDocuments
+    ? confirmationState.documents
     : selectedFiles.map((file, index) => ({ file, id: `${file.name}-${index}`, name: file.name, url: "" }));
   const isPdfFile = (file) => file?.type === "application/pdf" || file?.name?.toLowerCase().endsWith(".pdf");
 
@@ -599,7 +602,10 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
         method: "POST",
         body: payload,
       });
-      setSavedDocuments(getApplicantConfirmationDocuments(updatedApplication));
+      setConfirmationState({
+        isAgreed: hasApplicantAgreedToOffer(updatedApplication),
+        documents: getApplicantConfirmationDocuments(updatedApplication),
+      });
       setSelectedFiles([]);
       setFileInputKey((current) => current + 1);
       setShowConfirmModal(false);

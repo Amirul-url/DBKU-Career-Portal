@@ -70,10 +70,10 @@ test("applicant accepted applications stay hidden behind review status until HRM
   );
   assert.match(viewSource, /function getOrganizationFeedbackReportValue\(application, field\)/);
   assert.match(viewSource, /function getOrganizationFeedbackConfirmationDate\(application\)/);
-  assert.match(viewSource, /const reportDate = getOrganizationFeedbackReportValue\(application, "date"\)/);
-  assert.match(viewSource, /const reportTime = getOrganizationFeedbackReportValue\(application, "time"\)/);
-  assert.match(viewSource, /const reportPlace = getOrganizationFeedbackReportValue\(application, "place"\)/);
-  assert.match(viewSource, /const confirmationDate = getOrganizationFeedbackConfirmationDate\(application\)/);
+  assert.match(viewSource, /<dd>\{feedbackReportDate\}<\/dd>/);
+  assert.match(viewSource, /<dd>\{feedbackReportTime\}<\/dd>/);
+  assert.match(viewSource, /feedbackReportPlace\.split\("\\n"\)/);
+  assert.match(viewSource, /\{feedbackConfirmationDate\}<\/span>/);
   assert.match(viewSource, /Maklumat lapor diri adalah seperti berikut:/);
   assert.match(viewSource, /className="organization-feedback-report-note applicant-organization-report-note"/);
   assert.match(viewSource, /className="organization-feedback-confirmation-note"/);
@@ -81,6 +81,12 @@ test("applicant accepted applications stay hidden behind review status until HRM
   assert.match(viewSource, /seperti di Lampiran II/);
   assert.match(viewSource, /className="organization-feedback-confirmation-date"/);
   assert.match(viewSource, /Sila muat turun dokumen maklumbalas organisasi di bawah\./);
+  assert.match(viewSource, /const \[feedbackRelease\] = useState\(\(\) => getOrganizationFeedbackRelease\(application\)\)/);
+  assert.match(viewSource, /const \[feedbackDocuments\] = useState\(\(\) => getOrganizationFeedbackDocuments\(application\)\)/);
+  assert.match(viewSource, /const \[feedbackReportDate\] = useState\(\(\) => getOrganizationFeedbackReportValue\(application, "date"\)\)/);
+  assert.match(viewSource, /const \[feedbackReportTime\] = useState\(\(\) => getOrganizationFeedbackReportValue\(application, "time"\)\)/);
+  assert.match(viewSource, /const \[feedbackReportPlace\] = useState\(\(\) => getOrganizationFeedbackReportValue\(application, "place"\)\)/);
+  assert.match(viewSource, /const \[feedbackConfirmationDate\] = useState\(\(\) => getOrganizationFeedbackConfirmationDate\(application\)\)/);
   assert.match(
     viewSource,
     /className="organization-feedback-document-table applicant-organization-document-table"/,
@@ -132,6 +138,11 @@ test("applicant can submit acceptance confirmation after organization feedback",
   assert.match(viewSource, /Dokumen pengesahan pemohon[\s\S]*organization-feedback-required/);
   assert.match(viewSource, /Wajib muat naik sekurang-kurangnya satu dokumen pengesahan penerimaan tawaran dalam format PDF\./);
   assert.match(viewSource, /applicantConfirmationDocuments/);
+  assert.match(viewSource, /const \[confirmationState, setConfirmationState\] = useState\(\(\) => \(\{/);
+  assert.match(viewSource, /isAgreed: hasApplicantAgreedToOffer\(application\)/);
+  assert.match(viewSource, /documents: getApplicantConfirmationDocuments\(application\)/);
+  assert.match(viewSource, /const isAgreed = confirmationState\.isAgreed/);
+  assert.match(viewSource, /setConfirmationState\(\{/);
   assert.match(viewSource, /file,\s*index/);
   assert.match(viewSource, /URL\.createObjectURL\(document\.file\)/);
   assert.match(viewSource, /URL\.revokeObjectURL\(previewUrl\)/);
