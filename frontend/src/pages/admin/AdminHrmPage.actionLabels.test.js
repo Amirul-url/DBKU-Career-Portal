@@ -26,7 +26,7 @@ test("HRM sidebar shows red badges for new application counts", () => {
 });
 
 test("department and HRM internship rows mark pending decision tasks as new", () => {
-  assert.match(source, /department_new: "Baharu"/);
+  assert.match(source, /department_new: "Semakan Bahagian"/);
   assert.match(source, /hrm_department_new: "Baharu"/);
   assert.match(source, /hrm_department_accepted: "Diterima Bahagian"/);
   assert.match(source, /hrm_department_rejected: "Ditolak Bahagian"/);
@@ -49,11 +49,11 @@ test("department and HRM internship rows mark pending decision tasks as new", ()
   assert.match(source, /return getHrmDepartmentDecisionStatus\(application\)/);
   assert.match(source, /return "department_new"/);
   assert.match(source, /isHrmWorkspace=\{isHrmWorkspace\}/);
-  assert.match(source, /const showHrmNewBadge = isHrmWorkspace && isHrmNewApplication\(application\)/);
+  assert.match(source, /const showReferenceNewBadge = isHrmWorkspace\s*\?\s*isHrmNewApplication\(application\)\s*:\s*isDepartmentPendingDecisionApplication\(application\)/);
   assert.match(source, /className="hrm-reference-cell"/);
   assert.match(cssSource, /\.hrm-reference-cell \{[\s\S]*position: relative;[\s\S]*display: block;[\s\S]*width: 100%;[\s\S]*text-align: center;/);
   assert.match(cssSource, /\.hrm-reference-cell \.hrm-badge \{[\s\S]*position: absolute;[\s\S]*left: -24px;[\s\S]*top: 50%;[\s\S]*transform: translateY\(-50%\);/);
-  assert.match(source, /<Badge status="hrm_department_new" \/> : null\}\s*<span>\{formatReferenceNo\(application\)\}<\/span>/);
+  assert.match(source, /\{showReferenceNewBadge \? <Badge status="hrm_department_new" \/> : null\}\s*<span>\{formatReferenceNo\(application\)\}<\/span>/);
   assert.match(source, /<Badge status=\{displayStatus\} \/>/);
 });
 

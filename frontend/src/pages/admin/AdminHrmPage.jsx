@@ -66,7 +66,7 @@ function getAdminShellRoleLabel(user) {
 }
 
 const statusLabel = {
-  department_new: "Baharu",
+  department_new: "Semakan Bahagian",
   hrm_department_new: "Baharu",
   hrm_department_accepted: "Diterima Bahagian",
   hrm_department_rejected: "Ditolak Bahagian",
@@ -1990,12 +1990,14 @@ function InternshipApplicationsPanel({ applications, isHrmWorkspace, onView }) {
             {visibleApplications.length ? (
               visibleApplications.map((application) => {
                 const displayStatus = getInternshipApplicationDisplayStatus(application, isHrmWorkspace);
-                const showHrmNewBadge = isHrmWorkspace && isHrmNewApplication(application);
+                const showReferenceNewBadge = isHrmWorkspace
+                  ? isHrmNewApplication(application)
+                  : isDepartmentPendingDecisionApplication(application);
                 return (
                   <tr key={application.id}>
                     <td>
                       <div className="hrm-reference-cell">
-                        {showHrmNewBadge ? <Badge status="hrm_department_new" /> : null}
+                        {showReferenceNewBadge ? <Badge status="hrm_department_new" /> : null}
                         <span>{formatReferenceNo(application)}</span>
                       </div>
                     </td>
