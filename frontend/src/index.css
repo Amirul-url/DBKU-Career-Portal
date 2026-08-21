@@ -11096,6 +11096,61 @@ body:has(.applicant-profile-page) {
   white-space: pre-line;
 }
 
+.organization-feedback-confirmation-note {
+  padding: 0 2px;
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.55;
+}
+
+.organization-feedback-confirmation-note p {
+  margin: 0 0 12px;
+}
+
+.organization-feedback-confirmation-note p:last-child {
+  margin-bottom: 0;
+}
+
+.organization-feedback-confirmation-note strong {
+  font-weight: 800;
+}
+
+.organization-feedback-inline-date-input {
+  width: 180px;
+  border: 0;
+  border-bottom: 1px solid #334155;
+  border-radius: 0;
+  background: transparent;
+  color: #020617;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.25;
+  padding: 0 8px 2px;
+  text-align: center;
+}
+
+.organization-feedback-inline-date-input:focus {
+  border-bottom-color: #059669;
+  box-shadow: none;
+  outline: none;
+}
+
+.organization-feedback-inline-date-input:disabled {
+  color: #0f172a;
+  opacity: 1;
+}
+
+.organization-feedback-confirmation-date {
+  display: inline-block;
+  min-width: 160px;
+  border-bottom: 1px solid #334155;
+  padding: 0 8px 2px;
+  text-align: center;
+  vertical-align: baseline;
+}
+
 .organization-feedback-table-wrap {
   overflow-x: auto;
 }

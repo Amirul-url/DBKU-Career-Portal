@@ -100,6 +100,7 @@ const organizationFeedbackReportDefaults = {
   time: "8.00 pagi",
   place:
     "Unit Pengurusan Latihan\nBahagian Pengurusan Sumber Manusia\nTingkat 3, Bangunan Dewan Bandaraya Kuching Utara\nBukit Siol, Jalan Semariang, Petra Jaya\n93050 Kuching, SARAWAK",
+  confirmationDate: "",
 };
 const dateValue = (value) =>
   value
@@ -449,6 +450,7 @@ export default function AdminHrmPage() {
         report_date: feedback.reportDate || organizationFeedbackReportDefaults.date,
         report_time: feedback.reportTime || organizationFeedbackReportDefaults.time,
         report_place: feedback.reportPlace || organizationFeedbackReportDefaults.place,
+        confirmation_date: feedback.confirmationDate || organizationFeedbackReportDefaults.confirmationDate,
         sent_at_label: dateValue(feedback.sentAt),
         sent_by: user?.full_name || user?.email || "",
         sent_to_applicant_at: feedback.sentAt || new Date().toISOString(),
@@ -1715,6 +1717,11 @@ function getOrganizationFeedbackReportValue(application, field) {
   const fallback = organizationFeedbackReportDefaults[field] || "";
   return String(release[`report_${field}`] || fallback).trim();
 }
+function getOrganizationFeedbackConfirmationDate(application) {
+  const release = getOrganizationFeedbackRelease(application);
+  const fallback = organizationFeedbackReportDefaults.confirmationDate;
+  return String(release.confirmation_date || fallback).trim();
+}
 function InstitutionSearchFilter({ onChange, options, value }) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -2313,6 +2320,9 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
   const [feedbackReportDate, setFeedbackReportDate] = useState(() => getOrganizationFeedbackReportValue(application, "date"));
   const [feedbackReportTime, setFeedbackReportTime] = useState(() => getOrganizationFeedbackReportValue(application, "time"));
   const [feedbackReportPlace, setFeedbackReportPlace] = useState(() => getOrganizationFeedbackReportValue(application, "place"));
+  const [feedbackConfirmationDate, setFeedbackConfirmationDate] = useState(() =>
+    getOrganizationFeedbackConfirmationDate(application),
+  );
   const [feedbackRelease, setFeedbackRelease] = useState(() => getOrganizationFeedbackRelease(application));
   const [fileInputKey, setFileInputKey] = useState(0);
   const feedbackFileInputRef = useRef(null);
@@ -2440,6 +2450,7 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
         reportDate: feedbackReportDate.trim(),
         reportTime: feedbackReportTime.trim(),
         reportPlace: feedbackReportPlace.trim(),
+        confirmationDate: feedbackConfirmationDate.trim(),
         sentAt,
       });
       setFeedbackRelease(getOrganizationFeedbackRelease(updatedApplication || application));
@@ -2641,6 +2652,23 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
             />
           </dd>
         </dl>
+      </section>
+      <section className="organization-feedback-confirmation-note" aria-label="Pengesahan bertulis">
+        <p>
+          Sila buat pengesahan secara bertulis <strong>(seperti di Lampiran II)</strong> kepada Dewan Bandaraya Kuching Utara
+          sebelum atau pada{" "}
+          <input
+            aria-label="Tarikh akhir pengesahan bertulis"
+            className="organization-feedback-inline-date-input"
+            disabled={isSentToApplicant}
+            onChange={(event) => setFeedbackConfirmationDate(event.target.value)}
+            type="text"
+            value={feedbackConfirmationDate}
+          />
+          . Sekiranya pihak kami tidak menerima sebarang maklumbalas selepas tarikh tersebut, maka kami beranggapan bahawa
+          pelajar tuan/puan telah menolak tawaran tersebut. Sebarang surat-menyurat selepas tarikh tersebut tidak akan dilayan.
+        </p>
+        <p>Sekian. Terima kasih.</p>
       </section>
       <footer className="organization-feedback-send-actions">
         {isSentToApplicant ? (

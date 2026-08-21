@@ -15,6 +15,7 @@ const organizationFeedbackReportDefaults = {
   time: "8.00 pagi",
   place:
     "Unit Pengurusan Latihan\nBahagian Pengurusan Sumber Manusia\nTingkat 3, Bangunan Dewan Bandaraya Kuching Utara\nBukit Siol, Jalan Semariang, Petra Jaya\n93050 Kuching, SARAWAK",
+  confirmationDate: "",
 };
 
 const statusLabels = {
@@ -46,6 +47,12 @@ function getOrganizationFeedbackReportValue(application, field) {
   const release = getOrganizationFeedbackRelease(application);
   const fallback = organizationFeedbackReportDefaults[field] || "";
   return String(release[`report_${field}`] || fallback).trim();
+}
+
+function getOrganizationFeedbackConfirmationDate(application) {
+  const release = getOrganizationFeedbackRelease(application);
+  const fallback = organizationFeedbackReportDefaults.confirmationDate;
+  return String(release.confirmation_date || fallback).trim();
 }
 
 function hasOrganizationFeedbackBeenSent(application) {
@@ -362,6 +369,7 @@ function ApplicantOrganizationFeedbackTab({ application }) {
   const reportDate = getOrganizationFeedbackReportValue(application, "date");
   const reportTime = getOrganizationFeedbackReportValue(application, "time");
   const reportPlace = getOrganizationFeedbackReportValue(application, "place");
+  const confirmationDate = getOrganizationFeedbackConfirmationDate(application);
   const studentName = getInternshipStudentName(application);
   const identityNo = getInternshipStudentIdentityNo(application);
   const program = getInternshipProgram(application);
@@ -417,6 +425,17 @@ function ApplicantOrganizationFeedbackTab({ application }) {
             ))}
           </dd>
         </dl>
+      </section>
+
+      <section className="organization-feedback-confirmation-note" aria-label="Pengesahan bertulis">
+        <p>
+          Sila buat pengesahan secara bertulis <strong>(seperti di Lampiran II)</strong> kepada Dewan Bandaraya Kuching Utara
+          sebelum atau pada{" "}
+          <span className="organization-feedback-confirmation-date">{confirmationDate}</span>. Sekiranya pihak kami tidak
+          menerima sebarang maklumbalas selepas tarikh tersebut, maka kami beranggapan bahawa pelajar tuan/puan telah menolak
+          tawaran tersebut. Sebarang surat-menyurat selepas tarikh tersebut tidak akan dilayan.
+        </p>
+        <p>Sekian. Terima kasih.</p>
       </section>
 
       <div className="student-personal-table-wrap applicant-organization-document-wrap">

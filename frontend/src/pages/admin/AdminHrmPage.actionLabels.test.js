@@ -199,7 +199,13 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.doesNotMatch(source, /organization-feedback-attachment-hint/);
   assert.match(source, /className="organization-feedback-report-note"/);
   assert.match(source, /Sehubungan itu, pelajar tuan\/puan adalah diminta untuk melapor diri/);
+  assert.match(source, /className="organization-feedback-confirmation-note"/);
+  assert.match(source, /Sila buat pengesahan secara bertulis/);
+  assert.match(source, /seperti di Lampiran II/);
+  assert.match(source, /aria-label="Tarikh akhir pengesahan bertulis"/);
+  assert.match(source, /className="organization-feedback-inline-date-input"/);
   assert.match(source, /date: ""/);
+  assert.match(source, /confirmationDate: ""/);
   assert.match(source, /time: "8\.00 pagi"/);
   assert.match(source, /Unit Pengurusan Latihan/);
   assert.match(source, /className="organization-feedback-row-actions"/);
@@ -223,6 +229,8 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /const \[feedbackReportDate, setFeedbackReportDate\] = useState\(\(\) => getOrganizationFeedbackReportValue\(application, "date"\)\)/);
   assert.match(source, /const \[feedbackReportTime, setFeedbackReportTime\] = useState\(\(\) => getOrganizationFeedbackReportValue\(application, "time"\)\)/);
   assert.match(source, /const \[feedbackReportPlace, setFeedbackReportPlace\] = useState\(\(\) => getOrganizationFeedbackReportValue\(application, "place"\)\)/);
+  assert.match(source, /const \[feedbackConfirmationDate, setFeedbackConfirmationDate\] = useState\(\(\) =>/);
+  assert.match(source, /getOrganizationFeedbackConfirmationDate\(application\)/);
   assert.match(source, /const \[feedbackRelease, setFeedbackRelease\] = useState\(\(\) => getOrganizationFeedbackRelease\(application\)\)/);
   assert.match(source, /const \[showSendConfirmModal, setShowSendConfirmModal\] = useState\(false\)/);
   assert.match(source, /className="organization-feedback-required"/);
@@ -234,6 +242,7 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /onChange=\{\(event\) => setFeedbackReportDate\(event\.target\.value\)\}/);
   assert.match(source, /onChange=\{\(event\) => setFeedbackReportTime\(event\.target\.value\)\}/);
   assert.match(source, /onChange=\{\(event\) => setFeedbackReportPlace\(event\.target\.value\)\}/);
+  assert.match(source, /onChange=\{\(event\) => setFeedbackConfirmationDate\(event\.target\.value\)\}/);
   assert.match(source, /key=\{`\$\{application\?\.id \|\| "organization-feedback"\}-\$\{application\?\.updated_at \|\| ""\}`\}/);
   assert.match(source, /const clearFeedbackInput = \(\) => \{/);
   assert.match(source, /const selectedFiles = Array\.from\(event\.target\.files \|\| \[\]\)/);
@@ -254,6 +263,7 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /report_date: feedback\.reportDate \|\| organizationFeedbackReportDefaults\.date/);
   assert.match(source, /report_time: feedback\.reportTime \|\| organizationFeedbackReportDefaults\.time/);
   assert.match(source, /report_place: feedback\.reportPlace \|\| organizationFeedbackReportDefaults\.place/);
+  assert.match(source, /confirmation_date: feedback\.confirmationDate \|\| organizationFeedbackReportDefaults\.confirmationDate/);
   assert.match(source, /sent_to_applicant_at:/);
   assert.match(source, /onSendOrganizationFeedbackToApplicant=\{sendOrganizationFeedbackToApplicant\}/);
   assert.match(source, /onSendToApplicant=\{onSendOrganizationFeedbackToApplicant\}/);
@@ -263,6 +273,7 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /reportDate: feedbackReportDate\.trim\(\)/);
   assert.match(source, /reportTime: feedbackReportTime\.trim\(\)/);
   assert.match(source, /reportPlace: feedbackReportPlace\.trim\(\)/);
+  assert.match(source, /confirmationDate: feedbackConfirmationDate\.trim\(\)/);
   assert.match(source, /setFeedbackRelease\(getOrganizationFeedbackRelease\(updatedApplication \|\| application\)\)/);
   assert.match(source, /onSubmitted\?\.\(\)/);
   assert.match(source, /application\?\.document_files\?\.organizationFeedbackDocuments/);
