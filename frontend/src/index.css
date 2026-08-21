@@ -10478,7 +10478,7 @@ body:has(.applicant-profile-page) {
 
 .hrm-reference-cell .hrm-badge {
   position: absolute;
-  left: 0;
+  left: -24px;
   top: 50%;
   transform: translateY(-50%);
 }
