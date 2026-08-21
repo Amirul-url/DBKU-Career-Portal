@@ -851,14 +851,6 @@ export default function AdminHrmPage() {
               <div className="hrm-grid hrm-dashboard-grid">
                 <RecentApplicationsPanel
                   applications={overallMetrics.applications}
-                  applicationLinks={isHrmWorkspace ? undefined : []}
-                  onOpenApplications={(vacancyType) => {
-                    if (!isHrmWorkspace || vacancyType === "internship") {
-                      navigate(ADMIN_ROUTES.applications.internship);
-                      return;
-                    }
-                    openFilteredPanel("Permohonan Jawatan DBKU", "Permohonan", vacancyType);
-                  }}
                   onReview={setReview}
                 />
                 <aside className="hrm-dashboard-side">
@@ -1287,7 +1279,7 @@ function Stat({ icon, label, value, tone }) {
     </article>
   );
 }
-function RecentApplicationsPanel({ applications, applicationLinks = dashboardTypes, onOpenApplications, onReview }) {
+function RecentApplicationsPanel({ applications, onReview }) {
   const [monthFilter, setMonthFilter] = useState("all");
   const [yearFilter, setYearFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
@@ -1346,13 +1338,6 @@ function RecentApplicationsPanel({ applications, applicationLinks = dashboardTyp
               ))}
             </select>
           </label>
-          <div className="hrm-card-actions">
-            {applicationLinks.map((link) => (
-              <button key={link.type} onClick={() => onOpenApplications(link.type)} type="button">
-                {link.label} <Icon>chevron_right</Icon>
-              </button>
-            ))}
-          </div>
         </div>
       </header>
       <ApplicationTable applications={recentApplications.visibleApplications} onReview={onReview} compact />
