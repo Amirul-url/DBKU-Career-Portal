@@ -11078,6 +11078,31 @@ body:has(.applicant-profile-page) {
   display: block;
 }
 
+.organization-feedback-report-input {
+  width: min(100%, 560px);
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #020617;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  padding: 8px 10px;
+}
+
+.organization-feedback-report-input:disabled {
+  background: #f8fafc;
+  color: #0f172a;
+  opacity: 1;
+}
+
+.organization-feedback-report-textarea {
+  min-height: 116px;
+  resize: vertical;
+  white-space: pre-line;
+}
+
 .organization-feedback-table-wrap {
   overflow-x: auto;
 }

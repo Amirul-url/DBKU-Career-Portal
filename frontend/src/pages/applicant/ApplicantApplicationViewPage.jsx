@@ -10,6 +10,12 @@ import { ApplicantAddressMap, ProfileContentHeader, ProfileSidebar } from "./App
 const personalInfoTab = "Maklumat Peribadi Pemohon";
 const infoTabs = [personalInfoTab, "Maklumat Akademik", "Dokumen Sokongan"];
 const organizationFeedbackTab = "Maklumbalas Organisasi";
+const organizationFeedbackReportDefaults = {
+  date: "16 Mac 2026 (Isnin)",
+  time: "8.00 pagi",
+  place:
+    "Unit Pengurusan Latihan\nBahagian Pengurusan Sumber Manusia\nTingkat 3, Bangunan Dewan Bandaraya Kuching Utara\nBukit Siol, Jalan Semariang, Petra Jaya\n93050 Kuching, SARAWAK",
+};
 
 const statusLabels = {
   draft: "Draf",
@@ -34,6 +40,12 @@ function getReadOnlyStatusLabel(status, maskAcceptedStatus) {
 function getOrganizationFeedbackRelease(application) {
   const release = application?.profile_data?.organization_feedback_release;
   return release && typeof release === "object" ? release : {};
+}
+
+function getOrganizationFeedbackReportValue(application, field) {
+  const release = getOrganizationFeedbackRelease(application);
+  const fallback = organizationFeedbackReportDefaults[field] || "";
+  return String(release[`report_${field}`] || fallback).trim();
 }
 
 function hasOrganizationFeedbackBeenSent(application) {
@@ -347,6 +359,9 @@ function ApplicantOrganizationFeedbackTab({ application }) {
   const release = getOrganizationFeedbackRelease(application);
   const documents = getOrganizationFeedbackDocuments(application);
   const internshipPeriod = release.internship_period || "Belum ditetapkan";
+  const reportDate = getOrganizationFeedbackReportValue(application, "date");
+  const reportTime = getOrganizationFeedbackReportValue(application, "time");
+  const reportPlace = getOrganizationFeedbackReportValue(application, "place");
   const studentName = getInternshipStudentName(application);
   const identityNo = getInternshipStudentIdentityNo(application);
   const program = getInternshipProgram(application);
@@ -377,6 +392,25 @@ function ApplicantOrganizationFeedbackTab({ application }) {
           </tbody>
         </table>
       </div>
+
+      <section className="organization-feedback-report-note applicant-organization-report-note" aria-label="Maklumat lapor diri">
+        <p>Maklumat lapor diri adalah seperti berikut:</p>
+        <dl className="organization-feedback-report-details">
+          <dt>Tarikh</dt>
+          <dd>:</dd>
+          <dd>{reportDate}</dd>
+          <dt>Masa</dt>
+          <dd>:</dd>
+          <dd>{reportTime}</dd>
+          <dt>Tempat</dt>
+          <dd>:</dd>
+          <dd>
+            {reportPlace.split("\n").map((line, index) => (
+              <span key={`${line}-${index}`}>{line}</span>
+            ))}
+          </dd>
+        </dl>
+      </section>
 
       <div className="student-personal-table-wrap applicant-organization-document-wrap">
         <p className="applicant-organization-download-note">

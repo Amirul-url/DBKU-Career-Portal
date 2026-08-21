@@ -95,6 +95,12 @@ const statusClass = {
 const hrmReviewTab = "Semakan HRM";
 const departmentDecisionTab = "Keputusan Bahagian";
 const organizationFeedbackTab = "Maklumbalas Organisasi";
+const organizationFeedbackReportDefaults = {
+  date: "16 Mac 2026 (Isnin)",
+  time: "8.00 pagi",
+  place:
+    "Unit Pengurusan Latihan\nBahagian Pengurusan Sumber Manusia\nTingkat 3, Bangunan Dewan Bandaraya Kuching Utara\nBukit Siol, Jalan Semariang, Petra Jaya\n93050 Kuching, SARAWAK",
+};
 const dateValue = (value) =>
   value
     ? new Date(value).toLocaleDateString("ms-MY", {
@@ -440,6 +446,9 @@ export default function AdminHrmPage() {
       organization_feedback_release: {
         ...(currentProfileData.organization_feedback_release || {}),
         internship_period: feedback.internshipPeriod || "",
+        report_date: feedback.reportDate || organizationFeedbackReportDefaults.date,
+        report_time: feedback.reportTime || organizationFeedbackReportDefaults.time,
+        report_place: feedback.reportPlace || organizationFeedbackReportDefaults.place,
         sent_at_label: dateValue(feedback.sentAt),
         sent_by: user?.full_name || user?.email || "",
         sent_to_applicant_at: feedback.sentAt || new Date().toISOString(),
@@ -1701,6 +1710,11 @@ function getOrganizationFeedbackPeriodValue(application) {
   const period = getInternshipPeriod(application);
   return period === "Belum ditetapkan" ? "" : period;
 }
+function getOrganizationFeedbackReportValue(application, field) {
+  const release = getOrganizationFeedbackRelease(application);
+  const fallback = organizationFeedbackReportDefaults[field] || "";
+  return String(release[`report_${field}`] || fallback).trim();
+}
 function InstitutionSearchFilter({ onChange, options, value }) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -2296,6 +2310,9 @@ function DepartmentDecisionTab({ application, isReadOnly = false, onSaveDecision
 function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument, onSendToApplicant, onSubmitted }) {
   const [feedbackDocuments, setFeedbackDocuments] = useState(() => getOrganizationFeedbackDocuments(application));
   const [feedbackInternshipPeriod, setFeedbackInternshipPeriod] = useState(() => getOrganizationFeedbackPeriodValue(application));
+  const [feedbackReportDate, setFeedbackReportDate] = useState(() => getOrganizationFeedbackReportValue(application, "date"));
+  const [feedbackReportTime, setFeedbackReportTime] = useState(() => getOrganizationFeedbackReportValue(application, "time"));
+  const [feedbackReportPlace, setFeedbackReportPlace] = useState(() => getOrganizationFeedbackReportValue(application, "place"));
   const [feedbackRelease, setFeedbackRelease] = useState(() => getOrganizationFeedbackRelease(application));
   const [fileInputKey, setFileInputKey] = useState(0);
   const feedbackFileInputRef = useRef(null);
@@ -2420,6 +2437,9 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
       const sentAt = new Date().toISOString();
       const updatedApplication = await onSendToApplicant(application, {
         internshipPeriod: feedbackInternshipPeriod.trim(),
+        reportDate: feedbackReportDate.trim(),
+        reportTime: feedbackReportTime.trim(),
+        reportPlace: feedbackReportPlace.trim(),
         sentAt,
       });
       setFeedbackRelease(getOrganizationFeedbackRelease(updatedApplication || application));
@@ -2586,18 +2606,36 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
         <dl className="organization-feedback-report-details">
           <dt>Tarikh</dt>
           <dd>:</dd>
-          <dd>16 Mac 2026 (Isnin)</dd>
+          <dd>
+            <input
+              className="organization-feedback-report-input"
+              disabled={isSentToApplicant}
+              onChange={(event) => setFeedbackReportDate(event.target.value)}
+              type="text"
+              value={feedbackReportDate}
+            />
+          </dd>
           <dt>Masa</dt>
           <dd>:</dd>
-          <dd>8.00 pagi</dd>
+          <dd>
+            <input
+              className="organization-feedback-report-input"
+              disabled={isSentToApplicant}
+              onChange={(event) => setFeedbackReportTime(event.target.value)}
+              type="text"
+              value={feedbackReportTime}
+            />
+          </dd>
           <dt>Tempat</dt>
           <dd>:</dd>
           <dd>
-            <span>Unit Pengurusan Latihan</span>
-            <span>Bahagian Pengurusan Sumber Manusia</span>
-            <span>Tingkat 3, Bangunan Dewan Bandaraya Kuching Utara</span>
-            <span>Bukit Siol, Jalan Semariang, Petra Jaya</span>
-            <span>93050 Kuching, SARAWAK</span>
+            <textarea
+              className="organization-feedback-report-input organization-feedback-report-textarea"
+              disabled={isSentToApplicant}
+              onChange={(event) => setFeedbackReportPlace(event.target.value)}
+              rows={5}
+              value={feedbackReportPlace}
+            />
           </dd>
         </dl>
       </section>
