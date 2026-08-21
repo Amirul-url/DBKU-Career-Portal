@@ -651,6 +651,23 @@ function getMissingApplicationFields(studentInfo) {
   return { errors, missingFields };
 }
 
+function RequiredMarker() {
+  return <span className="student-required-marker" aria-hidden="true">*</span>;
+}
+
+function renderRequiredLabel(label, required = true) {
+  return (
+    <>
+      {label}
+      {required ? <RequiredMarker /> : null}
+    </>
+  );
+}
+
+function isRequiredInfoTab(tab) {
+  return requiredInfoTabs.includes(tab);
+}
+
 function getDocumentSummary(studentInfo) {
   return Object.fromEntries(
     documentFields.map((document) => {
@@ -1090,9 +1107,9 @@ export default function ApplicantInternshipApplicationPage() {
     </select>
   );
 
-  const renderPersonalRow = (label, fieldContent, className = "") => (
+  const renderPersonalRow = (label, fieldContent, className = "", required = true) => (
     <tr className={className}>
-      <th scope="row">{label}</th>
+      <th scope="row">{renderRequiredLabel(label, required)}</th>
       <td>{fieldContent}</td>
     </tr>
   );
@@ -1217,14 +1234,20 @@ export default function ApplicantInternshipApplicationPage() {
           {renderPersonalRow(
             "Nama Penyelaras Program",
             <input value={studentInfo.supervisorName} onChange={updateStudentInfo("supervisorName")} />,
+            "",
+            false,
           )}
           {renderPersonalRow(
             "Emel Penyelaras Program",
             <input type="email" value={studentInfo.supervisorEmail} onChange={updateStudentInfo("supervisorEmail")} />,
+            "",
+            false,
           )}
           {renderPersonalRow(
             "No. Telefon Penyelaras Program",
             <InternshipPhoneInput value={studentInfo.supervisorPhone} onChange={(value) => updateStudentValue("supervisorPhone", value)} />,
+            "",
+            false,
           )}
         </tbody>
       </table>
@@ -1311,13 +1334,13 @@ export default function ApplicantInternshipApplicationPage() {
                       type="button"
                       onClick={() => openInfoTab(tab)}
                     >
-                      {tab}
+                      {renderRequiredLabel(tab, isRequiredInfoTab(tab))}
                     </button>
                   ))}
                 </nav>
 
                 <form className="student-info-form" onSubmit={handleUpdate}>
-                  <h2>{activeInfoTab}</h2>
+                  <h2>{renderRequiredLabel(activeInfoTab, isRequiredInfoTab(activeInfoTab))}</h2>
                   {notice ? <p className={`student-info-notice ${noticeStatus}`}>{notice}</p> : null}
 
                   {activeInfoTab === personalInfoTab ? renderApplicantFields() : null}

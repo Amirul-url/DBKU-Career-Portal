@@ -6730,6 +6730,13 @@ body:has(.applicant-profile-page) {
   box-shadow: 0 8px 18px rgba(17, 24, 39, .04);
 }
 
+.student-required-marker {
+  display: inline;
+  margin-left: 4px;
+  color: #dc2626;
+  font-weight: 900;
+}
+
 .student-info-tabs-grouped {
   flex-direction: column;
   gap: 0;
@@ -6933,6 +6940,12 @@ body:has(.applicant-profile-page) {
   display: block;
   margin-left: 22px;
   font-weight: 500;
+}
+
+.student-personal-table th .student-required-marker {
+  display: inline;
+  margin-left: 4px;
+  font-weight: 900;
 }
 
 .student-personal-table th em {

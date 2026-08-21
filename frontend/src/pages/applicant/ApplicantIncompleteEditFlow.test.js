@@ -221,6 +221,20 @@ test("internship submission requires all mandatory info tabs", () => {
   assert.match(formSource, /disabled=\{!isApplicationReadyToSubmit \|\| isSubmittingApplication\}/);
 });
 
+test("internship mandatory tabs and fields show red required markers", () => {
+  assert.match(formSource, /function RequiredMarker\(\)/);
+  assert.match(formSource, /className="student-required-marker"/);
+  assert.match(formSource, /function renderRequiredLabel\(label, required = true\)/);
+  assert.match(formSource, /function isRequiredInfoTab\(tab\)/);
+  assert.match(formSource, /renderRequiredLabel\(tab, isRequiredInfoTab\(tab\)\)/);
+  assert.match(formSource, /<h2>\{renderRequiredLabel\(activeInfoTab, isRequiredInfoTab\(activeInfoTab\)\)\}<\/h2>/);
+  assert.match(formSource, /const renderPersonalRow = \(label, fieldContent, className = "", required = true\)/);
+  assert.match(formSource, /<th scope="row">\{renderRequiredLabel\(label, required\)\}<\/th>/);
+  assert.match(formSource, /renderPersonalRow\(\s*"Nama Penyelaras Program"[\s\S]*,\s*false,\s*\)/);
+  assert.match(cssSource, /\.student-required-marker \{[\s\S]*color: #dc2626;/);
+  assert.match(cssSource, /\.student-personal-table th \.student-required-marker \{[\s\S]*display: inline;/);
+});
+
 test("applicant rejected internship applications can apply again", () => {
   assert.match(routesSource, /internshipApplicationNew: "\/profile\/internship-application\?new=1"/);
   assert.match(infoSource, /reapplyAllowedApplicationStatuses = new Set\(\["rejected", "withdrawn"\]\)/);
