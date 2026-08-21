@@ -5884,6 +5884,8 @@ body:has(.applicant-profile-page) {
 
 .applicant-applications-table th:first-child,
 .applicant-applications-table td:first-child {
+  width: 18%;
+  min-width: 250px;
   text-align: center;
 }
 
@@ -5898,7 +5900,7 @@ body:has(.applicant-profile-page) {
 
 .applicant-new-badge {
   position: absolute;
-  left: 0;
+  left: 12px;
   top: 50%;
   display: inline-flex;
   align-items: center;
