@@ -713,3 +713,49 @@ class CandidateApplicationReferenceNoTests(TestCase):
         self.assertNotIn("HRM", notification.message)
         mock_send_email.assert_called_once_with(applicant, notification.title, notification.message)
         mock_send_whatsapp.assert_called_once_with(applicant.mobile_number, notification.message)
+
+    def test_hrm_review_stores_final_internship_decision(self):
+        applicant = self.create_applicant("final-decision@example.com")
+        staff = self.user_model.objects.create_user(
+            username="hrm-final@example.com",
+            email="hrm-final@example.com",
+            password="Password123!",
+            role="admin",
+            department="Bahagian Pengurusan Sumber Manusia (HRM)",
+        )
+        application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=self.vacancy,
+            status="shortlisted",
+            assigned_department="Bahagian Teknologi Maklumat (ICT)",
+            profile_data={
+                "department_decision": {
+                    "recommendation": "Tolak",
+                    "remarks": "Tidak memenuhi keperluan bahagian.",
+                    "submitted_at": "2026-08-21T09:00:00+08:00",
+                }
+            },
+        )
+        client = APIClient()
+        client.force_authenticate(user=staff)
+
+        response = client.post(
+            f"/api/applications/{application.id}/review/",
+            {
+                "status": "rejected",
+                "hrm_final_decision": {
+                    "decision": "Tolak",
+                    "department_recommendation": "Tolak",
+                    "remarks": "HRM menolak permohonan.",
+                    "submitted_by": "HRM",
+                },
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        application.refresh_from_db()
+        self.assertEqual(application.status, "rejected")
+        self.assertEqual(application.profile_data["department_decision"]["recommendation"], "Tolak")
+        self.assertEqual(application.profile_data["hrm_final_decision"]["decision"], "Tolak")
+        self.assertEqual(application.profile_data["hrm_final_decision"]["department_recommendation"], "Tolak")

@@ -105,6 +105,7 @@ const statusClass = {
 };
 const hrmReviewTab = "Semakan HRM";
 const departmentDecisionTab = "Keputusan Bahagian";
+const hrmFinalDecisionTab = "Keputusan Akhir HRM";
 const organizationFeedbackTab = "Maklumbalas Organisasi";
 const applicantConfirmationTab = "Pengesahan Pemohon";
 const applicantDetailTabs = ["Maklumat Peribadi Pemohon", "Maklumat Akademik", "Dokumen Sokongan"];
@@ -247,6 +248,14 @@ function hasSubmittedDepartmentDecision(application) {
   return Boolean(application?.profile_data?.department_decision?.submitted_at);
 }
 
+function getSavedHrmFinalDecision(application) {
+  return application?.profile_data?.hrm_final_decision || {};
+}
+
+function hasSubmittedHrmFinalDecision(application) {
+  return Boolean(getSavedHrmFinalDecision(application).submitted_at);
+}
+
 function hasOrganizationFeedbackBeenSent(application) {
   return Boolean(getOrganizationFeedbackRelease(application).sent_to_applicant_at);
 }
@@ -262,12 +271,15 @@ function isDepartmentPendingDecisionApplication(application) {
 function isHrmPendingDepartmentDecisionApplication(application) {
   return Boolean(
     hasSubmittedDepartmentDecision(application) &&
-      ["accepted", "rejected"].includes(application?.status) &&
-      !hasOrganizationFeedbackBeenSent(application),
+      !hasSubmittedHrmFinalDecision(application) &&
+      (application?.status || "submitted") === "shortlisted",
   );
 }
 
 function getHrmDepartmentDecisionStatus(application) {
+  const recommendation = getSavedDepartmentDecision(application).recommendation;
+  if (recommendation === "Terima") return "hrm_department_accepted";
+  if (recommendation === "Tolak") return "hrm_department_rejected";
   if (application?.status === "accepted") return "hrm_department_accepted";
   if (application?.status === "rejected") return "hrm_department_rejected";
   return application?.status || "submitted";
@@ -276,6 +288,7 @@ function getHrmDepartmentDecisionStatus(application) {
 function getInternshipApplicationDisplayStatus(application, isHrmWorkspace) {
   if (hasApplicantAgreedToOffer(application)) return getApplicantAgreedInternshipStatus(application);
   if (isHrmWorkspace && isHrmPendingDepartmentDecisionApplication(application)) return getHrmDepartmentDecisionStatus(application);
+  if (!isHrmWorkspace && hasSubmittedDepartmentDecision(application)) return getHrmDepartmentDecisionStatus(application);
   if (!isHrmWorkspace && isDepartmentPendingDecisionApplication(application)) return "department_new";
   return application?.status || "submitted";
 }
@@ -408,15 +421,30 @@ export default function AdminHrmPage() {
     const updatedApplication = await apiRequest(`/applications/${application.id}/`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        profile_data: profileData,
-        status: decision.recommendation === "Tolak" ? "rejected" : "accepted",
-      }),
+      body: JSON.stringify({ profile_data: profileData }),
     });
     setApplications((current) =>
       current.map((item) => (String(item.id) === String(updatedApplication.id) ? updatedApplication : item)),
     );
     setNotice("Keputusan bahagian telah dihantar kepada HRM.");
+    return updatedApplication;
+  };
+  const saveHrmFinalDecision = async (application, finalDecision) => {
+    if (!application) return null;
+
+    const nextStatus = finalDecision.decision === "Tolak" ? "rejected" : "accepted";
+    const updatedApplication = await apiRequest(`/applications/${application.id}/review/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        status: nextStatus,
+        hrm_final_decision: finalDecision,
+      }),
+    });
+    setApplications((current) =>
+      current.map((item) => (String(item.id) === String(updatedApplication.id) ? updatedApplication : item)),
+    );
+    setNotice(nextStatus === "accepted" ? "Keputusan akhir HRM telah menerima permohonan." : "Keputusan akhir HRM telah menolak permohonan.");
     return updatedApplication;
   };
   const saveOrganizationFeedbackDocument = async (application, files) => {
@@ -1208,6 +1236,8 @@ export default function AdminHrmPage() {
               }}
               onSaveAssessment={saveHrmAssessment}
               onDepartmentDecisionSubmitted={() => navigate(ADMIN_ROUTES.applications.internship)}
+              onFinalDecisionSubmitted={() => navigate(ADMIN_ROUTES.applications.internship)}
+              onSaveFinalDecision={saveHrmFinalDecision}
               onSaveDepartmentDecision={saveDepartmentDecision}
               onDeleteOrganizationFeedbackDocument={deleteOrganizationFeedbackDocument}
               onOrganizationFeedbackSent={() => navigate(ADMIN_ROUTES.applications.internship)}
@@ -2344,6 +2374,82 @@ function DepartmentDecisionTab({ application, isReadOnly = false, onSaveDecision
     </div>
   );
 }
+function buildHrmFinalDecisionPayload(application, user, decision) {
+  const savedFinalDecision = getSavedHrmFinalDecision(application);
+  const departmentDecision = getSavedDepartmentDecision(application);
+  return {
+    ...savedFinalDecision,
+    decision,
+    department_recommendation: departmentDecision.recommendation || "",
+    department_remarks: departmentDecision.remarks || "",
+    submitted_at: new Date().toISOString(),
+    submitted_by: user?.full_name || user?.name || user?.email || "",
+  };
+}
+function HrmFinalDecisionTab({ application, onSaveFinalDecision, onSubmitted, user }) {
+  const departmentDecision = getSavedDepartmentDecision(application);
+  const finalDecision = getSavedHrmFinalDecision(application);
+  const [message, setMessage] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const isFinalized = Boolean(finalDecision.submitted_at) || ["accepted", "rejected"].includes(application?.status);
+  const canSubmit = Boolean(application && onSaveFinalDecision && hasSubmittedDepartmentDecision(application) && !isFinalized);
+
+  const submitFinalDecision = async (decision) => {
+    if (!canSubmit) return;
+
+    setMessage("");
+    setIsSaving(true);
+    try {
+      await onSaveFinalDecision(application, buildHrmFinalDecisionPayload(application, user, decision));
+      onSubmitted?.();
+    } catch (error) {
+      setMessage(error.message || "Keputusan akhir HRM gagal dihantar.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="department-decision-panel">
+      <div className="department-decision-form" aria-label="Keputusan akhir HRM">
+        <label>
+          <span>Syor Bahagian</span>
+          <input readOnly value={departmentDecision.recommendation || "Belum diterima"} />
+        </label>
+        <label>
+          <span>Ulasan Bahagian</span>
+          <textarea readOnly rows={4} value={departmentDecision.remarks || ""} />
+        </label>
+        {finalDecision.submitted_at ? (
+          <p className="organization-feedback-sent-note">
+            Keputusan akhir HRM telah dihantar: {finalDecision.decision || statusLabel[application?.status] || application?.status}.
+          </p>
+        ) : null}
+        {message ? <p className="organization-feedback-message">{message}</p> : null}
+      </div>
+      {!isFinalized ? (
+        <footer className="hrm-application-detail-actions">
+          <button
+            className="hrm-primary"
+            disabled={!canSubmit || isSaving}
+            onClick={() => submitFinalDecision("Terima")}
+            type="button"
+          >
+            {isSaving ? "Menghantar..." : "Terima Permohonan"}
+          </button>
+          <button
+            className="hrm-danger"
+            disabled={!canSubmit || isSaving}
+            onClick={() => submitFinalDecision("Tolak")}
+            type="button"
+          >
+            Tolak Permohonan
+          </button>
+        </footer>
+      ) : null}
+    </div>
+  );
+}
 function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument, onSendToApplicant, onSubmitted }) {
   const [feedbackDocuments, setFeedbackDocuments] = useState(() => getOrganizationFeedbackDocuments(application));
   const [feedbackInternshipPeriod, setFeedbackInternshipPeriod] = useState(() => getOrganizationFeedbackPeriodValue(application));
@@ -2832,9 +2938,11 @@ function InternshipApplicationDetailPage({
   loading,
   onBack,
   onDepartmentDecisionSubmitted,
+  onFinalDecisionSubmitted,
   onReview,
   onSaveAssessment,
   onSaveDepartmentDecision,
+  onSaveFinalDecision,
   onDeleteOrganizationFeedbackDocument,
   onOrganizationFeedbackSent,
   onSaveOrganizationFeedbackDocument,
@@ -2843,10 +2951,17 @@ function InternshipApplicationDetailPage({
 }) {
   const [activeTab, setActiveTab] = useState("Maklumat Peribadi Pemohon");
   const shouldShowDepartmentDecision = !isHrmWorkspace || Boolean(application?.assigned_department);
+  const shouldShowHrmFinalDecision =
+    isHrmWorkspace &&
+    hasSubmittedDepartmentDecision(application) &&
+    !hasSubmittedHrmFinalDecision(application) &&
+    application?.status === "shortlisted";
+  const shouldShowOrganizationFeedback = isHrmWorkspace && application?.status === "accepted";
   const extraTabs = [
     ...(isHrmWorkspace ? [hrmReviewTab] : []),
     ...(shouldShowDepartmentDecision ? [departmentDecisionTab] : []),
-    ...(isHrmWorkspace ? [organizationFeedbackTab] : []),
+    ...(shouldShowHrmFinalDecision ? [hrmFinalDecisionTab] : []),
+    ...(shouldShowOrganizationFeedback ? [organizationFeedbackTab] : []),
     ...(hasApplicantAgreedToOffer(application) ? [applicantConfirmationTab] : []),
   ];
   const detailTabGroups = [
@@ -2883,6 +2998,14 @@ function InternshipApplicationDetailPage({
               key={application?.id || "department-decision"}
               onSaveDecision={onSaveDepartmentDecision}
               onSubmitted={onDepartmentDecisionSubmitted}
+              user={user}
+            />
+          ) : tab === hrmFinalDecisionTab ? (
+            <HrmFinalDecisionTab
+              application={application}
+              key={application?.id || "hrm-final-decision"}
+              onSaveFinalDecision={onSaveFinalDecision}
+              onSubmitted={onFinalDecisionSubmitted}
               user={user}
             />
           ) : tab === organizationFeedbackTab ? (

@@ -135,12 +135,17 @@ class CandidateApplicationViewSet(viewsets.ModelViewSet):
 
         next_status = request.data.get("status")
         assigned_department = request.data.get("assigned_department") if is_hrm_staff(request.user) else None
+        profile_data_updates = {}
+        hrm_final_decision = request.data.get("hrm_final_decision") if is_hrm_staff(request.user) else None
+        if isinstance(hrm_final_decision, dict):
+            profile_data_updates["hrm_final_decision"] = hrm_final_decision
         try:
             application = review_application(
                 application,
                 next_status=next_status,
                 remark=request.data.get("remark", application.latest_remark),
                 assigned_department=assigned_department,
+                profile_data_updates=profile_data_updates,
             )
         except InvalidApplicationStatus as error:
             return Response({"status": str(error)}, status=status.HTTP_400_BAD_REQUEST)

@@ -85,7 +85,7 @@ def withdraw_application(application, remark=""):
     return application
 
 
-def review_application(application, next_status, remark=None, assigned_department=None):
+def review_application(application, next_status, remark=None, assigned_department=None, profile_data_updates=None):
     valid_statuses = {key for key, _label in CandidateApplication.STATUS_CHOICES}
     if next_status not in valid_statuses:
         raise InvalidApplicationStatus("Status tidak sah.")
@@ -97,6 +97,11 @@ def review_application(application, next_status, remark=None, assigned_departmen
     if assigned_department is not None:
         application.assigned_department = assigned_department
         update_fields.append("assigned_department")
+    if profile_data_updates:
+        profile_data = dict(application.profile_data or {})
+        profile_data.update(profile_data_updates)
+        application.profile_data = profile_data
+        update_fields.append("profile_data")
     application.save(update_fields=update_fields)
     notification = build_application_review_notification(application, next_status)
     create_notification(

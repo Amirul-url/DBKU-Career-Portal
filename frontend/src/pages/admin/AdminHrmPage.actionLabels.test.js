@@ -38,7 +38,7 @@ test("department and HRM internship rows mark pending decision tasks as new", ()
   assert.match(source, /function isHrmPendingDepartmentDecisionApplication\(application\)/);
   assert.match(source, /function getHrmDepartmentDecisionStatus\(application\)/);
   assert.match(source, /return Boolean\(application\?\.assigned_department && !hasSubmittedDepartmentDecision\(application\)\)/);
-  assert.match(source, /!\s*hasOrganizationFeedbackBeenSent\(application\)/);
+  assert.match(source, /!\s*hasSubmittedHrmFinalDecision\(application\)/);
   assert.match(source, /const applications = metrics\?\.\[item\.vacancyType\]\?\.applications \|\| \[\]/);
   assert.match(source, /if \(!isHrmWorkspace\) \{\s*return applications\.filter\(isDepartmentPendingDecisionApplication\)\.length;\s*\}/);
   assert.match(source, /function getInternshipApplicationDisplayStatus\(application, isHrmWorkspace\)/);
@@ -117,7 +117,12 @@ test("HRM review can assign internship applications to a department dashboard", 
 test("department decision tab replaces HRM review for department workspaces", () => {
   assert.match(source, /const departmentDecisionTab = "Keputusan Bahagian"/);
   assert.match(source, /profile_data: profileData/);
-  assert.match(source, /status: decision\.recommendation === "Tolak" \? "rejected" : "accepted"/);
+  const saveDepartmentDecisionStart = source.indexOf("const saveDepartmentDecision = async");
+  const saveOrganizationFeedbackStart = source.indexOf("const saveHrmFinalDecision = async");
+  assert.ok(saveDepartmentDecisionStart >= 0);
+  assert.ok(saveOrganizationFeedbackStart > saveDepartmentDecisionStart);
+  const saveDepartmentDecisionSource = source.slice(saveDepartmentDecisionStart, saveOrganizationFeedbackStart);
+  assert.doesNotMatch(saveDepartmentDecisionSource, /status:/);
   assert.match(source, /department_decision: decision/);
   assert.match(source, /function DepartmentDecisionTab/);
   assert.match(source, /Syor Bahagian/);
@@ -133,6 +138,20 @@ test("department decision tab replaces HRM review for department workspaces", ()
   assert.match(source, /\.\.\.\(shouldShowDepartmentDecision \? \[departmentDecisionTab\] : \[\]\)/);
   assert.match(source, /isReadOnly=\{isHrmWorkspace\}/);
   assert.match(source, /maskAcceptedStatus=\{false\}/);
+});
+
+test("HRM makes the final internship decision after department recommendation", () => {
+  assert.match(source, /const hrmFinalDecisionTab = "Keputusan Akhir HRM"/);
+  assert.match(source, /function HrmFinalDecisionTab/);
+  assert.match(source, /const saveHrmFinalDecision = async/);
+  assert.match(source, /hrm_final_decision: finalDecision/);
+  assert.match(source, /status: nextStatus/);
+  assert.match(source, /finalDecision\.decision === "Tolak" \? "rejected" : "accepted"/);
+  assert.match(source, /onSaveFinalDecision=\{saveHrmFinalDecision\}/);
+  assert.match(source, /\.\.\.\(shouldShowHrmFinalDecision \? \[hrmFinalDecisionTab\] : \[\]\)/);
+  assert.match(source, /\.\.\.\(shouldShowOrganizationFeedback \? \[organizationFeedbackTab\] : \[\]\)/);
+  assert.match(source, /"Terima Permohonan"/);
+  assert.match(source, />\s*Tolak Permohonan\s*</);
 });
 
 test("HRM assessment saves do not change the application status before review action", () => {
@@ -181,7 +200,8 @@ test("HRM and department decision tabs keep draft selections in local state unti
 test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /const organizationFeedbackTab = "Maklumbalas Organisasi"/);
   assert.match(source, /const applicantDetailTabs = \["Maklumat Peribadi Pemohon", "Maklumat Akademik", "Dokumen Sokongan"\]/);
-  assert.match(source, /\.\.\.\(isHrmWorkspace \? \[organizationFeedbackTab\] : \[\]\)/);
+  assert.match(source, /const shouldShowOrganizationFeedback = isHrmWorkspace && application\?\.status === "accepted"/);
+  assert.match(source, /\.\.\.\(shouldShowOrganizationFeedback \? \[organizationFeedbackTab\] : \[\]\)/);
   assert.match(source, /const detailTabGroups = \[\s*\{ label: "Pemohon", tabs: applicantDetailTabs \},\s*\{ label: "Urusan Dalaman", tabs: extraTabs \},\s*\]/);
   assert.match(source, /tabGroups=\{detailTabGroups\}/);
   assert.match(source, /import \{ InternshipApplicationReadOnlyPanel \} from "\.\.\/applicant\/ApplicantApplicationViewPage"/);
