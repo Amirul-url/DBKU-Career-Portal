@@ -11039,6 +11039,45 @@ body:has(.applicant-profile-page) {
   white-space: nowrap;
 }
 
+.organization-feedback-report-note {
+  border: 1px solid #d6eee0;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.82);
+  padding: 16px 18px;
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.55;
+}
+
+.organization-feedback-report-note p {
+  margin: 0 0 14px;
+}
+
+.organization-feedback-report-details {
+  display: grid;
+  grid-template-columns: max-content 12px 1fr;
+  gap: 2px 14px;
+  margin: 0;
+}
+
+.organization-feedback-report-details dt,
+.organization-feedback-report-details dd {
+  margin: 0;
+}
+
+.organization-feedback-report-details dt {
+  font-weight: 800;
+}
+
+.organization-feedback-report-details dd {
+  font-weight: 600;
+}
+
+.organization-feedback-report-details dd span {
+  display: block;
+}
+
 .organization-feedback-table-wrap {
   overflow-x: auto;
 }

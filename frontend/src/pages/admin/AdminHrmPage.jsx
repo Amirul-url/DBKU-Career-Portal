@@ -2581,6 +2581,26 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
           </table>
         </div>
       </section>
+      <section className="organization-feedback-report-note" aria-label="Maklumat lapor diri">
+        <p>Sehubungan itu, pelajar tuan/puan adalah diminta untuk melapor diri pada tarikh, masa dan tempat seperti berikut:-</p>
+        <dl className="organization-feedback-report-details">
+          <dt>Tarikh</dt>
+          <dd>:</dd>
+          <dd>16 Mac 2026 (Isnin)</dd>
+          <dt>Masa</dt>
+          <dd>:</dd>
+          <dd>8.00 pagi</dd>
+          <dt>Tempat</dt>
+          <dd>:</dd>
+          <dd>
+            <span>Unit Pengurusan Latihan</span>
+            <span>Bahagian Pengurusan Sumber Manusia</span>
+            <span>Tingkat 3, Bangunan Dewan Bandaraya Kuching Utara</span>
+            <span>Bukit Siol, Jalan Semariang, Petra Jaya</span>
+            <span>93050 Kuching, SARAWAK</span>
+          </dd>
+        </dl>
+      </section>
       <footer className="organization-feedback-send-actions">
         {isSentToApplicant ? (
           <p className="organization-feedback-sent-note">
