@@ -62,6 +62,8 @@ test("applicant organization feedback notification shows red badges", () => {
   assert.match(listSource, /className="applicant-reference-col"/);
   assert.match(listSource, /className="applicant-reference-cell"/);
   assert.match(listSource, /className="applicant-new-badge">Baharu/);
+  assert.match(listSource, /aria-label=\{`Lihat permohonan \$\{formatReferenceNo\(application\)\}`\}/);
+  assert.match(listSource, /<Icon>visibility<\/Icon>\s*<\/Link>/);
   assert.match(profileSource, /export function ProfileSidebar\(\{ applicationBadgeCount = 0, isOpen, onToggle \}\)/);
   assert.match(profileSource, /item\.to === APPLICANT_ROUTES\.applications \? applicationBadgeCount : 0/);
   assert.match(profileSource, /className=\{`profile-nav-badge\$\{isOpen \? "" : " collapsed"\}`\}/);
@@ -71,6 +73,7 @@ test("applicant organization feedback notification shows red badges", () => {
   assert.match(cssSource, /\.applicant-profile-applications-table \.applicant-reference-col \{[\s\S]*width: 230px;/);
   assert.match(cssSource, /\.applicant-profile-applications-table th:first-child,\s*\.applicant-profile-applications-table td:first-child \{[\s\S]*width: 230px;[\s\S]*min-width: 0;[\s\S]*max-width: 230px;/);
   assert.match(cssSource, /\.applicant-reference-cell \{[\s\S]*display: inline-flex;[\s\S]*gap: 14px;[\s\S]*text-align: center;/);
+  assert.match(cssSource, /\.applicant-profile-applications-table \.app-view-action \{[\s\S]*width: 38px;[\s\S]*height: 38px;[\s\S]*background: #eff6ff;[\s\S]*color: #0b70c9;/);
 });
 
 test("applicant rejected internship applications can apply again", () => {

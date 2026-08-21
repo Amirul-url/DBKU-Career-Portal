@@ -253,9 +253,13 @@ function ApplicationList({ applications, loading }) {
                           {status === "incomplete" ? "Kemaskini" : "Teruskan"}
                         </Link>
                       ) : (
-                        <Link className="applicant-table-action app-view-action" to={APPLICANT_ROUTES.applicationView(application.id)}>
+                        <Link
+                          className="applicant-table-action app-view-action"
+                          to={APPLICANT_ROUTES.applicationView(application.id)}
+                          aria-label={`Lihat permohonan ${formatReferenceNo(application)}`}
+                          title="Lihat"
+                        >
                           <Icon>visibility</Icon>
-                          Lihat
                         </Link>
                       )}
                     </td>
