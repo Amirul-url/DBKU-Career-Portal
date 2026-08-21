@@ -64,9 +64,10 @@ test("applicant organization feedback notification shows red badges", () => {
   assert.match(profileSource, /item\.to === APPLICANT_ROUTES\.applications \? applicationBadgeCount : 0/);
   assert.match(profileSource, /className=\{`profile-nav-badge\$\{isOpen \? "" : " collapsed"\}`\}/);
   assert.match(profileSource, /aria-label=\{`\$\{badgeCount\} maklumbalas baharu`\}/);
-  assert.match(cssSource, /\.applicant-applications-table th:first-child,\s*\.applicant-applications-table td:first-child \{[\s\S]*min-width: 250px;[\s\S]*text-align: center;/);
-  assert.match(cssSource, /\.applicant-reference-cell \{[\s\S]*position: relative;[\s\S]*text-align: center;/);
-  assert.match(cssSource, /\.applicant-new-badge \{[\s\S]*position: absolute;[\s\S]*left: 12px;/);
+  assert.match(cssSource, /\.applicant-applications-table th:first-child,\s*\.applicant-applications-table td:first-child \{[\s\S]*min-width: 270px;[\s\S]*text-align: center;/);
+  assert.match(cssSource, /\.applicant-reference-cell \{[\s\S]*display: grid;[\s\S]*grid-template-columns: 76px minmax\(max-content, 1fr\) 76px;[\s\S]*text-align: center;/);
+  assert.match(cssSource, /\.applicant-reference-cell > span:last-child \{[\s\S]*grid-column: 2;[\s\S]*justify-self: center;/);
+  assert.match(cssSource, /\.applicant-new-badge \{[\s\S]*grid-column: 1;[\s\S]*justify-self: start;/);
 });
 
 test("applicant rejected internship applications can apply again", () => {

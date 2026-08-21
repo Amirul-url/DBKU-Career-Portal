@@ -5885,27 +5885,31 @@ body:has(.applicant-profile-page) {
 .applicant-applications-table th:first-child,
 .applicant-applications-table td:first-child {
   width: 18%;
-  min-width: 250px;
+  min-width: 270px;
   text-align: center;
 }
 
 .applicant-reference-cell {
-  position: relative;
-  display: block;
+  display: grid;
+  grid-template-columns: 76px minmax(max-content, 1fr) 76px;
+  align-items: center;
   width: 100%;
   min-height: 26px;
   text-align: center;
   white-space: nowrap;
 }
 
+.applicant-reference-cell > span:last-child {
+  grid-column: 2;
+  justify-self: center;
+}
+
 .applicant-new-badge {
-  position: absolute;
-  left: 12px;
-  top: 50%;
   display: inline-flex;
+  grid-column: 1;
   align-items: center;
   justify-content: center;
-  transform: translateY(-50%);
+  justify-self: start;
   border-radius: 999px;
   background: #ffeded;
   padding: 5px 10px;
