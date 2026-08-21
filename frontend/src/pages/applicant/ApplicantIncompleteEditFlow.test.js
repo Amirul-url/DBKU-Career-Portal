@@ -33,10 +33,11 @@ test("applicant rejected applications use Ditolak status label", () => {
   assert.doesNotMatch(viewSource, /Tidak berjaya/);
 });
 
-test("applicant rejected internship applications show HRM final decision reason", () => {
-  assert.match(viewSource, /const hrmDecisionTab = "Keputusan HRM"/);
+test("applicant rejected internship applications show application decision reason", () => {
+  assert.match(viewSource, /const hrmDecisionTab = "Keputusan Permohonan"/);
   assert.match(viewSource, /function hasHrmFinalRejectionDecision\(application\)/);
   assert.match(viewSource, /function ApplicantHrmDecisionTab\(\{ application \}\)/);
+  assert.match(viewSource, /aria-label="Alasan keputusan permohonan"/);
   assert.match(viewSource, /saudara\/i untuk menjalani latihan industri di Dewan Bandaraya Kuching Utara \(DBKU\) telah diterima dan diteliti/);
   assert.match(viewSource, /\.\.\.\(hasHrmFinalRejectionDecision\(application\) \? \[hrmDecisionTab\] : \[\]\)/);
   assert.match(viewSource, /tab === hrmDecisionTab \? \(\s*<ApplicantHrmDecisionTab application=\{application\} \/>/);

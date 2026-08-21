@@ -15,7 +15,7 @@ const personalInfoTab = "Maklumat Peribadi Pemohon";
 const infoTabs = [personalInfoTab, "Maklumat Akademik", "Dokumen Sokongan"];
 const organizationFeedbackTab = "Maklumbalas Organisasi";
 const applicantConfirmationTab = "Pengesahan Pemohon";
-const hrmDecisionTab = "Keputusan HRM";
+const hrmDecisionTab = "Keputusan Permohonan";
 const hrmFinalRejectionMessage = `Sukacita dimaklumkan bahawa permohonan saudara/i untuk menjalani latihan industri di Dewan Bandaraya Kuching Utara (DBKU) telah diterima dan diteliti oleh pihak kami.
 
 Walau bagaimanapun, setelah mengambil kira keperluan semasa serta kapasiti penempatan pelatih, dukacita dimaklumkan bahawa pihak DBKU tidak dapat mempertimbangkan permohonan tersebut buat masa ini.
@@ -852,7 +852,7 @@ function ApplicantHrmDecisionTab({ application }) {
 
   return (
     <div className="applicant-confirmation-panel applicant-hrm-decision-panel">
-      <section className="applicant-confirmation-statement" aria-label="Alasan keputusan HRM">
+      <section className="applicant-confirmation-statement" aria-label="Alasan keputusan permohonan">
         {decisionMessage.split("\n\n").map((paragraph) => (
           <p key={paragraph}>{paragraph}</p>
         ))}
