@@ -105,6 +105,9 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
         organization_feedback_documents = self.serialize_organization_feedback_documents(obj)
         if organization_feedback_documents and self.can_view_organization_feedback_documents(obj):
             documents["organizationFeedbackDocuments"] = organization_feedback_documents
+        applicant_confirmation_documents = self.serialize_applicant_confirmation_documents(obj)
+        if applicant_confirmation_documents:
+            documents["applicantConfirmationDocuments"] = applicant_confirmation_documents
         return documents
 
     def can_view_organization_feedback_documents(self, obj):
@@ -175,6 +178,29 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
 
         return documents
 
+    def serialize_applicant_confirmation_documents(self, obj):
+        profile_data = dict(obj.profile_data or {})
+        stored_documents = profile_data.get("applicant_confirmation_documents") or []
+        documents = []
+
+        for index, document in enumerate(stored_documents, start=1):
+            if not isinstance(document, dict):
+                continue
+            file_path = document.get("path")
+            if not file_path:
+                continue
+            size = document.get("size") or 0
+            documents.append({
+                "id": document.get("id") or str(index),
+                "name": document.get("name") or os.path.basename(file_path),
+                "url": self.build_absolute_file_url(file_path),
+                "size": size,
+                "size_label": self.format_file_size(size),
+                "uploaded_at": document.get("uploaded_at") or "",
+            })
+
+        return documents
+
     def validate_profile_data(self, value):
         if isinstance(value, str):
             try:
@@ -184,14 +210,17 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
         return value
 
     def validate_organizationFeedbackDocument(self, value):
-        return self.validate_organization_feedback_pdf(value)
+        return self.validate_pdf_document(value)
 
     def validate_organizationFeedbackDocuments(self, value):
         for uploaded_file in value:
-            self.validate_organization_feedback_pdf(uploaded_file)
+            self.validate_pdf_document(uploaded_file)
         return value
 
     def validate_organization_feedback_pdf(self, value):
+        return self.validate_pdf_document(value)
+
+    def validate_pdf_document(self, value):
         is_pdf_content = getattr(value, "content_type", "") == "application/pdf"
         is_pdf_name = value.name.lower().endswith(".pdf")
         if not (is_pdf_content or is_pdf_name):
@@ -241,6 +270,14 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
                     self.validate_organization_feedback_pdf(uploaded_file)
                     uploads.append(uploaded_file)
 
+        return uploads
+
+    def get_applicant_confirmation_document_uploads(self, request):
+        uploads = []
+        for field_name in ("applicantConfirmationDocuments", "applicantConfirmationDocuments[]"):
+            uploads.extend(request.FILES.getlist(field_name))
+        for uploaded_file in uploads:
+            self.validate_pdf_document(uploaded_file)
         return uploads
 
     def apply_document_uploads(self, instance, uploads):
@@ -295,6 +332,49 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
             "uploaded_at": latest_document.get("uploaded_at", ""),
         }
         instance.profile_data = profile_data
+        return instance
+
+    def save_applicant_confirmation_documents(self, instance, uploads, submitted_by=""):
+        if not uploads:
+            return instance
+
+        profile_data = dict(instance.profile_data or {})
+        documents = [
+            document
+            for document in profile_data.get("applicant_confirmation_documents", [])
+            if isinstance(document, dict)
+        ]
+
+        for uploaded_file in uploads:
+            safe_name = get_valid_filename(uploaded_file.name or "pengesahan-pemohon.pdf")
+            _, extension = os.path.splitext(safe_name)
+            extension = extension or ".pdf"
+            document_id = uuid4().hex
+            saved_path = default_storage.save(
+                f"applicant_confirmation_documents/{document_id}{extension}",
+                uploaded_file,
+            )
+            documents.append({
+                "id": document_id,
+                "name": uploaded_file.name,
+                "path": saved_path,
+                "size": getattr(uploaded_file, "size", 0) or 0,
+                "uploaded_at": timezone.now().isoformat(),
+            })
+
+        submitted_at = timezone.now().isoformat()
+        profile_data["applicant_confirmation_documents"] = documents
+        profile_data["applicant_confirmation"] = {
+            **(profile_data.get("applicant_confirmation") or {}),
+            "status": "agreed",
+            "submitted_at": submitted_at,
+            "submitted_by": submitted_by,
+            "statement":
+                "Dengan ini, saya mengesahkan penerimaan tawaran menjalani latihan industri di "
+                "Dewan Bandaraya Kuching Utara (DBKU) seperti yang dinyatakan.",
+        }
+        instance.profile_data = profile_data
+        instance.save(update_fields=["profile_data", "updated_at"])
         return instance
 
     def delete_organization_feedback_document_by_id(self, instance, document_id):

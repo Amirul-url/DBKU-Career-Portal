@@ -319,6 +319,43 @@ class CandidateApplicationReferenceNoTests(TestCase):
             "16 Mac 2026 - 29 Ogos 2026",
         )
 
+    def test_applicant_can_confirm_released_internship_offer_with_document(self):
+        applicant = self.create_applicant("confirm-offer-target@example.com")
+        application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=self.vacancy,
+            status="accepted",
+            profile_data={
+                "organization_feedback_release": {
+                    "internship_period": "16 Mac 2026 - 29 Ogos 2026",
+                    "sent_to_applicant_at": "2026-08-20T08:00:00+08:00",
+                },
+            },
+        )
+        uploaded_file = SimpleUploadedFile(
+            "pengesahan-pemohon.pdf",
+            b"%PDF-1.4\n% applicant confirmation\n",
+            content_type="application/pdf",
+        )
+        client = APIClient()
+        client.force_authenticate(user=applicant)
+
+        response = client.post(
+            f"/api/applications/{application.id}/confirm-offer/",
+            {"applicantConfirmationDocuments": [uploaded_file]},
+            format="multipart",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["status"], "accepted")
+        confirmation = response.data["profile_data"]["applicant_confirmation"]
+        self.assertEqual(confirmation["status"], "agreed")
+        self.assertIn("submitted_at", confirmation)
+        documents = response.data["document_files"]["applicantConfirmationDocuments"]
+        self.assertEqual(len(documents), 1)
+        self.assertEqual(documents[0]["name"], "pengesahan-pemohon.pdf")
+        self.assertIn("/media/applicant_confirmation_documents/", documents[0]["url"])
+
     def test_staff_application_list_excludes_drafts(self):
         applicant = self.create_applicant("hidden-draft@example.com")
         staff = self.user_model.objects.create_user(

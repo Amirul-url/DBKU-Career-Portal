@@ -50,7 +50,7 @@ test("applicant accepted applications stay hidden behind review status until HRM
   assert.match(viewSource, /student-info-tabs-grouped/);
   assert.match(viewSource, /panelTabs\.map\(renderTabButton\)/);
   assert.match(viewSource, /function hasOrganizationFeedbackBeenSent\(application\)/);
-  assert.match(viewSource, /extraTabs=\{organizationFeedbackSent \? \[organizationFeedbackTab\] : \[\]\}/);
+  assert.match(viewSource, /extraTabs=\{organizationFeedbackSent \? \[organizationFeedbackTab, applicantConfirmationTab\] : \[\]\}/);
   assert.match(viewSource, /maskAcceptedStatus=\{!organizationFeedbackSent\}/);
   assert.match(viewSource, /function ApplicantOrganizationFeedbackTab/);
   assert.match(viewSource, /function getApplicantFeedbackPlacementDepartment\(application\)/);
@@ -120,6 +120,25 @@ test("applicant organization feedback notification shows red badges", () => {
   assert.match(cssSource, /\.applicant-reference-number \{[\s\S]*display: inline-block;[\s\S]*padding-inline: 4px;/);
   assert.match(cssSource, /\.applicant-new-badge \{[\s\S]*position: absolute;[\s\S]*left: -10px;[\s\S]*transform: translateY\(-50%\);[\s\S]*padding: 4px 8px;[\s\S]*font-size: 10px;/);
   assert.match(cssSource, /\.applicant-profile-applications-table \.app-view-action \{[\s\S]*width: 38px;[\s\S]*height: 38px;[\s\S]*background: #eff6ff;[\s\S]*color: #0b70c9;/);
+});
+
+test("applicant can submit acceptance confirmation after organization feedback", () => {
+  assert.match(viewSource, /const applicantConfirmationTab = "Pengesahan Pemohon"/);
+  assert.match(viewSource, /function hasApplicantAgreedToOffer\(application\)/);
+  assert.match(viewSource, /return "Setuju"/);
+  assert.match(viewSource, /extraTabs=\{organizationFeedbackSent \? \[organizationFeedbackTab, applicantConfirmationTab\] : \[\]\}/);
+  assert.match(viewSource, /function ApplicantConfirmationTab/);
+  assert.match(viewSource, /Muat Naik Dokumen/);
+  assert.match(viewSource, /applicantConfirmationDocuments/);
+  assert.match(viewSource, /Dengan ini, saya mengesahkan penerimaan tawaran menjalani latihan industri di Dewan Bandaraya Kuching Utara \(DBKU\)/);
+  assert.match(viewSource, /Sekian, terima kasih atas perhatian dan kerjasama pihak puan\./);
+  assert.match(viewSource, /function ApplicantConfirmationSendConfirmModal/);
+  assert.match(viewSource, /Anda yakin mahu menghantar pengesahan penerimaan tawaran ini\?/);
+  assert.match(viewSource, /\/confirm-offer\//);
+  assert.match(viewSource, />\s*Seterusnya\s*</);
+  assert.match(viewSource, />\s*Hantar\s*</);
+  assert.match(cssSource, /\.applicant-confirmation-panel/);
+  assert.match(cssSource, /\.applicant-confirmation-statement/);
 });
 
 test("applicant rejected internship applications can apply again", () => {

@@ -10,6 +10,7 @@ import { ApplicantAddressMap, ProfileContentHeader, ProfileSidebar } from "./App
 const personalInfoTab = "Maklumat Peribadi Pemohon";
 const infoTabs = [personalInfoTab, "Maklumat Akademik", "Dokumen Sokongan"];
 const organizationFeedbackTab = "Maklumbalas Organisasi";
+const applicantConfirmationTab = "Pengesahan Pemohon";
 const organizationFeedbackReportDefaults = {
   date: "",
   time: "8.00 pagi",
@@ -33,7 +34,12 @@ function getApplicantVisibleStatus(status, maskAcceptedStatus = true) {
   return maskAcceptedStatus && status === "accepted" ? "screening" : status;
 }
 
-function getReadOnlyStatusLabel(status, maskAcceptedStatus) {
+function hasApplicantAgreedToOffer(application) {
+  return application?.profile_data?.applicant_confirmation?.status === "agreed";
+}
+
+function getReadOnlyStatusLabel(status, maskAcceptedStatus, application = null) {
+  if (hasApplicantAgreedToOffer(application)) return "Setuju";
   if (!maskAcceptedStatus && status === "accepted") return "Diterima";
   return statusLabels[status] || status;
 }
@@ -329,6 +335,16 @@ function getOrganizationFeedbackDocuments(application) {
   }];
 }
 
+function getApplicantConfirmationDocuments(application) {
+  const documents = application?.document_files?.applicantConfirmationDocuments;
+  if (!Array.isArray(documents)) return [];
+  return documents.map((document, index) => ({
+    id: document.id || String(index + 1),
+    name: document.name || "Dokumen pengesahan pemohon",
+    url: resolveMediaUrl(document.url || ""),
+  }));
+}
+
 function getInternshipStudentInfo(application) {
   return application?.profile_data?.student_info || {};
 }
@@ -362,7 +378,7 @@ function getApplicantFeedbackPlacementDepartment(application) {
   return String(department).replace(/\s*\([^)]+\)\s*$/, "");
 }
 
-function ApplicantOrganizationFeedbackTab({ application }) {
+function ApplicantOrganizationFeedbackTab({ application, onNext }) {
   const release = getOrganizationFeedbackRelease(application);
   const documents = getOrganizationFeedbackDocuments(application);
   const internshipPeriod = release.internship_period || "Belum ditetapkan";
@@ -501,6 +517,214 @@ function ApplicantOrganizationFeedbackTab({ application }) {
           </tbody>
         </table>
       </div>
+      <footer className="organization-feedback-send-actions applicant-organization-next-actions">
+        <button className="hrm-primary organization-feedback-send" type="button" onClick={onNext}>
+          Seterusnya
+        </button>
+      </footer>
+    </div>
+  );
+}
+
+function ApplicantConfirmationSendConfirmModal({ isSaving, onCancel, onConfirm }) {
+  return (
+    <div className="profile-confirm-overlay" role="presentation">
+      <section className="profile-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="applicant-confirmation-send-title">
+        <h2 id="applicant-confirmation-send-title">Hantar pengesahan?</h2>
+        <p>Anda yakin mahu menghantar pengesahan penerimaan tawaran ini?</p>
+        <div>
+          <button className="profile-confirm-secondary" disabled={isSaving} onClick={onCancel} type="button">
+            Tidak
+          </button>
+          <button className="profile-confirm-primary" disabled={isSaving} onClick={onConfirm} type="button">
+            {isSaving ? "Menghantar..." : "Ya"}
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function ApplicantConfirmationTab({ application, onConfirmed }) {
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [savedDocuments, setSavedDocuments] = useState(() => getApplicantConfirmationDocuments(application));
+  const [fileInputKey, setFileInputKey] = useState(0);
+  const [message, setMessage] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const isAgreed = hasApplicantAgreedToOffer(application);
+  const documents = isAgreed
+    ? savedDocuments
+    : selectedFiles.map((file, index) => ({ id: `${file.name}-${index}`, name: file.name, url: "" }));
+  const isPdfFile = (file) => file?.type === "application/pdf" || file?.name?.toLowerCase().endsWith(".pdf");
+
+  const selectConfirmationFiles = (event) => {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) return;
+    if (files.some((file) => !isPdfFile(file))) {
+      setFileInputKey((current) => current + 1);
+      setSelectedFiles([]);
+      setMessage("Format fail mesti PDF sahaja.");
+      return;
+    }
+    setMessage("");
+    setSelectedFiles(files);
+  };
+
+  const requestSubmitConfirmation = () => {
+    if (isAgreed) return;
+    if (!selectedFiles.length) {
+      setMessage("Sila muat naik sekurang-kurangnya satu dokumen pengesahan sebelum hantar.");
+      return;
+    }
+    setMessage("");
+    setShowConfirmModal(true);
+  };
+
+  const submitConfirmation = async () => {
+    const payload = new FormData();
+    selectedFiles.forEach((file) => {
+      payload.append("applicantConfirmationDocuments", file);
+    });
+
+    setIsSaving(true);
+    setMessage("");
+    try {
+      const updatedApplication = await apiRequest(`/applications/${application.id}/confirm-offer/`, {
+        method: "POST",
+        body: payload,
+      });
+      setSavedDocuments(getApplicantConfirmationDocuments(updatedApplication));
+      setSelectedFiles([]);
+      setFileInputKey((current) => current + 1);
+      setShowConfirmModal(false);
+      setMessage("Pengesahan penerimaan tawaran telah dihantar.");
+      onConfirmed?.(updatedApplication);
+    } catch (error) {
+      setMessage(error.message || "Pengesahan penerimaan tawaran gagal dihantar.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const openConfirmationDocument = (document) => {
+    if (!document?.url) return;
+    openDocumentFile(document);
+  };
+
+  return (
+    <div className="applicant-confirmation-panel">
+      <section className="organization-feedback-section" aria-label="Dokumen pengesahan pemohon">
+        <div className="organization-feedback-section-header">
+          <div className="organization-feedback-section-title">
+            <h3>Dokumen pengesahan pemohon</h3>
+            <p>Muat naik dokumen pengesahan penerimaan tawaran dalam format PDF.</p>
+          </div>
+          <div className="organization-feedback-section-actions">
+            <label className="organization-feedback-add">
+              <Icon>upload_file</Icon>
+              <span>Muat Naik Dokumen</span>
+              <input
+                key={fileInputKey}
+                accept="application/pdf,.pdf"
+                className="organization-feedback-hidden-input"
+                disabled={isAgreed || isSaving}
+                multiple
+                name="applicantConfirmationDocuments"
+                onChange={selectConfirmationFiles}
+                type="file"
+              />
+            </label>
+          </div>
+        </div>
+        {message ? <p className="organization-feedback-message">{message}</p> : null}
+        <div className="organization-feedback-table-wrap">
+          <table className="organization-feedback-document-table applicant-confirmation-document-table">
+            <colgroup>
+              <col className="organization-feedback-col-index" />
+              <col className="organization-feedback-col-format" />
+              <col />
+              <col className="organization-feedback-col-actions applicant-organization-document-actions-col" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Format</th>
+                <th>Lampiran</th>
+                <th>Tindakan</th>
+              </tr>
+            </thead>
+            <tbody>
+              {documents.length ? (
+                documents.map((document, index) => (
+                  <tr key={document.id || `${document.name}-${index}`}>
+                    <td>{index + 1}</td>
+                    <td>PDF</td>
+                    <td>
+                      {document.url ? (
+                        <a className="organization-feedback-attachment-link" href={document.url} target="_blank" rel="noreferrer">
+                          <Icon>description</Icon>
+                          <span>{document.name}</span>
+                        </a>
+                      ) : (
+                        <span className="organization-feedback-attachment-link applicant-confirmation-local-file">
+                          <Icon>description</Icon>
+                          <span>{document.name}</span>
+                        </span>
+                      )}
+                    </td>
+                    <td>
+                      <div className="organization-feedback-row-actions applicant-organization-document-actions">
+                        <button
+                          aria-label={`Lihat ${document.name}`}
+                          className="organization-feedback-icon-button organization-feedback-icon-button-view"
+                          disabled={!document.url}
+                          onClick={() => openConfirmationDocument(document)}
+                          title="Lihat fail"
+                          type="button"
+                        >
+                          <Icon>visibility</Icon>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr className="organization-feedback-empty-row">
+                  <td colSpan={4}>--Tiada rekod--</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="applicant-confirmation-statement" aria-label="Pengesahan penerimaan tawaran">
+        <p>
+          Dengan ini, saya mengesahkan penerimaan tawaran menjalani latihan industri di Dewan Bandaraya Kuching Utara (DBKU) seperti yang dinyatakan.
+        </p>
+        <p>Sekian, terima kasih atas perhatian dan kerjasama pihak puan.</p>
+      </section>
+
+      <footer className="organization-feedback-send-actions">
+        {isAgreed ? <p className="organization-feedback-sent-note">Pengesahan penerimaan tawaran telah dihantar.</p> : null}
+        <button
+          className="hrm-primary organization-feedback-send"
+          disabled={isAgreed || isSaving}
+          onClick={requestSubmitConfirmation}
+          type="button"
+        >
+          {isSaving ? "Menghantar..." : isAgreed ? "Telah dihantar" : <span>Hantar</span>}
+        </button>
+      </footer>
+
+      {showConfirmModal ? (
+        <ApplicantConfirmationSendConfirmModal
+          isSaving={isSaving}
+          onCancel={() => setShowConfirmModal(false)}
+          onConfirm={submitConfirmation}
+        />
+      ) : null}
     </div>
   );
 }
@@ -567,7 +791,7 @@ export function InternshipApplicationReadOnlyPanel({
   };
   const vacancy = application?.vacancy_detail || {};
   const status = application?.status || "draft";
-  const visibleStatus = getApplicantVisibleStatus(status, maskAcceptedStatus);
+  const visibleStatus = hasApplicantAgreedToOffer(application) ? "accepted" : getApplicantVisibleStatus(status, maskAcceptedStatus);
   const panelTabs = [...infoTabs, ...extraTabs];
   const groupedTabs = tabGroups
     .map((group) => ({
@@ -666,7 +890,7 @@ export function InternshipApplicationReadOnlyPanel({
                 <div>
                   <span>Status</span>
                   <strong className={`applicant-status-pill ${visibleStatus}`}>
-                    {getReadOnlyStatusLabel(status, maskAcceptedStatus)}
+                    {getReadOnlyStatusLabel(status, maskAcceptedStatus, application)}
                   </strong>
                 </div>
               </section>
@@ -783,13 +1007,17 @@ export default function ApplicantApplicationViewPage() {
             activeInfoTab={activeInfoTab}
             application={application}
             error={error}
-            extraTabs={organizationFeedbackSent ? [organizationFeedbackTab] : []}
+            extraTabs={organizationFeedbackSent ? [organizationFeedbackTab, applicantConfirmationTab] : []}
             loading={loading}
             maskAcceptedStatus={!organizationFeedbackSent}
             onBack={exitApplicationView}
             onTabChange={setActiveInfoTab}
             renderExtraTabContent={(tab) =>
-              tab === organizationFeedbackTab ? <ApplicantOrganizationFeedbackTab application={application} /> : null
+              tab === organizationFeedbackTab ? (
+                <ApplicantOrganizationFeedbackTab application={application} onNext={() => setActiveInfoTab(applicantConfirmationTab)} />
+              ) : tab === applicantConfirmationTab ? (
+                <ApplicantConfirmationTab application={application} onConfirmed={setApplication} />
+              ) : null
             }
           />
         </main>

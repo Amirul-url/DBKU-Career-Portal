@@ -1,5 +1,6 @@
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from .models import CandidateApplication
@@ -87,6 +88,43 @@ class CandidateApplicationViewSet(viewsets.ModelViewSet):
         if application.applicant_id != request.user.id:
             return Response({"detail": "Hanya pemohon boleh menarik balik permohonan ini."}, status=403)
         application = withdraw_application(application, remark=request.data.get("remark", ""))
+        return Response(self.get_serializer(application).data)
+
+    @action(detail=True, methods=["post"], url_path="confirm-offer")
+    def confirm_offer(self, request, pk=None):
+        application = self.get_object()
+        if application.applicant_id != request.user.id:
+            return Response({"detail": "Hanya pemohon boleh membuat pengesahan tawaran ini."}, status=403)
+        if application.status != "accepted":
+            return Response(
+                {"detail": "Pengesahan hanya boleh dihantar selepas tawaran diterima."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        profile_data = dict(application.profile_data or {})
+        feedback_release = profile_data.get("organization_feedback_release") or {}
+        if not feedback_release.get("sent_to_applicant_at"):
+            return Response(
+                {"detail": "Maklumbalas organisasi belum dihantar kepada pemohon."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        serializer = self.get_serializer(application)
+        try:
+            uploads = serializer.get_applicant_confirmation_document_uploads(request)
+        except ValidationError as error:
+            return Response({"applicantConfirmationDocuments": error.detail}, status=status.HTTP_400_BAD_REQUEST)
+        if not uploads:
+            return Response(
+                {"applicantConfirmationDocuments": ["Sila muat naik sekurang-kurangnya satu dokumen pengesahan."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        application = serializer.save_applicant_confirmation_documents(
+            application,
+            uploads,
+            submitted_by=request.user.get_full_name() or request.user.email,
+        )
         return Response(self.get_serializer(application).data)
 
     @action(detail=True, methods=["post"])

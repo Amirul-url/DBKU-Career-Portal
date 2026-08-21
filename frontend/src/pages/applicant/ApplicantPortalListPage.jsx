@@ -97,11 +97,17 @@ function hasNewOrganizationFeedbackForApplicant(application) {
   return (application?.status || "") === "accepted" && hasOrganizationFeedbackBeenSent(application);
 }
 
+function hasApplicantAgreedToOffer(application) {
+  return application?.profile_data?.applicant_confirmation?.status === "agreed";
+}
+
 function getApplicantVisibleStatus(status, application = null) {
+  if (hasApplicantAgreedToOffer(application)) return "accepted";
   return status === "accepted" && !hasOrganizationFeedbackBeenSent(application) ? "screening" : status;
 }
 
 function getApplicantStatusLabel(status, application = null) {
+  if (hasApplicantAgreedToOffer(application)) return "Setuju";
   if (status === "accepted" && hasOrganizationFeedbackBeenSent(application)) return "Diterima";
   return statusLabels[getApplicantVisibleStatus(status, application)] || status;
 }

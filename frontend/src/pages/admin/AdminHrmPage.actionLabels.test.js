@@ -299,3 +299,16 @@ test("HRM detail includes an organization feedback document tab", () => {
   );
   assert.doesNotMatch(source, /<Icon>send<\/Icon>/);
 });
+
+test("HRM can see applicant offer confirmation after applicant agrees", () => {
+  assert.match(source, /applicant_agreed: "Pemohon Bersetuju"/);
+  assert.match(source, /function hasApplicantAgreedToOffer\(application\)/);
+  assert.match(source, /function getApplicantConfirmationDocuments\(application\)/);
+  assert.match(source, /return "applicant_agreed"/);
+  assert.match(source, /const applicantConfirmationTab = "Pengesahan Pemohon"/);
+  assert.match(source, /\.\.\.\(hasApplicantAgreedToOffer\(application\) \? \[applicantConfirmationTab\] : \[\]\)/);
+  assert.match(source, /function ApplicantConfirmationReadOnlyTab/);
+  assert.match(source, /Dokumen pengesahan pemohon/);
+  assert.match(source, /Dengan ini, saya mengesahkan penerimaan tawaran menjalani latihan industri di Dewan Bandaraya Kuching Utara \(DBKU\)/);
+  assert.match(source, /applicantConfirmationDocuments/);
+});

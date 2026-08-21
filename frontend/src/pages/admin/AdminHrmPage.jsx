@@ -65,6 +65,7 @@ const statusLabel = {
   hrm_department_new: "Baharu",
   hrm_department_accepted: "Diterima Bahagian",
   hrm_department_rejected: "Ditolak Bahagian",
+  applicant_agreed: "Pemohon Bersetuju",
   submitted: "Baharu",
   screening: "Saringan",
   incomplete: "Tidak Lengkap",
@@ -81,6 +82,7 @@ const statusClass = {
   hrm_department_new: "red",
   hrm_department_accepted: "green",
   hrm_department_rejected: "red",
+  applicant_agreed: "green",
   submitted: "blue",
   screening: "amber",
   incomplete: "amber",
@@ -95,6 +97,7 @@ const statusClass = {
 const hrmReviewTab = "Semakan HRM";
 const departmentDecisionTab = "Keputusan Bahagian";
 const organizationFeedbackTab = "Maklumbalas Organisasi";
+const applicantConfirmationTab = "Pengesahan Pemohon";
 const applicantDetailTabs = ["Maklumat Peribadi Pemohon", "Maklumat Akademik", "Dokumen Sokongan"];
 const organizationFeedbackReportDefaults = {
   date: "",
@@ -239,6 +242,10 @@ function hasOrganizationFeedbackBeenSent(application) {
   return Boolean(getOrganizationFeedbackRelease(application).sent_to_applicant_at);
 }
 
+function hasApplicantAgreedToOffer(application) {
+  return application?.profile_data?.applicant_confirmation?.status === "agreed";
+}
+
 function isDepartmentPendingDecisionApplication(application) {
   return Boolean(application?.assigned_department && !hasSubmittedDepartmentDecision(application));
 }
@@ -258,6 +265,7 @@ function getHrmDepartmentDecisionStatus(application) {
 }
 
 function getInternshipApplicationDisplayStatus(application, isHrmWorkspace) {
+  if (hasApplicantAgreedToOffer(application)) return "applicant_agreed";
   if (isHrmWorkspace && isHrmPendingDepartmentDecisionApplication(application)) return getHrmDepartmentDecisionStatus(application);
   if (!isHrmWorkspace && isDepartmentPendingDecisionApplication(application)) return "department_new";
   return application?.status || "submitted";
@@ -1703,6 +1711,18 @@ function getOrganizationFeedbackDocuments(application) {
     uploadedAt: legacyDocument.uploaded_at || legacyDocument.uploadedAt || "",
   }];
 }
+function getApplicantConfirmationDocuments(application) {
+  const documents = application?.document_files?.applicantConfirmationDocuments;
+  if (!Array.isArray(documents)) return [];
+  return documents.map((document, index) => ({
+    id: document.id || String(index + 1),
+    name: document.name || "Dokumen pengesahan pemohon",
+    url: document.url || "",
+    size: document.size || 0,
+    sizeLabel: document.size_label || document.sizeLabel || formatOrganizationFeedbackFileSize(document.size),
+    uploadedAt: document.uploaded_at || document.uploadedAt || "",
+  }));
+}
 function getOrganizationFeedbackRelease(application) {
   const release = application?.profile_data?.organization_feedback_release;
   return release && typeof release === "object" ? release : {};
@@ -2704,6 +2724,99 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
     </div>
   );
 }
+function ApplicantConfirmationReadOnlyTab({ application }) {
+  const documents = getApplicantConfirmationDocuments(application);
+  const confirmation = application?.profile_data?.applicant_confirmation || {};
+  const openConfirmationDocument = (document) => {
+    if (!document?.url) return;
+    window.open(document.url, "_blank", "noreferrer");
+  };
+
+  return (
+    <div className="applicant-confirmation-panel hrm-applicant-confirmation-panel">
+      <section className="organization-feedback-section" aria-label="Dokumen pengesahan pemohon">
+        <div className="organization-feedback-section-header">
+          <div className="organization-feedback-section-title">
+            <h3>Dokumen pengesahan pemohon</h3>
+            <p>
+              {confirmation.submitted_at
+                ? `Dihantar oleh pemohon pada ${dateValue(confirmation.submitted_at)}.`
+                : "Dokumen pengesahan pemohon akan dipaparkan selepas dihantar."}
+            </p>
+          </div>
+        </div>
+        <div className="organization-feedback-table-wrap">
+          <table className="organization-feedback-document-table applicant-confirmation-document-table">
+            <colgroup>
+              <col className="organization-feedback-col-index" />
+              <col className="organization-feedback-col-format" />
+              <col />
+              <col className="organization-feedback-col-actions applicant-organization-document-actions-col" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Format</th>
+                <th>Lampiran</th>
+                <th>Tindakan</th>
+              </tr>
+            </thead>
+            <tbody>
+              {documents.length ? (
+                documents.map((document, index) => (
+                  <tr key={document.id || `${document.name}-${index}`}>
+                    <td>{index + 1}</td>
+                    <td>PDF</td>
+                    <td>
+                      <a
+                        className="organization-feedback-attachment-link"
+                        href={document.url || "#"}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-disabled={!document.url}
+                        onClick={(event) => {
+                          if (!document.url) event.preventDefault();
+                        }}
+                      >
+                        <Icon>description</Icon>
+                        <span>{document.name}</span>
+                      </a>
+                    </td>
+                    <td>
+                      <div className="organization-feedback-row-actions applicant-organization-document-actions">
+                        <button
+                          aria-label={`Lihat ${document.name}`}
+                          className="organization-feedback-icon-button organization-feedback-icon-button-view"
+                          disabled={!document.url}
+                          onClick={() => openConfirmationDocument(document)}
+                          title="Lihat fail"
+                          type="button"
+                        >
+                          <Icon>visibility</Icon>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr className="organization-feedback-empty-row">
+                  <td colSpan={4}>--Tiada rekod--</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="applicant-confirmation-statement" aria-label="Pengesahan penerimaan tawaran">
+        <p>
+          Dengan ini, saya mengesahkan penerimaan tawaran menjalani latihan industri di Dewan Bandaraya Kuching Utara (DBKU) seperti yang dinyatakan.
+        </p>
+        <p>Sekian, terima kasih atas perhatian dan kerjasama pihak puan.</p>
+      </section>
+    </div>
+  );
+}
 function InternshipApplicationDetailPage({
   application,
   isHrmWorkspace,
@@ -2725,6 +2838,7 @@ function InternshipApplicationDetailPage({
     ...(isHrmWorkspace ? [hrmReviewTab] : []),
     ...(shouldShowDepartmentDecision ? [departmentDecisionTab] : []),
     ...(isHrmWorkspace ? [organizationFeedbackTab] : []),
+    ...(hasApplicantAgreedToOffer(application) ? [applicantConfirmationTab] : []),
   ];
   const detailTabGroups = [
     { label: "Pemohon", tabs: applicantDetailTabs },
@@ -2771,6 +2885,8 @@ function InternshipApplicationDetailPage({
               onSendToApplicant={onSendOrganizationFeedbackToApplicant}
               onSubmitted={onOrganizationFeedbackSent}
             />
+          ) : tab === applicantConfirmationTab ? (
+            <ApplicantConfirmationReadOnlyTab application={application} key={application?.id || "applicant-confirmation"} />
           ) : null
         }
       />
