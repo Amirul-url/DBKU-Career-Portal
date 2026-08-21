@@ -65,7 +65,8 @@ test("applicant organization feedback notification shows red badges", () => {
   assert.match(profileSource, /className=\{`profile-nav-badge\$\{isOpen \? "" : " collapsed"\}`\}/);
   assert.match(profileSource, /aria-label=\{`\$\{badgeCount\} maklumbalas baharu`\}/);
   assert.match(cssSource, /\.applicant-applications-table th:first-child,\s*\.applicant-applications-table td:first-child \{\s*text-align: center;/);
-  assert.match(cssSource, /\.applicant-reference-cell \{[\s\S]*width: 100%;[\s\S]*justify-content: center;/);
+  assert.match(cssSource, /\.applicant-reference-cell \{[\s\S]*position: relative;[\s\S]*text-align: center;/);
+  assert.match(cssSource, /\.applicant-new-badge \{[\s\S]*position: absolute;[\s\S]*left: 0;/);
 });
 
 test("applicant rejected internship applications can apply again", () => {
