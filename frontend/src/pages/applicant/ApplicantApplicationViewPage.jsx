@@ -432,8 +432,8 @@ function ApplicantOrganizationFeedbackTab({ application }) {
           Sila buat pengesahan secara bertulis <strong>(seperti di Lampiran II)</strong> kepada Dewan Bandaraya Kuching Utara
           sebelum atau pada{" "}
           <span className="organization-feedback-confirmation-date">{confirmationDate}</span>. Sekiranya pihak kami tidak
-          menerima sebarang maklumbalas selepas tarikh tersebut, maka kami beranggapan bahawa pelajar tuan/puan telah menolak
-          tawaran tersebut. Sebarang surat-menyurat selepas tarikh tersebut tidak akan dilayan.
+          menerima sebarang maklumbalas selepas tarikh tersebut, maka kami beranggapan bahawa anda telah menolak tawaran
+          tersebut. Sebarang surat-menyurat selepas tarikh tersebut tidak akan dilayan.
         </p>
         <p>Sekian. Terima kasih.</p>
       </section>

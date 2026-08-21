@@ -2666,7 +2666,7 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
             value={feedbackConfirmationDate}
           />
           . Sekiranya pihak kami tidak menerima sebarang maklumbalas selepas tarikh tersebut, maka kami beranggapan bahawa
-          pelajar tuan/puan telah menolak tawaran tersebut. Sebarang surat-menyurat selepas tarikh tersebut tidak akan dilayan.
+          anda telah menolak tawaran tersebut. Sebarang surat-menyurat selepas tarikh tersebut tidak akan dilayan.
         </p>
         <p>Sekian. Terima kasih.</p>
       </section>
