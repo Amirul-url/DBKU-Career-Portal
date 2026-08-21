@@ -5919,20 +5919,26 @@ body:has(.applicant-profile-page) {
 }
 
 .applicant-reference-cell {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  width: auto;
+  position: relative;
+  display: block;
+  width: 100%;
   min-height: 26px;
   text-align: center;
   white-space: nowrap;
 }
 
+.applicant-reference-number {
+  display: inline-block;
+}
+
 .applicant-new-badge {
+  position: absolute;
+  left: 0;
+  top: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  transform: translateY(-50%);
   border-radius: 999px;
   background: #ffeded;
   padding: 5px 10px;

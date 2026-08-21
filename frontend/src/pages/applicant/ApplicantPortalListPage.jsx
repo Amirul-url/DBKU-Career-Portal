@@ -237,7 +237,7 @@ function ApplicationList({ applications, loading }) {
                     <td>
                       <span className="applicant-reference-cell">
                         {showNewFeedbackBadge ? <span className="applicant-new-badge">Baharu</span> : null}
-                        <span>{formatReferenceNo(application)}</span>
+                        <span className="applicant-reference-number">{formatReferenceNo(application)}</span>
                       </span>
                     </td>
                     <td>{vacancy.title || "Jawatan DBKU"}</td>
