@@ -2456,6 +2456,13 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
 
   return (
     <div className="organization-feedback-panel">
+      <div className="organization-feedback-intro">
+        <p>Dengan segala hormatnya perkara di atas adalah dirujuk.</p>
+        <p>
+          Sukacita dimaklumkan bahawa Dewan Bandaraya Kuching Utara tiada halangan untuk menerima pelajar tuan/puan
+          bagi menjalani Latihan Industri / Praktikal seperti berikut:-
+        </p>
+      </div>
       <div className="organization-feedback-table-wrap">
         <table className="organization-feedback-table">
           <thead>

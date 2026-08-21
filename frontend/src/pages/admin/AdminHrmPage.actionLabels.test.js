@@ -271,5 +271,10 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /Program/);
   assert.match(source, /Bahagian Ditempatkan/);
   assert.match(source, /No\. Kad Pengenalan:/);
+  assert.match(source, /Dengan segala hormatnya perkara di atas adalah dirujuk\./);
+  assert.match(source, /Sukacita dimaklumkan bahawa Dewan Bandaraya Kuching Utara tiada halangan/);
+  assert.ok(
+    source.indexOf('className="organization-feedback-intro"') < source.indexOf('className="organization-feedback-table"'),
+  );
   assert.doesNotMatch(source, /<Icon>send<\/Icon>/);
 });

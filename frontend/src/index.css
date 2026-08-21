@@ -11100,6 +11100,22 @@ body:has(.applicant-profile-page) {
   overflow-x: auto;
 }
 
+.organization-feedback-intro {
+  margin: 0 0 18px;
+  color: #020617;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.55;
+}
+
+.organization-feedback-intro p {
+  margin: 0 0 10px;
+}
+
+.organization-feedback-intro p:last-child {
+  margin-bottom: 0;
+}
+
 .organization-feedback-table {
   width: 100%;
   min-width: 860px;
