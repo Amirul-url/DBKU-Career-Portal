@@ -1132,7 +1132,7 @@ export default function ApplicantInternshipApplicationPage() {
             <span>
               <Icon>upload</Icon>
               <b>
-                Muat Naik<br />gambar<br />pasport
+                Muat Naik<br />gambar<br />pasport{renderRequiredLabel("", true)}
               </b>
               <small>3.5 cm x 5.0 cm</small>
             </span>
