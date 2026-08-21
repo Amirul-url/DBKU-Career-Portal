@@ -10,9 +10,15 @@ from rest_framework import serializers
 from jobs.serializers import VacancySerializer
 
 from .models import CandidateApplication
+from .services import notify_organization_feedback_released
 
 
 REAPPLY_ALLOWED_STATUSES = {"rejected", "withdrawn"}
+
+
+def has_organization_feedback_been_released(profile_data):
+    release = (profile_data or {}).get("organization_feedback_release") or {}
+    return bool(release.get("sent_to_applicant_at"))
 
 
 class CandidateApplicationSerializer(serializers.ModelSerializer):
@@ -455,6 +461,7 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
         organization_feedback_document_uploads = self.pop_organization_feedback_document_uploads(validated_data)
         clear_organization_feedback_document = validated_data.pop("clearOrganizationFeedbackDocument", False)
         clear_organization_feedback_document_id = validated_data.pop("clearOrganizationFeedbackDocumentId", "")
+        was_organization_feedback_released = has_organization_feedback_been_released(instance.profile_data)
         new_status = validated_data.get("status")
         if new_status == "submitted" and instance.status == "draft" and not instance.submitted_at:
             validated_data["submitted_at"] = timezone.now()
@@ -472,4 +479,9 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
             or clear_organization_feedback_document_id
         ):
             instance.save()
+        if (
+            not was_organization_feedback_released
+            and has_organization_feedback_been_released(instance.profile_data)
+        ):
+            notify_organization_feedback_released(instance)
         return instance

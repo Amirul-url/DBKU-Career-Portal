@@ -52,6 +52,17 @@ def build_application_review_notification(application, next_status):
     )
 
 
+def build_organization_feedback_released_notification(application):
+    return {
+        "title": "Permohonan Latihan Industri Berjaya",
+        "message": (
+            f"Sukacita dimaklumkan bahawa permohonan latihan industri anda dengan No. rujukan {application.reference_no} "
+            "telah berjaya diterima. "
+            "Untuk menyemak maklumat tawaran dan tindakan lanjut, sila layari Portal Kerjaya DBKU."
+        ),
+    }
+
+
 def send_application_whatsapp(application, message, context):
     if not application.applicant.mobile_number or not getattr(settings, "WHATSAPP_ENABLED", False):
         return
@@ -75,6 +86,17 @@ def submit_application(application):
     )
     send_application_whatsapp(application, message, "application submission")
     return application
+
+
+def notify_organization_feedback_released(application):
+    notification = build_organization_feedback_released_notification(application)
+    create_notification(
+        user=application.applicant,
+        title=notification["title"],
+        message=notification["message"],
+        application=application,
+    )
+    send_application_whatsapp(application, notification["message"], "organization feedback release")
 
 
 def withdraw_application(application, remark=""):

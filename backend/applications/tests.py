@@ -319,6 +319,54 @@ class CandidateApplicationReferenceNoTests(TestCase):
             "16 Mac 2026 - 29 Ogos 2026",
         )
 
+    @override_settings(NOTIFICATION_EMAIL_ENABLED=True, WHATSAPP_ENABLED=True)
+    @patch("applications.services.send_whatsapp_message")
+    @patch("notifications.services.send_notification_email")
+    def test_releasing_organization_feedback_notifies_applicant_by_email_and_whatsapp(
+        self,
+        mock_send_email,
+        mock_send_whatsapp,
+    ):
+        applicant = self.create_applicant("offer-feedback-target@example.com", mobile_number="60128889999")
+        hrm = self.user_model.objects.create_user(
+            username="hrm-offer-feedback@example.com",
+            email="hrm-offer-feedback@example.com",
+            password="Password123!",
+            role="admin",
+            department="Bahagian Pengurusan Sumber Manusia (HRM)",
+        )
+        application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=self.vacancy,
+            status="accepted",
+        )
+        client = APIClient()
+        client.force_authenticate(user=hrm)
+
+        response = client.patch(
+            f"/api/applications/{application.id}/",
+            {
+                "profile_data": {
+                    "organization_feedback_release": {
+                        "internship_period": "16 Mac 2026 - 29 Ogos 2026",
+                        "sent_to_applicant_at": "2026-08-21T09:00:00+08:00",
+                    },
+                },
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        notification = Notification.objects.get(application=application, user=applicant)
+        self.assertEqual(notification.title, "Permohonan Latihan Industri Berjaya")
+        self.assertIn(application.reference_no, notification.message)
+        self.assertIn("Sukacita dimaklumkan", notification.message)
+        self.assertIn("telah berjaya diterima", notification.message)
+        self.assertIn("maklumat tawaran dan tindakan lanjut", notification.message)
+        self.assertIn("Portal Kerjaya DBKU", notification.message)
+        mock_send_email.assert_called_once_with(applicant, notification.title, notification.message)
+        mock_send_whatsapp.assert_called_once_with(applicant.mobile_number, notification.message)
+
     def test_applicant_can_confirm_released_internship_offer_with_document(self):
         applicant = self.create_applicant("confirm-offer-target@example.com")
         application = CandidateApplication.objects.create(
