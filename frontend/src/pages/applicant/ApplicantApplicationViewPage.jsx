@@ -1171,6 +1171,8 @@ export default function ApplicantApplicationViewPage() {
           setApplication(data);
           if (requestedInfoTab === hrmDecisionTab && hasHrmFinalRejectionDecision(data)) {
             setActiveInfoTab(hrmDecisionTab);
+          } else if (requestedInfoTab === organizationFeedbackTab && hasOrganizationFeedbackBeenSent(data)) {
+            setActiveInfoTab(organizationFeedbackTab);
           }
         })
         .catch((requestError) => {

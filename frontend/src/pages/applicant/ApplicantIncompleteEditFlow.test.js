@@ -63,6 +63,7 @@ test("applicant view action opens rejected applications on the application decis
   assert.match(viewSource, /useSearchParams/);
   assert.match(viewSource, /const requestedInfoTab = searchParams\.get\("tab"\) \|\| ""/);
   assert.match(viewSource, /requestedInfoTab === hrmDecisionTab && hasHrmFinalRejectionDecision\(data\)[\s\S]*setActiveInfoTab\(hrmDecisionTab\)/);
+  assert.match(viewSource, /requestedInfoTab === organizationFeedbackTab && hasOrganizationFeedbackBeenSent\(data\)[\s\S]*setActiveInfoTab\(organizationFeedbackTab\)/);
 });
 
 test("applicant accepted applications stay hidden behind review status until HRM notification", () => {
