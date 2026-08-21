@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const source = readFileSync(new URL("./AdminHrmPage.jsx", import.meta.url), "utf8");
+const cssSource = readFileSync(new URL("../../index.css", import.meta.url), "utf8");
 const adminRoutesSource = readFileSync(new URL("../../modules/admin/adminRoutes.js", import.meta.url), "utf8");
 
 test("HRM application action labels match the department review workflow", () => {
@@ -183,6 +184,8 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /\.\.\.\(isHrmWorkspace \? \[organizationFeedbackTab\] : \[\]\)/);
   assert.match(source, /const detailTabGroups = \[\s*\{ label: "Pemohon", tabs: applicantDetailTabs \},\s*\{ label: "Dalaman", tabs: extraTabs \},\s*\]/);
   assert.match(source, /tabGroups=\{detailTabGroups\}/);
+  assert.match(cssSource, /\.student-info-tabs-grouped \{[\s\S]*flex-direction: column;[\s\S]*align-items: flex-start;/);
+  assert.match(cssSource, /\.student-info-tab-group \{[\s\S]*width: 100%;/);
   assert.match(source, /function OrganizationFeedbackTab/);
   assert.match(source, /function OrganizationFeedbackSendConfirmModal/);
   assert.match(source, /Anda yakin mahu menghantar maklumbalas organisasi ini kepada pemohon\?/);

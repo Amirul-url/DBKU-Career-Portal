@@ -6720,7 +6720,8 @@ body:has(.applicant-profile-page) {
 }
 
 .student-info-tabs-grouped {
-  gap: 18px;
+  flex-direction: column;
+  gap: 14px;
   align-items: flex-start;
 }
 
@@ -6730,6 +6731,7 @@ body:has(.applicant-profile-page) {
   flex-direction: column;
   gap: 7px;
   min-width: 0;
+  width: 100%;
 }
 
 .student-info-tab-group-label {
