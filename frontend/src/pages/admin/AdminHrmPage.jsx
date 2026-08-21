@@ -96,10 +96,9 @@ const hrmReviewTab = "Semakan HRM";
 const departmentDecisionTab = "Keputusan Bahagian";
 const organizationFeedbackTab = "Maklumbalas Organisasi";
 const organizationFeedbackReportDefaults = {
-  date: "16 Mac 2026 (Isnin)",
-  time: "8.00 pagi",
-  place:
-    "Unit Pengurusan Latihan\nBahagian Pengurusan Sumber Manusia\nTingkat 3, Bangunan Dewan Bandaraya Kuching Utara\nBukit Siol, Jalan Semariang, Petra Jaya\n93050 Kuching, SARAWAK",
+  date: "",
+  time: "",
+  place: "",
 };
 const dateValue = (value) =>
   value
