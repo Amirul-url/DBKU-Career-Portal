@@ -2412,7 +2412,7 @@ function DepartmentDecisionTab({ application, isReadOnly = false, onSaveDecision
     </div>
   );
 }
-function buildHrmFinalDecisionPayload(application, user) {
+function buildHrmFinalDecisionPayload(application, user, remarks) {
   const savedFinalDecision = getSavedHrmFinalDecision(application);
   const departmentDecision = getSavedDepartmentDecision(application);
   return {
@@ -2420,17 +2420,18 @@ function buildHrmFinalDecisionPayload(application, user) {
     decision: "Tolak",
     department_recommendation: departmentDecision.recommendation || "",
     department_remarks: departmentDecision.remarks || "",
-    remarks: hrmFinalRejectionMessage,
+    remarks: remarks.trim(),
     submitted_at: new Date().toISOString(),
     submitted_by: user?.full_name || user?.name || user?.email || "",
   };
 }
 function HrmFinalDecisionTab({ application, onSaveFinalDecision, onSubmitted, user }) {
   const finalDecision = getSavedHrmFinalDecision(application);
+  const [finalRemarks, setFinalRemarks] = useState(finalDecision.remarks || hrmFinalRejectionMessage);
   const [message, setMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const isFinalized = Boolean(finalDecision.submitted_at) || ["accepted", "rejected"].includes(application?.status);
-  const canSubmit = Boolean(application && onSaveFinalDecision && hasSubmittedDepartmentDecision(application) && !isFinalized);
+  const canSubmit = Boolean(application && onSaveFinalDecision && hasSubmittedDepartmentDecision(application) && !isFinalized && finalRemarks.trim());
 
   const submitFinalDecision = async () => {
     if (!canSubmit) return;
@@ -2438,7 +2439,7 @@ function HrmFinalDecisionTab({ application, onSaveFinalDecision, onSubmitted, us
     setMessage("");
     setIsSaving(true);
     try {
-      await onSaveFinalDecision(application, buildHrmFinalDecisionPayload(application, user));
+      await onSaveFinalDecision(application, buildHrmFinalDecisionPayload(application, user, finalRemarks));
       onSubmitted?.();
     } catch (error) {
       setMessage(error.message || "Keputusan akhir HRM gagal dihantar.");
@@ -2450,11 +2451,27 @@ function HrmFinalDecisionTab({ application, onSaveFinalDecision, onSubmitted, us
   return (
     <div className="department-decision-panel">
       <div className="department-decision-form" aria-label="Keputusan akhir HRM">
-        <section className="organization-feedback-confirmation-note" aria-label="Alasan keputusan akhir HRM">
-          {hrmFinalRejectionMessage.split("\n\n").map((paragraph) => (
-            <p key={paragraph}>{paragraph}</p>
-          ))}
-        </section>
+        <label>
+          <span>
+            Ulasan <b>*</b>
+          </span>
+          <textarea
+            disabled={isFinalized}
+            rows={9}
+            value={finalRemarks}
+            onChange={(event) => setFinalRemarks(event.target.value)}
+          />
+        </label>
+        <dl>
+          <div>
+            <dt>Bahagian</dt>
+            <dd>Bahagian Pengurusan Sumber Manusia (HRM)</dd>
+          </div>
+          <div>
+            <dt>Tarikh Hantar</dt>
+            <dd>{dateValue(finalDecision.submitted_at)}</dd>
+          </div>
+        </dl>
         {message ? <p className="organization-feedback-message">{message}</p> : null}
       </div>
       {!isFinalized ? (
@@ -2465,7 +2482,7 @@ function HrmFinalDecisionTab({ application, onSaveFinalDecision, onSubmitted, us
             onClick={submitFinalDecision}
             type="button"
           >
-            {isSaving ? "Menghantar..." : "Tolak Permohonan"}
+            {isSaving ? "Menghantar..." : "Hantar ke Pemohon"}
           </button>
         </footer>
       ) : null}

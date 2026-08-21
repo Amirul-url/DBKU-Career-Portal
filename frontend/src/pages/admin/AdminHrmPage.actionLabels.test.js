@@ -205,9 +205,13 @@ test("HRM makes the final internship decision after department recommendation", 
   assert.match(source, /onSaveFinalDecision=\{saveHrmFinalDecision\}/);
   assert.match(source, /\.\.\.\(shouldShowHrmFinalDecision \? \[hrmFinalDecisionTab\] : \[\]\)/);
   assert.match(source, /\.\.\.\(shouldShowOrganizationFeedback \? \[organizationFeedbackTab\] : \[\]\)/);
-  assert.match(source, /remarks: hrmFinalRejectionMessage/);
+  assert.match(source, /const \[finalRemarks, setFinalRemarks\] = useState/);
+  assert.match(source, /<textarea[\s\S]*value=\{finalRemarks\}[\s\S]*onChange=\{\(event\) => setFinalRemarks\(event\.target\.value\)\}/);
+  assert.match(source, /buildHrmFinalDecisionPayload\(application, user, finalRemarks\)/);
+  assert.match(source, /remarks: remarks\.trim\(\)/);
   assert.doesNotMatch(source, /Terima Permohonan/);
-  assert.match(source, /: "Tolak Permohonan"/);
+  assert.doesNotMatch(source, /: "Tolak Permohonan"/);
+  assert.match(source, /: "Hantar ke Pemohon"/);
 });
 
 test("HRM assessment saves do not change the application status before review action", () => {
