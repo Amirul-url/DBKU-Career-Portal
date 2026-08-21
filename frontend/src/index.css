@@ -11101,7 +11101,7 @@ body:has(.applicant-profile-page) {
 }
 
 .organization-feedback-intro {
-  margin: 0 0 18px;
+  margin: 0;
   color: #020617;
   font-size: 13px;
   font-weight: 600;
