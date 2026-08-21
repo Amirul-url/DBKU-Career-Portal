@@ -2552,10 +2552,6 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
                         ) : (
                           <p className="organization-feedback-empty">Tiada fail dipilih.</p>
                         )}
-                        {document.sizeLabel ? (
-                          <p className="organization-feedback-attachment-size">{document.sizeLabel}</p>
-                        ) : null}
-                        <p className="organization-feedback-attachment-hint">Saiz fail maksimum: 15MB</p>
                       </div>
                     </td>
                     <td>

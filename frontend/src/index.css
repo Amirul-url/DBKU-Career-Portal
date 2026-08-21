@@ -10939,13 +10939,6 @@ body:has(.applicant-profile-page) {
   flex: 0 0 auto;
 }
 
-.organization-feedback-attachment-size,
-.organization-feedback-attachment-hint {
-  color: #64748b;
-  font-size: 12px;
-  font-weight: 600;
-}
-
 .organization-feedback-empty {
   color: #64748b;
   font-size: 13px;

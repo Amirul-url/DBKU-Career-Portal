@@ -195,7 +195,8 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /className="organization-feedback-document-table"/);
   assert.match(source, /className="organization-feedback-attachment-cell"/);
   assert.match(source, /Tiada fail dipilih\./);
-  assert.match(source, /Saiz fail maksimum: 15MB/);
+  assert.doesNotMatch(source, /organization-feedback-attachment-size/);
+  assert.doesNotMatch(source, /organization-feedback-attachment-hint/);
   assert.match(source, /className="organization-feedback-report-note"/);
   assert.match(source, /Sehubungan itu, pelajar tuan\/puan adalah diminta untuk melapor diri/);
   assert.match(source, /16 Mac 2026 \(Isnin\)/);
