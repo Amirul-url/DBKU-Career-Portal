@@ -143,6 +143,8 @@ test("applicant can submit acceptance confirmation after organization feedback",
   assert.match(viewSource, /documents: getApplicantConfirmationDocuments\(application\)/);
   assert.match(viewSource, /const isAgreed = confirmationState\.isAgreed/);
   assert.match(viewSource, /setConfirmationState\(\{/);
+  assert.match(viewSource, /setSelectedFiles\(\(current\) => \[\.\.\.current, \.\.\.files\]\)/);
+  assert.doesNotMatch(viewSource, /setSelectedFiles\(files\)/);
   assert.match(viewSource, /file,\s*index/);
   assert.match(viewSource, /URL\.createObjectURL\(document\.file\)/);
   assert.match(viewSource, /URL\.revokeObjectURL\(previewUrl\)/);

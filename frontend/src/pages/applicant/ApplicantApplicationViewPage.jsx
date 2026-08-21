@@ -566,12 +566,12 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
     if (!files.length) return;
     if (files.some((file) => !isPdfFile(file))) {
       setFileInputKey((current) => current + 1);
-      setSelectedFiles([]);
       setMessage("Format fail mesti PDF sahaja.");
       return;
     }
     setMessage("");
-    setSelectedFiles(files);
+    setSelectedFiles((current) => [...current, ...files]);
+    setFileInputKey((current) => current + 1);
   };
 
   const requestSubmitConfirmation = () => {
