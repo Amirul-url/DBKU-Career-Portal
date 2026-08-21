@@ -6721,17 +6721,23 @@ body:has(.applicant-profile-page) {
 
 .student-info-tabs-grouped {
   flex-direction: column;
-  gap: 14px;
-  align-items: flex-start;
+  gap: 0;
+  align-items: stretch;
 }
 
 .student-info-tab-group {
-  display: flex;
+  display: grid;
   flex: 0 1 auto;
-  flex-direction: column;
-  gap: 7px;
+  grid-template-columns: 145px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
   min-width: 0;
+  padding: 8px 4px;
   width: 100%;
+}
+
+.student-info-tab-group + .student-info-tab-group {
+  border-top: 1px solid #e1f1e8;
 }
 
 .student-info-tab-group-label {
@@ -6746,6 +6752,7 @@ body:has(.applicant-profile-page) {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  min-width: 0;
 }
 
 .student-info-form {

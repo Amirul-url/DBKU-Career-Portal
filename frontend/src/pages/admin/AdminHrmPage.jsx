@@ -2729,7 +2729,7 @@ function InternshipApplicationDetailPage({
   ];
   const detailTabGroups = [
     { label: "Pemohon", tabs: applicantDetailTabs },
-    { label: "Dalaman", tabs: extraTabs },
+    { label: "Urusan Dalaman", tabs: extraTabs },
   ];
 
   return (

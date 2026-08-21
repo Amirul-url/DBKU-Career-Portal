@@ -182,10 +182,11 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /const organizationFeedbackTab = "Maklumbalas Organisasi"/);
   assert.match(source, /const applicantDetailTabs = \["Maklumat Peribadi Pemohon", "Maklumat Akademik", "Dokumen Sokongan"\]/);
   assert.match(source, /\.\.\.\(isHrmWorkspace \? \[organizationFeedbackTab\] : \[\]\)/);
-  assert.match(source, /const detailTabGroups = \[\s*\{ label: "Pemohon", tabs: applicantDetailTabs \},\s*\{ label: "Dalaman", tabs: extraTabs \},\s*\]/);
+  assert.match(source, /const detailTabGroups = \[\s*\{ label: "Pemohon", tabs: applicantDetailTabs \},\s*\{ label: "Urusan Dalaman", tabs: extraTabs \},\s*\]/);
   assert.match(source, /tabGroups=\{detailTabGroups\}/);
-  assert.match(cssSource, /\.student-info-tabs-grouped \{[\s\S]*flex-direction: column;[\s\S]*align-items: flex-start;/);
-  assert.match(cssSource, /\.student-info-tab-group \{[\s\S]*width: 100%;/);
+  assert.match(cssSource, /\.student-info-tabs-grouped \{[\s\S]*flex-direction: column;[\s\S]*align-items: stretch;/);
+  assert.match(cssSource, /\.student-info-tab-group \{[\s\S]*display: grid;[\s\S]*grid-template-columns: 145px minmax\(0, 1fr\);[\s\S]*width: 100%;/);
+  assert.match(cssSource, /\.student-info-tab-group \+ \.student-info-tab-group \{[\s\S]*border-top: 1px solid #e1f1e8;/);
   assert.match(source, /function OrganizationFeedbackTab/);
   assert.match(source, /function OrganizationFeedbackSendConfirmModal/);
   assert.match(source, /Anda yakin mahu menghantar maklumbalas organisasi ini kepada pemohon\?/);
