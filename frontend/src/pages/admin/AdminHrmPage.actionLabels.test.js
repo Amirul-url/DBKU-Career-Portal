@@ -358,7 +358,8 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /onChange=\{\(event\) => setFeedbackReportTime\(event\.target\.value\)\}/);
   assert.match(source, /onChange=\{\(event\) => setFeedbackReportPlace\(event\.target\.value\)\}/);
   assert.match(source, /onChange=\{\(event\) => setFeedbackConfirmationDate\(event\.target\.value\)\}/);
-  assert.match(source, /key=\{`\$\{application\?\.id \|\| "organization-feedback"\}-\$\{application\?\.updated_at \|\| ""\}`\}/);
+  assert.match(source, /key=\{application\?\.id \|\| "organization-feedback"\}/);
+  assert.doesNotMatch(source, /key=\{`\$\{application\?\.id \|\| "organization-feedback"\}-\$\{application\?\.updated_at \|\| ""\}`\}/);
   assert.match(source, /const clearFeedbackInput = \(\) => \{/);
   assert.match(source, /const selectedFiles = Array\.from\(event\.target\.files \|\| \[\]\)/);
   assert.match(source, /void uploadDocuments\(selectedFiles\);/);

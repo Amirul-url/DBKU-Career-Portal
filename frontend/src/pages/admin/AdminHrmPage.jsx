@@ -3058,7 +3058,7 @@ function InternshipApplicationDetailPage({
           ) : tab === organizationFeedbackTab ? (
             <OrganizationFeedbackTab
               application={application}
-              key={`${application?.id || "organization-feedback"}-${application?.updated_at || ""}`}
+              key={application?.id || "organization-feedback"}
               onDeleteDocument={onDeleteOrganizationFeedbackDocument}
               onSaveDocument={onSaveOrganizationFeedbackDocument}
               onSendToApplicant={onSendOrganizationFeedbackToApplicant}
