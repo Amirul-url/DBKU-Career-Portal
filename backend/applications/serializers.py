@@ -479,9 +479,13 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
             or clear_organization_feedback_document_id
         ):
             instance.save()
-        if (
+        organization_feedback_was_just_released = (
             not was_organization_feedback_released
             and has_organization_feedback_been_released(instance.profile_data)
-        ):
+        )
+        if organization_feedback_was_just_released:
+            if instance.status != "accepted":
+                instance.status = "accepted"
+                instance.save(update_fields=["status", "updated_at"])
             notify_organization_feedback_released(instance)
         return instance

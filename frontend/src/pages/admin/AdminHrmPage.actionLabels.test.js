@@ -45,6 +45,7 @@ test("department and HRM internship rows mark pending decision tasks as new", ()
   assert.match(source, /function isHrmPendingDepartmentDecisionApplication\(application\)/);
   assert.match(source, /function isHrmNewApplication\(application\)/);
   assert.match(source, /function getHrmDepartmentDecisionStatus\(application\)/);
+  assert.match(source, /if \(hasOrganizationFeedbackBeenSent\(application\)\) return "accepted"/);
   assert.match(source, /return Boolean\(application\?\.assigned_department && !hasSubmittedDepartmentDecision\(application\)\)/);
   assert.match(source, /!\s*hasSubmittedHrmFinalDecision\(application\)/);
   assert.match(source, /\(application\?\.status \|\| "submitted"\) === "submitted" \|\|\s*isHrmPendingDepartmentDecisionApplication\(application\)/);
@@ -52,6 +53,7 @@ test("department and HRM internship rows mark pending decision tasks as new", ()
   assert.match(source, /if \(!isHrmWorkspace\) \{\s*return applications\.filter\(isDepartmentPendingDecisionApplication\)\.length;\s*\}/);
   assert.match(source, /return applications\.filter\(isHrmNewApplication\)\.length;/);
   assert.match(source, /function getInternshipApplicationDisplayStatus\(application, isHrmWorkspace\)/);
+  assert.match(source, /if \(hasOrganizationFeedbackBeenSent\(application\)\) return "accepted"/);
   assert.match(source, /if \(isHrmWorkspace && isDepartmentPendingDecisionApplication\(application\)\) return "department_new"/);
   assert.match(source, /return getHrmDepartmentDecisionStatus\(application\)/);
   assert.match(source, /return "department_new"/);
@@ -67,6 +69,7 @@ test("department and HRM internship rows mark pending decision tasks as new", ()
 test("HRM and department dashboards keep assignment status separate from shortlisted status", () => {
   assert.match(source, /function isDepartmentAcceptedApplication\(application\)/);
   assert.match(source, /function getInternshipDashboardStatus\(application, isHrmWorkspace\)/);
+  assert.match(source, /if \(hasOrganizationFeedbackBeenSent\(application\)\) return "accepted"/);
   assert.match(source, /if \(isDepartmentPendingDecisionApplication\(application\)\) return "department_new"/);
   assert.match(source, /if \(isDepartmentAcceptedApplication\(application\)\) return "hrm_department_accepted"/);
   assert.match(source, /function getDashboardApplicationStatus\(application, isHrmWorkspace\)/);
@@ -375,6 +378,7 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /onSaveOrganizationFeedbackDocument=\{saveOrganizationFeedbackDocument\}/);
   assert.match(source, /onSaveDocument=\{onSaveOrganizationFeedbackDocument\}/);
   assert.match(source, /const sendOrganizationFeedbackToApplicant = async/);
+  assert.match(source, /body: JSON\.stringify\(\{ status: "accepted", profile_data: profileData \}\)/);
   assert.match(source, /organization_feedback_release:/);
   assert.match(source, /report_date: feedback\.reportDate \|\| organizationFeedbackReportDefaults\.date/);
   assert.match(source, /report_time: feedback\.reportTime \|\| organizationFeedbackReportDefaults\.time/);

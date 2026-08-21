@@ -140,7 +140,7 @@ class CandidateApplicationReferenceNoTests(TestCase):
         application = CandidateApplication.objects.create(
             applicant=applicant,
             vacancy=self.vacancy,
-            status="accepted",
+            status="shortlisted",
         )
         uploaded_file = SimpleUploadedFile(
             "maklumbalas.png",
@@ -171,7 +171,7 @@ class CandidateApplicationReferenceNoTests(TestCase):
         application = CandidateApplication.objects.create(
             applicant=applicant,
             vacancy=self.vacancy,
-            status="accepted",
+            status="shortlisted",
         )
         uploaded_file = SimpleUploadedFile(
             "maklumbalas.pdf",
@@ -338,7 +338,7 @@ class CandidateApplicationReferenceNoTests(TestCase):
         application = CandidateApplication.objects.create(
             applicant=applicant,
             vacancy=self.vacancy,
-            status="accepted",
+            status="shortlisted",
         )
         client = APIClient()
         client.force_authenticate(user=hrm)
@@ -357,6 +357,8 @@ class CandidateApplicationReferenceNoTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
+        application.refresh_from_db()
+        self.assertEqual(application.status, "accepted")
         notification = Notification.objects.get(application=application, user=applicant)
         self.assertEqual(notification.title, "Permohonan Latihan Industri Berjaya")
         self.assertIn(application.reference_no, notification.message)
