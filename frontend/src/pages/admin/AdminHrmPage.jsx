@@ -2655,8 +2655,8 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
       </section>
       <section className="organization-feedback-confirmation-note" aria-label="Pengesahan bertulis">
         <p>
-          Sila buat pengesahan secara bertulis <strong>(seperti di Lampiran II)</strong> kepada Dewan Bandaraya Kuching Utara
-          sebelum atau pada{" "}
+          Sila buat pengesahan secara bertulis <strong>(seperti di Lampiran II)</strong>, kemudian sila muat naik dokumen
+          pengesahan tersebut kepada Dewan Bandaraya Kuching Utara dan sebelum atau pada{" "}
           <input
             aria-label="Tarikh akhir pengesahan bertulis"
             className="organization-feedback-inline-date-input"
