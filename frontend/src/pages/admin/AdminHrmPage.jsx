@@ -108,7 +108,7 @@ const departmentDecisionTab = "Keputusan Bahagian";
 const hrmFinalDecisionTab = "Keputusan Akhir HRM";
 const organizationFeedbackTab = "Maklumbalas Organisasi";
 const applicantConfirmationTab = "Pengesahan Pemohon";
-const hrmFinalRejectionMessage = `Sukacita dimaklumkan bahawa permohonan saudara/i untuk menjalani latihan industri di Dewan Bandaraya Kuching Utara (DBKU) telah diterima dan diteliti oleh pihak kami.
+const hrmFinalRejectionMessage = `Dukacita dimaklumkan bahawa permohonan saudara/i untuk menjalani latihan industri di Dewan Bandaraya Kuching Utara (DBKU) telah diterima dan diteliti oleh pihak kami.
 
 Walau bagaimanapun, setelah mengambil kira keperluan semasa serta kapasiti penempatan pelatih, dukacita dimaklumkan bahawa pihak DBKU tidak dapat mempertimbangkan permohonan tersebut buat masa ini.
 

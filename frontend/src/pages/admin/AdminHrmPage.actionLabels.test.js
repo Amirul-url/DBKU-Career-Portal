@@ -202,7 +202,8 @@ test("department decision tab replaces HRM review for department workspaces", ()
 test("HRM makes the final internship decision after department recommendation", () => {
   assert.match(source, /const hrmFinalDecisionTab = "Keputusan Akhir HRM"/);
   assert.match(source, /const hrmFinalRejectionMessage = `/);
-  assert.match(source, /saudara\/i untuk menjalani latihan industri di Dewan Bandaraya Kuching Utara \(DBKU\) telah diterima dan diteliti/);
+  assert.match(source, /Dukacita dimaklumkan bahawa permohonan saudara\/i untuk menjalani latihan industri di Dewan Bandaraya Kuching Utara \(DBKU\) telah diterima dan diteliti/);
+  assert.doesNotMatch(source, /Sukacita dimaklumkan bahawa permohonan saudara\/i/);
   assert.match(source, /function HrmFinalDecisionTab/);
   assert.match(source, /const saveHrmFinalDecision = async/);
   assert.match(source, /hrm_final_decision: finalDecision/);

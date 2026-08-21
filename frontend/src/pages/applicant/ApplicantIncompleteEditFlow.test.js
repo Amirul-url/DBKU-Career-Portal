@@ -43,7 +43,8 @@ test("applicant rejected internship applications show application decision reaso
   assert.match(viewSource, /function hasHrmFinalRejectionDecision\(application\)/);
   assert.match(viewSource, /function ApplicantHrmDecisionTab\(\{ application \}\)/);
   assert.match(viewSource, /aria-label="Alasan keputusan permohonan"/);
-  assert.match(viewSource, /saudara\/i untuk menjalani latihan industri di Dewan Bandaraya Kuching Utara \(DBKU\) telah diterima dan diteliti/);
+  assert.match(viewSource, /Dukacita dimaklumkan bahawa permohonan saudara\/i untuk menjalani latihan industri di Dewan Bandaraya Kuching Utara \(DBKU\) telah diterima dan diteliti/);
+  assert.doesNotMatch(viewSource, /Sukacita dimaklumkan bahawa permohonan saudara\/i/);
   assert.match(viewSource, /\.\.\.\(hasHrmFinalRejectionDecision\(application\) \? \[hrmDecisionTab\] : \[\]\)/);
   assert.match(viewSource, /tab === hrmDecisionTab \? \(\s*<ApplicantHrmDecisionTab application=\{application\} \/>/);
 });
