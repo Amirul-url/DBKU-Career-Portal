@@ -5882,9 +5882,16 @@ body:has(.applicant-profile-page) {
   font-weight: 400;
 }
 
+.applicant-applications-table th:first-child,
+.applicant-applications-table td:first-child {
+  text-align: center;
+}
+
 .applicant-reference-cell {
   display: inline-flex;
+  width: 100%;
   align-items: center;
+  justify-content: center;
   gap: 12px;
   white-space: nowrap;
 }
