@@ -137,8 +137,10 @@ test("applicant organization feedback notification shows red badges", () => {
 test("applicant can submit acceptance confirmation after organization feedback", () => {
   assert.match(viewSource, /const applicantConfirmationTab = "Pengesahan Pemohon"/);
   assert.match(viewSource, /function hasApplicantAgreedToOffer\(application\)/);
-  assert.match(viewSource, /return "Pengesahan Dihantar"/);
-  assert.match(listSource, /return "Pengesahan Dihantar"/);
+  assert.match(viewSource, /getApplicantAgreedInternshipStatus\(application\)/);
+  assert.match(viewSource, /applicant_agreed: "Pengesahan Dihantar"/);
+  assert.match(listSource, /getApplicantAgreedInternshipStatus\(application\)/);
+  assert.match(listSource, /applicant_agreed: "Pengesahan Dihantar"/);
   assert.match(viewSource, /extraTabs=\{organizationFeedbackSent \? \[organizationFeedbackTab, applicantConfirmationTab\] : \[\]\}/);
   assert.match(viewSource, /function ApplicantConfirmationTab/);
   assert.match(viewSource, /Muat Naik Dokumen/);

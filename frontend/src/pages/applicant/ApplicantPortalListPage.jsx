@@ -4,6 +4,10 @@ import { apiRequest, getStoredUser } from "../../lib/authApi";
 import { APPLICANT_ROUTES } from "../../modules/applicant/applicantRoutes";
 import { getSavedVacancies, removeSavedVacancy } from "../../modules/applicant/savedVacancies";
 import { useApplicantSidebarState } from "../../modules/applicant/useApplicantSidebarState";
+import {
+  getApplicantAgreedInternshipStatus,
+  internshipLifecycleStatusLabels,
+} from "../../modules/internship/internshipLifecycleStatus";
 import { Icon } from "./ApplicantAuthShared";
 import { ProfileContentHeader, ProfileSidebar } from "./ApplicantProfilePage";
 
@@ -21,6 +25,11 @@ const statusLabels = {
 const getInternshipDraftStorageKey = (user) => `dbku_internship_student_info_manual_${user?.id || user?.email || "guest"}`;
 const reapplyAllowedApplicationStatuses = new Set(["rejected", "withdrawn"]);
 const APPLICATIONS_PER_PAGE = 5;
+const applicantInternshipLifecycleStatusLabels = {
+  applicant_agreed: "Pengesahan Dihantar",
+  internship_active: internshipLifecycleStatusLabels.internship_active,
+  internship_completed: internshipLifecycleStatusLabels.internship_completed,
+};
 
 function formatDate(value) {
   if (!value) return "-";
@@ -102,12 +111,15 @@ function hasApplicantAgreedToOffer(application) {
 }
 
 function getApplicantVisibleStatus(status, application = null) {
-  if (hasApplicantAgreedToOffer(application)) return "accepted";
+  if (hasApplicantAgreedToOffer(application)) return getApplicantAgreedInternshipStatus(application);
   return status === "accepted" && !hasOrganizationFeedbackBeenSent(application) ? "screening" : status;
 }
 
 function getApplicantStatusLabel(status, application = null) {
-  if (hasApplicantAgreedToOffer(application)) return "Pengesahan Dihantar";
+  if (hasApplicantAgreedToOffer(application)) {
+    const lifecycleStatus = getApplicantAgreedInternshipStatus(application);
+    return applicantInternshipLifecycleStatusLabels[lifecycleStatus] || "Pengesahan Dihantar";
+  }
   if (status === "accepted" && hasOrganizationFeedbackBeenSent(application)) return "Diterima";
   return statusLabels[getApplicantVisibleStatus(status, application)] || status;
 }
@@ -188,7 +200,7 @@ function ApplicationList({ applications, loading }) {
               <option value="all">Semua status</option>
               {statusOptions.map((status) => (
                 <option key={status} value={status}>
-                  {status === "accepted" ? "Diterima" : statusLabels[status] || status}
+                  {status === "accepted" ? "Diterima" : applicantInternshipLifecycleStatusLabels[status] || statusLabels[status] || status}
                 </option>
               ))}
             </select>

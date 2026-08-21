@@ -6177,6 +6177,17 @@ body:has(.applicant-profile-page) {
   color: #087a42;
 }
 
+.applicant-status-pill.applicant_agreed,
+.applicant-status-pill.internship_active {
+  background: #dcfce7;
+  color: #087a42;
+}
+
+.applicant-status-pill.internship_completed {
+  background: #f1f5f9;
+  color: #475569;
+}
+
 .applicant-status-pill.rejected,
 .applicant-status-pill.withdrawn {
   background: #fee2e2;

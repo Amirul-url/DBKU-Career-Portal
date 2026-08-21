@@ -8,6 +8,11 @@ import {
 } from "../../lib/authApi";
 import { buildHrmDashboardMetrics, buildRecentApplicationsView } from "../../modules/admin/hrmDashboardMetrics";
 import { ADMIN_ROUTES, adminNavItems, getAdminRoutePath, getAdminRouteState } from "../../modules/admin/adminRoutes";
+import {
+  getApplicantAgreedInternshipStatus,
+  internshipLifecycleStatusClasses,
+  internshipLifecycleStatusLabels,
+} from "../../modules/internship/internshipLifecycleStatus";
 import { InternshipApplicationReadOnlyPanel } from "../applicant/ApplicantApplicationViewPage";
 import { Icon } from "../applicant/ApplicantAuthShared";
 import SuperAdminApplicantsPanel from "./SuperAdminApplicantsPanel";
@@ -66,6 +71,8 @@ const statusLabel = {
   hrm_department_accepted: "Diterima Bahagian",
   hrm_department_rejected: "Ditolak Bahagian",
   applicant_agreed: "Pemohon Bersetuju",
+  internship_active: internshipLifecycleStatusLabels.internship_active,
+  internship_completed: internshipLifecycleStatusLabels.internship_completed,
   submitted: "Baharu",
   screening: "Saringan",
   incomplete: "Tidak Lengkap",
@@ -83,6 +90,8 @@ const statusClass = {
   hrm_department_accepted: "green",
   hrm_department_rejected: "red",
   applicant_agreed: "green",
+  internship_active: internshipLifecycleStatusClasses.internship_active,
+  internship_completed: internshipLifecycleStatusClasses.internship_completed,
   submitted: "blue",
   screening: "amber",
   incomplete: "amber",
@@ -265,7 +274,7 @@ function getHrmDepartmentDecisionStatus(application) {
 }
 
 function getInternshipApplicationDisplayStatus(application, isHrmWorkspace) {
-  if (hasApplicantAgreedToOffer(application)) return "applicant_agreed";
+  if (hasApplicantAgreedToOffer(application)) return getApplicantAgreedInternshipStatus(application);
   if (isHrmWorkspace && isHrmPendingDepartmentDecisionApplication(application)) return getHrmDepartmentDecisionStatus(application);
   if (!isHrmWorkspace && isDepartmentPendingDecisionApplication(application)) return "department_new";
   return application?.status || "submitted";

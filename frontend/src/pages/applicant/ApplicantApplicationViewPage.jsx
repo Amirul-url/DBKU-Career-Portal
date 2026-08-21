@@ -4,6 +4,10 @@ import { apiRequest, getStoredUser, resolveMediaUrl } from "../../lib/authApi";
 import { countryCallingCodes, defaultCountryCallingCode } from "../../lib/countryCallingCodes";
 import { APPLICANT_ROUTES } from "../../modules/applicant/applicantRoutes";
 import { useApplicantSidebarState } from "../../modules/applicant/useApplicantSidebarState";
+import {
+  getApplicantAgreedInternshipStatus,
+  internshipLifecycleStatusLabels,
+} from "../../modules/internship/internshipLifecycleStatus";
 import { Icon } from "./ApplicantAuthShared";
 import { ApplicantAddressMap, ProfileContentHeader, ProfileSidebar } from "./ApplicantProfilePage";
 
@@ -17,6 +21,11 @@ const organizationFeedbackReportDefaults = {
   place:
     "Unit Pengurusan Latihan\nBahagian Pengurusan Sumber Manusia\nTingkat 3, Bangunan Dewan Bandaraya Kuching Utara\nBukit Siol, Jalan Semariang, Petra Jaya\n93050 Kuching, SARAWAK",
   confirmationDate: "",
+};
+const applicantInternshipLifecycleStatusLabels = {
+  applicant_agreed: "Pengesahan Dihantar",
+  internship_active: internshipLifecycleStatusLabels.internship_active,
+  internship_completed: internshipLifecycleStatusLabels.internship_completed,
 };
 
 const statusLabels = {
@@ -39,7 +48,10 @@ function hasApplicantAgreedToOffer(application) {
 }
 
 function getReadOnlyStatusLabel(status, maskAcceptedStatus, application = null) {
-  if (hasApplicantAgreedToOffer(application)) return "Pengesahan Dihantar";
+  if (hasApplicantAgreedToOffer(application)) {
+    const lifecycleStatus = getApplicantAgreedInternshipStatus(application);
+    return applicantInternshipLifecycleStatusLabels[lifecycleStatus] || "Pengesahan Dihantar";
+  }
   if (!maskAcceptedStatus && status === "accepted") return "Diterima";
   return statusLabels[status] || status;
 }
@@ -830,7 +842,9 @@ export function InternshipApplicationReadOnlyPanel({
   };
   const vacancy = application?.vacancy_detail || {};
   const status = application?.status || "draft";
-  const visibleStatus = hasApplicantAgreedToOffer(application) ? "accepted" : getApplicantVisibleStatus(status, maskAcceptedStatus);
+  const visibleStatus = hasApplicantAgreedToOffer(application)
+    ? getApplicantAgreedInternshipStatus(application)
+    : getApplicantVisibleStatus(status, maskAcceptedStatus);
   const panelTabs = [...infoTabs, ...extraTabs];
   const groupedTabs = tabGroups
     .map((group) => ({
