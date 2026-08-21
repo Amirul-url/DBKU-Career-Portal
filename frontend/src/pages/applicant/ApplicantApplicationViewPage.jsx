@@ -438,33 +438,66 @@ function ApplicantOrganizationFeedbackTab({ application }) {
         <p>Sekian. Terima kasih.</p>
       </section>
 
-      <div className="student-personal-table-wrap applicant-organization-document-wrap">
+      <div className="organization-feedback-table-wrap applicant-organization-document-wrap">
         <p className="applicant-organization-download-note">
           Sila muat turun dokumen maklumbalas organisasi di bawah.
         </p>
-        <table className="student-personal-table student-readonly-table">
+        <table className="organization-feedback-document-table applicant-organization-document-table">
+          <colgroup>
+            <col className="organization-feedback-col-index" />
+            <col className="organization-feedback-col-format" />
+            <col />
+            <col className="organization-feedback-col-actions applicant-organization-document-actions-col" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Format</th>
+              <th>Lampiran</th>
+              <th>Tindakan</th>
+            </tr>
+          </thead>
           <tbody>
             {documents.length ? (
-              documents.map((document, index) =>
-                renderReadOnlyContentRow(
-                  `organizationFeedbackDocument-${document.id || index}`,
-                  `Dokumen ${index + 1}`,
-                  <div className="student-readonly-document-cell">
-                    <span className="student-readonly-value uploaded">{document.name}</span>
-                    <button
-                      aria-label={`Lihat ${document.name}`}
-                      className="app-view-action applicant-organization-document-action"
-                      disabled={!document.url}
-                      type="button"
-                      onClick={() => openDocumentFile(document)}
+              documents.map((document, index) => (
+                <tr key={`organizationFeedbackDocument-${document.id || index}`}>
+                  <td>{index + 1}</td>
+                  <td>PDF</td>
+                  <td>
+                    <a
+                      className="organization-feedback-attachment-link"
+                      href={document.url || "#"}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-disabled={!document.url}
+                      onClick={(event) => {
+                        if (!document.url) event.preventDefault();
+                      }}
                     >
-                      <Icon>visibility</Icon>
-                    </button>
-                  </div>,
-                ),
-              )
+                      <Icon>description</Icon>
+                      <span>{document.name}</span>
+                    </a>
+                  </td>
+                  <td>
+                    <div className="organization-feedback-row-actions applicant-organization-document-actions">
+                      <button
+                        aria-label={`Lihat ${document.name}`}
+                        className="organization-feedback-icon-button organization-feedback-icon-button-view"
+                        disabled={!document.url}
+                        type="button"
+                        onClick={() => openDocumentFile(document)}
+                        title="Lihat fail"
+                      >
+                        <Icon>visibility</Icon>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
             ) : (
-              renderReadOnlyRow("organizationFeedbackDocuments", "Dokumen", "Tiada dokumen maklumbalas organisasi.")
+              <tr className="organization-feedback-empty-row">
+                <td colSpan={4}>--Tiada rekod--</td>
+              </tr>
             )}
           </tbody>
         </table>

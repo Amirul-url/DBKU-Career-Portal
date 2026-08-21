@@ -11266,28 +11266,16 @@ body:has(.applicant-profile-page) {
   font-weight: 700;
 }
 
-.student-readonly-document-cell .applicant-organization-document-action {
-  width: 38px;
-  min-width: 38px;
-  height: 38px;
-  min-height: 38px;
-  border-color: #bfdbfe;
-  background: #eff6ff;
-  padding: 0;
-  color: #0b70c9;
+.applicant-organization-document-table {
+  table-layout: fixed;
 }
 
-.student-readonly-document-cell .applicant-organization-document-action:hover,
-.student-readonly-document-cell .applicant-organization-document-action:focus-visible {
-  border-color: #93c5fd;
-  background: #dbeafe;
-  color: #075985;
+.applicant-organization-document-actions-col {
+  width: 110px;
 }
 
-.student-readonly-document-cell .applicant-organization-document-action .material-symbols-outlined {
-  width: 20px;
-  height: 20px;
-  font-size: 20px;
+.applicant-organization-document-actions {
+  justify-content: center;
 }
 
 .organization-feedback-period-input {

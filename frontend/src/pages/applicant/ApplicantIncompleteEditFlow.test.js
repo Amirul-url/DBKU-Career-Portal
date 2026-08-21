@@ -78,7 +78,15 @@ test("applicant accepted applications stay hidden behind review status until HRM
   assert.match(viewSource, /seperti di Lampiran II/);
   assert.match(viewSource, /className="organization-feedback-confirmation-date"/);
   assert.match(viewSource, /Sila muat turun dokumen maklumbalas organisasi di bawah\./);
-  assert.match(viewSource, /className="app-view-action applicant-organization-document-action"/);
+  assert.match(
+    viewSource,
+    /className="organization-feedback-document-table applicant-organization-document-table"/,
+  );
+  assert.match(viewSource, /<th>#<\/th>/);
+  assert.match(viewSource, /<th>Format<\/th>/);
+  assert.match(viewSource, /<th>Lampiran<\/th>/);
+  assert.match(viewSource, /<th>Tindakan<\/th>/);
+  assert.match(viewSource, /className="organization-feedback-icon-button organization-feedback-icon-button-view"/);
   assert.match(viewSource, /aria-label=\{`Lihat \$\{document\.name\}`\}/);
   assert.doesNotMatch(viewSource, /organizationFeedbackDate/);
   assert.doesNotMatch(viewSource, /Tarikh Maklumbalas/);
