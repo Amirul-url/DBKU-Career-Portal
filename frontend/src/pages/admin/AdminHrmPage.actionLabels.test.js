@@ -200,8 +200,8 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /className="organization-feedback-report-note"/);
   assert.match(source, /Sehubungan itu, pelajar tuan\/puan adalah diminta untuk melapor diri/);
   assert.match(source, /date: ""/);
-  assert.match(source, /time: ""/);
-  assert.match(source, /place: ""/);
+  assert.match(source, /time: "8\.00 pagi"/);
+  assert.match(source, /Unit Pengurusan Latihan/);
   assert.match(source, /className="organization-feedback-row-actions"/);
   assert.match(source, /organization-feedback-icon-button organization-feedback-icon-button-view/);
   assert.match(source, /organization-feedback-icon-button organization-feedback-icon-button-remove-file/);

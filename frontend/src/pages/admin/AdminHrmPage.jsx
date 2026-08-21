@@ -97,8 +97,9 @@ const departmentDecisionTab = "Keputusan Bahagian";
 const organizationFeedbackTab = "Maklumbalas Organisasi";
 const organizationFeedbackReportDefaults = {
   date: "",
-  time: "",
-  place: "",
+  time: "8.00 pagi",
+  place:
+    "Unit Pengurusan Latihan\nBahagian Pengurusan Sumber Manusia\nTingkat 3, Bangunan Dewan Bandaraya Kuching Utara\nBukit Siol, Jalan Semariang, Petra Jaya\n93050 Kuching, SARAWAK",
 };
 const dateValue = (value) =>
   value
