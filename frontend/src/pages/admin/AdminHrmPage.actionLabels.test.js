@@ -343,6 +343,11 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /getOrganizationFeedbackConfirmationDate\(application\)/);
   assert.match(source, /const \[feedbackRelease, setFeedbackRelease\] = useState\(\(\) => getOrganizationFeedbackRelease\(application\)\)/);
   assert.match(source, /const \[showSendConfirmModal, setShowSendConfirmModal\] = useState\(false\)/);
+  assert.match(source, /const hasRequiredOrganizationFeedbackDocuments = feedbackDocuments\.length > 0/);
+  assert.match(source, /const canSendOrganizationFeedbackToApplicant = Boolean\(/);
+  assert.match(source, /hasRequiredOrganizationFeedbackDocuments/);
+  assert.match(source, /feedbackInternshipPeriod\.trim\(\)/);
+  assert.match(source, /disabled=\{!canSendOrganizationFeedbackToApplicant\}/);
   assert.match(source, /className="organization-feedback-required"/);
   assert.match(source, /className="organization-feedback-period-input"/);
   assert.match(source, /placeholder="Contoh: 16 Mac 2026 - 29 Ogos 2026"/);

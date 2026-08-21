@@ -2505,6 +2505,13 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
   const isSentToApplicant = Boolean(feedbackRelease.sent_to_applicant_at);
   const isPdfFile = (file) => file?.type === "application/pdf" || file?.name?.toLowerCase().endsWith(".pdf");
   const isBusy = isSaving || isSendingToApplicant || Boolean(deletingDocumentId);
+  const hasRequiredOrganizationFeedbackDocuments = feedbackDocuments.length > 0;
+  const canSendOrganizationFeedbackToApplicant = Boolean(
+    !isBusy &&
+      !isSentToApplicant &&
+      hasRequiredOrganizationFeedbackDocuments &&
+      feedbackInternshipPeriod.trim(),
+  );
 
   const addDocumentRow = () => {
     if (isSentToApplicant) return;
@@ -2598,7 +2605,7 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
       setMessage("Sila isi tempoh latihan industri / praktikal sebelum hantar kepada pemohon.");
       return;
     }
-    if (!feedbackDocuments.length) {
+    if (!hasRequiredOrganizationFeedbackDocuments) {
       setMessage("Sila tambah sekurang-kurangnya satu fail maklumbalas organisasi sebelum hantar kepada pemohon.");
       return;
     }
@@ -2845,7 +2852,7 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
         <button
           className="hrm-primary organization-feedback-send"
           type="button"
-          disabled={isBusy || isSentToApplicant}
+          disabled={!canSendOrganizationFeedbackToApplicant}
           onClick={requestSendToApplicant}
         >
           {isSendingToApplicant ? "Menghantar..." : isSentToApplicant ? "Telah dihantar kepada pemohon" : "Hantar ke Pemohon"}
