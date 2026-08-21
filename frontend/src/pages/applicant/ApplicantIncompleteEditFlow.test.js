@@ -43,6 +43,17 @@ test("applicant rejected internship applications show application decision reaso
   assert.match(viewSource, /tab === hrmDecisionTab \? \(\s*<ApplicantHrmDecisionTab application=\{application\} \/>/);
 });
 
+test("applicant view action opens rejected applications on the application decision tab", () => {
+  assert.match(listSource, /const applicationDecisionTab = "Keputusan Permohonan"/);
+  assert.match(listSource, /function hasApplicationDecisionTab\(application\)/);
+  assert.match(listSource, /function getApplicationViewTarget\(application\)/);
+  assert.match(listSource, /encodeURIComponent\(applicationDecisionTab\)/);
+  assert.match(listSource, /to=\{getApplicationViewTarget\(application\)\}/);
+  assert.match(viewSource, /useSearchParams/);
+  assert.match(viewSource, /const requestedInfoTab = searchParams\.get\("tab"\) \|\| ""/);
+  assert.match(viewSource, /requestedInfoTab === hrmDecisionTab && hasHrmFinalRejectionDecision\(data\)[\s\S]*setActiveInfoTab\(hrmDecisionTab\)/);
+});
+
 test("applicant accepted applications stay hidden behind review status until HRM notification", () => {
   assert.match(listSource, /accepted: "Dalam semakan"/);
   assert.match(viewSource, /accepted: "Dalam semakan"/);

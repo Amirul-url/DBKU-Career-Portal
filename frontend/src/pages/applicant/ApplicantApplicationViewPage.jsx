@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { apiRequest, getStoredUser, resolveMediaUrl } from "../../lib/authApi";
 import { countryCallingCodes, defaultCountryCallingCode } from "../../lib/countryCallingCodes";
 import { APPLICANT_ROUTES } from "../../modules/applicant/applicantRoutes";
@@ -1072,6 +1072,8 @@ export function InternshipApplicationReadOnlyPanel({
 export default function ApplicantApplicationViewPage() {
   const { applicationId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const requestedInfoTab = searchParams.get("tab") || "";
   const [user] = useState(() => getStoredUser());
   const [sidebarOpen, toggleSidebar] = useApplicantSidebarState();
   const [activeInfoTab, setActiveInfoTab] = useState(personalInfoTab);
@@ -1110,6 +1112,9 @@ export default function ApplicantApplicationViewPage() {
             return;
           }
           setApplication(data);
+          if (requestedInfoTab === hrmDecisionTab && hasHrmFinalRejectionDecision(data)) {
+            setActiveInfoTab(hrmDecisionTab);
+          }
         })
         .catch((requestError) => {
           if (!isMounted) return;
@@ -1128,7 +1133,7 @@ export default function ApplicantApplicationViewPage() {
       window.clearTimeout(timeoutId);
       controller.abort();
     };
-  }, [applicationId, navigate, user]);
+  }, [applicationId, navigate, requestedInfoTab, user]);
 
   const exitApplicationView = () => {
     navigate(APPLICANT_ROUTES.applications);

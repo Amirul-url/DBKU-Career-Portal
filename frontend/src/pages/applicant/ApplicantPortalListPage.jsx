@@ -25,6 +25,7 @@ const statusLabels = {
 const getInternshipDraftStorageKey = (user) => `dbku_internship_student_info_manual_${user?.id || user?.email || "guest"}`;
 const reapplyAllowedApplicationStatuses = new Set(["rejected", "withdrawn"]);
 const APPLICATIONS_PER_PAGE = 5;
+const applicationDecisionTab = "Keputusan Permohonan";
 const applicantInternshipLifecycleStatusLabels = {
   applicant_agreed: "Pengesahan Dihantar",
   internship_active: internshipLifecycleStatusLabels.internship_active,
@@ -112,6 +113,23 @@ function hasApplicantAgreedToOffer(application) {
 
 function hasSubmittedDepartmentDecision(application) {
   return Boolean(application?.profile_data?.department_decision?.submitted_at);
+}
+
+function getSavedApplicationFinalDecision(application) {
+  const decision = application?.profile_data?.hrm_final_decision;
+  return decision && typeof decision === "object" ? decision : {};
+}
+
+function hasApplicationDecisionTab(application) {
+  const decision = getSavedApplicationFinalDecision(application);
+  return (application?.status || "") === "rejected" && (decision.decision === "Tolak" || Boolean(decision.remarks));
+}
+
+function getApplicationViewTarget(application) {
+  const baseTarget = APPLICANT_ROUTES.applicationView(application.id);
+  return hasApplicationDecisionTab(application)
+    ? `${baseTarget}?tab=${encodeURIComponent(applicationDecisionTab)}`
+    : baseTarget;
 }
 
 function hasAcceptedDepartmentRecommendation(application) {
@@ -289,7 +307,7 @@ function ApplicationList({ applications, loading }) {
                       ) : (
                         <Link
                           className="applicant-table-action app-view-action"
-                          to={APPLICANT_ROUTES.applicationView(application.id)}
+                          to={getApplicationViewTarget(application)}
                           aria-label={`Lihat permohonan ${formatReferenceNo(application)}`}
                           title="Lihat"
                         >
