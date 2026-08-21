@@ -379,7 +379,9 @@ function ApplicantOrganizationFeedbackTab({ application }) {
       </div>
 
       <div className="student-personal-table-wrap applicant-organization-document-wrap">
-        <p className="applicant-organization-download-note">Sila muat turun dokumen di bawah.</p>
+        <p className="applicant-organization-download-note">
+          Sila muat turun dokumen maklumbalas organisasi di bawah.
+        </p>
         <table className="student-personal-table student-readonly-table">
           <tbody>
             {documents.length ? (
@@ -390,13 +392,13 @@ function ApplicantOrganizationFeedbackTab({ application }) {
                   <div className="student-readonly-document-cell">
                     <span className="student-readonly-value uploaded">{document.name}</span>
                     <button
-                      className="app-view-action"
+                      aria-label={`Lihat ${document.name}`}
+                      className="app-view-action applicant-organization-document-action"
                       disabled={!document.url}
                       type="button"
                       onClick={() => openDocumentFile(document)}
                     >
                       <Icon>visibility</Icon>
-                      Lihat
                     </button>
                   </div>,
                 ),
