@@ -2982,13 +2982,21 @@ function InternshipApplicationDetailPage({
 }) {
   const [activeTab, setActiveTab] = useState("Maklumat Peribadi Pemohon");
   const shouldShowDepartmentDecision = !isHrmWorkspace || Boolean(application?.assigned_department);
+  const departmentRecommendation = getSavedDepartmentDecision(application).recommendation || "";
   const hasFinalDecision = hasSubmittedHrmFinalDecision(application);
+  const hasFinalRejectionDecision =
+    hasFinalDecision &&
+    departmentRecommendation !== "Terima" &&
+    (application?.status === "rejected" || getSavedHrmFinalDecision(application).decision === "Tolak");
   const needsFinalDecision =
+    departmentRecommendation === "Tolak" &&
     hasSubmittedDepartmentDecision(application) &&
     !hasFinalDecision &&
     application?.status === "shortlisted";
-  const shouldShowHrmFinalDecision = isHrmWorkspace && (needsFinalDecision || hasFinalDecision);
-  const shouldShowOrganizationFeedback = isHrmWorkspace && application?.status === "accepted";
+  const shouldShowHrmFinalDecision = isHrmWorkspace && (needsFinalDecision || hasFinalRejectionDecision);
+  const shouldShowOrganizationFeedback =
+    isHrmWorkspace &&
+    (departmentRecommendation === "Terima" || application?.status === "accepted");
   const extraTabs = [
     ...(isHrmWorkspace ? [hrmReviewTab] : []),
     ...(shouldShowDepartmentDecision ? [departmentDecisionTab] : []),

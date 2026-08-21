@@ -213,9 +213,9 @@ test("HRM makes the final internship decision after department recommendation", 
   assert.match(source, /const nextStatus = "rejected"/);
   assert.match(source, /onSaveFinalDecision=\{saveHrmFinalDecision\}/);
   assert.match(source, /\.\.\.\(shouldShowHrmFinalDecision \? \[hrmFinalDecisionTab\] : \[\]\)/);
-  assert.match(source, /const hasFinalDecision = hasSubmittedHrmFinalDecision\(application\)/);
-  assert.match(source, /const needsFinalDecision =[\s\S]*application\?\.status === "shortlisted"/);
-  assert.match(source, /const shouldShowHrmFinalDecision = isHrmWorkspace && \(needsFinalDecision \|\| hasFinalDecision\)/);
+  assert.match(source, /const departmentRecommendation = getSavedDepartmentDecision\(application\)\.recommendation \|\| ""/);
+  assert.match(source, /departmentRecommendation === "Tolak"[\s\S]*application\?\.status === "shortlisted"/);
+  assert.match(source, /const shouldShowHrmFinalDecision = isHrmWorkspace && \(needsFinalDecision \|\| hasFinalRejectionDecision\)/);
   assert.match(source, /\.\.\.\(shouldShowOrganizationFeedback \? \[organizationFeedbackTab\] : \[\]\)/);
   assert.match(source, /const \[finalRemarks, setFinalRemarks\] = useState/);
   assert.match(source, /<textarea[\s\S]*value=\{finalRemarks\}[\s\S]*onChange=\{\(event\) => setFinalRemarks\(event\.target\.value\)\}/);
@@ -225,6 +225,13 @@ test("HRM makes the final internship decision after department recommendation", 
   assert.doesNotMatch(source, /Terima Permohonan/);
   assert.doesNotMatch(source, /: "Tolak Permohonan"/);
   assert.match(source, /: "Hantar ke Pemohon"/);
+});
+
+test("HRM uses organization feedback after department accepts an internship application", () => {
+  assert.match(source, /const departmentRecommendation = getSavedDepartmentDecision\(application\)\.recommendation \|\| ""/);
+  assert.match(source, /const shouldShowOrganizationFeedback =\s*isHrmWorkspace &&\s*\(departmentRecommendation === "Terima" \|\| application\?\.status === "accepted"\)/);
+  assert.match(source, /const shouldShowHrmFinalDecision = isHrmWorkspace && \(needsFinalDecision \|\| hasFinalRejectionDecision\)/);
+  assert.doesNotMatch(source, /const shouldShowOrganizationFeedback = isHrmWorkspace && application\?\.status === "accepted"/);
 });
 
 test("HRM assessment saves do not change the application status before review action", () => {
@@ -273,7 +280,7 @@ test("HRM and department decision tabs keep draft selections in local state unti
 test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /const organizationFeedbackTab = "Maklumbalas Organisasi"/);
   assert.match(source, /const applicantDetailTabs = \["Maklumat Peribadi Pemohon", "Maklumat Akademik", "Dokumen Sokongan"\]/);
-  assert.match(source, /const shouldShowOrganizationFeedback = isHrmWorkspace && application\?\.status === "accepted"/);
+  assert.match(source, /const shouldShowOrganizationFeedback =\s*isHrmWorkspace &&\s*\(departmentRecommendation === "Terima" \|\| application\?\.status === "accepted"\)/);
   assert.match(source, /\.\.\.\(shouldShowOrganizationFeedback \? \[organizationFeedbackTab\] : \[\]\)/);
   assert.match(source, /const detailTabGroups = \[\s*\{ label: "Pemohon", tabs: applicantDetailTabs \},\s*\{ label: "Urusan Dalaman", tabs: extraTabs \},\s*\]/);
   assert.match(source, /tabGroups=\{detailTabGroups\}/);
