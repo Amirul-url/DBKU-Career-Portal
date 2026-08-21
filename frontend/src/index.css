@@ -3316,15 +3316,17 @@ body:has(.auth-page) {
 }
 
 .hrm-recent-pagination div {
-  display: flex;
+  display: grid;
+  grid-template-columns: 42px minmax(42px, auto) 42px;
   align-items: center;
+  justify-items: center;
   gap: 8px;
 }
 
 .hrm-recent-pagination button {
   display: inline-flex;
-  width: 32px;
-  height: 32px;
+  width: 42px;
+  height: 42px;
   align-items: center;
   justify-content: center;
   border: 1px solid #cfe0d6;
@@ -3342,7 +3344,7 @@ body:has(.auth-page) {
 }
 
 .hrm-recent-pagination strong {
-  min-width: 46px;
+  min-width: 0;
   color: #17251e;
   font-size: 12px;
   text-align: center;

@@ -64,6 +64,13 @@ test("internship application table uses icon-only view actions", () => {
   assert.doesNotMatch(source, /<Icon>visibility<\/Icon>\s*Lihat\s*<\/button>/);
 });
 
+test("recent application pagination keeps controls evenly aligned", () => {
+  assert.match(source, /<footer className="hrm-recent-pagination">[\s\S]*<strong>\{recentApplications\.activePage\} \/ \{recentApplications\.totalPages\}<\/strong>/);
+  assert.match(cssSource, /\.hrm-recent-pagination div \{[\s\S]*display: grid;[\s\S]*grid-template-columns: 42px minmax\(42px, auto\) 42px;[\s\S]*justify-items: center;/);
+  assert.match(cssSource, /\.hrm-recent-pagination button \{[\s\S]*width: 42px;[\s\S]*height: 42px;/);
+  assert.match(cssSource, /\.hrm-recent-pagination strong \{[\s\S]*min-width: 0;/);
+});
+
 test("admin workspace labels and navigation follow the signed-in department", () => {
   assert.match(source, /getDepartmentWorkspaceLabel\(user\)/);
   assert.match(source, /getAdminShellRoleLabel\(user\)/);
