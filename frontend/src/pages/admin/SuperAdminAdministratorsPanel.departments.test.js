@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const source = readFileSync(new URL("./SuperAdminAdministratorsPanel.jsx", import.meta.url), "utf8");
+const shellSource = readFileSync(new URL("./SuperAdminShellPage.jsx", import.meta.url), "utf8");
 
 const expectedDepartments = [
   "Bahagian Audit Dalaman (AUD)",
@@ -46,6 +47,11 @@ test("administrator modal captures department role and password visibility toggl
   assert.match(source, /payload\.department_role = form\.department_role/);
   assert.match(source, /aria-label=\{showPassword \? "Sembunyikan kata laluan" : "Tunjuk kata laluan"\}/);
   assert.match(source, /aria-label=\{showConfirmPassword \? "Sembunyikan pengesahan kata laluan" : "Tunjuk pengesahan kata laluan"\}/);
+});
+
+test("Super Admin header no longer renders notification bell", () => {
+  assert.doesNotMatch(shellSource, /aria-label="Notifikasi"/);
+  assert.doesNotMatch(shellSource, /<Icon>notifications<\/Icon>/);
 });
 
 test("password fields stay adjacent at the bottom of the administrator modal grid", () => {

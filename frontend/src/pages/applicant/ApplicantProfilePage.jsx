@@ -1761,9 +1761,6 @@ export function ProfileContentHeader({ displayName, email, photoUrl, leading = n
         </div>
       )}
       <div className="profile-actions">
-        <button type="button" className="profile-icon-button" aria-label="Notifikasi">
-          <Icon>notifications</Icon>
-        </button>
         <details className="profile-account-menu">
           <summary className="profile-account-trigger" aria-label="Menu profil">
             <span className="profile-user-chip">{profileChip}</span>

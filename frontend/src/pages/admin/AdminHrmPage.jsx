@@ -803,13 +803,6 @@ export default function AdminHrmPage() {
             </strong>
           </div>
           <div className="profile-actions">
-            <button
-              type="button"
-              className="profile-icon-button"
-              aria-label="Notifikasi"
-            >
-              <Icon>notifications</Icon>
-            </button>
             <details className="profile-account-menu">
               <summary
                 className="profile-account-trigger"

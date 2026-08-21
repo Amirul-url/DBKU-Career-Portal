@@ -25,6 +25,11 @@ test("HRM sidebar shows red badges for new application counts", () => {
   assert.match(source, /\(application\?\.status \|\| "submitted"\) === "submitted"/);
 });
 
+test("HRM and department headers no longer render notification bell", () => {
+  assert.doesNotMatch(source, /aria-label="Notifikasi"/);
+  assert.doesNotMatch(source, /<Icon>notifications<\/Icon>/);
+});
+
 test("department and HRM internship rows mark pending decision tasks as new", () => {
   assert.match(source, /department_new: "Semakan Bahagian"/);
   assert.match(source, /hrm_department_new: "Baharu"/);

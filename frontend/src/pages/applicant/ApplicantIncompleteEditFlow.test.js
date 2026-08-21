@@ -33,6 +33,11 @@ test("applicant rejected applications use Ditolak status label", () => {
   assert.doesNotMatch(viewSource, /Tidak berjaya/);
 });
 
+test("applicant header no longer renders notification bell", () => {
+  assert.doesNotMatch(profileSource, /aria-label="Notifikasi"/);
+  assert.doesNotMatch(profileSource, /<Icon>notifications<\/Icon>/);
+});
+
 test("applicant rejected internship applications show application decision reason", () => {
   assert.match(viewSource, /const hrmDecisionTab = "Keputusan Permohonan"/);
   assert.match(viewSource, /function hasHrmFinalRejectionDecision\(application\)/);

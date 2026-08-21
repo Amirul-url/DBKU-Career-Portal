@@ -74,9 +74,6 @@ export default function SuperAdminShellPage() {
             <strong className="mt-1 block text-[17px] text-slate-950">{displayName}</strong>
           </div>
           <div className="profile-actions">
-            <button type="button" className="profile-icon-button" aria-label="Notifikasi">
-              <Icon>notifications</Icon>
-            </button>
             <details className="profile-account-menu">
               <summary className="profile-account-trigger" aria-label="Menu profil">
                 <span className="profile-user-chip">{profileChip}</span>
