@@ -129,7 +129,10 @@ test("applicant can submit acceptance confirmation after organization feedback",
   assert.match(viewSource, /extraTabs=\{organizationFeedbackSent \? \[organizationFeedbackTab, applicantConfirmationTab\] : \[\]\}/);
   assert.match(viewSource, /function ApplicantConfirmationTab/);
   assert.match(viewSource, /Muat Naik Dokumen/);
+  assert.match(viewSource, /Dokumen pengesahan pemohon[\s\S]*organization-feedback-required/);
+  assert.match(viewSource, /Wajib muat naik sekurang-kurangnya satu dokumen pengesahan penerimaan tawaran dalam format PDF\./);
   assert.match(viewSource, /applicantConfirmationDocuments/);
+  assert.match(viewSource, /disabled=\{isAgreed \|\| isSaving \|\| !selectedFiles\.length\}/);
   assert.match(viewSource, /Dengan ini, saya mengesahkan penerimaan tawaran menjalani latihan industri di Dewan Bandaraya Kuching Utara \(DBKU\)/);
   assert.match(viewSource, /Sekian, terima kasih atas perhatian dan kerjasama pihak puan\./);
   assert.match(viewSource, /function ApplicantConfirmationSendConfirmModal/);

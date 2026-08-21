@@ -617,8 +617,11 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
       <section className="organization-feedback-section" aria-label="Dokumen pengesahan pemohon">
         <div className="organization-feedback-section-header">
           <div className="organization-feedback-section-title">
-            <h3>Dokumen pengesahan pemohon</h3>
-            <p>Muat naik dokumen pengesahan penerimaan tawaran dalam format PDF.</p>
+            <h3>
+              Dokumen pengesahan pemohon
+              <span className="organization-feedback-required" aria-hidden="true">*</span>
+            </h3>
+            <p>Wajib muat naik sekurang-kurangnya satu dokumen pengesahan penerimaan tawaran dalam format PDF.</p>
           </div>
           <div className="organization-feedback-section-actions">
             <label className="organization-feedback-add">
@@ -710,7 +713,7 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
         {isAgreed ? <p className="organization-feedback-sent-note">Pengesahan penerimaan tawaran telah dihantar.</p> : null}
         <button
           className="hrm-primary organization-feedback-send"
-          disabled={isAgreed || isSaving}
+          disabled={isAgreed || isSaving || !selectedFiles.length}
           onClick={requestSubmitConfirmation}
           type="button"
         >
