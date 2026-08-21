@@ -35,12 +35,11 @@ def build_application_review_notification(application, next_status):
             ),
         },
         "rejected": {
-            "title": "Permohonan Tidak Layak",
+            "title": "Keputusan Permohonan Latihan Industri",
             "message": (
-                f"Permohonan anda dengan No. rujukan {application.reference_no} "
-                "telah ditanda tidak layak. Permohonan ini tidak boleh dikemaskini "
-                "semula. Sila buat permohonan baharu sekiranya ingin memohon "
-                "semula melalui Portal Kerjaya DBKU."
+                f"Dukacita dimaklumkan bahawa permohonan anda dengan No. rujukan {application.reference_no} "
+                "tidak berjaya dipertimbangkan buat masa ini. "
+                "Untuk maklumat lanjut, sila layari Portal Kerjaya DBKU."
             ),
         },
     }
