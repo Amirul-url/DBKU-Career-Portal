@@ -555,7 +555,7 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
   const isAgreed = hasApplicantAgreedToOffer(application);
   const documents = isAgreed
     ? savedDocuments
-    : selectedFiles.map((file, index) => ({ id: `${file.name}-${index}`, name: file.name, url: "" }));
+    : selectedFiles.map((file, index) => ({ file, id: `${file.name}-${index}`, name: file.name, url: "" }));
   const isPdfFile = (file) => file?.type === "application/pdf" || file?.name?.toLowerCase().endsWith(".pdf");
 
   const selectConfirmationFiles = (event) => {
@@ -580,6 +580,11 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
     setMessage("");
     setShowConfirmModal(true);
   };
+
+  function removeConfirmationFile(index) {
+    setSelectedFiles((current) => current.filter((_file, fileIndex) => fileIndex !== index));
+    setMessage("");
+  }
 
   const submitConfirmation = async () => {
     const payload = new FormData();
@@ -608,8 +613,15 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
   };
 
   const openConfirmationDocument = (document) => {
-    if (!document?.url) return;
-    openDocumentFile(document);
+    if (document?.url) {
+      openDocumentFile(document);
+      return;
+    }
+    if (!document?.file || typeof window === "undefined") return;
+
+    const previewUrl = URL.createObjectURL(document.file);
+    window.open(previewUrl, "_blank", "noopener,noreferrer");
+    window.setTimeout(() => URL.revokeObjectURL(previewUrl), 1000);
   };
 
   return (
@@ -681,13 +693,25 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
                         <button
                           aria-label={`Lihat ${document.name}`}
                           className="organization-feedback-icon-button organization-feedback-icon-button-view"
-                          disabled={!document.url}
+                          disabled={!document.url && !document.file}
                           onClick={() => openConfirmationDocument(document)}
                           title="Lihat fail"
                           type="button"
                         >
                           <Icon>visibility</Icon>
                         </button>
+                        {!isAgreed ? (
+                          <button
+                            aria-label={`Buang ${document.name}`}
+                            className="organization-feedback-icon-button organization-feedback-icon-button-remove-file"
+                            disabled={isSaving}
+                            onClick={() => removeConfirmationFile(index)}
+                            title="Buang fail"
+                            type="button"
+                          >
+                            <Icon>delete</Icon>
+                          </button>
+                        ) : null}
                       </div>
                     </td>
                   </tr>
