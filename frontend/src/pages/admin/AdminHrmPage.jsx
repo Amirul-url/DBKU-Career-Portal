@@ -193,7 +193,16 @@ const dashboardTypes = [
     applicationsLabel: "Permohonan Latihan Industri",
   },
 ];
-const applicationStatusKeys = ["submitted", "screening", "incomplete", "shortlisted", "rejected"];
+const applicationStatusKeys = [
+  "submitted",
+  "department_new",
+  "hrm_department_accepted",
+  "hrm_department_rejected",
+  "screening",
+  "incomplete",
+  "shortlisted",
+  "rejected",
+];
 const jobStatusOptions = [
   { value: "all", label: "Semua status" },
   { value: "active", label: "Aktif" },
@@ -268,6 +277,15 @@ function isDepartmentPendingDecisionApplication(application) {
   return Boolean(application?.assigned_department && !hasSubmittedDepartmentDecision(application));
 }
 
+function isDepartmentAcceptedApplication(application) {
+  return (
+    hasSubmittedDepartmentDecision(application) &&
+    getSavedDepartmentDecision(application).recommendation === "Terima" &&
+    (application?.status || "submitted") === "shortlisted" &&
+    !hasSubmittedHrmFinalDecision(application)
+  );
+}
+
 function isHrmPendingDepartmentDecisionApplication(application) {
   return Boolean(
     hasSubmittedDepartmentDecision(application) &&
@@ -297,6 +315,22 @@ function getInternshipApplicationDisplayStatus(application, isHrmWorkspace) {
   if (isHrmWorkspace && isHrmPendingDepartmentDecisionApplication(application)) return getHrmDepartmentDecisionStatus(application);
   if (!isHrmWorkspace && hasSubmittedDepartmentDecision(application)) return getHrmDepartmentDecisionStatus(application);
   if (!isHrmWorkspace && isDepartmentPendingDecisionApplication(application)) return "department_new";
+  return application?.status || "submitted";
+}
+
+function getInternshipDashboardStatus(application, isHrmWorkspace) {
+  if (hasApplicantAgreedToOffer(application)) return getApplicantAgreedInternshipStatus(application);
+  if (isDepartmentPendingDecisionApplication(application)) return "department_new";
+  if (isDepartmentAcceptedApplication(application)) return "hrm_department_accepted";
+  if (hasSubmittedDepartmentDecision(application) && !hasSubmittedHrmFinalDecision(application)) {
+    return getHrmDepartmentDecisionStatus(application);
+  }
+  return getInternshipApplicationDisplayStatus(application, isHrmWorkspace);
+}
+
+function getDashboardApplicationStatus(application, isHrmWorkspace) {
+  const vacancyType = application?.vacancy_detail?.vacancy_type;
+  if (vacancyType === "internship") return getInternshipDashboardStatus(application, isHrmWorkspace);
   return application?.status || "submitted";
 }
 
@@ -851,6 +885,7 @@ export default function AdminHrmPage() {
               <div className="hrm-grid hrm-dashboard-grid">
                 <RecentApplicationsPanel
                   applications={overallMetrics.applications}
+                  isHrmWorkspace={isHrmWorkspace}
                   onReview={setReview}
                 />
                 <aside className="hrm-dashboard-side">
@@ -869,7 +904,7 @@ export default function AdminHrmPage() {
                       onViewApplications: isHrmWorkspace ? () => openFilteredPanel(item.applicationsLabel, "Permohonan", item.type) : null,
                     }))}
                   />
-                  <StatusSummaryPanel applications={overallMetrics.applications} />
+                  <StatusSummaryPanel applications={overallMetrics.applications} isHrmWorkspace={isHrmWorkspace} />
                 </aside>
               </div>
             </>
@@ -1279,7 +1314,7 @@ function Stat({ icon, label, value, tone }) {
     </article>
   );
 }
-function RecentApplicationsPanel({ applications, onReview }) {
+function RecentApplicationsPanel({ applications, isHrmWorkspace, onReview }) {
   const [monthFilter, setMonthFilter] = useState("all");
   const [yearFilter, setYearFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
@@ -1340,7 +1375,13 @@ function RecentApplicationsPanel({ applications, onReview }) {
           </label>
         </div>
       </header>
-      <ApplicationTable applications={recentApplications.visibleApplications} onReview={onReview} compact />
+      <ApplicationTable
+        applications={recentApplications.visibleApplications}
+        compact
+        isHrmWorkspace={isHrmWorkspace}
+        onReview={onReview}
+        useDashboardStatus
+      />
       <footer className="hrm-recent-pagination">
         <span>
           {recentApplications.total
@@ -1414,7 +1455,7 @@ function DashboardChannelsPanel({ channels, subtitle = "Ringkasan jawatan DBKU d
     </section>
   );
 }
-function StatusSummaryPanel({ applications }) {
+function StatusSummaryPanel({ applications, isHrmWorkspace }) {
   return (
     <section className="hrm-card hrm-status-card">
       <header>
@@ -1425,7 +1466,7 @@ function StatusSummaryPanel({ applications }) {
       </header>
       <div className="hrm-status-list">
         {applicationStatusKeys.map((status) => {
-          const statusCount = applications.filter((app) => app.status === status).length;
+          const statusCount = applications.filter((app) => getDashboardApplicationStatus(app, isHrmWorkspace) === status).length;
           const statusPercent = applications.length ? Math.max(6, (statusCount / applications.length) * 100) : 0;
           return (
             <div key={status}>
@@ -3015,7 +3056,7 @@ function InternshipApplicationDetailPage({
     </section>
   );
 }
-function ApplicationTable({ applications, onReview, compact }) {
+function ApplicationTable({ applications, isHrmWorkspace = true, onReview, compact, useDashboardStatus = false }) {
   if (!applications.length)
     return (
       <p className="hrm-empty">
@@ -3037,52 +3078,55 @@ function ApplicationTable({ applications, onReview, compact }) {
           </tr>
         </thead>
         <tbody>
-          {applications.map((app) => (
-            <tr key={app.id}>
-              <td>
-                <strong>{app.applicant_name}</strong>
-                <small>{app.reference_no}</small>
-              </td>
-              <td>{app.vacancy_detail?.title || "—"}</td>
-              <td>
-                <Badge status={app.status} />
-              </td>
-              <td>{dateValue(app.submitted_at || app.created_at)}</td>
-              {!compact && (
+          {applications.map((app) => {
+            const displayStatus = useDashboardStatus ? getDashboardApplicationStatus(app, isHrmWorkspace) : app.status;
+            return (
+              <tr key={app.id}>
                 <td>
-                  <div className="hrm-actions">
-                    <button
-                      className="shortlist"
-                      onClick={() => onReview(app.id, "shortlisted")}
-                      disabled={["shortlisted", "rejected"].includes(
-                        app.status,
-                      )}
-                    >
-                      Hantar ke Bahagian
-                    </button>
-                    <button
-                      className="incomplete"
-                      onClick={() => onReview(app.id, "incomplete")}
-                      disabled={["shortlisted", "rejected"].includes(
-                        app.status,
-                      )}
-                    >
-                      Tidak Lengkap
-                    </button>
-                    <button
-                      className="reject"
-                      onClick={() => onReview(app.id, "rejected")}
-                      disabled={["shortlisted", "rejected"].includes(
-                        app.status,
-                      )}
-                    >
-                      Tidak Layak
-                    </button>
-                  </div>
+                  <strong>{app.applicant_name}</strong>
+                  <small>{app.reference_no}</small>
                 </td>
-              )}
-            </tr>
-          ))}
+                <td>{app.vacancy_detail?.title || "—"}</td>
+                <td>
+                  <Badge status={displayStatus} />
+                </td>
+                <td>{dateValue(app.submitted_at || app.created_at)}</td>
+                {!compact && (
+                  <td>
+                    <div className="hrm-actions">
+                      <button
+                        className="shortlist"
+                        onClick={() => onReview(app.id, "shortlisted")}
+                        disabled={["shortlisted", "rejected"].includes(
+                          app.status,
+                        )}
+                      >
+                        Hantar ke Bahagian
+                      </button>
+                      <button
+                        className="incomplete"
+                        onClick={() => onReview(app.id, "incomplete")}
+                        disabled={["shortlisted", "rejected"].includes(
+                          app.status,
+                        )}
+                      >
+                        Tidak Lengkap
+                      </button>
+                      <button
+                        className="reject"
+                        onClick={() => onReview(app.id, "rejected")}
+                        disabled={["shortlisted", "rejected"].includes(
+                          app.status,
+                        )}
+                      >
+                        Tidak Layak
+                      </button>
+                    </div>
+                  </td>
+                )}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

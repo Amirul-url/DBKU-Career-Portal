@@ -15,6 +15,15 @@ const isHrmVisibleApplication = (application) =>
 
 const isActiveVacancy = (job) => job?.is_open ?? job?.status === "open";
 
+const hasSubmittedDepartmentDecision = (application) =>
+  Boolean(application?.profile_data?.department_decision?.submitted_at);
+
+const isDepartmentWorkflowApplication = (application) =>
+  Boolean(application?.assigned_department || hasSubmittedDepartmentDecision(application));
+
+const isDashboardShortlistedApplication = (application) =>
+  application?.status === "shortlisted" && !isDepartmentWorkflowApplication(application);
+
 export function buildHrmDashboardMetrics(jobs = [], applications = []) {
   const visibleJobs = Array.isArray(jobs) ? jobs : [];
   const visibleApplications = (Array.isArray(applications) ? applications : []).filter(isHrmVisibleApplication);
@@ -32,7 +41,7 @@ export function buildHrmDashboardMetrics(jobs = [], applications = []) {
       jobs: typeJobs,
       new: typeApplications.filter((app) => app.status === "submitted").length,
       open: typeJobs.filter(isActiveVacancy).length,
-      shortlist: typeApplications.filter((app) => app.status === "shortlisted").length,
+      shortlist: typeApplications.filter(isDashboardShortlistedApplication).length,
       total: typeApplications.length,
     };
   };
@@ -43,7 +52,7 @@ export function buildHrmDashboardMetrics(jobs = [], applications = []) {
     jobs: visibleJobs,
     new: visibleApplications.filter((app) => app.status === "submitted").length,
     open: visibleJobs.filter(isActiveVacancy).length,
-    shortlist: visibleApplications.filter((app) => app.status === "shortlisted").length,
+    shortlist: visibleApplications.filter(isDashboardShortlistedApplication).length,
     total: visibleApplications.length,
   };
 

@@ -55,6 +55,35 @@ describe("buildHrmDashboardMetrics", () => {
     assert.equal(metrics.summary.totalApplications, 1);
     assert.equal(metrics.internship.total, 1);
   });
+
+  it("does not count department workflow internship applications as shortlisted", () => {
+    const metrics = buildHrmDashboardMetrics(
+      [{ id: 1, vacancy_type: "internship", status: "open", is_open: true }],
+      [
+        {
+          id: 1,
+          vacancy: 1,
+          status: "shortlisted",
+          assigned_department: "Bahagian Teknologi Maklumat (ICT)",
+        },
+        {
+          id: 2,
+          vacancy: 1,
+          status: "shortlisted",
+          assigned_department: "Bahagian Teknologi Maklumat (ICT)",
+          profile_data: {
+            department_decision: {
+              recommendation: "Terima",
+              submitted_at: "2026-08-21T00:00:00Z",
+            },
+          },
+        },
+      ],
+    );
+
+    assert.equal(metrics.summary.shortlist, 0);
+    assert.equal(metrics.internship.shortlist, 0);
+  });
 });
 
 describe("buildRecentApplicationsView", () => {

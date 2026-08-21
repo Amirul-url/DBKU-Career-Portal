@@ -57,6 +57,18 @@ test("department and HRM internship rows mark pending decision tasks as new", ()
   assert.match(source, /<Badge status=\{displayStatus\} \/>/);
 });
 
+test("HRM and department dashboards keep assignment status separate from shortlisted status", () => {
+  assert.match(source, /function isDepartmentAcceptedApplication\(application\)/);
+  assert.match(source, /function getInternshipDashboardStatus\(application, isHrmWorkspace\)/);
+  assert.match(source, /if \(isDepartmentPendingDecisionApplication\(application\)\) return "department_new"/);
+  assert.match(source, /if \(isDepartmentAcceptedApplication\(application\)\) return "hrm_department_accepted"/);
+  assert.match(source, /function getDashboardApplicationStatus\(application, isHrmWorkspace\)/);
+  assert.match(source, /return getInternshipDashboardStatus\(application, isHrmWorkspace\)/);
+  assert.match(source, /const displayStatus = useDashboardStatus \? getDashboardApplicationStatus\(app, isHrmWorkspace\) : app\.status/);
+  assert.match(source, /<StatusSummaryPanel applications=\{overallMetrics\.applications\} isHrmWorkspace=\{isHrmWorkspace\} \/>/);
+  assert.match(source, /applications\.filter\(\(app\) => getDashboardApplicationStatus\(app, isHrmWorkspace\) === status\)\.length/);
+});
+
 test("internship application table uses icon-only view actions", () => {
   assert.match(source, /<button className="view" type="button" aria-label="Lihat" title="Lihat" onClick=\{\(\) => onView\(application\)\}>/);
   assert.match(cssSource, /\.hrm-internship-applications-table \.hrm-badge \{[\s\S]*max-width: 122px;[\s\S]*text-align: center;[\s\S]*white-space: normal;/);
@@ -84,7 +96,7 @@ test("application table pagination centers page count with buttons", () => {
 });
 
 test("status summary card keeps long badges away from progress bars", () => {
-  assert.match(source, /function StatusSummaryPanel\(\{ applications \}\)/);
+  assert.match(source, /function StatusSummaryPanel\(\{ applications, isHrmWorkspace \}\)/);
   assert.match(source, /<span><Badge status=\{status\} \/><\/span>\s*<i><b style=\{\{ width: `\$\{statusPercent\}%` \}\} \/><\/i>/);
   assert.match(cssSource, /\.hrm-status-list > div \{[\s\S]*grid-template-columns: minmax\(160px, max-content\) minmax\(0, 1fr\) 24px;/);
   assert.match(cssSource, /\.hrm-status-list > div > span \{[\s\S]*min-width: 0;/);
