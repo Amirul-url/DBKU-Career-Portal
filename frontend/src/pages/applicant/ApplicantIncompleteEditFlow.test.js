@@ -97,6 +97,12 @@ test("applicant accepted applications stay hidden behind review status until HRM
   assert.match(viewSource, /<th>Tindakan<\/th>/);
   assert.match(viewSource, /className="organization-feedback-icon-button organization-feedback-icon-button-view"/);
   assert.match(viewSource, /aria-label=\{`Lihat \$\{document\.name\}`\}/);
+  assert.match(viewSource, /function renderDocumentRow\(document, documents, studentInfo\)/);
+  assert.match(viewSource, /className="organization-feedback-icon-button organization-feedback-icon-button-view"/);
+  assert.match(viewSource, /aria-label=\{`Lihat \$\{file\.name\}`\}/);
+  assert.match(viewSource, /title="Lihat fail"/);
+  assert.doesNotMatch(viewSource, /<Icon>visibility<\/Icon>\s*Lihat\s*<\/button>/);
+  assert.match(cssSource, /\.student-readonly-document-cell \.organization-feedback-icon-button \{/);
   assert.doesNotMatch(viewSource, /organizationFeedbackDate/);
   assert.doesNotMatch(viewSource, /Tarikh Maklumbalas/);
 });

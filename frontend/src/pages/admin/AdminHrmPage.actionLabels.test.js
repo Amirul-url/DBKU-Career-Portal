@@ -184,6 +184,9 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /\.\.\.\(isHrmWorkspace \? \[organizationFeedbackTab\] : \[\]\)/);
   assert.match(source, /const detailTabGroups = \[\s*\{ label: "Pemohon", tabs: applicantDetailTabs \},\s*\{ label: "Urusan Dalaman", tabs: extraTabs \},\s*\]/);
   assert.match(source, /tabGroups=\{detailTabGroups\}/);
+  assert.match(source, /import \{ InternshipApplicationReadOnlyPanel \} from "\.\.\/applicant\/ApplicantApplicationViewPage"/);
+  assert.match(source, /className="hrm-application-direct-panel"/);
+  assert.match(cssSource, /\.student-readonly-document-cell \.organization-feedback-icon-button \{/);
   assert.match(cssSource, /\.student-info-tabs-grouped \{[\s\S]*flex-direction: column;[\s\S]*align-items: stretch;/);
   assert.match(cssSource, /\.student-info-tab-group \{[\s\S]*display: grid;[\s\S]*grid-template-columns: 145px minmax\(0, 1fr\);[\s\S]*width: 100%;/);
   assert.match(cssSource, /\.student-info-tab-group \+ \.student-info-tab-group \{[\s\S]*border-top: 1px solid #e1f1e8;/);

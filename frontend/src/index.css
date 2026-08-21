@@ -7767,6 +7767,18 @@ body:has(.applicant-profile-page) {
   font-weight: 500;
 }
 
+.student-readonly-document-cell .organization-feedback-icon-button {
+  width: 42px;
+  min-height: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  gap: 0;
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  padding: 0;
+  color: #1769aa;
+}
+
 .student-readonly-document-cell button:disabled {
   border-color: #d7e8df;
   background: #f8fafc;

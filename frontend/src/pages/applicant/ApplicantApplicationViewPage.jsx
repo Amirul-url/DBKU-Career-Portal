@@ -302,13 +302,14 @@ function renderDocumentRow(document, documents, studentInfo) {
         {file.name}
       </span>
       <button
-        className="app-view-action"
+        aria-label={`Lihat ${file.name}`}
+        className="organization-feedback-icon-button organization-feedback-icon-button-view"
         disabled={!file.url && !file.isLegacyNameOnly}
-        type="button"
         onClick={() => openDocumentFile(file)}
+        title="Lihat fail"
+        type="button"
       >
         <Icon>visibility</Icon>
-        Lihat
       </button>
     </div>,
   );
