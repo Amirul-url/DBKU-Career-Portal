@@ -10447,7 +10447,9 @@ body:has(.applicant-profile-page) {
 
 .hrm-filter-reset {
   align-self: end;
+  margin-left: 8px;
   min-height: 42px;
+  min-width: 112px;
   white-space: nowrap;
   border: 1px solid #bfd8cb;
   border-radius: 7px;
@@ -11537,6 +11539,10 @@ body:has(.applicant-profile-page) {
   .hrm-manage-filters label,
   .hrm-filter-reset {
     width: 100%;
+  }
+
+  .hrm-filter-reset {
+    margin-left: 0;
   }
 
   .hrm-internship-detail-grid {

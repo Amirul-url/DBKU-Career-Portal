@@ -71,6 +71,12 @@ test("recent application pagination keeps controls evenly aligned", () => {
   assert.match(cssSource, /\.hrm-recent-pagination strong \{[\s\S]*min-width: 0;/);
 });
 
+test("internship filter reset button has breathing room after status filter", () => {
+  assert.match(source, /<button className="hrm-filter-reset" type="button" onClick=\{resetFilters\}>[\s\S]*Set semula/);
+  assert.match(cssSource, /\.hrm-filter-reset \{[\s\S]*margin-left: 8px;[\s\S]*min-width: 112px;/);
+  assert.match(cssSource, /@media \(max-width: 900px\) \{[\s\S]*\.hrm-filter-reset \{[\s\S]*margin-left: 0;/);
+});
+
 test("admin workspace labels and navigation follow the signed-in department", () => {
   assert.match(source, /getDepartmentWorkspaceLabel\(user\)/);
   assert.match(source, /getAdminShellRoleLabel\(user\)/);
