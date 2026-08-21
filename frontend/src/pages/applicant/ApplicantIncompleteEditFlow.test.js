@@ -211,10 +211,13 @@ test("read-only internship view shows passport photo before personal details tab
   assert.match(viewSource, /className="student-passport-upload student-passport-upload-readonly"/);
   assert.match(viewSource, /src=\{passportPhoto\.url\}/);
   assert.match(viewSource, /alt="Gambar pasport pemohon"/);
-  assert.match(viewSource, /openDocumentFile\(passportPhoto\)/);
+  assert.doesNotMatch(viewSource, /openDocumentFile\(passportPhoto\)/);
+  assert.doesNotMatch(viewSource, /className="student-passport-readonly-meta"/);
+  assert.doesNotMatch(viewSource, /Gambar pasport belum tersedia/);
+  assert.doesNotMatch(viewSource, /Sila pastikan gambar yang dimuatnaik adalah dalam format \.jpg/);
   assert.match(viewSource, /renderReadOnlyPassportPhoto\(documents, studentInfo\)/);
   assert.match(cssSource, /\.student-info-photo-card-readonly \{/);
-  assert.match(cssSource, /\.student-passport-readonly-meta \{/);
+  assert.doesNotMatch(cssSource, /\.student-passport-readonly-meta \{/);
   assert.ok(
     viewSource.indexOf("{renderReadOnlyPassportPhoto(documents, studentInfo)}") <
       viewSource.indexOf('<div className="student-personal-table-wrap">'),

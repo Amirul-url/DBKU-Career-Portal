@@ -310,8 +310,6 @@ function getPassportPhotoDocument(documents, studentInfo) {
 function renderReadOnlyPassportPhoto(documents, studentInfo) {
   const passportPhoto = getPassportPhotoDocument(documents, studentInfo);
   const hasPreview = Boolean(passportPhoto.url);
-  const hasFile = hasPreview || passportPhoto.isLegacyNameOnly;
-  const fileName = hasFile ? passportPhoto.name : "Gambar pasport belum tersedia";
 
   return (
     <section className="student-info-photo-card student-info-photo-card-readonly" aria-label="Gambar pasport pemohon">
@@ -328,23 +326,6 @@ function renderReadOnlyPassportPhoto(documents, studentInfo) {
           </span>
         )}
       </div>
-      <div className="student-passport-readonly-meta">
-        <span title={fileName}>{fileName}</span>
-        <button
-          aria-label={`Lihat ${fileName}`}
-          className="organization-feedback-icon-button organization-feedback-icon-button-view"
-          disabled={!hasFile}
-          onClick={() => openDocumentFile(passportPhoto)}
-          title="Lihat fail"
-          type="button"
-        >
-          <Icon>visibility</Icon>
-        </button>
-      </div>
-      <p>
-        <strong>Nota</strong>
-        <span>Sila pastikan gambar yang dimuatnaik adalah dalam format .jpg</span>
-      </p>
     </section>
   );
 }
