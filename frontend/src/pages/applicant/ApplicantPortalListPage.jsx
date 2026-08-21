@@ -16,6 +16,7 @@ const statusLabels = {
   incomplete: "Tidak Lengkap",
   rejected: "Ditolak",
   accepted: "Dalam semakan",
+  offered: "Pengesahan Pemohon",
   screening: "Dalam semakan",
   shortlisted: "Disenarai pendek",
   submitted: "Dihantar",
@@ -104,7 +105,7 @@ function hasOrganizationFeedbackBeenSent(application) {
 }
 
 function hasNewOrganizationFeedbackForApplicant(application) {
-  return (application?.status || "") === "accepted" && hasOrganizationFeedbackBeenSent(application) && !hasApplicantAgreedToOffer(application);
+  return (application?.status || "") === "offered" && hasOrganizationFeedbackBeenSent(application) && !hasApplicantAgreedToOffer(application);
 }
 
 function hasApplicantAgreedToOffer(application) {
@@ -143,6 +144,7 @@ function isPendingDepartmentReview(application) {
 
 function getApplicantVisibleStatus(status, application = null) {
   if (hasApplicantAgreedToOffer(application)) return getApplicantAgreedInternshipStatus(application);
+  if (status === "accepted" && hasOrganizationFeedbackBeenSent(application)) return "offered";
   if (status === "shortlisted" && hasAcceptedDepartmentRecommendation(application)) return "shortlisted";
   if (isPendingDepartmentReview(application)) return "screening";
   if (application?.assigned_department && hasSubmittedDepartmentDecision(application) && status === "shortlisted") return "screening";
@@ -154,7 +156,8 @@ function getApplicantStatusLabel(status, application = null) {
     const lifecycleStatus = getApplicantAgreedInternshipStatus(application);
     return applicantInternshipLifecycleStatusLabels[lifecycleStatus] || "Pengesahan Dihantar";
   }
-  if (status === "accepted" && hasOrganizationFeedbackBeenSent(application)) return "Diterima";
+  if (status === "offered") return "Pengesahan Pemohon";
+  if (status === "accepted" && hasOrganizationFeedbackBeenSent(application)) return "Pengesahan Pemohon";
   return statusLabels[getApplicantVisibleStatus(status, application)] || status;
 }
 
@@ -234,7 +237,7 @@ function ApplicationList({ applications, loading }) {
               <option value="all">Semua status</option>
               {statusOptions.map((status) => (
                 <option key={status} value={status}>
-                  {status === "accepted" ? "Diterima" : applicantInternshipLifecycleStatusLabels[status] || statusLabels[status] || status}
+                  {applicantInternshipLifecycleStatusLabels[status] || statusLabels[status] || status}
                 </option>
               ))}
             </select>

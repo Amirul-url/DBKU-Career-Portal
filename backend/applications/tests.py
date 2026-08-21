@@ -358,7 +358,7 @@ class CandidateApplicationReferenceNoTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         application.refresh_from_db()
-        self.assertEqual(application.status, "accepted")
+        self.assertEqual(application.status, "offered")
         notification = Notification.objects.get(application=application, user=applicant)
         self.assertEqual(notification.title, "Permohonan Latihan Industri Berjaya")
         self.assertIn(application.reference_no, notification.message)
@@ -374,7 +374,7 @@ class CandidateApplicationReferenceNoTests(TestCase):
         application = CandidateApplication.objects.create(
             applicant=applicant,
             vacancy=self.vacancy,
-            status="accepted",
+            status="offered",
             profile_data={
                 "organization_feedback_release": {
                     "internship_period": "16 Mac 2026 - 29 Ogos 2026",
@@ -405,6 +405,30 @@ class CandidateApplicationReferenceNoTests(TestCase):
         self.assertEqual(len(documents), 1)
         self.assertEqual(documents[0]["name"], "pengesahan-pemohon.pdf")
         self.assertIn("/media/applicant_confirmation_documents/", documents[0]["url"])
+
+    def test_applicant_can_reject_released_internship_offer(self):
+        applicant = self.create_applicant("reject-offer-target@example.com")
+        application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=self.vacancy,
+            status="offered",
+            profile_data={
+                "organization_feedback_release": {
+                    "internship_period": "16 Mac 2026 - 29 Ogos 2026",
+                    "sent_to_applicant_at": "2026-08-20T08:00:00+08:00",
+                },
+            },
+        )
+        client = APIClient()
+        client.force_authenticate(user=applicant)
+
+        response = client.post(f"/api/applications/{application.id}/reject-offer/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["status"], "rejected")
+        confirmation = response.data["profile_data"]["applicant_confirmation"]
+        self.assertEqual(confirmation["status"], "rejected")
+        self.assertIn("submitted_at", confirmation)
 
     def test_staff_application_list_excludes_drafts(self):
         applicant = self.create_applicant("hidden-draft@example.com")

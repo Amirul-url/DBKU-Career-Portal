@@ -38,6 +38,7 @@ const statusLabels = {
   incomplete: "Tidak Lengkap",
   rejected: "Ditolak",
   accepted: "Dalam semakan",
+  offered: "Pengesahan Pemohon",
   screening: "Dalam semakan",
   shortlisted: "Disenarai pendek",
   submitted: "Dihantar",
@@ -45,6 +46,7 @@ const statusLabels = {
 };
 
 function getApplicantVisibleStatus(status, maskAcceptedStatus = true, application = null) {
+  if (status === "accepted" && hasOrganizationFeedbackBeenSent(application) && !hasApplicantAgreedToOffer(application)) return "offered";
   if (status === "shortlisted" && hasAcceptedDepartmentRecommendation(application)) return "shortlisted";
   if (isPendingDepartmentReview(application)) return "screening";
   if (application?.assigned_department && hasSubmittedDepartmentDecision(application) && status === "shortlisted") return "screening";
@@ -53,6 +55,10 @@ function getApplicantVisibleStatus(status, maskAcceptedStatus = true, applicatio
 
 function hasApplicantAgreedToOffer(application) {
   return application?.profile_data?.applicant_confirmation?.status === "agreed";
+}
+
+function hasApplicantRejectedOffer(application) {
+  return application?.profile_data?.applicant_confirmation?.status === "rejected";
 }
 
 function hasSubmittedDepartmentDecision(application) {
@@ -73,7 +79,7 @@ function getReadOnlyStatusLabel(status, maskAcceptedStatus, application = null) 
     const lifecycleStatus = getApplicantAgreedInternshipStatus(application);
     return applicantInternshipLifecycleStatusLabels[lifecycleStatus] || "Pengesahan Dihantar";
   }
-  if (!maskAcceptedStatus && status === "accepted") return "Diterima";
+  if (hasApplicantRejectedOffer(application)) return "Ditolak";
   const visibleStatus = getApplicantVisibleStatus(status, maskAcceptedStatus, application);
   return statusLabels[visibleStatus] || visibleStatus;
 }
@@ -602,7 +608,14 @@ function ApplicantOrganizationFeedbackTab({ application, onNext }) {
   );
 }
 
-function ApplicantConfirmationSendConfirmModal({ isSaving, onCancel, onConfirm }) {
+function ApplicantConfirmationSendConfirmModal({
+  confirmLabel = "Ya",
+  isSaving,
+  message = "Anda yakin mahu menghantar pengesahan penerimaan tawaran ini?",
+  onCancel,
+  onConfirm,
+  title = "Hantar pengesahan?",
+}) {
   return (
     <div className="profile-confirm-overlay" role="presentation">
       <section
@@ -611,14 +624,14 @@ function ApplicantConfirmationSendConfirmModal({ isSaving, onCancel, onConfirm }
         aria-modal="true"
         aria-labelledby="applicant-confirmation-send-title"
       >
-        <h2 id="applicant-confirmation-send-title">Hantar pengesahan?</h2>
-        <p>Anda yakin mahu menghantar pengesahan penerimaan tawaran ini?</p>
+        <h2 id="applicant-confirmation-send-title">{title}</h2>
+        <p>{message}</p>
         <div>
           <button className="profile-confirm-secondary" disabled={isSaving} onClick={onCancel} type="button">
             Tidak
           </button>
           <button className="profile-confirm-primary" disabled={isSaving} onClick={onConfirm} type="button">
-            {isSaving ? "Menghantar..." : "Ya"}
+            {isSaving ? "Menghantar..." : confirmLabel}
           </button>
         </div>
       </section>
@@ -636,7 +649,10 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
   const [message, setMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
   const isAgreed = confirmationState.isAgreed;
+  const isRejected = hasApplicantRejectedOffer(application);
+  const hasResponded = isAgreed || isRejected;
   const documents = isAgreed
     ? confirmationState.documents
     : selectedFiles.map((file, index) => ({ file, id: `${file.name}-${index}`, name: file.name, url: "" }));
@@ -656,13 +672,19 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
   };
 
   const requestSubmitConfirmation = () => {
-    if (isAgreed) return;
+    if (hasResponded) return;
     if (!selectedFiles.length) {
       setMessage("Sila muat naik sekurang-kurangnya satu dokumen pengesahan sebelum hantar.");
       return;
     }
     setMessage("");
     setShowConfirmModal(true);
+  };
+
+  const requestRejectConfirmation = () => {
+    if (hasResponded) return;
+    setMessage("");
+    setShowRejectModal(true);
   };
 
   function removeConfirmationFile(index) {
@@ -699,6 +721,23 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
     }
   };
 
+  const rejectConfirmation = async () => {
+    setIsSaving(true);
+    setMessage("");
+    try {
+      const updatedApplication = await apiRequest(`/applications/${application.id}/reject-offer/`, {
+        method: "POST",
+      });
+      setShowRejectModal(false);
+      setMessage("Penolakan tawaran telah dihantar.");
+      onConfirmed?.(updatedApplication);
+    } catch (error) {
+      setMessage(error.message || "Penolakan tawaran gagal dihantar.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const openConfirmationDocument = (document) => {
     if (document?.url) {
       openDocumentFile(document);
@@ -730,7 +769,7 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
                 key={fileInputKey}
                 accept="application/pdf,.pdf"
                 className="organization-feedback-hidden-input"
-                disabled={isAgreed || isSaving}
+                disabled={hasResponded || isSaving}
                 multiple
                 name="applicantConfirmationDocuments"
                 onChange={selectConfirmationFiles}
@@ -787,7 +826,7 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
                         >
                           <Icon>visibility</Icon>
                         </button>
-                        {!isAgreed ? (
+                        {!hasResponded ? (
                           <button
                             aria-label={`Buang ${document.name}`}
                             className="organization-feedback-icon-button organization-feedback-icon-button-remove-file"
@@ -822,13 +861,24 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
 
       <footer className="organization-feedback-send-actions">
         {isAgreed ? <p className="organization-feedback-sent-note">Pengesahan penerimaan tawaran telah dihantar.</p> : null}
+        {isRejected ? <p className="organization-feedback-sent-note">Penolakan tawaran telah dihantar.</p> : null}
+        {!hasResponded ? (
+          <button
+            className="hrm-danger organization-feedback-send"
+            disabled={isSaving}
+            onClick={requestRejectConfirmation}
+            type="button"
+          >
+            Tolak Tawaran
+          </button>
+        ) : null}
         <button
           className="hrm-primary organization-feedback-send"
-          disabled={isAgreed || isSaving || !selectedFiles.length}
+          disabled={hasResponded || isSaving || !selectedFiles.length}
           onClick={requestSubmitConfirmation}
           type="button"
         >
-          {isSaving ? "Menghantar..." : isAgreed ? "Telah dihantar" : <span>Hantar</span>}
+          {isSaving ? "Menghantar..." : hasResponded ? "Telah dihantar" : <span>Hantar</span>}
         </button>
       </footer>
 
@@ -837,6 +887,16 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
           isSaving={isSaving}
           onCancel={() => setShowConfirmModal(false)}
           onConfirm={submitConfirmation}
+        />
+      ) : null}
+      {showRejectModal ? (
+        <ApplicantConfirmationSendConfirmModal
+          confirmLabel="Ya, Tolak"
+          isSaving={isSaving}
+          message="Anda yakin mahu menolak tawaran latihan industri ini?"
+          onCancel={() => setShowRejectModal(false)}
+          onConfirm={rejectConfirmation}
+          title="Tolak tawaran?"
         />
       ) : null}
     </div>

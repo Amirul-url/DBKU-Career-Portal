@@ -65,16 +65,18 @@ test("applicant view action opens rejected applications on the application decis
 
 test("applicant accepted applications stay hidden behind review status until HRM notification", () => {
   assert.match(listSource, /accepted: "Dalam semakan"/);
+  assert.match(listSource, /offered: "Pengesahan Pemohon"/);
   assert.match(viewSource, /accepted: "Dalam semakan"/);
+  assert.match(viewSource, /offered: "Pengesahan Pemohon"/);
   assert.match(listSource, /function hasOrganizationFeedbackBeenSent\(application\)/);
   assert.match(listSource, /function getApplicantVisibleStatus\(status, application = null\)/);
   assert.match(listSource, /status === "accepted" && !hasOrganizationFeedbackBeenSent\(application\) \? "screening" : status/);
   assert.match(listSource, /function getApplicantStatusLabel\(status, application = null\)/);
-  assert.match(listSource, /status === "accepted" && hasOrganizationFeedbackBeenSent\(application\)\) return "Diterima"/);
+  assert.match(listSource, /if \(status === "offered"\) return "Pengesahan Pemohon"/);
   assert.match(listSource, /getApplicantStatusLabel\(status, application\)/);
   assert.match(viewSource, /maskAcceptedStatus = true/);
   assert.match(viewSource, /maskAcceptedStatus && status === "accepted" \? "screening" : status/);
-  assert.match(viewSource, /!maskAcceptedStatus && status === "accepted"\) return "Diterima"/);
+  assert.match(viewSource, /offered: "Pengesahan Pemohon"/);
   assert.match(viewSource, /const organizationFeedbackTab = "Maklumbalas Organisasi"/);
   assert.match(viewSource, /tabGroups = \[\]/);
   assert.match(viewSource, /student-info-tabs-grouped/);
@@ -155,7 +157,7 @@ test("applicant internship department workflow statuses stay applicant friendly"
 
 test("applicant organization feedback notification shows red badges", () => {
   assert.match(listSource, /function hasNewOrganizationFeedbackForApplicant\(application\)/);
-  assert.match(listSource, /\(application\?\.status \|\| ""\) === "accepted" && hasOrganizationFeedbackBeenSent\(application\) && !hasApplicantAgreedToOffer\(application\)/);
+  assert.match(listSource, /\(application\?\.status \|\| ""\) === "offered" && hasOrganizationFeedbackBeenSent\(application\) && !hasApplicantAgreedToOffer\(application\)/);
   assert.match(listSource, /const newApplicationFeedbackCount = useMemo/);
   assert.match(listSource, /displayApplications\.filter\(hasNewOrganizationFeedbackForApplicant\)\.length/);
   assert.match(listSource, /applicationBadgeCount=\{newApplicationFeedbackCount\}/);
@@ -209,7 +211,7 @@ test("applicant can submit acceptance confirmation after organization feedback",
   assert.match(viewSource, /organization-feedback-icon-button organization-feedback-icon-button-remove-file/);
   assert.match(viewSource, /aria-label=\{`Buang \$\{document\.name\}`\}/);
   assert.match(viewSource, /disabled=\{!document\.url && !document\.file\}/);
-  assert.match(viewSource, /disabled=\{isAgreed \|\| isSaving \|\| !selectedFiles\.length\}/);
+  assert.match(viewSource, /disabled=\{hasResponded \|\| isSaving \|\| !selectedFiles\.length\}/);
   assert.match(viewSource, /Dengan ini, saya mengesahkan penerimaan tawaran menjalani latihan industri di Dewan Bandaraya Kuching Utara \(DBKU\)/);
   assert.match(viewSource, /Sekian, terima kasih atas perhatian dan kerjasama pihak puan\./);
   assert.match(viewSource, /function ApplicantConfirmationSendConfirmModal/);
@@ -219,6 +221,8 @@ test("applicant can submit acceptance confirmation after organization feedback",
   assert.match(cssSource, /background: transparent;/);
   assert.match(cssSource, /padding: 0;/);
   assert.match(viewSource, /\/confirm-offer\//);
+  assert.match(viewSource, /\/reject-offer\//);
+  assert.match(viewSource, /Tolak Tawaran/);
   assert.match(viewSource, /function handleApplicantConfirmationSent\(updatedApplication\)/);
   assert.match(viewSource, /setApplication\(updatedApplication\)/);
   assert.match(viewSource, /navigate\(APPLICANT_ROUTES\.applications\)/);

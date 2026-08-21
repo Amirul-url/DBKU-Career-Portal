@@ -45,7 +45,7 @@ test("department and HRM internship rows mark pending decision tasks as new", ()
   assert.match(source, /function isHrmPendingDepartmentDecisionApplication\(application\)/);
   assert.match(source, /function isHrmNewApplication\(application\)/);
   assert.match(source, /function getHrmDepartmentDecisionStatus\(application\)/);
-  assert.match(source, /if \(hasOrganizationFeedbackBeenSent\(application\)\) return "accepted"/);
+  assert.match(source, /if \(hasOrganizationFeedbackBeenSent\(application\)\) return "offered"/);
   assert.match(source, /return Boolean\(application\?\.assigned_department && !hasSubmittedDepartmentDecision\(application\)\)/);
   assert.match(source, /!\s*hasSubmittedHrmFinalDecision\(application\)/);
   assert.match(source, /\(application\?\.status \|\| "submitted"\) === "submitted" \|\|\s*isHrmPendingDepartmentDecisionApplication\(application\)/);
@@ -53,7 +53,7 @@ test("department and HRM internship rows mark pending decision tasks as new", ()
   assert.match(source, /if \(!isHrmWorkspace\) \{\s*return applications\.filter\(isDepartmentPendingDecisionApplication\)\.length;\s*\}/);
   assert.match(source, /return applications\.filter\(isHrmNewApplication\)\.length;/);
   assert.match(source, /function getInternshipApplicationDisplayStatus\(application, isHrmWorkspace\)/);
-  assert.match(source, /if \(hasOrganizationFeedbackBeenSent\(application\)\) return "accepted"/);
+  assert.match(source, /if \(hasOrganizationFeedbackBeenSent\(application\)\) return "offered"/);
   assert.match(source, /if \(isHrmWorkspace && isDepartmentPendingDecisionApplication\(application\)\) return "department_new"/);
   assert.match(source, /return getHrmDepartmentDecisionStatus\(application\)/);
   assert.match(source, /return "department_new"/);
@@ -69,7 +69,7 @@ test("department and HRM internship rows mark pending decision tasks as new", ()
 test("HRM and department dashboards keep assignment status separate from shortlisted status", () => {
   assert.match(source, /function isDepartmentAcceptedApplication\(application\)/);
   assert.match(source, /function getInternshipDashboardStatus\(application, isHrmWorkspace\)/);
-  assert.match(source, /if \(hasOrganizationFeedbackBeenSent\(application\)\) return "accepted"/);
+  assert.match(source, /if \(hasOrganizationFeedbackBeenSent\(application\)\) return "offered"/);
   assert.match(source, /if \(isDepartmentPendingDecisionApplication\(application\)\) return "department_new"/);
   assert.match(source, /if \(isDepartmentAcceptedApplication\(application\)\) return "hrm_department_accepted"/);
   assert.match(source, /function getDashboardApplicationStatus\(application, isHrmWorkspace\)/);
@@ -232,7 +232,7 @@ test("HRM makes the final internship decision after department recommendation", 
 
 test("HRM uses organization feedback after department accepts an internship application", () => {
   assert.match(source, /const departmentRecommendation = getSavedDepartmentDecision\(application\)\.recommendation \|\| ""/);
-  assert.match(source, /const shouldShowOrganizationFeedback =\s*isHrmWorkspace &&\s*\(departmentRecommendation === "Terima" \|\| application\?\.status === "accepted"\)/);
+  assert.match(source, /const shouldShowOrganizationFeedback =\s*isHrmWorkspace &&\s*\(departmentRecommendation === "Terima" \|\| application\?\.status === "offered" \|\| application\?\.status === "accepted"\)/);
   assert.match(source, /const shouldShowHrmFinalDecision = isHrmWorkspace && \(needsFinalDecision \|\| hasFinalRejectionDecision\)/);
   assert.doesNotMatch(source, /const shouldShowOrganizationFeedback = isHrmWorkspace && application\?\.status === "accepted"/);
 });
@@ -283,7 +283,7 @@ test("HRM and department decision tabs keep draft selections in local state unti
 test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /const organizationFeedbackTab = "Maklumbalas Organisasi"/);
   assert.match(source, /const applicantDetailTabs = \["Maklumat Peribadi Pemohon", "Maklumat Akademik", "Dokumen Sokongan"\]/);
-  assert.match(source, /const shouldShowOrganizationFeedback =\s*isHrmWorkspace &&\s*\(departmentRecommendation === "Terima" \|\| application\?\.status === "accepted"\)/);
+  assert.match(source, /const shouldShowOrganizationFeedback =\s*isHrmWorkspace &&\s*\(departmentRecommendation === "Terima" \|\| application\?\.status === "offered" \|\| application\?\.status === "accepted"\)/);
   assert.match(source, /\.\.\.\(shouldShowOrganizationFeedback \? \[organizationFeedbackTab\] : \[\]\)/);
   assert.match(source, /const detailTabGroups = \[\s*\{ label: "Pemohon", tabs: applicantDetailTabs \},\s*\{ label: "Urusan Dalaman", tabs: extraTabs \},\s*\]/);
   assert.match(source, /tabGroups=\{detailTabGroups\}/);
@@ -378,7 +378,7 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /onSaveOrganizationFeedbackDocument=\{saveOrganizationFeedbackDocument\}/);
   assert.match(source, /onSaveDocument=\{onSaveOrganizationFeedbackDocument\}/);
   assert.match(source, /const sendOrganizationFeedbackToApplicant = async/);
-  assert.match(source, /body: JSON\.stringify\(\{ status: "accepted", profile_data: profileData \}\)/);
+  assert.match(source, /body: JSON\.stringify\(\{ status: "offered", profile_data: profileData \}\)/);
   assert.match(source, /organization_feedback_release:/);
   assert.match(source, /report_date: feedback\.reportDate \|\| organizationFeedbackReportDefaults\.date/);
   assert.match(source, /report_time: feedback\.reportTime \|\| organizationFeedbackReportDefaults\.time/);

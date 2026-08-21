@@ -82,7 +82,7 @@ const statusLabel = {
   incomplete: "Tidak Lengkap",
   shortlisted: "Disenarai pendek",
   interview: "Temu duga",
-  offered: "Tawaran",
+  offered: "Pengesahan Pemohon",
   accepted: "Diterima",
   rejected: "Ditolak",
   withdrawn: "Ditarik balik",
@@ -101,7 +101,7 @@ const statusClass = {
   incomplete: "amber",
   shortlisted: "green",
   interview: "violet",
-  offered: "green",
+  offered: "blue",
   accepted: "green",
   rejected: "red",
   withdrawn: "slate",
@@ -307,7 +307,7 @@ function isHrmNewApplication(application) {
 }
 
 function getHrmDepartmentDecisionStatus(application) {
-  if (hasOrganizationFeedbackBeenSent(application)) return "accepted";
+  if (hasOrganizationFeedbackBeenSent(application)) return "offered";
   const recommendation = getSavedDepartmentDecision(application).recommendation;
   if (recommendation === "Terima") return "hrm_department_accepted";
   if (recommendation === "Tolak") return "hrm_department_rejected";
@@ -318,7 +318,7 @@ function getHrmDepartmentDecisionStatus(application) {
 
 function getInternshipApplicationDisplayStatus(application, isHrmWorkspace) {
   if (hasApplicantAgreedToOffer(application)) return getApplicantAgreedInternshipStatus(application);
-  if (hasOrganizationFeedbackBeenSent(application)) return "accepted";
+  if (hasOrganizationFeedbackBeenSent(application)) return "offered";
   if (isHrmWorkspace && isDepartmentPendingDecisionApplication(application)) return "department_new";
   if (isHrmWorkspace && isHrmPendingDepartmentDecisionApplication(application)) return getHrmDepartmentDecisionStatus(application);
   if (!isHrmWorkspace && hasSubmittedDepartmentDecision(application)) return getHrmDepartmentDecisionStatus(application);
@@ -328,7 +328,7 @@ function getInternshipApplicationDisplayStatus(application, isHrmWorkspace) {
 
 function getInternshipDashboardStatus(application, isHrmWorkspace) {
   if (hasApplicantAgreedToOffer(application)) return getApplicantAgreedInternshipStatus(application);
-  if (hasOrganizationFeedbackBeenSent(application)) return "accepted";
+  if (hasOrganizationFeedbackBeenSent(application)) return "offered";
   if (isDepartmentPendingDecisionApplication(application)) return "department_new";
   if (isDepartmentAcceptedApplication(application)) return "hrm_department_accepted";
   if (hasSubmittedDepartmentDecision(application) && !hasSubmittedHrmFinalDecision(application)) {
@@ -552,7 +552,7 @@ export default function AdminHrmPage() {
     const updatedApplication = await apiRequest(`/applications/${application.id}/`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "accepted", profile_data: profileData }),
+      body: JSON.stringify({ status: "offered", profile_data: profileData }),
     });
     setApplications((current) =>
       current.map((item) => (String(item.id) === String(updatedApplication.id) ? updatedApplication : item)),
@@ -3007,7 +3007,7 @@ function InternshipApplicationDetailPage({
   const shouldShowHrmFinalDecision = isHrmWorkspace && (needsFinalDecision || hasFinalRejectionDecision);
   const shouldShowOrganizationFeedback =
     isHrmWorkspace &&
-    (departmentRecommendation === "Terima" || application?.status === "accepted");
+    (departmentRecommendation === "Terima" || application?.status === "offered" || application?.status === "accepted");
   const extraTabs = [
     ...(isHrmWorkspace ? [hrmReviewTab] : []),
     ...(shouldShowDepartmentDecision ? [departmentDecisionTab] : []),

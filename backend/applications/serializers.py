@@ -380,7 +380,8 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
                 "Dewan Bandaraya Kuching Utara (DBKU) seperti yang dinyatakan.",
         }
         instance.profile_data = profile_data
-        instance.save(update_fields=["profile_data", "updated_at"])
+        instance.status = "accepted"
+        instance.save(update_fields=["status", "profile_data", "updated_at"])
         return instance
 
     def delete_organization_feedback_document_by_id(self, instance, document_id):
@@ -484,8 +485,8 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
             and has_organization_feedback_been_released(instance.profile_data)
         )
         if organization_feedback_was_just_released:
-            if instance.status != "accepted":
-                instance.status = "accepted"
+            if instance.status != "offered":
+                instance.status = "offered"
                 instance.save(update_fields=["status", "updated_at"])
             notify_organization_feedback_released(instance)
         return instance

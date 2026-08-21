@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -95,7 +96,7 @@ class CandidateApplicationViewSet(viewsets.ModelViewSet):
         application = self.get_object()
         if application.applicant_id != request.user.id:
             return Response({"detail": "Hanya pemohon boleh membuat pengesahan tawaran ini."}, status=403)
-        if application.status != "accepted":
+        if application.status not in {"offered", "accepted"}:
             return Response(
                 {"detail": "Pengesahan hanya boleh dihantar selepas tawaran diterima."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -125,6 +126,37 @@ class CandidateApplicationViewSet(viewsets.ModelViewSet):
             uploads,
             submitted_by=request.user.get_full_name() or request.user.email,
         )
+        return Response(self.get_serializer(application).data)
+
+    @action(detail=True, methods=["post"], url_path="reject-offer")
+    def reject_offer(self, request, pk=None):
+        application = self.get_object()
+        if application.applicant_id != request.user.id:
+            return Response({"detail": "Hanya pemohon boleh membuat pengesahan tawaran ini."}, status=403)
+        if application.status not in {"offered", "accepted"}:
+            return Response(
+                {"detail": "Penolakan hanya boleh dihantar selepas tawaran diterima."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        profile_data = dict(application.profile_data or {})
+        feedback_release = profile_data.get("organization_feedback_release") or {}
+        if not feedback_release.get("sent_to_applicant_at"):
+            return Response(
+                {"detail": "Maklumbalas organisasi belum dihantar kepada pemohon."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        profile_data["applicant_confirmation"] = {
+            **(profile_data.get("applicant_confirmation") or {}),
+            "status": "rejected",
+            "submitted_at": timezone.now().isoformat(),
+            "submitted_by": request.user.get_full_name() or request.user.email,
+            "statement": "Pemohon menolak tawaran menjalani latihan industri di DBKU.",
+        }
+        application.profile_data = profile_data
+        application.status = "rejected"
+        application.save(update_fields=["status", "profile_data", "updated_at"])
         return Response(self.get_serializer(application).data)
 
     @action(detail=True, methods=["post"])
