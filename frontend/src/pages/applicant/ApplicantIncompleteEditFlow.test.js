@@ -190,6 +190,12 @@ test("internship personal tab shows passport upload before personal details tabl
   assert.match(formSource, /accept="\.jpg,\s*\.jpeg,\s*image\/jpeg"/);
   assert.match(formSource, /updateDocument\("passportPhotoFile"\)/);
   assert.match(formSource, /clearDocument\("passportPhotoFile"\)/);
+  assert.match(formSource, /passportPhotoPreviewUrlRef = useRef\(""\)/);
+  assert.match(formSource, /URL\.createObjectURL\(file\)/);
+  assert.match(formSource, /URL\.revokeObjectURL\(passportPhotoPreviewUrlRef\.current\)/);
+  assert.match(formSource, /src=\{passportPhotoPreviewUrl\}/);
+  assert.match(formSource, /alt="Gambar pasport dimuat naik"/);
+  assert.match(cssSource, /\.student-info-photo-card \{[\s\S]*margin-bottom: 34px;/);
   assert.ok(
     formSource.indexOf("{renderPassportPhotoUpload()}") <
       formSource.indexOf('<div className="student-personal-table-wrap">'),

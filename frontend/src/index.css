@@ -7250,6 +7250,7 @@ body:has(.applicant-profile-page) {
   display: grid;
   justify-items: center;
   gap: 18px;
+  margin-bottom: 34px;
   padding-top: 24px;
 }
 

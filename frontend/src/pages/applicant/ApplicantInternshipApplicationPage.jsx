@@ -712,8 +712,10 @@ export default function ApplicantInternshipApplicationPage() {
   const [noticeStatus, setNoticeStatus] = useState("success");
   const [validationErrors, setValidationErrors] = useState({});
   const documentInputRefs = useRef({});
+  const passportPhotoPreviewUrlRef = useRef("");
   const [studentInfo, setStudentInfo] = useState(() => initialStudentInfo);
   const [documentFiles, setDocumentFiles] = useState({});
+  const [passportPhotoPreviewUrl, setPassportPhotoPreviewUrl] = useState("");
   const [declarationAccepted, setDeclarationAccepted] = useState(false);
   const [isSubmittingApplication, setIsSubmittingApplication] = useState(false);
   const [internshipVacancy, setInternshipVacancy] = useState(null);
@@ -722,6 +724,23 @@ export default function ApplicantInternshipApplicationPage() {
   const [submittedReferenceNo, setSubmittedReferenceNo] = useState("");
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
   const email = user?.email || "Belum dikemaskini";
+
+  const clearPassportPhotoPreview = () => {
+    if (passportPhotoPreviewUrlRef.current) {
+      URL.revokeObjectURL(passportPhotoPreviewUrlRef.current);
+    }
+    passportPhotoPreviewUrlRef.current = "";
+    setPassportPhotoPreviewUrl("");
+  };
+
+  const updatePassportPhotoPreview = (file) => {
+    if (passportPhotoPreviewUrlRef.current) {
+      URL.revokeObjectURL(passportPhotoPreviewUrlRef.current);
+    }
+    const previewUrl = URL.createObjectURL(file);
+    passportPhotoPreviewUrlRef.current = previewUrl;
+    setPassportPhotoPreviewUrl(previewUrl);
+  };
 
   useEffect(() => {
     if (!user) {
@@ -803,6 +822,12 @@ export default function ApplicantInternshipApplicationPage() {
       isMounted = false;
     };
   }, [activeSavedDraft?.studentInfo, applicantDraftDefaults, applicantRole, editApplicationId]);
+
+  useEffect(() => () => {
+    if (passportPhotoPreviewUrlRef.current) {
+      URL.revokeObjectURL(passportPhotoPreviewUrlRef.current);
+    }
+  }, []);
 
   if (!user || user.role !== "applicant") {
     return null;
@@ -904,12 +929,18 @@ export default function ApplicantInternshipApplicationPage() {
     }
 
     setNotice("");
+    if (field === "passportPhotoFile") {
+      updatePassportPhotoPreview(file);
+    }
     setDocumentFiles((current) => ({ ...current, [field]: file }));
     setStudentInfo((current) => ({ ...current, [field]: file.name }));
   };
 
   const clearDocument = (field) => {
     setNotice("");
+    if (field === "passportPhotoFile") {
+      clearPassportPhotoPreview();
+    }
     setDocumentFiles((current) => {
       const next = { ...current };
       delete next[field];
@@ -1070,13 +1101,17 @@ export default function ApplicantInternshipApplicationPage() {
             type="file"
             onChange={updateDocument("passportPhotoFile")}
           />
-          <span>
-            <Icon>upload</Icon>
-            <b>
-              Muat Naik<br />gambar<br />pasport
-            </b>
-            <small>3.5 cm x 5.0 cm</small>
-          </span>
+          {passportPhotoPreviewUrl ? (
+            <img src={passportPhotoPreviewUrl} alt="Gambar pasport dimuat naik" />
+          ) : (
+            <span>
+              <Icon>upload</Icon>
+              <b>
+                Muat Naik<br />gambar<br />pasport
+              </b>
+              <small>3.5 cm x 5.0 cm</small>
+            </span>
+          )}
         </label>
         <div className="student-passport-actions">
           <button type="button" onClick={() => documentInputRefs.current.passportPhotoFile?.click()}>
