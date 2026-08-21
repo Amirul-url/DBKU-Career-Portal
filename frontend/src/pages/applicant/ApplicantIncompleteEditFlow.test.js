@@ -56,7 +56,9 @@ test("applicant accepted applications stay hidden behind review status until HRM
   assert.match(viewSource, /<th>Tempoh Latihan Industri \/ Praktikal<\/th>/);
   assert.match(viewSource, /<th>Program<\/th>/);
   assert.match(viewSource, /<th>Bahagian Ditempatkan<\/th>/);
-  assert.match(viewSource, /organizationFeedbackDate/);
+  assert.match(viewSource, /Sila muat turun dokumen di bawah\./);
+  assert.doesNotMatch(viewSource, /organizationFeedbackDate/);
+  assert.doesNotMatch(viewSource, /Tarikh Maklumbalas/);
 });
 
 test("applicant organization feedback notification shows red badges", () => {

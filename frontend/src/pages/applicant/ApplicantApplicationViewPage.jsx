@@ -379,9 +379,9 @@ function ApplicantOrganizationFeedbackTab({ application }) {
       </div>
 
       <div className="student-personal-table-wrap applicant-organization-document-wrap">
+        <p className="applicant-organization-download-note">Sila muat turun dokumen di bawah.</p>
         <table className="student-personal-table student-readonly-table">
           <tbody>
-            {renderReadOnlyRow("organizationFeedbackDate", "Tarikh Maklumbalas", formatDate(release.sent_to_applicant_at))}
             {documents.length ? (
               documents.map((document, index) =>
                 renderReadOnlyContentRow(
