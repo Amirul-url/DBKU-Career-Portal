@@ -51,6 +51,7 @@ test("department and HRM internship rows mark pending decision tasks as new", ()
   assert.match(source, /if \(!isHrmWorkspace\) \{\s*return applications\.filter\(isDepartmentPendingDecisionApplication\)\.length;\s*\}/);
   assert.match(source, /return applications\.filter\(isHrmNewApplication\)\.length;/);
   assert.match(source, /function getInternshipApplicationDisplayStatus\(application, isHrmWorkspace\)/);
+  assert.match(source, /if \(isHrmWorkspace && isDepartmentPendingDecisionApplication\(application\)\) return "department_new"/);
   assert.match(source, /return getHrmDepartmentDecisionStatus\(application\)/);
   assert.match(source, /return "department_new"/);
   assert.match(source, /isHrmWorkspace=\{isHrmWorkspace\}/);

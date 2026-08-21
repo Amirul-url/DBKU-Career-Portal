@@ -319,6 +319,7 @@ function getHrmDepartmentDecisionStatus(application) {
 
 function getInternshipApplicationDisplayStatus(application, isHrmWorkspace) {
   if (hasApplicantAgreedToOffer(application)) return getApplicantAgreedInternshipStatus(application);
+  if (isHrmWorkspace && isDepartmentPendingDecisionApplication(application)) return "department_new";
   if (isHrmWorkspace && isHrmPendingDepartmentDecisionApplication(application)) return getHrmDepartmentDecisionStatus(application);
   if (!isHrmWorkspace && hasSubmittedDepartmentDecision(application)) return getHrmDepartmentDecisionStatus(application);
   if (!isHrmWorkspace && isDepartmentPendingDecisionApplication(application)) return "department_new";
