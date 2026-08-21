@@ -276,6 +276,13 @@ function isHrmPendingDepartmentDecisionApplication(application) {
   );
 }
 
+function isHrmNewApplication(application) {
+  return (
+    (application?.status || "submitted") === "submitted" ||
+    isHrmPendingDepartmentDecisionApplication(application)
+  );
+}
+
 function getHrmDepartmentDecisionStatus(application) {
   const recommendation = getSavedDepartmentDecision(application).recommendation;
   if (recommendation === "Terima") return "hrm_department_accepted";
@@ -299,10 +306,7 @@ function getSidebarApplicationBadgeCount(item, metrics, { isHrmWorkspace = true 
   if (!isHrmWorkspace) {
     return applications.filter(isDepartmentPendingDecisionApplication).length;
   }
-  return applications.filter((application) =>
-    (application?.status || "submitted") === "submitted" ||
-    isHrmPendingDepartmentDecisionApplication(application)
-  ).length;
+  return applications.filter(isHrmNewApplication).length;
 }
 
 function formatSidebarBadgeCount(count) {
@@ -2001,7 +2005,7 @@ function InternshipApplicationsPanel({ applications, isHrmWorkspace, onView }) {
             {visibleApplications.length ? (
               visibleApplications.map((application) => {
                 const displayStatus = getInternshipApplicationDisplayStatus(application, isHrmWorkspace);
-                const showHrmNewBadge = isHrmWorkspace && isHrmPendingDepartmentDecisionApplication(application);
+                const showHrmNewBadge = isHrmWorkspace && isHrmNewApplication(application);
                 return (
                   <tr key={application.id}>
                     <td>
