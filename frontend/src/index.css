@@ -11087,6 +11087,11 @@ body:has(.applicant-profile-page) {
   font-weight: 700;
 }
 
+.applicant-organization-feedback-panel {
+  display: grid;
+  gap: 24px;
+}
+
 .organization-feedback-period-input {
   width: min(100%, 280px);
   border: 1px solid #cbd5e1;

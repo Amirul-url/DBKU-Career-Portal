@@ -50,6 +50,13 @@ test("applicant accepted applications stay hidden behind review status until HRM
   assert.match(viewSource, /extraTabs=\{organizationFeedbackSent \? \[organizationFeedbackTab\] : \[\]\}/);
   assert.match(viewSource, /maskAcceptedStatus=\{!organizationFeedbackSent\}/);
   assert.match(viewSource, /function ApplicantOrganizationFeedbackTab/);
+  assert.match(viewSource, /function getApplicantFeedbackPlacementDepartment\(application\)/);
+  assert.match(viewSource, /className="organization-feedback-table applicant-organization-feedback-table"/);
+  assert.match(viewSource, /<th>Nama Pelajar<\/th>/);
+  assert.match(viewSource, /<th>Tempoh Latihan Industri \/ Praktikal<\/th>/);
+  assert.match(viewSource, /<th>Program<\/th>/);
+  assert.match(viewSource, /<th>Bahagian Ditempatkan<\/th>/);
+  assert.match(viewSource, /organizationFeedbackDate/);
 });
 
 test("applicant organization feedback notification shows red badges", () => {

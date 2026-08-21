@@ -310,41 +310,103 @@ function getOrganizationFeedbackDocuments(application) {
   }];
 }
 
+function getInternshipStudentInfo(application) {
+  return application?.profile_data?.student_info || {};
+}
+
+function getInternshipStudentName(application) {
+  const studentInfo = getInternshipStudentInfo(application);
+  return studentInfo.name || application?.applicant_name || "Belum diisi";
+}
+
+function getInternshipStudentIdentityNo(application) {
+  const studentInfo = getInternshipStudentInfo(application);
+  return (
+    studentInfo.icNo ||
+    studentInfo.identificationNumber ||
+    application?.applicant_detail?.mykad_number ||
+    "Belum diisi"
+  );
+}
+
+function getInternshipProgram(application) {
+  return getInternshipStudentInfo(application).program || "Belum diisi";
+}
+
+function getApplicantFeedbackPlacementDepartment(application) {
+  const department =
+    application?.assigned_department ||
+    application?.profile_data?.department_decision?.department ||
+    application?.profile_data?.internship_vacancy?.division ||
+    application?.vacancy_detail?.division ||
+    "Belum ditetapkan";
+  return String(department).replace(/\s*\([^)]+\)\s*$/, "");
+}
+
 function ApplicantOrganizationFeedbackTab({ application }) {
   const release = getOrganizationFeedbackRelease(application);
   const documents = getOrganizationFeedbackDocuments(application);
   const internshipPeriod = release.internship_period || "Belum ditetapkan";
+  const studentName = getInternshipStudentName(application);
+  const identityNo = getInternshipStudentIdentityNo(application);
+  const program = getInternshipProgram(application);
+  const placementDepartment = getApplicantFeedbackPlacementDepartment(application);
 
   return (
-    <div className="student-personal-table-wrap">
-      <table className="student-personal-table student-readonly-table">
-        <tbody>
-          {renderReadOnlyRow("organizationFeedbackPeriod", "Tempoh Latihan Industri / Praktikal", internshipPeriod)}
-          {renderReadOnlyRow("organizationFeedbackDate", "Tarikh Maklumbalas", formatDate(release.sent_to_applicant_at))}
-          {documents.length ? (
-            documents.map((document, index) =>
-              renderReadOnlyContentRow(
-                `organizationFeedbackDocument-${document.id || index}`,
-                `Dokumen ${index + 1}`,
-                <div className="student-readonly-document-cell">
-                  <span className="student-readonly-value uploaded">{document.name}</span>
-                  <button
-                    className="app-view-action"
-                    disabled={!document.url}
-                    type="button"
-                    onClick={() => openDocumentFile(document)}
-                  >
-                    <Icon>visibility</Icon>
-                    Lihat
-                  </button>
-                </div>,
-              ),
-            )
-          ) : (
-            renderReadOnlyRow("organizationFeedbackDocuments", "Dokumen", "Tiada dokumen maklumbalas organisasi.")
-          )}
-        </tbody>
-      </table>
+    <div className="organization-feedback-panel applicant-organization-feedback-panel">
+      <div className="organization-feedback-table-wrap">
+        <table className="organization-feedback-table applicant-organization-feedback-table">
+          <thead>
+            <tr>
+              <th>Nama Pelajar</th>
+              <th>Tempoh Latihan Industri / Praktikal</th>
+              <th>Program</th>
+              <th>Bahagian Ditempatkan</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <strong>{studentName}</strong>
+                <span>No. Kad Pengenalan: {identityNo}</span>
+              </td>
+              <td>{internshipPeriod}</td>
+              <td>{program}</td>
+              <td>{placementDepartment}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div className="student-personal-table-wrap applicant-organization-document-wrap">
+        <table className="student-personal-table student-readonly-table">
+          <tbody>
+            {renderReadOnlyRow("organizationFeedbackDate", "Tarikh Maklumbalas", formatDate(release.sent_to_applicant_at))}
+            {documents.length ? (
+              documents.map((document, index) =>
+                renderReadOnlyContentRow(
+                  `organizationFeedbackDocument-${document.id || index}`,
+                  `Dokumen ${index + 1}`,
+                  <div className="student-readonly-document-cell">
+                    <span className="student-readonly-value uploaded">{document.name}</span>
+                    <button
+                      className="app-view-action"
+                      disabled={!document.url}
+                      type="button"
+                      onClick={() => openDocumentFile(document)}
+                    >
+                      <Icon>visibility</Icon>
+                      Lihat
+                    </button>
+                  </div>,
+                ),
+              )
+            ) : (
+              renderReadOnlyRow("organizationFeedbackDocuments", "Dokumen", "Tiada dokumen maklumbalas organisasi.")
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
