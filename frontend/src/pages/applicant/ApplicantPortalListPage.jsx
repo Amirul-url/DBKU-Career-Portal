@@ -27,6 +27,7 @@ const getInternshipDraftStorageKey = (user) => `dbku_internship_student_info_man
 const reapplyAllowedApplicationStatuses = new Set(["rejected", "withdrawn"]);
 const APPLICATIONS_PER_PAGE = 5;
 const applicationDecisionTab = "Keputusan Permohonan";
+const organizationFeedbackTab = "Maklumbalas Organisasi";
 const applicantInternshipLifecycleStatusLabels = {
   applicant_agreed: "Pengesahan Dihantar",
   internship_active: internshipLifecycleStatusLabels.internship_active,
@@ -128,6 +129,10 @@ function hasApplicationDecisionTab(application) {
 
 function getApplicationViewTarget(application) {
   const baseTarget = APPLICANT_ROUTES.applicationView(application.id);
+  if (hasNewOrganizationFeedbackForApplicant(application)) {
+    return `${baseTarget}?tab=${encodeURIComponent(organizationFeedbackTab)}`;
+  }
+
   return hasApplicationDecisionTab(application)
     ? `${baseTarget}?tab=${encodeURIComponent(applicationDecisionTab)}`
     : baseTarget;
