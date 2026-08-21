@@ -110,8 +110,24 @@ function hasApplicantAgreedToOffer(application) {
   return application?.profile_data?.applicant_confirmation?.status === "agreed";
 }
 
+function hasSubmittedDepartmentDecision(application) {
+  return Boolean(application?.profile_data?.department_decision?.submitted_at);
+}
+
+function hasAcceptedDepartmentRecommendation(application) {
+  const recommendation = application?.profile_data?.department_decision?.recommendation || "";
+  return hasSubmittedDepartmentDecision(application) && String(recommendation).toLowerCase() === "terima";
+}
+
+function isPendingDepartmentReview(application) {
+  return Boolean(application?.assigned_department && !hasSubmittedDepartmentDecision(application));
+}
+
 function getApplicantVisibleStatus(status, application = null) {
   if (hasApplicantAgreedToOffer(application)) return getApplicantAgreedInternshipStatus(application);
+  if (status === "shortlisted" && hasAcceptedDepartmentRecommendation(application)) return "shortlisted";
+  if (isPendingDepartmentReview(application)) return "screening";
+  if (application?.assigned_department && hasSubmittedDepartmentDecision(application) && status === "shortlisted") return "screening";
   return status === "accepted" && !hasOrganizationFeedbackBeenSent(application) ? "screening" : status;
 }
 

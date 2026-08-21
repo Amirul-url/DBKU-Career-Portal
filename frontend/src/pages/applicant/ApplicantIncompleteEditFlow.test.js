@@ -107,6 +107,20 @@ test("applicant accepted applications stay hidden behind review status until HRM
   assert.doesNotMatch(viewSource, /Tarikh Maklumbalas/);
 });
 
+test("applicant internship department workflow statuses stay applicant friendly", () => {
+  assert.match(listSource, /function hasSubmittedDepartmentDecision\(application\)/);
+  assert.match(listSource, /function hasAcceptedDepartmentRecommendation\(application\)/);
+  assert.match(listSource, /function isPendingDepartmentReview\(application\)/);
+  assert.match(listSource, /if \(status === "shortlisted" && hasAcceptedDepartmentRecommendation\(application\)\) return "shortlisted"/);
+  assert.match(listSource, /if \(isPendingDepartmentReview\(application\)\) return "screening"/);
+  assert.match(viewSource, /function hasSubmittedDepartmentDecision\(application\)/);
+  assert.match(viewSource, /function hasAcceptedDepartmentRecommendation\(application\)/);
+  assert.match(viewSource, /function isPendingDepartmentReview\(application\)/);
+  assert.match(viewSource, /if \(status === "shortlisted" && hasAcceptedDepartmentRecommendation\(application\)\) return "shortlisted"/);
+  assert.match(viewSource, /if \(isPendingDepartmentReview\(application\)\) return "screening"/);
+  assert.match(viewSource, /getApplicantVisibleStatus\(status, maskAcceptedStatus, application\)/);
+});
+
 test("applicant organization feedback notification shows red badges", () => {
   assert.match(listSource, /function hasNewOrganizationFeedbackForApplicant\(application\)/);
   assert.match(listSource, /\(application\?\.status \|\| ""\) === "accepted" && hasOrganizationFeedbackBeenSent\(application\) && !hasApplicantAgreedToOffer\(application\)/);

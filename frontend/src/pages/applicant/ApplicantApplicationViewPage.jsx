@@ -39,12 +39,28 @@ const statusLabels = {
   withdrawn: "Ditarik balik",
 };
 
-function getApplicantVisibleStatus(status, maskAcceptedStatus = true) {
+function getApplicantVisibleStatus(status, maskAcceptedStatus = true, application = null) {
+  if (status === "shortlisted" && hasAcceptedDepartmentRecommendation(application)) return "shortlisted";
+  if (isPendingDepartmentReview(application)) return "screening";
+  if (application?.assigned_department && hasSubmittedDepartmentDecision(application) && status === "shortlisted") return "screening";
   return maskAcceptedStatus && status === "accepted" ? "screening" : status;
 }
 
 function hasApplicantAgreedToOffer(application) {
   return application?.profile_data?.applicant_confirmation?.status === "agreed";
+}
+
+function hasSubmittedDepartmentDecision(application) {
+  return Boolean(application?.profile_data?.department_decision?.submitted_at);
+}
+
+function hasAcceptedDepartmentRecommendation(application) {
+  const recommendation = application?.profile_data?.department_decision?.recommendation || "";
+  return hasSubmittedDepartmentDecision(application) && String(recommendation).toLowerCase() === "terima";
+}
+
+function isPendingDepartmentReview(application) {
+  return Boolean(application?.assigned_department && !hasSubmittedDepartmentDecision(application));
 }
 
 function getReadOnlyStatusLabel(status, maskAcceptedStatus, application = null) {
@@ -53,7 +69,8 @@ function getReadOnlyStatusLabel(status, maskAcceptedStatus, application = null) 
     return applicantInternshipLifecycleStatusLabels[lifecycleStatus] || "Pengesahan Dihantar";
   }
   if (!maskAcceptedStatus && status === "accepted") return "Diterima";
-  return statusLabels[status] || status;
+  const visibleStatus = getApplicantVisibleStatus(status, maskAcceptedStatus, application);
+  return statusLabels[visibleStatus] || visibleStatus;
 }
 
 function getOrganizationFeedbackRelease(application) {
@@ -875,7 +892,7 @@ export function InternshipApplicationReadOnlyPanel({
   const status = application?.status || "draft";
   const visibleStatus = hasApplicantAgreedToOffer(application)
     ? getApplicantAgreedInternshipStatus(application)
-    : getApplicantVisibleStatus(status, maskAcceptedStatus);
+    : getApplicantVisibleStatus(status, maskAcceptedStatus, application);
   const panelTabs = [...infoTabs, ...extraTabs];
   const groupedTabs = tabGroups
     .map((group) => ({
