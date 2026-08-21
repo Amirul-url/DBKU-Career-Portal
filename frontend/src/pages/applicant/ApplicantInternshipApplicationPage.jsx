@@ -1057,54 +1057,96 @@ export default function ApplicantInternshipApplicationPage() {
     </tr>
   );
 
+  function renderPassportPhotoUpload() {
+    return (
+      <section className="student-info-photo-card" aria-label="Muat naik gambar pasport">
+        <label className="student-passport-upload">
+          <input
+            ref={(element) => {
+              documentInputRefs.current.passportPhotoFile = element;
+            }}
+            accept=".jpg, .jpeg, image/jpeg"
+            className="student-passport-input"
+            type="file"
+            onChange={updateDocument("passportPhotoFile")}
+          />
+          <span>
+            <Icon>upload</Icon>
+            <b>
+              Muat Naik<br />gambar<br />pasport
+            </b>
+            <small>3.5 cm x 5.0 cm</small>
+          </span>
+        </label>
+        <div className="student-passport-actions">
+          <button type="button" onClick={() => documentInputRefs.current.passportPhotoFile?.click()}>
+            <Icon>upload</Icon>
+            Muat Naik
+          </button>
+          <button disabled={!studentInfo.passportPhotoFile} type="button" onClick={() => clearDocument("passportPhotoFile")}>
+            <Icon>delete</Icon>
+            Padam
+          </button>
+        </div>
+        <p>
+          <strong>Nota</strong>
+          <span>Sila pastikan gambar yang dimuatnaik adalah dalam format .jpg</span>
+        </p>
+      </section>
+    );
+  }
+
   const renderApplicantFields = () => (
-    <div className="student-personal-table-wrap">
-      <table className="student-personal-table">
-        <tbody>
-          {renderPersonalRow("Nama", <input required value={studentInfo.name} onChange={updateStudentName} />)}
-          {renderPersonalRow("No. Kad Pengenalan Baru", <input required inputMode="numeric" maxLength={12} pattern="[0-9]*" value={studentInfo.icNo} onChange={updateNumericStudentInfo("icNo")} />)}
-          {renderPersonalRow("No. Telefon Bimbit/ Telefon Rumah", <InternshipPhoneInput value={studentInfo.phone} onChange={updatePhoneNumber} />)}
-          {renderPersonalRow(
-            "Alamat Surat Menyurat",
-            <ApplicantAddressMap
-              address={studentInfo.address}
-              addressError={validationErrors.address}
-              latitude={studentInfo.latitude}
-              locationError={validationErrors.location}
-              longitude={studentInfo.longitude}
-              onLocationChange={updateAddressMapLocation}
-            />,
-            "map-row",
-          )}
-          {renderPersonalRow("Alamat Emel", <input required type="email" value={studentInfo.email} onChange={updateStudentInfo("email")} />)}
-          {renderPersonalRow("Umur", <input required inputMode="numeric" pattern="[0-9]*" value={studentInfo.age} onChange={updateNumericStudentInfo("age")} />)}
-          {renderPersonalRow("Tarikh Lahir", <input required type="date" value={studentInfo.birthDate} onChange={updateBirthDate} />)}
-          {renderPersonalRow("Tempat Lahir", textInput("birthPlace"))}
-          {renderPersonalRow(
-            <>
-              Negeri Tempat Lahir:
-              <span>i. Pemohon</span>
-              <span>ii. Ibu</span>
-              <span>iii. Bapa</span>
-            </>,
-            <div className="student-nested-fields">
-              {selectInput("stateOfBirth", stateOptions)}
-              {selectInput("motherBirthState", stateOptions)}
-              {selectInput("fatherBirthState", stateOptions)}
-            </div>,
-            "nested-row",
-          )}
-          {renderPersonalRow("Bangsa", selectInput("race", raceOptions))}
-          {renderPersonalRow("Agama", selectInput("religion", religionOptions))}
-          {renderPersonalRow("Kewarganegaraan", selectInput("citizenship", citizenshipOptions))}
-          {renderPersonalRow("Taraf Perkahwinan", selectInput("maritalStatus", maritalStatusOptions))}
-          {renderPersonalRow("Tinggi", <input required inputMode="decimal" placeholder="cm" value={studentInfo.height} onChange={updateDecimalStudentInfo("height")} />)}
-          {renderPersonalRow("Berat", <input required inputMode="decimal" placeholder="kg" value={studentInfo.weight} onChange={updateDecimalStudentInfo("weight")} />)}
-          {renderPersonalRow("Kelainan Upaya (Ya/ Tidak)", selectInput("disability", yesNoOptions))}
-          {renderPersonalRow("Lesen Memandu", selectInput("drivingLicense", drivingLicenseOptions))}
-        </tbody>
-      </table>
-    </div>
+    <>
+      {renderPassportPhotoUpload()}
+      <div className="student-personal-table-wrap">
+        <table className="student-personal-table">
+          <tbody>
+            {renderPersonalRow("Nama", <input required value={studentInfo.name} onChange={updateStudentName} />)}
+            {renderPersonalRow("No. Kad Pengenalan Baru", <input required inputMode="numeric" maxLength={12} pattern="[0-9]*" value={studentInfo.icNo} onChange={updateNumericStudentInfo("icNo")} />)}
+            {renderPersonalRow("No. Telefon Bimbit/ Telefon Rumah", <InternshipPhoneInput value={studentInfo.phone} onChange={updatePhoneNumber} />)}
+            {renderPersonalRow(
+              "Alamat Surat Menyurat",
+              <ApplicantAddressMap
+                address={studentInfo.address}
+                addressError={validationErrors.address}
+                latitude={studentInfo.latitude}
+                locationError={validationErrors.location}
+                longitude={studentInfo.longitude}
+                onLocationChange={updateAddressMapLocation}
+              />,
+              "map-row",
+            )}
+            {renderPersonalRow("Alamat Emel", <input required type="email" value={studentInfo.email} onChange={updateStudentInfo("email")} />)}
+            {renderPersonalRow("Umur", <input required inputMode="numeric" pattern="[0-9]*" value={studentInfo.age} onChange={updateNumericStudentInfo("age")} />)}
+            {renderPersonalRow("Tarikh Lahir", <input required type="date" value={studentInfo.birthDate} onChange={updateBirthDate} />)}
+            {renderPersonalRow("Tempat Lahir", textInput("birthPlace"))}
+            {renderPersonalRow(
+              <>
+                Negeri Tempat Lahir:
+                <span>i. Pemohon</span>
+                <span>ii. Ibu</span>
+                <span>iii. Bapa</span>
+              </>,
+              <div className="student-nested-fields">
+                {selectInput("stateOfBirth", stateOptions)}
+                {selectInput("motherBirthState", stateOptions)}
+                {selectInput("fatherBirthState", stateOptions)}
+              </div>,
+              "nested-row",
+            )}
+            {renderPersonalRow("Bangsa", selectInput("race", raceOptions))}
+            {renderPersonalRow("Agama", selectInput("religion", religionOptions))}
+            {renderPersonalRow("Kewarganegaraan", selectInput("citizenship", citizenshipOptions))}
+            {renderPersonalRow("Taraf Perkahwinan", selectInput("maritalStatus", maritalStatusOptions))}
+            {renderPersonalRow("Tinggi", <input required inputMode="decimal" placeholder="cm" value={studentInfo.height} onChange={updateDecimalStudentInfo("height")} />)}
+            {renderPersonalRow("Berat", <input required inputMode="decimal" placeholder="kg" value={studentInfo.weight} onChange={updateDecimalStudentInfo("weight")} />)}
+            {renderPersonalRow("Kelainan Upaya (Ya/ Tidak)", selectInput("disability", yesNoOptions))}
+            {renderPersonalRow("Lesen Memandu", selectInput("drivingLicense", drivingLicenseOptions))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 
   const renderAcademicFields = () => (

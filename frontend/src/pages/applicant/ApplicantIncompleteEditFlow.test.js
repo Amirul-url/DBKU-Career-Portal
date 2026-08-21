@@ -181,6 +181,21 @@ test("applicant can submit acceptance confirmation after organization feedback",
   assert.match(cssSource, /\.applicant-confirmation-statement/);
 });
 
+test("internship personal tab shows passport upload before personal details table", () => {
+  assert.match(formSource, /function renderPassportPhotoUpload/);
+  assert.match(formSource, /className="student-info-photo-card"/);
+  assert.match(formSource, /className="student-passport-upload"/);
+  assert.match(formSource, /Muat Naik\s*<br \/>gambar\s*<br \/>pasport/);
+  assert.match(formSource, /3\.5 cm x 5\.0 cm/);
+  assert.match(formSource, /accept="\.jpg,\s*\.jpeg,\s*image\/jpeg"/);
+  assert.match(formSource, /updateDocument\("passportPhotoFile"\)/);
+  assert.match(formSource, /clearDocument\("passportPhotoFile"\)/);
+  assert.ok(
+    formSource.indexOf("{renderPassportPhotoUpload()}") <
+      formSource.indexOf('<div className="student-personal-table-wrap">'),
+  );
+});
+
 test("applicant rejected internship applications can apply again", () => {
   assert.match(routesSource, /internshipApplicationNew: "\/profile\/internship-application\?new=1"/);
   assert.match(infoSource, /reapplyAllowedApplicationStatuses = new Set\(\["rejected", "withdrawn"\]\)/);
