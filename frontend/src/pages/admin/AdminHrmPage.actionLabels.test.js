@@ -83,6 +83,13 @@ test("application table pagination centers page count with buttons", () => {
   assert.match(cssSource, /\.applicant-table-pagination strong \{[\s\S]*display: inline-flex;[\s\S]*height: 38px;[\s\S]*align-items: center;/);
 });
 
+test("status summary card keeps long badges away from progress bars", () => {
+  assert.match(source, /function StatusSummaryPanel\(\{ applications \}\)/);
+  assert.match(source, /<span><Badge status=\{status\} \/><\/span>\s*<i><b style=\{\{ width: `\$\{statusPercent\}%` \}\} \/><\/i>/);
+  assert.match(cssSource, /\.hrm-status-list > div \{[\s\S]*grid-template-columns: minmax\(160px, max-content\) minmax\(0, 1fr\) 24px;/);
+  assert.match(cssSource, /\.hrm-status-list > div > span \{[\s\S]*min-width: 0;/);
+});
+
 test("admin workspace labels and navigation follow the signed-in department", () => {
   assert.match(source, /getDepartmentWorkspaceLabel\(user\)/);
   assert.match(source, /getAdminShellRoleLabel\(user\)/);
