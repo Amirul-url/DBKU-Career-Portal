@@ -109,7 +109,7 @@ test("applicant accepted applications stay hidden behind review status until HRM
 
 test("applicant organization feedback notification shows red badges", () => {
   assert.match(listSource, /function hasNewOrganizationFeedbackForApplicant\(application\)/);
-  assert.match(listSource, /\(application\?\.status \|\| ""\) === "accepted" && hasOrganizationFeedbackBeenSent\(application\)/);
+  assert.match(listSource, /\(application\?\.status \|\| ""\) === "accepted" && hasOrganizationFeedbackBeenSent\(application\) && !hasApplicantAgreedToOffer\(application\)/);
   assert.match(listSource, /const newApplicationFeedbackCount = useMemo/);
   assert.match(listSource, /displayApplications\.filter\(hasNewOrganizationFeedbackForApplicant\)\.length/);
   assert.match(listSource, /applicationBadgeCount=\{newApplicationFeedbackCount\}/);
@@ -137,7 +137,8 @@ test("applicant organization feedback notification shows red badges", () => {
 test("applicant can submit acceptance confirmation after organization feedback", () => {
   assert.match(viewSource, /const applicantConfirmationTab = "Pengesahan Pemohon"/);
   assert.match(viewSource, /function hasApplicantAgreedToOffer\(application\)/);
-  assert.match(viewSource, /return "Setuju"/);
+  assert.match(viewSource, /return "Pengesahan Dihantar"/);
+  assert.match(listSource, /return "Pengesahan Dihantar"/);
   assert.match(viewSource, /extraTabs=\{organizationFeedbackSent \? \[organizationFeedbackTab, applicantConfirmationTab\] : \[\]\}/);
   assert.match(viewSource, /function ApplicantConfirmationTab/);
   assert.match(viewSource, /Muat Naik Dokumen/);

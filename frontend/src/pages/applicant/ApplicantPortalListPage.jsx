@@ -94,7 +94,7 @@ function hasOrganizationFeedbackBeenSent(application) {
 }
 
 function hasNewOrganizationFeedbackForApplicant(application) {
-  return (application?.status || "") === "accepted" && hasOrganizationFeedbackBeenSent(application);
+  return (application?.status || "") === "accepted" && hasOrganizationFeedbackBeenSent(application) && !hasApplicantAgreedToOffer(application);
 }
 
 function hasApplicantAgreedToOffer(application) {
@@ -107,7 +107,7 @@ function getApplicantVisibleStatus(status, application = null) {
 }
 
 function getApplicantStatusLabel(status, application = null) {
-  if (hasApplicantAgreedToOffer(application)) return "Setuju";
+  if (hasApplicantAgreedToOffer(application)) return "Pengesahan Dihantar";
   if (status === "accepted" && hasOrganizationFeedbackBeenSent(application)) return "Diterima";
   return statusLabels[getApplicantVisibleStatus(status, application)] || status;
 }

@@ -39,7 +39,7 @@ function hasApplicantAgreedToOffer(application) {
 }
 
 function getReadOnlyStatusLabel(status, maskAcceptedStatus, application = null) {
-  if (hasApplicantAgreedToOffer(application)) return "Setuju";
+  if (hasApplicantAgreedToOffer(application)) return "Pengesahan Dihantar";
   if (!maskAcceptedStatus && status === "accepted") return "Diterima";
   return statusLabels[status] || status;
 }
