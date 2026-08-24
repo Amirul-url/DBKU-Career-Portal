@@ -34,11 +34,11 @@ test("completed internships do not block a new internship application CTA", () =
   assert.match(infoSource, /setHasSubmittedInternshipApplication\(applications\.some\(isBlockingInternshipApplication\)\)/);
 });
 
-test("internship CTA ignores auto-saved empty applicant drafts", () => {
-  assert.match(infoSource, /const autoFilledDraftFields = new Set\(\["name", "email"\]\)/);
-  assert.match(infoSource, /function hasMeaningfulInternshipDraft\(studentInfo = \{\}\)/);
-  assert.match(infoSource, /!autoFilledDraftFields\.has\(field\)/);
-  assert.match(infoSource, /const hasDraft = Boolean\(draft\?\.studentInfo && hasMeaningfulInternshipDraft\(draft\.studentInfo\)\)/);
+test("internship CTA does not expose browser-only local drafts", () => {
+  assert.doesNotMatch(infoSource, /Teruskan Draf/);
+  assert.doesNotMatch(infoSource, /Draf permohonan belum lengkap/);
+  assert.doesNotMatch(infoSource, /getInternshipDraft/);
+  assert.doesNotMatch(infoSource, /hasEditableLocalDraft/);
 });
 
 test("applicant rejected applications use Ditolak status label", () => {
@@ -355,11 +355,6 @@ test("applicant rejected internship applications can apply again", () => {
   assert.match(
     infoSource,
     /setHasReapplyAllowedInternshipApplication\(applications\.some\(isReapplyAllowedInternshipApplication\)\)/,
-  );
-  assert.match(infoSource, /draft\?\.purpose === "new-application"/);
-  assert.match(
-    infoSource,
-    /const hasEditableLocalDraft = hasDraft && \(!hasReapplyAllowedInternshipApplication \|\| hasNewApplicationDraft\)/,
   );
   assert.match(
     infoSource,
