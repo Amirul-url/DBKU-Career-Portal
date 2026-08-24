@@ -1195,9 +1195,58 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
     );
   }
 
+  function renderJobApplicationInstructions() {
+    return (
+      <section className="student-job-application-instructions" aria-label="Arahan permohonan jawatan kosong">
+        <table className="student-job-instructions-table">
+          <thead>
+            <tr>
+              <th colSpan={2}>SILA BACA ARAHAN DI BAWAH DENGAN TELITI</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1.</td>
+              <td>Pemohon hendaklah membaca iklan jawatan yang dipohon dengan teliti.</td>
+            </tr>
+            <tr>
+              <td>2.</td>
+              <td>Hanya pemohon yang memenuhi syarat-syarat yang dikehendaki sahaja akan dipertimbangkan.</td>
+            </tr>
+            <tr>
+              <td>3.</td>
+              <td>Gunakan <strong>HURUF BESAR</strong> sahaja. Tuliskan <strong>TB</strong> pada ruangan yang tidak berkenaan.</td>
+            </tr>
+            <tr>
+              <td>4.</td>
+              <td>Borang ini hendaklah diisi dengan lengkap dan dihantar sebelum atau pada tarikh akhir iklan.</td>
+            </tr>
+            <tr>
+              <td>5.</td>
+              <td>Permohonan yang tidak lengkap, tidak memenuhi syarat atau diterima selepas tarikh iklan ditutup akan ditolak.</td>
+            </tr>
+            <tr>
+              <td>6.</td>
+              <td>
+                Pemohon yang sedang berkhidmat dengan Kerajaan/ Badan Berkanun/ Pihak Berkuasa Tempatan hendaklah
+                menghantar permohonan melalui Ketua Jabatan masing-masing dengan melampirkan Laporan Penilaian
+                Prestasi yang terkini serta penyata perkhidmatan yang disahkan.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    );
+  }
+
   const renderApplicantFields = () => (
     <>
-      {renderPassportPhotoUpload()}
+      {isJobApplication ? (
+        <div className="student-job-photo-guidance-row">
+          {renderJobApplicationInstructions()}
+          {renderPassportPhotoUpload()}
+        </div>
+      ) : renderPassportPhotoUpload()}
       <div className="student-personal-table-wrap">
         <table className="student-personal-table">
           <tbody>

@@ -7280,6 +7280,54 @@ body:has(.applicant-profile-page) {
   padding-top: 24px;
 }
 
+.student-job-photo-guidance-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+  gap: 28px;
+  align-items: start;
+  margin-bottom: 34px;
+  padding-top: 14px;
+}
+
+.student-job-photo-guidance-row .student-info-photo-card {
+  margin-bottom: 0;
+  padding-top: 0;
+}
+
+.student-job-application-instructions {
+  width: 100%;
+}
+
+.student-job-instructions-table {
+  width: 100%;
+  border: 2px solid #1f2937;
+  border-collapse: collapse;
+  background: rgba(255, 255, 255, .9);
+  color: #030712;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.student-job-instructions-table th,
+.student-job-instructions-table td {
+  border: 1px solid #1f2937;
+  padding: 8px 10px;
+  vertical-align: top;
+}
+
+.student-job-instructions-table th {
+  background: #d9d9d9;
+  font-size: 14px;
+  font-weight: 900;
+  text-align: center;
+  text-decoration: underline;
+}
+
+.student-job-instructions-table td:first-child {
+  width: 34px;
+  text-align: center;
+}
+
 .student-passport-upload {
   position: relative;
   box-sizing: border-box;
@@ -7870,6 +7918,10 @@ body:has(.applicant-profile-page) {
   .student-info-photo-card {
     justify-items: start;
     padding-top: 0;
+  }
+
+  .student-job-photo-guidance-row {
+    grid-template-columns: 1fr;
   }
 }
 
