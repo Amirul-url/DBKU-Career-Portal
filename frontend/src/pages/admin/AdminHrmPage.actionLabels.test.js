@@ -117,8 +117,9 @@ test("admin workspace labels and navigation follow the signed-in department", ()
   assert.match(source, /getAdminShellRoleLabel\(user\)/);
   assert.match(source, /visibleAdminNavItems\.map/);
   assert.match(source, /isHrmWorkspace \? adminNavItems : adminNavItems\.filter/);
-  assert.match(source, /item\.panel === "applicants"/);
-  assert.match(source, /\["PEMOHON", "JAWATAN DBKU", "LATIHAN INDUSTRI"\]\.includes\(item\.label\)/);
+  assert.match(source, /item\.panel !== "applicants"/);
+  assert.match(source, /item\.label !== "PEMOHON"/);
+  assert.match(source, /\["JAWATAN DBKU", "LATIHAN INDUSTRI"\]\.includes\(item\.label\)/);
   assert.match(source, /item\.panel === "manage" && item\.vacancyType === "job"/);
   assert.match(source, /\["job", "internship"\]\.includes\(item\.vacancyType\)/);
   assert.doesNotMatch(source, />Pentadbir HRM<\/p>/);
