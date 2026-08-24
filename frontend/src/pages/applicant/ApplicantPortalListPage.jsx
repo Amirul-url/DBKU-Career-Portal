@@ -98,9 +98,16 @@ function isInternshipApplication(application) {
     || vacancy.category === "Latihan Industri";
 }
 
+function isCompletedInternshipApplication(application) {
+  return hasApplicantAgreedToOffer(application)
+    && getApplicantAgreedInternshipStatus(application) === "internship_completed";
+}
+
 function shouldHideLocalDraftForApplication(application) {
   const status = application.status || "draft";
-  return isInternshipApplication(application) && !reapplyAllowedApplicationStatuses.has(status);
+  return isInternshipApplication(application)
+    && !isCompletedInternshipApplication(application)
+    && !reapplyAllowedApplicationStatuses.has(status);
 }
 
 function hasOrganizationFeedbackBeenSent(application) {

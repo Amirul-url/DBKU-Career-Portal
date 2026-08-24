@@ -34,6 +34,18 @@ test("completed internships do not block a new internship application CTA", () =
   assert.match(infoSource, /setHasSubmittedInternshipApplication\(applications\.some\(isBlockingInternshipApplication\)\)/);
 });
 
+test("completed internships do not hide saved local internship drafts", () => {
+  assert.match(listSource, /function isCompletedInternshipApplication\(application\)/);
+  assert.match(
+    listSource,
+    /return hasApplicantAgreedToOffer\(application\)[\s\S]*getApplicantAgreedInternshipStatus\(application\) === "internship_completed"/,
+  );
+  assert.match(
+    listSource,
+    /isInternshipApplication\(application\)[\s\S]*!isCompletedInternshipApplication\(application\)[\s\S]*!reapplyAllowedApplicationStatuses\.has\(status\)/,
+  );
+});
+
 test("internship CTA does not expose browser-only local drafts", () => {
   assert.doesNotMatch(infoSource, /Teruskan Draf/);
   assert.doesNotMatch(infoSource, /Draf permohonan belum lengkap/);
