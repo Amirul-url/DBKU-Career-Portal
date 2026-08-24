@@ -94,13 +94,13 @@ test("job application SPM section renders the official subject and grade table",
   assert.match(cssSource, /\.student-job-spm-table \.hrm-use-cell \{[\s\S]*background: #d9d9d9;/);
 });
 
-test("job application personal table includes optional salutation row above name", () => {
+test("job application personal table includes required salutation row above name", () => {
   assert.match(internshipFormSource, /const salutationOptions = \["Encik", "Puan", "Cik"\]/);
   assert.match(internshipFormSource, /salutation: ""/);
   assert.match(internshipFormSource, /"salutation",[\s\S]*"address"/);
   assert.match(
     internshipFormSource,
-    /isJobApplication \? renderPersonalRow\(\s*"Gelaran \(Encik\/ Puan\/ Cik\)",\s*selectInput\("salutation", salutationOptions, false\),\s*"",\s*false,\s*\) : null[\s\S]*renderPersonalRow\("Nama"/,
+    /isJobApplication \? renderPersonalRow\(\s*"Gelaran \(Encik\/ Puan\/ Cik\)",\s*selectInput\("salutation", salutationOptions\),\s*\) : null[\s\S]*renderPersonalRow\("Nama"/,
   );
 });
 

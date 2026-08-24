@@ -1458,9 +1458,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
           <tbody>
             {isJobApplication ? renderPersonalRow(
               "Gelaran (Encik/ Puan/ Cik)",
-              selectInput("salutation", salutationOptions, false),
-              "",
-              false,
+              selectInput("salutation", salutationOptions),
             ) : null}
             {renderPersonalRow("Nama", <input required value={studentInfo.name} onChange={updateStudentName} />)}
             {renderPersonalRow("No. Kad Pengenalan Baru", <input required inputMode="numeric" maxLength={12} pattern="[0-9]*" value={studentInfo.icNo} onChange={updateNumericStudentInfo("icNo")} />)}
