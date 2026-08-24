@@ -364,7 +364,7 @@ test("applicant rejected internship applications can apply again", () => {
   assert.match(formSource, /const isStartingNewApplication = searchParams\.get\("new"\) === "1"/);
   assert.match(
     formSource,
-    /const activeSavedDraft = isStartingNewApplication && savedDraft\?\.purpose !== "new-application"\s*\?\s*null\s*:\s*savedDraft/,
+    /const activeSavedDraft = isStartingNewApplication \? null : savedDraft/,
   );
   assert.match(formSource, /activeSavedDraft\?\.studentInfo/);
   assert.match(formSource, /purpose:[\s\S]*"new-application"/);

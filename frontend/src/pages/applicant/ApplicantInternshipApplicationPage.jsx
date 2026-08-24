@@ -720,7 +720,7 @@ export default function ApplicantInternshipApplicationPage() {
   const editApplicationId = searchParams.get("application") || "";
   const isStartingNewApplication = searchParams.get("new") === "1";
   const [savedDraft] = useState(() => loadStudentInfoDraft(user));
-  const activeSavedDraft = isStartingNewApplication && savedDraft?.purpose !== "new-application" ? null : savedDraft;
+  const activeSavedDraft = isStartingNewApplication ? null : savedDraft;
   const applicantRole = user?.role || "";
   const applicantDraftDefaults = useMemo(
     () => ({
