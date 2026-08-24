@@ -44,6 +44,7 @@ const stateOptions = [
 
 const raceOptions = ["Melayu", "Melanau", "Iban", "Bidayuh", "Cina", "India", "Lain-lain"];
 const religionOptions = ["Islam", "Kristian", "Buddha", "Hindu", "Lain-lain"];
+const salutationOptions = ["Encik", "Puan", "Cik"];
 const citizenshipOptions = ["Warganegara", "Bukan Warganegara", "Penduduk Tetap"];
 const maritalStatusOptions = ["Bujang", "Berkahwin", "Duda", "Janda"];
 const yesNoOptions = ["Ya", "Tidak"];
@@ -244,6 +245,7 @@ const getDefaultStudentInfo = () => ({
   race: "",
   religion: "",
   resumeFile: "",
+  salutation: "",
   semester: "",
   stateOfBirth: "",
   supervisorEmail: "",
@@ -773,6 +775,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
     ? `Nama Jawatan Yang Dipohon: ${selectedJobTitle}`
     : applicationTitle;
   const jobUppercasePersonalFields = new Set([
+    "salutation",
     "address",
     "birthPlace",
     "stateOfBirth",
@@ -1172,8 +1175,8 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
 
   const selectPlaceholder = isJobApplication ? "SILA PILIH" : "Sila pilih";
 
-  const selectInput = (field, options) => (
-    <select required value={normalizeJobPersonalValue(field, studentInfo[field])} onChange={updateStudentInfo(field)}>
+  const selectInput = (field, options, required = true) => (
+    <select required={required} value={normalizeJobPersonalValue(field, studentInfo[field])} onChange={updateStudentInfo(field)}>
       <option value="">{selectPlaceholder}</option>
       {options.map((option) => {
         const optionValue = normalizeJobPersonalValue(field, option);
@@ -1287,6 +1290,12 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
       <div className="student-personal-table-wrap">
         <table className="student-personal-table">
           <tbody>
+            {isJobApplication ? renderPersonalRow(
+              "Gelaran (Encik/ Puan/ Cik)",
+              selectInput("salutation", salutationOptions, false),
+              "",
+              false,
+            ) : null}
             {renderPersonalRow("Nama", <input required value={studentInfo.name} onChange={updateStudentName} />)}
             {renderPersonalRow("No. Kad Pengenalan Baru", <input required inputMode="numeric" maxLength={12} pattern="[0-9]*" value={studentInfo.icNo} onChange={updateNumericStudentInfo("icNo")} />)}
             {renderPersonalRow("No. Telefon Bimbit/ Telefon Rumah", <InternshipPhoneInput value={studentInfo.phone} onChange={updatePhoneNumber} />)}

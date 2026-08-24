@@ -38,6 +38,16 @@ test("job application personal heading uses uppercase numbered label", () => {
   assert.match(cssSource, /\.student-info-form h2\.job-section-heading \{[\s\S]*text-decoration: underline;/);
 });
 
+test("job application personal table includes optional salutation row above name", () => {
+  assert.match(internshipFormSource, /const salutationOptions = \["Encik", "Puan", "Cik"\]/);
+  assert.match(internshipFormSource, /salutation: ""/);
+  assert.match(internshipFormSource, /"salutation",[\s\S]*"address"/);
+  assert.match(
+    internshipFormSource,
+    /isJobApplication \? renderPersonalRow\(\s*"Gelaran \(Encik\/ Puan\/ Cik\)",\s*selectInput\("salutation", salutationOptions, false\),\s*"",\s*false,\s*\) : null[\s\S]*renderPersonalRow\("Nama"/,
+  );
+});
+
 test("job application personal tab shows instructions beside passport upload", () => {
   assert.match(internshipFormSource, /isJobApplication \? \(\s*<div className="student-job-photo-guidance-row">/);
   assert.match(internshipFormSource, /SILA BACA ARAHAN DI BAWAH DENGAN TELITI/);
