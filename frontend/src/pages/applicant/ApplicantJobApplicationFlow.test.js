@@ -27,7 +27,7 @@ test("job application form reuses the internship personal information table", ()
 
 test("job application header includes the selected vacancy title", () => {
   assert.match(internshipFormSource, /const selectedJobTitle = isJobApplication \? String\(internshipVacancy\?\.title \|\| ""\)\.trim\(\) : ""/);
-  assert.match(internshipFormSource, /selectedJobTitle\s*\?\s*`\$\{applicationTitle\} \(Nama Jawatan Yang Dipohon: \$\{selectedJobTitle\}\)`\s*:\s*applicationTitle/);
+  assert.match(internshipFormSource, /selectedJobTitle\s*\?\s*`Nama Jawatan Yang Dipohon: \$\{selectedJobTitle\}`\s*:\s*applicationTitle/);
 });
 
 test("draft and incomplete job applications reopen the job form", () => {
