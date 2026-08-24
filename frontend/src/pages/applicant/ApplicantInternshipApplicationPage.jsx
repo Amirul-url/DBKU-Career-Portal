@@ -40,6 +40,7 @@ const jobSpmSubjectRowCount = 12;
 const minimumJobSpmSubjectRows = 3;
 const jobStpmSubjectRowCount = 5;
 const minimumJobStpmSubjectRows = 3;
+const jobHigherEducationRowCount = 2;
 const jobTabShortLabels = {
   [personalInfoTab]: "Peribadi",
   [jobSpmTab]: "SPM/UEC",
@@ -287,6 +288,14 @@ const getDefaultStudentInfo = () => ({
   jobBmJulyYear: "",
   jobComputerSkills: "",
   jobDeclaration: "",
+  jobHigherEducationQualifications: Array.from({ length: jobHigherEducationRowCount }, () => ({
+    certificateName: "",
+    cgpa: "",
+    completionDate: "",
+    entryDate: "",
+    institution: "",
+    specialization: "",
+  })),
   jobLanguageSkills: "",
   jobMathJulyGradeDecision: "",
   jobMathJulyDetails: "",
@@ -368,19 +377,7 @@ const requiredFieldsByTab = {
     ["jobStpmYear", "Tahun"],
     ["jobStpmExamName", "Nama Peperiksaan"],
   ],
-  [jobHigherEducationTab]: [
-    ["institution", "Institusi Pengajian"],
-    ["program", "Program / Kursus"],
-    ["academicLevel", "Tahap Pengajian"],
-    ["totalStudyYears", "Jumlah Tahun Pengajian"],
-    ["totalSemesters", "Jumlah Semester"],
-    ["currentYear", "Tahun Pengajian Terkini"],
-    ["semester", "Semester Terkini"],
-    ["cgpa", "CGPA / Keputusan Terkini"],
-    ["supervisorName", "Nama Penyelaras Program"],
-    ["supervisorEmail", "Emel Penyelaras Program"],
-    ["supervisorPhone", "No. Telefon Penyelaras Program"],
-  ],
+  [jobHigherEducationTab]: [],
   [jobLanguageSkillsTab]: [
     ["jobLanguageSkills", "Pengetahuan dan Kemahiran Bahasa"],
   ],
@@ -706,6 +703,24 @@ function getJobStpmSubjects(studentInfo = {}) {
   });
 }
 
+function getJobHigherEducationQualifications(studentInfo = {}) {
+  const sourceRows = Array.isArray(studentInfo.jobHigherEducationQualifications)
+    ? studentInfo.jobHigherEducationQualifications
+    : [];
+
+  return Array.from({ length: jobHigherEducationRowCount }, (_, index) => {
+    const row = sourceRows[index] || {};
+    return {
+      certificateName: normalizeJobTableValue(row.certificateName),
+      cgpa: normalizeJobTableValue(row.cgpa),
+      completionDate: normalizeJobTableValue(row.completionDate),
+      entryDate: normalizeJobTableValue(row.entryDate),
+      institution: normalizeJobTableValue(row.institution),
+      specialization: normalizeJobTableValue(row.specialization),
+    };
+  });
+}
+
 function buildJobBmJulySummary(studentInfo = {}) {
   return [
     ["Tahun", studentInfo.jobBmJulyYear],
@@ -809,6 +824,7 @@ function normalizeStudentInfoDraft(studentInfo = {}, user = null) {
   const birthDate = studentInfo.birthDate || studentInfo.dateOfBirth || "";
   const normalizedJobSpmSubjects = getJobSpmSubjects(studentInfo);
   const normalizedJobStpmSubjects = getJobStpmSubjects(studentInfo);
+  const normalizedJobHigherEducationQualifications = getJobHigherEducationQualifications(studentInfo);
 
   return {
     ...defaults,
@@ -823,6 +839,7 @@ function normalizeStudentInfoDraft(studentInfo = {}, user = null) {
     jobBmJulyGradeDecision: normalizeJobTableValue(studentInfo.jobBmJulyGradeDecision),
     jobBmJulyOralExam: normalizeJobTableValue(studentInfo.jobBmJulyOralExam),
     jobBmJulyYear: normalizeJobTableValue(studentInfo.jobBmJulyYear),
+    jobHigherEducationQualifications: normalizedJobHigherEducationQualifications,
     jobMathJulyDetails: studentInfo.jobMathJulyDetails || buildJobMathJulySummary(studentInfo),
     jobMathJulyGradeDecision: normalizeJobTableValue(studentInfo.jobMathJulyGradeDecision),
     jobMathJulyYear: normalizeJobTableValue(studentInfo.jobMathJulyYear),
@@ -1273,6 +1290,17 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
       const next = { ...current, jobStpmSubjects: nextSubjects };
       return { ...next, jobStpmDetails: buildJobStpmSubjectSummary(next) };
     });
+  };
+
+  const updateJobHigherEducationRow = (index, field) => (event) => {
+    setNotice("");
+    clearValidationFields(["jobHigherEducationQualifications"]);
+    setStudentInfo((current) => ({
+      ...current,
+      jobHigherEducationQualifications: getJobHigherEducationQualifications(current).map((row, rowIndex) => (
+        rowIndex === index ? { ...row, [field]: normalizeJobTableValue(event.target.value) } : row
+      )),
+    }));
   };
 
   const updateStudentName = (event) => {
@@ -1962,6 +1990,67 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
     </div>
   );
 
+  const renderJobHigherEducationSection = () => (
+    <div className="student-job-spm-table-wrap">
+      {getJobHigherEducationQualifications(studentInfo).map((row, index) => (
+        <table className="student-job-spm-table student-job-higher-education-table" key={index}>
+          <colgroup>
+            <col />
+            <col />
+            <col />
+            <col />
+          </colgroup>
+          {index === 0 ? (
+            <thead>
+              <tr>
+                <th className="student-job-spm-heading" colSpan={4}>
+                  {activeInfoHeading}
+                  <span className="student-job-heading-note">
+                    (Sila lengkapkan maklumat kelulusan pendidikan tinggi jika jawatan yang dipohon memerlukan kelayakan tersebut. Jika tidak, ruangan ini hendaklah dikosongkan.)
+                  </span>
+                </th>
+              </tr>
+            </thead>
+          ) : null}
+          <tbody>
+            <tr>
+              <td>Nama Sijil</td>
+              <td>
+                <input value={row.certificateName} onChange={updateJobHigherEducationRow(index, "certificateName")} />
+              </td>
+              <td>Tarikh Masuk</td>
+              <td>
+                <input value={row.entryDate} onChange={updateJobHigherEducationRow(index, "entryDate")} />
+              </td>
+            </tr>
+            <tr>
+              <td>CGPA</td>
+              <td>
+                <input value={row.cgpa} onChange={updateJobHigherEducationRow(index, "cgpa")} />
+              </td>
+              <td>Tarikh Tamat Pengajian</td>
+              <td>
+                <input value={row.completionDate} onChange={updateJobHigherEducationRow(index, "completionDate")} />
+              </td>
+            </tr>
+            <tr>
+              <td>Institusi</td>
+              <td colSpan={3}>
+                <input value={row.institution} onChange={updateJobHigherEducationRow(index, "institution")} />
+              </td>
+            </tr>
+            <tr>
+              <td>Pengkhususan</td>
+              <td colSpan={3}>
+                <input value={row.specialization} onChange={updateJobHigherEducationRow(index, "specialization")} />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      ))}
+    </div>
+  );
+
   const renderDocumentFields = () => (
     <>
       <div className="student-personal-table-wrap">
@@ -2069,7 +2158,8 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
                   {activeInfoTab === jobBmJulyTab ? renderJobBmJulySection() : null}
                   {activeInfoTab === jobMathJulyTab ? renderJobMathJulySection() : null}
                   {activeInfoTab === jobStpmTab ? renderJobStpmSection() : null}
-                  {activeInfoTab === academicInfoTab || activeInfoTab === jobHigherEducationTab ? renderAcademicFields() : null}
+                  {activeInfoTab === academicInfoTab ? renderAcademicFields() : null}
+                  {activeInfoTab === jobHigherEducationTab ? renderJobHigherEducationSection() : null}
                   {activeInfoTab === jobLanguageSkillsTab ? renderJobSimpleSection("jobLanguageSkills", "Masukkan pengetahuan dan kemahiran bahasa.") : null}
                   {activeInfoTab === jobComputerSkillsTab ? renderJobSimpleSection("jobComputerSkills", "Masukkan maklumat kemahiran komputer.") : null}
                   {activeInfoTab === jobWorkExperienceTab ? renderJobSimpleSection("jobWorkExperience", "Masukkan pengalaman bekerja.") : null}

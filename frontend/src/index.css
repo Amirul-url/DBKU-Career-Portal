@@ -7474,6 +7474,34 @@ body:has(.applicant-profile-page) {
   min-width: 720px;
 }
 
+.student-job-higher-education-table {
+  table-layout: fixed;
+  min-width: 760px;
+}
+
+.student-job-higher-education-table + .student-job-higher-education-table {
+  margin-top: 18px;
+}
+
+.student-job-higher-education-table col {
+  width: 25%;
+}
+
+.student-job-higher-education-table th:first-child,
+.student-job-higher-education-table td:first-child,
+.student-job-higher-education-table th:nth-child(3),
+.student-job-higher-education-table td:nth-child(3) {
+  width: auto;
+  text-align: left;
+}
+
+.student-job-heading-note {
+  display: block;
+  margin-top: 2px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
 .student-passport-upload {
   position: relative;
   box-sizing: border-box;

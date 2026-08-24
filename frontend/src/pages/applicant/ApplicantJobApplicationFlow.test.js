@@ -151,6 +151,24 @@ test("job application BM July, Math July and STPM sections render official table
   assert.doesNotMatch(internshipFormSource, /activeInfoTab === jobStpmTab \? renderJobSimpleSection\("jobStpmDetails"/);
 });
 
+test("job application higher education section renders the official qualification table", () => {
+  assert.match(internshipFormSource, /const jobHigherEducationRowCount = 2/);
+  assert.match(internshipFormSource, /jobHigherEducationQualifications: Array\.from\(\{ length: jobHigherEducationRowCount \}/);
+  assert.match(internshipFormSource, /certificateName: ""/);
+  assert.match(internshipFormSource, /entryDate: ""/);
+  assert.match(internshipFormSource, /completionDate: ""/);
+  assert.match(internshipFormSource, /specialization: ""/);
+  assert.match(internshipFormSource, /\[jobHigherEducationTab\]: \[\]/);
+  assert.match(internshipFormSource, /const renderJobHigherEducationSection = \(\) => \(/);
+  assert.match(internshipFormSource, /student-job-higher-education-table/);
+  assert.match(internshipFormSource, /Sila lengkapkan maklumat kelulusan pendidikan tinggi jika jawatan yang dipohon memerlukan kelayakan tersebut/);
+  assert.match(internshipFormSource, /getJobHigherEducationQualifications\(studentInfo\)\.map\(\(row, index\) =>/);
+  assert.match(internshipFormSource, /updateJobHigherEducationRow\(index, "certificateName"\)/);
+  assert.match(internshipFormSource, /updateJobHigherEducationRow\(index, "completionDate"\)/);
+  assert.match(internshipFormSource, /activeInfoTab === jobHigherEducationTab \? renderJobHigherEducationSection\(\) : null/);
+  assert.doesNotMatch(internshipFormSource, /activeInfoTab === academicInfoTab \|\| activeInfoTab === jobHigherEducationTab \? renderAcademicFields\(\) : null/);
+});
+
 test("job application personal table includes required salutation row above name", () => {
   assert.match(internshipFormSource, /const salutationOptions = \["Encik", "Puan", "Cik"\]/);
   assert.match(internshipFormSource, /salutation: ""/);
