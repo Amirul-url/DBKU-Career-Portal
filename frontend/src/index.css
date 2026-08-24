@@ -6970,6 +6970,15 @@ body:has(.applicant-profile-page) {
   text-align: left;
 }
 
+.student-personal-table .student-personal-section-heading th {
+  width: auto;
+  background: #d9d9d9;
+  color: #020617;
+  padding: 8px 12px;
+  font-weight: 900;
+  text-decoration: underline;
+}
+
 .student-personal-table th span {
   display: block;
   margin-left: 22px;

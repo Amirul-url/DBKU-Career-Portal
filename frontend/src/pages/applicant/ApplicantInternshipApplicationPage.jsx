@@ -1446,9 +1446,15 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
           {renderPassportPhotoUpload()}
         </div>
       ) : renderPassportPhotoUpload()}
-      {isJobApplication ? renderInfoHeading() : null}
       <div className="student-personal-table-wrap">
         <table className="student-personal-table">
+          <thead>
+            {isJobApplication ? (
+              <tr className="student-personal-section-heading">
+                <th colSpan={2}>{activeInfoHeading}</th>
+              </tr>
+            ) : null}
+          </thead>
           <tbody>
             {isJobApplication ? renderPersonalRow(
               "Gelaran (Encik/ Puan/ Cik)",
@@ -1689,7 +1695,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
     ? getJobInfoHeading(activeInfoTab, currentInfoTabs.indexOf(activeInfoTab))
     : activeInfoTab;
   const renderInfoHeading = () => (
-    <h2 className={isJobApplication && activeInfoTab === personalInfoTab ? "job-section-heading" : undefined}>{activeInfoHeading}</h2>
+    <h2>{activeInfoHeading}</h2>
   );
   const requiredInfoTabsComplete = currentRequiredInfoTabs.every((tab) => isTabComplete(tab, studentInfo));
   const isApplicationReadyToSubmit = declarationAccepted && requiredInfoTabsComplete;
