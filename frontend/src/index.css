@@ -7455,6 +7455,21 @@ body:has(.applicant-profile-page) {
   width: auto;
 }
 
+.student-job-bm-july-table {
+  table-layout: fixed;
+}
+
+.student-job-bm-july-table col {
+  width: 25%;
+}
+
+.student-job-bm-july-table th:first-child,
+.student-job-bm-july-table td:first-child,
+.student-job-bm-july-table th:nth-child(3),
+.student-job-bm-july-table td:nth-child(3) {
+  width: auto;
+}
+
 .student-job-stpm-table {
   min-width: 720px;
 }

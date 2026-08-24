@@ -137,6 +137,10 @@ test("job application BM July, Math July and STPM sections render official table
   assert.match(internshipFormSource, /`Sekurang-kurangnya \$\{minimumJobStpmSubjectRows\} mata pelajaran bersama gred`/);
   assert.match(internshipFormSource, /if \(tab === jobStpmTab\) return isJobStpmTabComplete\(studentInfo\);/);
   assert.match(internshipFormSource, /const renderJobBmJulySection = \(\) => \(/);
+  assert.match(internshipFormSource, /student-job-bm-july-table/);
+  assert.match(internshipFormSource, /<colgroup>\s*<col \/>\s*<col \/>\s*<col \/>\s*<col \/>\s*<\/colgroup>/);
+  assert.match(internshipFormSource, /<td colSpan=\{2\}>Tahun<\/td>[\s\S]*<td colSpan=\{2\}>[\s\S]*jobBmJulyYear/);
+  assert.match(internshipFormSource, /<td colSpan=\{2\}>Nama Peperiksaan<\/td>[\s\S]*<td colSpan=\{2\}>[\s\S]*jobBmJulyExamName/);
   assert.match(internshipFormSource, /const renderJobMathJulySection = \(\) => \(/);
   assert.match(internshipFormSource, /const renderJobStpmSection = \(\) => \(/);
   assert.match(internshipFormSource, /activeInfoTab === jobBmJulyTab \? renderJobBmJulySection\(\) : null/);

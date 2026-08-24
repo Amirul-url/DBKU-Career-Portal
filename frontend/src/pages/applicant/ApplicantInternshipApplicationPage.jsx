@@ -1834,7 +1834,13 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
 
   const renderJobBmJulySection = () => (
     <div className="student-job-spm-table-wrap">
-      <table className="student-job-spm-table student-job-compact-table">
+      <table className="student-job-spm-table student-job-compact-table student-job-bm-july-table">
+        <colgroup>
+          <col />
+          <col />
+          <col />
+          <col />
+        </colgroup>
         <thead>
           <tr>
             <th className="student-job-spm-heading" colSpan={4}>{activeInfoHeading}</th>
@@ -1842,14 +1848,14 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
         </thead>
         <tbody>
           <tr>
-            <td>Tahun</td>
-            <td colSpan={3}>
+            <td colSpan={2}>Tahun</td>
+            <td colSpan={2}>
               <input value={studentInfo.jobBmJulyYear} onChange={updateJobBmJulyValue("jobBmJulyYear")} />
             </td>
           </tr>
           <tr>
-            <td>Nama Peperiksaan</td>
-            <td colSpan={3}>
+            <td colSpan={2}>Nama Peperiksaan</td>
+            <td colSpan={2}>
               <input value={studentInfo.jobBmJulyExamName} onChange={updateJobBmJulyValue("jobBmJulyExamName")} />
             </td>
           </tr>
