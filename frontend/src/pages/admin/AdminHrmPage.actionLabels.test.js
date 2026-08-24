@@ -427,6 +427,15 @@ test("HRM can see applicant offer confirmation after applicant agrees", () => {
   assert.match(source, /function ApplicantConfirmationReadOnlyTab/);
   assert.match(source, /Dokumen pengesahan pemohon/);
   assert.match(source, /Pemohon telah menolak tawaran latihan industri ini\./);
+  const applicantConfirmationSource = source.slice(
+    source.indexOf("function ApplicantConfirmationReadOnlyTab"),
+    source.indexOf("function InternshipApplicationDetailPage"),
+  );
+  assert.match(applicantConfirmationSource, /if \(isRejected\) return \(/);
+  assert.ok(
+    applicantConfirmationSource.indexOf("if (isRejected) return (") <
+      applicantConfirmationSource.indexOf('className="organization-feedback-document-table applicant-confirmation-document-table"'),
+  );
   assert.doesNotMatch(source, /Dengan ini, saya mengesahkan penerimaan tawaran menjalani latihan industri di Dewan Bandaraya Kuching Utara \(DBKU\)/);
   assert.doesNotMatch(source, /Sekian, terima kasih atas perhatian dan kerjasama pihak puan\./);
   assert.match(source, /applicantConfirmationDocuments/);

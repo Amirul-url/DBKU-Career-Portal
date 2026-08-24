@@ -2902,6 +2902,22 @@ function ApplicantConfirmationReadOnlyTab({ application }) {
     window.open(document.url, "_blank", "noreferrer");
   };
 
+  if (isRejected) return (
+    <div className="applicant-confirmation-panel hrm-applicant-confirmation-panel">
+      <section className="organization-feedback-section" aria-label="Pengesahan penolakan pemohon">
+        <div className="organization-feedback-section-header">
+          <div className="organization-feedback-section-title">
+            <h3>Pengesahan pemohon</h3>
+            <p>
+              Pemohon telah menolak tawaran latihan industri ini.
+              {confirmation.submitted_at ? ` Dihantar pada ${dateValue(confirmation.submitted_at)}.` : ""}
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+
   return (
     <div className="applicant-confirmation-panel hrm-applicant-confirmation-panel">
       <section className="organization-feedback-section" aria-label="Dokumen pengesahan pemohon">
@@ -2909,11 +2925,9 @@ function ApplicantConfirmationReadOnlyTab({ application }) {
           <div className="organization-feedback-section-title">
             <h3>Dokumen pengesahan pemohon</h3>
             <p>
-              {isRejected
-                ? "Pemohon telah menolak tawaran latihan industri ini."
-                : confirmation.submitted_at
-                  ? `Dihantar oleh pemohon pada ${dateValue(confirmation.submitted_at)}.`
-                  : "Dokumen pengesahan pemohon akan dipaparkan selepas dihantar."}
+              {confirmation.submitted_at
+                ? `Dihantar oleh pemohon pada ${dateValue(confirmation.submitted_at)}.`
+                : "Dokumen pengesahan pemohon akan dipaparkan selepas dihantar."}
             </p>
           </div>
         </div>
