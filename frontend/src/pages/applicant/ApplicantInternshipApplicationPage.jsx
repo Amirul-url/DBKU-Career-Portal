@@ -1440,6 +1440,10 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
   const renderInfoHeading = () => (
     <h2 className={isJobApplication && activeInfoTab === personalInfoTab ? "job-section-heading" : undefined}>{activeInfoHeading}</h2>
   );
+  const getInfoTabLabel = (tab, index) => {
+    if (!isJobApplication) return tab;
+    return `(${String.fromCharCode(65 + index)}) ${tab}`;
+  };
   const requiredInfoTabsComplete = requiredInfoTabs.every((tab) => isTabComplete(tab, studentInfo));
   const isApplicationReadyToSubmit = declarationAccepted && requiredInfoTabsComplete;
 
@@ -1461,14 +1465,14 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
             <div className="student-info-workspace">
               <div className="student-info-content">
                 <nav className="student-info-tabs" aria-label="Bahagian permohonan latihan industri">
-                  {infoTabs.map((tab) => (
+                  {infoTabs.map((tab, index) => (
                     <button
                       className={activeInfoTab === tab ? "active" : ""}
                       key={tab}
                       type="button"
                       onClick={() => openInfoTab(tab)}
                     >
-                      {tab}
+                      {getInfoTabLabel(tab, index)}
                     </button>
                   ))}
                 </nav>

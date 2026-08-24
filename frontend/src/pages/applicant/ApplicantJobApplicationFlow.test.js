@@ -44,6 +44,16 @@ test("job application personal heading uses uppercase numbered label", () => {
   assert.match(cssSource, /\.student-info-form h2\.job-section-heading \{[\s\S]*text-decoration: underline;/);
 });
 
+test("job application tabs show letter numbering without changing tab state values", () => {
+  assert.match(internshipFormSource, /const getInfoTabLabel = \(tab, index\) => \{/);
+  assert.match(internshipFormSource, /if \(!isJobApplication\) return tab;/);
+  assert.match(internshipFormSource, /return `\(\$\{String\.fromCharCode\(65 \+ index\)\}\) \$\{tab\}`;/);
+  assert.match(internshipFormSource, /infoTabs\.map\(\(tab, index\) =>/);
+  assert.match(internshipFormSource, /className=\{activeInfoTab === tab \? "active" : ""\}/);
+  assert.match(internshipFormSource, /onClick=\{\(\) => openInfoTab\(tab\)\}/);
+  assert.match(internshipFormSource, /\{getInfoTabLabel\(tab, index\)\}/);
+});
+
 test("job application personal table includes optional salutation row above name", () => {
   assert.match(internshipFormSource, /const salutationOptions = \["Encik", "Puan", "Cik"\]/);
   assert.match(internshipFormSource, /salutation: ""/);
