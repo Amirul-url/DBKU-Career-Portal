@@ -29,6 +29,7 @@ const statusLabels = {
 };
 
 const getInternshipDraftStorageKey = (user) => `dbku_internship_student_info_manual_${user?.id || user?.email || "guest"}`;
+const getJobDraftStorageKey = (user) => `dbku_job_application_student_info_manual_${user?.id || user?.email || "guest"}`;
 const reapplyAllowedApplicationStatuses = new Set(["rejected", "withdrawn"]);
 const APPLICATIONS_PER_PAGE = 5;
 const applicationDecisionTab = "Keputusan Permohonan";
@@ -87,6 +88,38 @@ function getInternshipDraftApplication(user) {
         department: "Latihan Industri",
         title: "Permohonan Latihan Industri DBKU",
         vacancy_type: "internship",
+      },
+    };
+  } catch {
+    return null;
+  }
+}
+
+function getJobDraftApplication(user) {
+  if (typeof window === "undefined" || !user) return null;
+
+  try {
+    const saved = window.localStorage.getItem(getJobDraftStorageKey(user));
+    if (!saved) return null;
+
+    const draft = JSON.parse(saved);
+    if (!draft.visibleInApplications) return null;
+
+    const vacancy = draft.vacancy || {};
+    return {
+      id: "job-draft",
+      isLocalDraft: true,
+      reference_no: "DRAF-JOB",
+      status: "draft",
+      submitted_at: null,
+      created_at: draft.savedAt || new Date().toISOString(),
+      vacancy: vacancy.id || "",
+      vacancy_detail: {
+        department: vacancy.department || "Dewan Bandaraya Kuching Utara",
+        division: vacancy.division || "",
+        id: vacancy.id || "",
+        title: vacancy.title || "Permohonan Jawatan Kosong DBKU",
+        vacancy_type: "job",
       },
     };
   } catch {
@@ -304,9 +337,21 @@ function ApplicationList({ applications, loading }) {
                 const visibleStatus = getApplicantVisibleStatus(status, application);
                 const showNewFeedbackBadge = hasNewOrganizationFeedbackForApplicant(application);
                 const shouldContinueApplication = application.isLocalDraft || status === "draft" || status === "incomplete";
-                const actionTarget = status === "incomplete"
-                  ? APPLICANT_ROUTES.internshipApplicationEdit(application.id)
-                  : APPLICANT_ROUTES.internshipApplication;
+                const actionTarget = application.isLocalDraft
+                  ? (
+                    isInternshipApplication(application)
+                      ? APPLICANT_ROUTES.internshipApplication
+                      : APPLICANT_ROUTES.jobApplicationForVacancy(application.vacancy_detail?.id || application.vacancy)
+                  )
+                  : status === "incomplete"
+                  ? (
+                    isInternshipApplication(application)
+                      ? APPLICANT_ROUTES.internshipApplicationEdit(application.id)
+                      : APPLICANT_ROUTES.jobApplicationEdit(application.id)
+                  )
+                  : isInternshipApplication(application)
+                    ? APPLICANT_ROUTES.internshipApplication
+                    : APPLICANT_ROUTES.jobApplicationEdit(application.id);
                 return (
                   <tr key={application.id}>
                     <td>
@@ -478,7 +523,11 @@ function SavedVacancyList({ onRemove, vacancies }) {
               </div>
 
               <div className="market-detail-actions">
-                <Link to={selectedVacancy.vacancy_type === "internship" ? APPLICANT_ROUTES.internships : APPLICANT_ROUTES.jobs}>
+                <Link to={
+                  selectedVacancy.vacancy_type === "internship"
+                    ? APPLICANT_ROUTES.internships
+                    : APPLICANT_ROUTES.jobApplicationForVacancy(selectedVacancy.id)
+                }>
                   Mohon Sekarang
                 </Link>
                 <button className="saved" type="button" onClick={() => onRemove(selectedVacancy.id)}>
@@ -505,16 +554,23 @@ export default function ApplicantPortalListPage({ page }) {
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
   const email = user?.email || "Belum dikemaskini";
   const isApplicationsPage = page === "applications";
-  const localDraftApplication = useMemo(
+  const localInternshipDraftApplication = useMemo(
     () => (isApplicationsPage ? getInternshipDraftApplication(user) : null),
     [isApplicationsPage, user],
   );
+  const localJobDraftApplication = useMemo(
+    () => (isApplicationsPage ? getJobDraftApplication(user) : null),
+    [isApplicationsPage, user],
+  );
   const displayApplications = useMemo(() => {
-    if (!isApplicationsPage || !localDraftApplication) return applications;
+    if (!isApplicationsPage) return applications;
 
     const hasBlockingInternshipApplication = applications.some(shouldHideLocalDraftForApplication);
-    return hasBlockingInternshipApplication ? applications : [localDraftApplication, ...applications];
-  }, [applications, isApplicationsPage, localDraftApplication]);
+    const localDraftApplications = [localJobDraftApplication, localInternshipDraftApplication]
+      .filter((application) => application && (application !== localInternshipDraftApplication || !hasBlockingInternshipApplication));
+
+    return localDraftApplications.length ? [...localDraftApplications, ...applications] : applications;
+  }, [applications, isApplicationsPage, localInternshipDraftApplication, localJobDraftApplication]);
   const newApplicationFeedbackCount = useMemo(
     () => (isApplicationsPage ? getApplicantApplicationBadgeCount(displayApplications) : 0),
     [displayApplications, isApplicationsPage],

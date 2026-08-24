@@ -155,6 +155,52 @@ class CandidateApplicationReferenceNoTests(TestCase):
         mock_send_email.assert_any_call(hrm, expected_title, expected_message)
         mock_send_whatsapp.assert_any_call(hrm.mobile_number, expected_message)
 
+    @override_settings(NOTIFICATION_EMAIL_ENABLED=True, WHATSAPP_ENABLED=True)
+    @patch("applications.services.send_whatsapp_message")
+    @patch("notifications.services.send_notification_email")
+    def test_submitting_job_application_uses_job_notification_copy(
+        self,
+        mock_send_email,
+        mock_send_whatsapp,
+    ):
+        applicant = self.create_applicant("new-job-submission@example.com")
+        hrm = self.user_model.objects.create_user(
+            username="hrm-new-job-submission@example.com",
+            email="hrm-new-job-submission@example.com",
+            password="Password123!",
+            role="admin",
+            department="Bahagian Pengurusan Sumber Manusia (HRM)",
+            mobile_number="60128889991",
+        )
+        job_vacancy = Vacancy.objects.create(
+            title="Penolong Pegawai Penerangan Gred S5",
+            vacancy_type="job",
+            department="Dewan Bandaraya Kuching Utara",
+            summary="Jawatan kosong DBKU.",
+            status="open",
+        )
+        application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=job_vacancy,
+            status="draft",
+            reference_no="PK.2026-0011",
+        )
+        client = APIClient()
+        client.force_authenticate(user=applicant)
+
+        response = client.post(f"/api/applications/{application.id}/submit/")
+
+        self.assertEqual(response.status_code, 200)
+        applicant_notification = Notification.objects.get(application=application, user=applicant)
+        hrm_notification = Notification.objects.get(application=application, user=hrm)
+        self.assertIn("Permohonan jawatan kosong", applicant_notification.message)
+        self.assertNotIn("latihan industri", applicant_notification.message.lower())
+        self.assertEqual(hrm_notification.title, "Permohonan Jawatan Baharu Untuk Semakan - PK.2026-0011")
+        self.assertIn("permohonan jawatan kosong baharu", hrm_notification.message.lower())
+        self.assertNotIn("Latihan Industri", hrm_notification.message)
+        mock_send_email.assert_any_call(hrm, hrm_notification.title, hrm_notification.message)
+        mock_send_whatsapp.assert_any_call(hrm.mobile_number, hrm_notification.message)
+
     def test_internship_document_upload_is_saved_and_returned(self):
         applicant = self.create_applicant("documents@example.com")
         client = APIClient()

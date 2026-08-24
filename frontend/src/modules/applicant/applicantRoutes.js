@@ -8,6 +8,9 @@ export const APPLICANT_ROUTES = {
   internshipApplicationEdit: (id) => `/profile/internship-application?application=${id}`,
   internshipApplicationNew: "/profile/internship-application?new=1",
   internships: "/profile/internships",
+  jobApplication: "/profile/job-application",
+  jobApplicationEdit: (id) => `/profile/job-application?application=${id}`,
+  jobApplicationForVacancy: (id) => `/profile/job-application?vacancy=${id}`,
   jobs: "/profile/jobs",
   personal: "/profile/personal",
   profile: "/profile",
@@ -24,7 +27,7 @@ const applicantSectionRoutes = [
 
 export const applicantSidebarNavItems = [
   { icon: "dashboard", label: "Papan Pemuka", to: APPLICANT_ROUTES.dashboard },
-  { activePaths: [APPLICANT_ROUTES.jobs, APPLICANT_ROUTES.internships, APPLICANT_ROUTES.internshipApplication], icon: "search", label: "Cari Kerja", to: APPLICANT_ROUTES.jobs },
+  { activePaths: [APPLICANT_ROUTES.jobs, APPLICANT_ROUTES.internships, APPLICANT_ROUTES.internshipApplication, APPLICANT_ROUTES.jobApplication], icon: "search", label: "Cari Kerja", to: APPLICANT_ROUTES.jobs },
   { icon: "assignment", label: "Permohonan Saya", to: APPLICANT_ROUTES.applications },
   { icon: "bookmark", label: "Senarai Simpan", to: APPLICANT_ROUTES.saved },
   {

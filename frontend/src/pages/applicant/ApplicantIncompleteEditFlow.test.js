@@ -21,7 +21,7 @@ test("applicant incomplete applications can be reopened for editing", () => {
   assert.match(viewSource, /Kemaskini Permohonan/);
   assert.match(formSource, /useSearchParams/);
   assert.match(formSource, /editableApplicationStatuses\.has/);
-  assert.match(formSource, /useState\(\(\) => loadStudentInfoDraft\(user\)\)/);
+  assert.match(formSource, /useState\(\(\) => loadStudentInfoDraft\(user, applicationType\)\)/);
   assert.doesNotMatch(formSource, /\[editApplicationId, savedDraft\?\.studentInfo, user\]/);
   assert.match(
     formSource,
@@ -421,6 +421,10 @@ test("applicant rejected internship applications can apply again", () => {
     listSource,
     /const hasBlockingInternshipApplication = applications\.some\(shouldHideLocalDraftForApplication\)/,
   );
-  assert.match(listSource, /hasBlockingInternshipApplication \? applications : \[localDraftApplication, \.\.\.applications\]/);
+  assert.match(listSource, /\[localJobDraftApplication, localInternshipDraftApplication\]/);
+  assert.match(
+    listSource,
+    /application !== localInternshipDraftApplication \|\| !hasBlockingInternshipApplication/,
+  );
   assert.doesNotMatch(listSource, /hasInternshipApplication \? applications/);
 });

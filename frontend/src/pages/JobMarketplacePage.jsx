@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { apiRequest, getStoredUser } from "../lib/authApi";
+import { getOpportunityApplicationTarget } from "../modules/applicant/jobApplicationRouting";
 import { getSavedVacancies, removeSavedVacancy, upsertSavedVacancy } from "../modules/applicant/savedVacancies";
 
 const dateLabel = (value) =>
@@ -149,6 +150,7 @@ export function JobMarketplaceContent({ actionTarget = "/login", embedded = fals
   const selectedOpportunitySaved = selectedOpportunity
     ? savedVacancies.some((item) => item.id === selectedOpportunity.id)
     : false;
+  const applicationTarget = getOpportunityApplicationTarget(selectedOpportunity, { actionTarget });
   const handleSaveToggle = () => {
     if (!selectedOpportunity) return;
 
@@ -270,7 +272,7 @@ export function JobMarketplaceContent({ actionTarget = "/login", embedded = fals
               </div>
 
               <div className="market-detail-actions">
-                <Link to={actionTarget}>Mohon Sekarang</Link>
+                <Link to={applicationTarget}>Mohon Sekarang</Link>
                 <button
                   type="button"
                   className={selectedOpportunitySaved ? "saved" : ""}

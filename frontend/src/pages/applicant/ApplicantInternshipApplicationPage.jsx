@@ -302,7 +302,10 @@ const requiredFieldsByTab = {
   ],
 };
 
-const getDraftStorageKey = (user) => `dbku_internship_student_info_manual_${user?.id || user?.email || "guest"}`;
+const getInternshipDraftStorageKey = (user) => `dbku_internship_student_info_manual_${user?.id || user?.email || "guest"}`;
+const getJobDraftStorageKey = (user) => `dbku_job_application_student_info_manual_${user?.id || user?.email || "guest"}`;
+const getDraftStorageKey = (user, applicationType = "internship") =>
+  applicationType === "job" ? getJobDraftStorageKey(user) : getInternshipDraftStorageKey(user);
 
 function getCountryKey(country) {
   return `${country.iso}-${country.code}`;
@@ -584,38 +587,38 @@ function getDraftStudentInfo(studentInfo = {}) {
   return draftStudentInfo;
 }
 
-function loadStudentInfoDraft(user) {
+function loadStudentInfoDraft(user, applicationType = "internship") {
   if (typeof window === "undefined") {
     return null;
   }
 
   try {
-    const saved = window.localStorage.getItem(getDraftStorageKey(user));
+    const saved = window.localStorage.getItem(getDraftStorageKey(user, applicationType));
     return saved ? JSON.parse(saved) : null;
   } catch {
     return null;
   }
 }
 
-function saveStudentInfoDraft(user, payload) {
+function saveStudentInfoDraft(user, payload, applicationType = "internship") {
   if (typeof window === "undefined") {
     return;
   }
 
   try {
-    window.localStorage.setItem(getDraftStorageKey(user), JSON.stringify(payload));
+    window.localStorage.setItem(getDraftStorageKey(user, applicationType), JSON.stringify(payload));
   } catch {
     // Browser storage may be unavailable or full; keep the current in-memory state.
   }
 }
 
-function clearStudentInfoDraft(user) {
+function clearStudentInfoDraft(user, applicationType = "internship") {
   if (typeof window === "undefined") {
     return;
   }
 
   try {
-    window.localStorage.removeItem(getDraftStorageKey(user));
+    window.localStorage.removeItem(getDraftStorageKey(user, applicationType));
   } catch {
     // Ignore storage cleanup failures; the submitted application remains in the backend.
   }
@@ -676,10 +679,10 @@ function getDocumentSummary(studentInfo) {
   );
 }
 
-function buildApplicationPayload(studentInfo, vacancy, documentFiles) {
+function buildApplicationPayload(studentInfo, vacancy, documentFiles, applicationType = "internship") {
   const payload = new FormData();
-  payload.append("cover_letter", "Permohonan Latihan Industri DBKU");
-  payload.append("profile_data", JSON.stringify(buildApplicationProfileData(studentInfo, vacancy)));
+  payload.append("cover_letter", applicationType === "job" ? "Permohonan Jawatan Kosong DBKU" : "Permohonan Latihan Industri DBKU");
+  payload.append("profile_data", JSON.stringify(buildApplicationProfileData(studentInfo, vacancy, applicationType)));
   payload.append("vacancy", vacancy.id);
 
   documentFields.forEach((document) => {
@@ -692,8 +695,9 @@ function buildApplicationPayload(studentInfo, vacancy, documentFiles) {
   return payload;
 }
 
-function buildApplicationProfileData(studentInfo, vacancy) {
+function buildApplicationProfileData(studentInfo, vacancy, applicationType = "internship") {
   return {
+    application_type: applicationType,
     declaration: {
       accepted: true,
       accepted_at: new Date().toISOString(),
@@ -701,7 +705,15 @@ function buildApplicationProfileData(studentInfo, vacancy) {
         "Saya dengan ini mengaku bahawa semua maklumat yang saya berikan adalah BENAR dan TEPAT. Saya juga bersetuju dan menerima bahawa sekiranya mana-mana daripada pengakuan ini didapati palsu atau tidak benar, pihak Dewan Bandaraya Kuching Utara berhak menarik balik keputusan tawaran dan menamatkan perkhidmatan saya dengan serta-merta tanpa apa-apa syarat",
     },
     documents: getDocumentSummary(studentInfo),
-    internship_vacancy: vacancy
+    job_vacancy: applicationType === "job" && vacancy
+      ? {
+          id: vacancy.id,
+          department: vacancy.department,
+          division: vacancy.division,
+          title: vacancy.title,
+        }
+      : null,
+    internship_vacancy: applicationType === "internship" && vacancy
       ? {
           id: vacancy.id,
           department: vacancy.department,
@@ -713,13 +725,19 @@ function buildApplicationProfileData(studentInfo, vacancy) {
   };
 }
 
-export default function ApplicantInternshipApplicationPage() {
+export default function ApplicantInternshipApplicationPage({ applicationType = "internship" }) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const user = getStoredUser();
   const editApplicationId = searchParams.get("application") || "";
+  const selectedVacancyId = searchParams.get("vacancy") || "";
   const isStartingNewApplication = searchParams.get("new") === "1";
-  const [savedDraft] = useState(() => loadStudentInfoDraft(user));
+  const isJobApplication = applicationType === "job";
+  const applicationTypeQuery = isJobApplication ? "job" : "internship";
+  const applicationTitle = isJobApplication ? "Permohonan Jawatan Kosong DBKU" : "Permohonan Latihan Industri";
+  const applicationNoticeNoun = isJobApplication ? "permohonan jawatan kosong" : "permohonan latihan industri";
+  const applicationOpportunityNoun = isJobApplication ? "jawatan kosong" : "peluang latihan industri";
+  const [savedDraft] = useState(() => loadStudentInfoDraft(user, applicationType));
   const activeSavedDraft = isStartingNewApplication ? null : savedDraft;
   const applicantRole = user?.role || "";
   const applicantDraftDefaults = useMemo(
@@ -732,7 +750,9 @@ export default function ApplicantInternshipApplicationPage() {
   );
   const initialStudentInfo = normalizeStudentInfoDraft(activeSavedDraft?.studentInfo || {}, applicantDraftDefaults);
   const [sidebarOpen, toggleSidebar] = useApplicantSidebarState();
-  const [activeInfoTab, setActiveInfoTab] = useState(() => getFirstIncompleteTab(initialStudentInfo));
+  const [activeInfoTab, setActiveInfoTab] = useState(() => (
+    isJobApplication ? personalInfoTab : getFirstIncompleteTab(initialStudentInfo)
+  ));
   const [notice, setNotice] = useState("");
   const [noticeStatus, setNoticeStatus] = useState("success");
   const [validationErrors, setValidationErrors] = useState({});
@@ -770,11 +790,11 @@ export default function ApplicantInternshipApplicationPage() {
 
   useEffect(() => {
     if (!user) {
-      navigate("/login", { replace: true, state: { message: "Sila log masuk untuk memohon latihan industri." } });
+      navigate("/login", { replace: true, state: { message: `Sila log masuk untuk memohon ${isJobApplication ? "jawatan kosong" : "latihan industri"}.` } });
     } else if (user.role !== "applicant") {
       navigate("/", { replace: true });
     }
-  }, [navigate, user]);
+  }, [isJobApplication, navigate, user]);
 
   useEffect(() => {
     if (user?.role !== "applicant") {
@@ -782,11 +802,14 @@ export default function ApplicantInternshipApplicationPage() {
     }
 
     let isMounted = true;
-    apiRequest("/jobs/?type=internship")
+    apiRequest(`/jobs/?type=${applicationTypeQuery}`)
       .then((data) => {
         if (!isMounted) return;
         const vacancies = Array.isArray(data) ? data : data.results || [];
-        setInternshipVacancy(vacancies[0] || null);
+        const selectedVacancy = selectedVacancyId
+          ? vacancies.find((vacancy) => String(vacancy.id) === String(selectedVacancyId))
+          : null;
+        setInternshipVacancy(selectedVacancy || vacancies[0] || null);
       })
       .catch(() => {
         if (isMounted) setInternshipVacancy(null);
@@ -798,7 +821,7 @@ export default function ApplicantInternshipApplicationPage() {
     return () => {
       isMounted = false;
     };
-  }, [user?.id, user?.role]);
+  }, [applicationTypeQuery, selectedVacancyId, user?.id, user?.role]);
 
   useEffect(() => {
     if (applicantRole !== "applicant" || (activeSavedDraft?.studentInfo && !editApplicationId)) {
@@ -806,7 +829,7 @@ export default function ApplicantInternshipApplicationPage() {
     }
 
     let isMounted = true;
-    apiRequest("/applications/?type=internship")
+    apiRequest(`/applications/?type=${applicationTypeQuery}`)
       .then((data) => {
         if (!isMounted) return;
         const applications = Array.isArray(data) ? data : data.results || [];
@@ -837,7 +860,7 @@ export default function ApplicantInternshipApplicationPage() {
     return () => {
       isMounted = false;
     };
-  }, [activeSavedDraft?.studentInfo, applicantDraftDefaults, applicantRole, editApplicationId]);
+  }, [activeSavedDraft?.studentInfo, applicantDraftDefaults, applicantRole, applicationTypeQuery, editApplicationId]);
 
   useEffect(() => () => {
     if (passportPhotoPreviewUrlRef.current) {
@@ -995,7 +1018,7 @@ export default function ApplicantInternshipApplicationPage() {
     }
 
     setNoticeStatus("success");
-    setNotice(`${activeInfoTab} telah dikemas kini untuk draf permohonan latihan industri.`);
+    setNotice(`${activeInfoTab} telah dikemas kini untuk draf ${applicationNoticeNoun}.`);
   };
 
   const handleSubmitApplication = async () => {
@@ -1019,13 +1042,13 @@ export default function ApplicantInternshipApplicationPage() {
 
     if (!editApplicationId && internshipVacancyLoading) {
       setNoticeStatus("error");
-      setNotice("Sila tunggu sebentar sementara peluang latihan industri dimuatkan.");
+      setNotice(`Sila tunggu sebentar sementara ${applicationOpportunityNoun} dimuatkan.`);
       return;
     }
 
     setIsSubmittingApplication(true);
     try {
-      const applicationsData = await apiRequest("/applications/?type=internship");
+      const applicationsData = await apiRequest(`/applications/?type=${applicationTypeQuery}`);
       const applications = Array.isArray(applicationsData) ? applicationsData : applicationsData.results || [];
       const existingApplication = editableApplication
         || applications.find(
@@ -1043,10 +1066,10 @@ export default function ApplicantInternshipApplicationPage() {
         || (existingApplication?.vacancy ? { id: existingApplication.vacancy } : null);
       if (!targetVacancy?.id) {
         setNoticeStatus("error");
-        setNotice("Tiada peluang latihan industri aktif ditemui untuk menerima permohonan ini.");
+        setNotice(`Tiada ${applicationOpportunityNoun} aktif ditemui untuk menerima permohonan ini.`);
         return;
       }
-      const payload = buildApplicationPayload(studentInfo, targetVacancy, documentFiles);
+      const payload = buildApplicationPayload(studentInfo, targetVacancy, documentFiles, applicationType);
       const application = existingApplication
         ? await apiRequest(`/applications/${existingApplication.id}/`, {
             method: "PATCH",
@@ -1062,7 +1085,7 @@ export default function ApplicantInternshipApplicationPage() {
 
       setNoticeStatus("success");
       setNotice(`Permohonan ${submittedApplication.reference_no} telah dihantar kepada HRM.`);
-      clearStudentInfoDraft(user);
+      clearStudentInfoDraft(user, applicationType);
       setSubmittedReferenceNo(submittedApplication.reference_no || "");
     } catch (error) {
       setNoticeStatus("error");
@@ -1083,11 +1106,21 @@ export default function ApplicantInternshipApplicationPage() {
 
   const saveDraftAndExit = () => {
     saveStudentInfoDraft(user, {
+      applicationType,
       purpose: isStartingNewApplication || savedDraft?.purpose === "new-application" ? "new-application" : "manual",
       savedAt: new Date().toISOString(),
       studentInfo: getDraftStudentInfo(studentInfo),
+      vacancy: internshipVacancy
+        ? {
+            id: internshipVacancy.id,
+            department: internshipVacancy.department,
+            division: internshipVacancy.division,
+            title: internshipVacancy.title,
+            vacancy_type: internshipVacancy.vacancy_type || applicationType,
+          }
+        : null,
       visibleInApplications: true,
-    });
+    }, applicationType);
     setShowSaveDraftDialog(false);
     navigate(APPLICANT_ROUTES.applications);
   };
@@ -1312,7 +1345,7 @@ export default function ApplicantInternshipApplicationPage() {
         <main className="profile-shell internship-application-shell">
           <section className="student-info-panel" aria-label="Maklumat permohonan latihan industri">
             <header className="student-info-titlebar">
-              <h1>Permohonan Latihan Industri</h1>
+              <h1>{applicationTitle}</h1>
               <button className="student-info-back" type="button" onClick={requestExitApplicationForm}>
                 <Icon>arrow_back</Icon>
                 Kembali

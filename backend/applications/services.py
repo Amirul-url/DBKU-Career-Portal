@@ -27,20 +27,39 @@ HRM_DEPARTMENT_ALIASES = {
 }
 
 
+def get_application_type_copy(application):
+    if application.vacancy.vacancy_type == "job":
+        return {
+            "applicant_success_title": "Permohonan Jawatan Kosong Berjaya Dihantar",
+            "applicant_type_label": "jawatan kosong",
+            "hrm_submission_title": "Permohonan Jawatan Baharu Untuk Semakan",
+            "hrm_submission_message": "Terdapat permohonan jawatan kosong baharu untuk semakan HRM.",
+        }
+
+    return {
+        "applicant_success_title": "Permohonan Latihan Industri Berjaya Dihantar",
+        "applicant_type_label": "latihan industri",
+        "hrm_submission_title": "Permohonan LI Baharu Untuk Semakan",
+        "hrm_submission_message": "Terdapat permohonan Latihan Industri baharu untuk semakan HRM.",
+    }
+
+
 def build_application_submitted_message(application):
+    copy = get_application_type_copy(application)
     return (
-        f"Permohonan latihan industri anda telah berjaya dihantar. "
+        f"Permohonan {copy['applicant_type_label']} anda telah berjaya dihantar. "
         f"No. rujukan: {application.reference_no}. "
         "Sila semak status permohonan melalui Portal Kerjaya DBKU."
     )
 
 
 def build_hrm_application_submission_notification(application):
+    copy = get_application_type_copy(application)
     return {
-        "title": f"Permohonan LI Baharu Untuk Semakan - {application.reference_no}",
+        "title": f"{copy['hrm_submission_title']} - {application.reference_no}",
         "message": (
             "Portal Kerjaya DBKU\n\n"
-            "Terdapat permohonan Latihan Industri baharu untuk semakan HRM.\n"
+            f"{copy['hrm_submission_message']}\n"
             f"No. Rujukan: {application.reference_no}\n\n"
             "Sila semak permohonan melalui Portal Kerjaya DBKU."
         ),
@@ -250,7 +269,7 @@ def submit_application(application):
     message = build_application_submitted_message(application)
     create_notification(
         user=application.applicant,
-        title="Permohonan Latihan Industri Berjaya Dihantar",
+        title=get_application_type_copy(application)["applicant_success_title"],
         message=message,
         application=application,
     )
