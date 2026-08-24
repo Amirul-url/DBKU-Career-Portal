@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { apiRequest, getStoredUser } from "../../lib/authApi";
 import { countryCallingCodes, defaultCountryCallingCode } from "../../lib/countryCallingCodes";
@@ -41,6 +41,17 @@ const minimumJobSpmSubjectRows = 3;
 const jobStpmSubjectRowCount = 5;
 const minimumJobStpmSubjectRows = 3;
 const jobHigherEducationRowCount = 2;
+const jobComputerSkillRowCount = 5;
+const minimumJobComputerSkillRows = 2;
+const jobSkillLevelOptions = ["Baik", "Sederhana", "Lemah"];
+const jobComputerLevelOptions = ["Sangat Mahir", "Mahir", "Sederhana", "Tidak Mahir"];
+const getDefaultJobLanguageSkillRows = () => [
+  { language: "Bahasa Malaysia", required: true, speaking: "", writing: "" },
+  { language: "Bahasa Inggeris", required: true, speaking: "", writing: "" },
+  { language: "", required: false, speaking: "", writing: "" },
+  { language: "", required: false, speaking: "", writing: "" },
+  { language: "", required: false, speaking: "", writing: "" },
+];
 const jobTabShortLabels = {
   [personalInfoTab]: "Peribadi",
   [jobSpmTab]: "SPM/UEC",
@@ -297,6 +308,8 @@ const getDefaultStudentInfo = () => ({
     specialization: "",
   })),
   jobLanguageSkills: "",
+  jobLanguageSkillRows: getDefaultJobLanguageSkillRows(),
+  jobComputerSkillRows: Array.from({ length: jobComputerSkillRowCount }, () => ({ level: "", softwareName: "" })),
   jobMathJulyGradeDecision: "",
   jobMathJulyDetails: "",
   jobMathJulyYear: "",
@@ -378,12 +391,8 @@ const requiredFieldsByTab = {
     ["jobStpmExamName", "Nama Peperiksaan"],
   ],
   [jobHigherEducationTab]: [],
-  [jobLanguageSkillsTab]: [
-    ["jobLanguageSkills", "Pengetahuan dan Kemahiran Bahasa"],
-  ],
-  [jobComputerSkillsTab]: [
-    ["jobComputerSkills", "Maklumat Kemahiran Komputer"],
-  ],
+  [jobLanguageSkillsTab]: [],
+  [jobComputerSkillsTab]: [],
   [jobWorkExperienceTab]: [
     ["jobWorkExperience", "Pengalaman Bekerja"],
   ],
@@ -721,6 +730,36 @@ function getJobHigherEducationQualifications(studentInfo = {}) {
   });
 }
 
+function getJobLanguageSkillRows(studentInfo = {}) {
+  const sourceRows = Array.isArray(studentInfo.jobLanguageSkillRows) ? studentInfo.jobLanguageSkillRows : [];
+  const defaults = getDefaultJobLanguageSkillRows();
+
+  return defaults.map((defaultRow, index) => {
+    const row = sourceRows[index] || {};
+    const isRequired = Boolean(defaultRow.required);
+    const language = isRequired ? defaultRow.language : normalizeJobTableValue(row.language || defaultRow.language);
+
+    return {
+      language,
+      required: isRequired,
+      speaking: normalizeJobTableValue(row.speaking),
+      writing: normalizeJobTableValue(row.writing),
+    };
+  });
+}
+
+function getJobComputerSkillRows(studentInfo = {}) {
+  const sourceRows = Array.isArray(studentInfo.jobComputerSkillRows) ? studentInfo.jobComputerSkillRows : [];
+
+  return Array.from({ length: jobComputerSkillRowCount }, (_, index) => {
+    const row = sourceRows[index] || {};
+    return {
+      level: normalizeJobTableValue(row.level),
+      softwareName: normalizeJobTableValue(row.softwareName),
+    };
+  });
+}
+
 function buildJobBmJulySummary(studentInfo = {}) {
   return [
     ["Tahun", studentInfo.jobBmJulyYear],
@@ -740,6 +779,20 @@ function buildJobMathJulySummary(studentInfo = {}) {
   ]
     .filter(([, value]) => String(value || "").trim())
     .map(([label, value]) => `${label}: ${normalizeJobTableValue(value)}`)
+    .join("\n");
+}
+
+function buildJobLanguageSkillsSummary(studentInfo = {}) {
+  return getJobLanguageSkillRows(studentInfo)
+    .filter((row) => row.language.trim() || row.speaking.trim() || row.writing.trim())
+    .map((row) => `${row.language || "BAHASA LAIN"}: PERTUTURAN ${row.speaking || "-"}, PENULISAN ${row.writing || "-"}`)
+    .join("\n");
+}
+
+function buildJobComputerSkillsSummary(studentInfo = {}) {
+  return getJobComputerSkillRows(studentInfo)
+    .filter((row) => row.softwareName.trim() || row.level.trim())
+    .map((row, index) => `${index + 1}. ${row.softwareName || "-"} - ${row.level || "-"}`)
     .join("\n");
 }
 
@@ -803,6 +856,53 @@ function getJobStpmValidation(studentInfo = {}) {
   return { completedRows, errors, missingFields, partialRows };
 }
 
+function getJobLanguageSkillsValidation(studentInfo = {}) {
+  const rows = getJobLanguageSkillRows(studentInfo);
+  const missingRequiredRows = rows.filter((row) => row.required && (!row.speaking || !row.writing));
+  const partialOtherRows = rows
+    .filter((row) => !row.required)
+    .map((row, index) => ({ ...row, rowNumber: index + 1 }))
+    .filter((row) => row.language.trim() && (!row.speaking || !row.writing))
+    .map((row) => row.rowNumber);
+  const missingFields = [];
+  const errors = {};
+
+  if (missingRequiredRows.length) {
+    missingFields.push("Bahasa Malaysia dan Bahasa Inggeris wajib lengkap untuk Pertuturan dan Penulisan");
+    errors.jobLanguageSkillRows = "Lengkapkan Pertuturan dan Penulisan untuk Bahasa Malaysia dan Bahasa Inggeris.";
+  }
+
+  if (partialOtherRows.length) {
+    missingFields.push(`Lengkapkan Pertuturan dan Penulisan pada Bahasa Lain ${partialOtherRows.join(", ")}`);
+    errors.jobLanguageSkillRows = "Lengkapkan tahap kemahiran Bahasa Lain yang diisi.";
+  }
+
+  return { errors, missingFields, missingRequiredRows, partialOtherRows };
+}
+
+function getJobComputerSkillsValidation(studentInfo = {}) {
+  const rows = getJobComputerSkillRows(studentInfo);
+  const completedRows = rows.filter((row) => row.softwareName.trim() && row.level.trim());
+  const partialRows = rows
+    .map((row, index) => ({ ...row, rowNumber: index + 1 }))
+    .filter((row) => (row.softwareName.trim() && !row.level.trim()) || (!row.softwareName.trim() && row.level.trim()))
+    .map((row) => row.rowNumber);
+  const missingFields = [];
+  const errors = {};
+
+  if (completedRows.length < minimumJobComputerSkillRows) {
+    missingFields.push(`Sekurang-kurangnya ${minimumJobComputerSkillRows} nama perisian bersama tahap kemahiran`);
+    errors.jobComputerSkillRows = `Isi sekurang-kurangnya ${minimumJobComputerSkillRows} nama perisian bersama tahap kemahiran.`;
+  }
+
+  if (partialRows.length) {
+    missingFields.push(`Lengkapkan Nama Perisian dan Tahap Kemahiran pada baris ${partialRows.join(", ")}`);
+    errors.jobComputerSkillRows = "Lengkapkan pasangan Nama Perisian dan Tahap Kemahiran.";
+  }
+
+  return { completedRows, errors, missingFields, partialRows };
+}
+
 function isJobSpmTabComplete(studentInfo = {}) {
   const hasRequiredFields = (requiredFieldsByTab[jobSpmTab] || [])
     .every(([field]) => String(studentInfo[field] || "").trim());
@@ -819,12 +919,22 @@ function isJobStpmTabComplete(studentInfo = {}) {
   return hasRequiredFields && validation.missingFields.length === 0;
 }
 
+function isJobLanguageSkillsTabComplete(studentInfo = {}) {
+  return getJobLanguageSkillsValidation(studentInfo).missingFields.length === 0;
+}
+
+function isJobComputerSkillsTabComplete(studentInfo = {}) {
+  return getJobComputerSkillsValidation(studentInfo).missingFields.length === 0;
+}
+
 function normalizeStudentInfoDraft(studentInfo = {}, user = null) {
   const defaults = getDefaultStudentInfo();
   const birthDate = studentInfo.birthDate || studentInfo.dateOfBirth || "";
   const normalizedJobSpmSubjects = getJobSpmSubjects(studentInfo);
   const normalizedJobStpmSubjects = getJobStpmSubjects(studentInfo);
   const normalizedJobHigherEducationQualifications = getJobHigherEducationQualifications(studentInfo);
+  const normalizedJobLanguageSkillRows = getJobLanguageSkillRows(studentInfo);
+  const normalizedJobComputerSkillRows = getJobComputerSkillRows(studentInfo);
 
   return {
     ...defaults,
@@ -839,7 +949,11 @@ function normalizeStudentInfoDraft(studentInfo = {}, user = null) {
     jobBmJulyGradeDecision: normalizeJobTableValue(studentInfo.jobBmJulyGradeDecision),
     jobBmJulyOralExam: normalizeJobTableValue(studentInfo.jobBmJulyOralExam),
     jobBmJulyYear: normalizeJobTableValue(studentInfo.jobBmJulyYear),
+    jobComputerSkillRows: normalizedJobComputerSkillRows,
+    jobComputerSkills: studentInfo.jobComputerSkills || buildJobComputerSkillsSummary({ ...studentInfo, jobComputerSkillRows: normalizedJobComputerSkillRows }),
     jobHigherEducationQualifications: normalizedJobHigherEducationQualifications,
+    jobLanguageSkillRows: normalizedJobLanguageSkillRows,
+    jobLanguageSkills: studentInfo.jobLanguageSkills || buildJobLanguageSkillsSummary({ ...studentInfo, jobLanguageSkillRows: normalizedJobLanguageSkillRows }),
     jobMathJulyDetails: studentInfo.jobMathJulyDetails || buildJobMathJulySummary(studentInfo),
     jobMathJulyGradeDecision: normalizeJobTableValue(studentInfo.jobMathJulyGradeDecision),
     jobMathJulyYear: normalizeJobTableValue(studentInfo.jobMathJulyYear),
@@ -907,6 +1021,8 @@ function clearStudentInfoDraft(user, applicationType = "internship") {
 function isTabComplete(tab, studentInfo) {
   if (tab === jobSpmTab) return isJobSpmTabComplete(studentInfo);
   if (tab === jobStpmTab) return isJobStpmTabComplete(studentInfo);
+  if (tab === jobLanguageSkillsTab) return isJobLanguageSkillsTabComplete(studentInfo);
+  if (tab === jobComputerSkillsTab) return isJobComputerSkillsTabComplete(studentInfo);
 
   const requiredFields = requiredFieldsByTab[tab] || [];
   const hasRequiredFields = requiredFields.every(([field]) => String(studentInfo[field] || "").trim());
@@ -941,6 +1057,18 @@ function getMissingApplicationFields(studentInfo, requiredTabs = internshipRequi
       const jobStpmValidation = getJobStpmValidation(studentInfo);
       missingFields.push(...jobStpmValidation.missingFields.map((field) => `${tab}: ${field}`));
       Object.assign(errors, jobStpmValidation.errors);
+    }
+
+    if (tab === jobLanguageSkillsTab) {
+      const jobLanguageValidation = getJobLanguageSkillsValidation(studentInfo);
+      missingFields.push(...jobLanguageValidation.missingFields.map((field) => `${tab}: ${field}`));
+      Object.assign(errors, jobLanguageValidation.errors);
+    }
+
+    if (tab === jobComputerSkillsTab) {
+      const jobComputerValidation = getJobComputerSkillsValidation(studentInfo);
+      missingFields.push(...jobComputerValidation.missingFields.map((field) => `${tab}: ${field}`));
+      Object.assign(errors, jobComputerValidation.errors);
     }
   });
 
@@ -1303,6 +1431,30 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
     }));
   };
 
+  const updateJobLanguageSkillRow = (index, field) => (event) => {
+    setNotice("");
+    clearValidationFields(["jobLanguageSkills", "jobLanguageSkillRows"]);
+    setStudentInfo((current) => {
+      const nextRows = getJobLanguageSkillRows(current).map((row, rowIndex) => (
+        rowIndex === index ? { ...row, [field]: normalizeJobTableValue(event.target.value) } : row
+      ));
+      const next = { ...current, jobLanguageSkillRows: nextRows };
+      return { ...next, jobLanguageSkills: buildJobLanguageSkillsSummary(next) };
+    });
+  };
+
+  const updateJobComputerSkillRow = (index, field) => (event) => {
+    setNotice("");
+    clearValidationFields(["jobComputerSkills", "jobComputerSkillRows"]);
+    setStudentInfo((current) => {
+      const nextRows = getJobComputerSkillRows(current).map((row, rowIndex) => (
+        rowIndex === index ? { ...row, [field]: normalizeJobTableValue(event.target.value) } : row
+      ));
+      const next = { ...current, jobComputerSkillRows: nextRows };
+      return { ...next, jobComputerSkills: buildJobComputerSkillsSummary(next) };
+    });
+  };
+
   const updateStudentName = (event) => {
     setNotice("");
     setValidationErrors((current) => {
@@ -1430,6 +1582,18 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
       const jobStpmValidation = getJobStpmValidation(studentInfo);
       missingFields.push(...jobStpmValidation.missingFields);
       Object.assign(errors, jobStpmValidation.errors);
+    }
+
+    if (activeInfoTab === jobLanguageSkillsTab) {
+      const jobLanguageValidation = getJobLanguageSkillsValidation(studentInfo);
+      missingFields.push(...jobLanguageValidation.missingFields);
+      Object.assign(errors, jobLanguageValidation.errors);
+    }
+
+    if (activeInfoTab === jobComputerSkillsTab) {
+      const jobComputerValidation = getJobComputerSkillsValidation(studentInfo);
+      missingFields.push(...jobComputerValidation.missingFields);
+      Object.assign(errors, jobComputerValidation.errors);
     }
 
     setValidationErrors(errors);
@@ -2051,6 +2215,140 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
     </div>
   );
 
+  const renderJobLanguageLevelCell = (row, index, field, option, onChange) => {
+    const normalizedOption = normalizeJobTableValue(option);
+
+    return (
+      <td key={option}>
+        <label className="student-job-radio-cell">
+          <input
+            aria-label={`${row.language || "Bahasa Lain"} ${field} ${option}`}
+            checked={row[field] === normalizedOption}
+            name={`job-language-${index}-${field}`}
+            type="radio"
+            value={normalizedOption}
+            onChange={onChange}
+          />
+          <span>/</span>
+        </label>
+      </td>
+    );
+  };
+
+  const renderJobLanguageSkillsSection = () => (
+    <div className="student-job-spm-table-wrap">
+      <table className="student-job-spm-table student-job-language-table">
+        <thead>
+          <tr>
+            <th className="student-job-spm-heading" colSpan={5}>
+              {activeInfoHeading}
+              <span className="student-job-heading-note">(Sila tandakan (/) di petak yang berkenaan)</span>
+            </th>
+          </tr>
+          <tr>
+            <th>Bahasa:</th>
+            <th>Kelancaran</th>
+            {jobSkillLevelOptions.map((option) => <th key={option}>{option}</th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {getJobLanguageSkillRows(studentInfo).map((row, index) => (
+            <Fragment key={index}>
+              <tr>
+                <td rowSpan={2}>
+                  {row.required ? (
+                    <>
+                      {row.language}
+                      <RequiredMarker />
+                    </>
+                  ) : (
+                    <label className="student-job-other-language">
+                      <span>Bahasa Lain:</span>
+                      <input
+                        aria-label={`Bahasa Lain ${index - 1}`}
+                        value={row.language}
+                        onChange={updateJobLanguageSkillRow(index, "language")}
+                      />
+                    </label>
+                  )}
+                </td>
+                <td>Pertuturan</td>
+                {jobSkillLevelOptions.map((option) => renderJobLanguageLevelCell(row, index, "speaking", option, updateJobLanguageSkillRow(index, "speaking")))}
+              </tr>
+              <tr>
+                <td>Penulisan</td>
+                {jobSkillLevelOptions.map((option) => renderJobLanguageLevelCell(row, index, "writing", option, updateJobLanguageSkillRow(index, "writing")))}
+              </tr>
+            </Fragment>
+          ))}
+        </tbody>
+      </table>
+      {validationErrors.jobLanguageSkillRows ? (
+        <p className="student-field-error">{validationErrors.jobLanguageSkillRows}</p>
+      ) : null}
+    </div>
+  );
+
+  const renderJobComputerSkillsSection = () => (
+    <div className="student-job-spm-table-wrap">
+      <table className="student-job-spm-table student-job-computer-table">
+        <thead>
+          <tr>
+            <th className="student-job-spm-heading" colSpan={5}>
+              {activeInfoHeading}
+              <span className="student-job-heading-note">(Sila tandakan (/) di petak yang berkenaan)</span>
+            </th>
+          </tr>
+          <tr>
+            <th rowSpan={2}>
+              Nama Perisian
+              <RequiredMarker />
+            </th>
+            <th colSpan={4}>Tahap Kemahiran</th>
+          </tr>
+          <tr>
+            {jobComputerLevelOptions.map((option) => <th key={option}>{option}</th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {getJobComputerSkillRows(studentInfo).map((row, index) => (
+            <tr key={index}>
+              <td>
+                <input
+                  aria-label={`Nama Perisian ${index + 1}`}
+                  value={row.softwareName}
+                  onChange={updateJobComputerSkillRow(index, "softwareName")}
+                />
+              </td>
+              {jobComputerLevelOptions.map((option) => {
+                const normalizedOption = normalizeJobTableValue(option);
+
+                return (
+                  <td key={option}>
+                    <label className="student-job-radio-cell">
+                      <input
+                        aria-label={`Tahap Kemahiran ${option} ${index + 1}`}
+                        checked={row.level === normalizedOption}
+                        name={`job-computer-${index}-level`}
+                        type="radio"
+                        value={normalizedOption}
+                        onChange={updateJobComputerSkillRow(index, "level")}
+                      />
+                      <span>/</span>
+                    </label>
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {validationErrors.jobComputerSkillRows ? (
+        <p className="student-field-error">{validationErrors.jobComputerSkillRows}</p>
+      ) : null}
+    </div>
+  );
+
   const renderDocumentFields = () => (
     <>
       <div className="student-personal-table-wrap">
@@ -2160,8 +2458,8 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
                   {activeInfoTab === jobStpmTab ? renderJobStpmSection() : null}
                   {activeInfoTab === academicInfoTab ? renderAcademicFields() : null}
                   {activeInfoTab === jobHigherEducationTab ? renderJobHigherEducationSection() : null}
-                  {activeInfoTab === jobLanguageSkillsTab ? renderJobSimpleSection("jobLanguageSkills", "Masukkan pengetahuan dan kemahiran bahasa.") : null}
-                  {activeInfoTab === jobComputerSkillsTab ? renderJobSimpleSection("jobComputerSkills", "Masukkan maklumat kemahiran komputer.") : null}
+                  {activeInfoTab === jobLanguageSkillsTab ? renderJobLanguageSkillsSection() : null}
+                  {activeInfoTab === jobComputerSkillsTab ? renderJobComputerSkillsSection() : null}
                   {activeInfoTab === jobWorkExperienceTab ? renderJobSimpleSection("jobWorkExperience", "Masukkan pengalaman bekerja.") : null}
                   {activeInfoTab === jobReferencesTab ? renderJobSimpleSection("jobReferences", "Masukkan maklumat rujukan.") : null}
                   {activeInfoTab === jobDeclarationTab ? renderJobSimpleSection("jobDeclaration", "Masukkan perakuan pemohon.") : null}

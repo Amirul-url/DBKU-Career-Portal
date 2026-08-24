@@ -169,6 +169,36 @@ test("job application higher education section renders the official qualificatio
   assert.doesNotMatch(internshipFormSource, /activeInfoTab === academicInfoTab \|\| activeInfoTab === jobHigherEducationTab \? renderAcademicFields\(\) : null/);
 });
 
+test("job application language and computer sections render official skill tables", () => {
+  assert.match(internshipFormSource, /const minimumJobComputerSkillRows = 2/);
+  assert.match(internshipFormSource, /jobLanguageSkillRows: getDefaultJobLanguageSkillRows\(\)/);
+  assert.match(internshipFormSource, /jobComputerSkillRows: Array\.from\(\{ length: jobComputerSkillRowCount \}/);
+  assert.match(internshipFormSource, /\[jobLanguageSkillsTab\]: \[\]/);
+  assert.match(internshipFormSource, /\[jobComputerSkillsTab\]: \[\]/);
+  assert.match(internshipFormSource, /function getJobLanguageSkillsValidation\(studentInfo = \{\}\) \{/);
+  assert.match(internshipFormSource, /row\.required && \(!row\.speaking \|\| !row\.writing\)/);
+  assert.match(internshipFormSource, /Bahasa Malaysia dan Bahasa Inggeris wajib lengkap untuk Pertuturan dan Penulisan/);
+  assert.match(internshipFormSource, /function getJobComputerSkillsValidation\(studentInfo = \{\}\) \{/);
+  assert.match(internshipFormSource, /completedRows\.length < minimumJobComputerSkillRows/);
+  assert.match(internshipFormSource, /`Sekurang-kurangnya \$\{minimumJobComputerSkillRows\} nama perisian bersama tahap kemahiran`/);
+  assert.match(internshipFormSource, /if \(tab === jobLanguageSkillsTab\) return isJobLanguageSkillsTabComplete\(studentInfo\);/);
+  assert.match(internshipFormSource, /if \(tab === jobComputerSkillsTab\) return isJobComputerSkillsTabComplete\(studentInfo\);/);
+  assert.match(internshipFormSource, /const renderJobLanguageSkillsSection = \(\) => \(/);
+  assert.match(internshipFormSource, /student-job-language-table/);
+  assert.match(internshipFormSource, /Bahasa Malaysia/);
+  assert.match(internshipFormSource, /Bahasa Inggeris/);
+  assert.match(internshipFormSource, /updateJobLanguageSkillRow\(index, "speaking"/);
+  assert.match(internshipFormSource, /updateJobLanguageSkillRow\(index, "writing"/);
+  assert.match(internshipFormSource, /const renderJobComputerSkillsSection = \(\) => \(/);
+  assert.match(internshipFormSource, /student-job-computer-table/);
+  assert.match(internshipFormSource, /updateJobComputerSkillRow\(index, "softwareName"/);
+  assert.match(internshipFormSource, /updateJobComputerSkillRow\(index, "level"/);
+  assert.match(internshipFormSource, /activeInfoTab === jobLanguageSkillsTab \? renderJobLanguageSkillsSection\(\) : null/);
+  assert.match(internshipFormSource, /activeInfoTab === jobComputerSkillsTab \? renderJobComputerSkillsSection\(\) : null/);
+  assert.doesNotMatch(internshipFormSource, /activeInfoTab === jobLanguageSkillsTab \? renderJobSimpleSection\("jobLanguageSkills"/);
+  assert.doesNotMatch(internshipFormSource, /activeInfoTab === jobComputerSkillsTab \? renderJobSimpleSection\("jobComputerSkills"/);
+});
+
 test("job application personal table includes required salutation row above name", () => {
   assert.match(internshipFormSource, /const salutationOptions = \["Encik", "Puan", "Cik"\]/);
   assert.match(internshipFormSource, /salutation: ""/);
