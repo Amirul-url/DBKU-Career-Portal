@@ -768,6 +768,10 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
   const [editableApplication, setEditableApplication] = useState(null);
   const [submittedReferenceNo, setSubmittedReferenceNo] = useState("");
   const [showSaveDraftDialog, setShowSaveDraftDialog] = useState(false);
+  const selectedJobTitle = isJobApplication ? String(internshipVacancy?.title || "").trim() : "";
+  const applicationPageTitle = selectedJobTitle
+    ? `${applicationTitle} (${selectedJobTitle})`
+    : applicationTitle;
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
   const email = user?.email || "Belum dikemaskini";
 
@@ -1345,7 +1349,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
         <main className="profile-shell internship-application-shell">
           <section className="student-info-panel" aria-label="Maklumat permohonan latihan industri">
             <header className="student-info-titlebar">
-              <h1>{applicationTitle}</h1>
+              <h1>{applicationPageTitle}</h1>
               <button className="student-info-back" type="button" onClick={requestExitApplicationForm}>
                 <Icon>arrow_back</Icon>
                 Kembali

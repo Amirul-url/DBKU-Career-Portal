@@ -22,7 +22,12 @@ test("job application form reuses the internship personal information table", ()
   assert.match(internshipFormSource, /applicationType = "internship"/);
   assert.match(internshipFormSource, /const isJobApplication = applicationType === "job"/);
   assert.match(internshipFormSource, /isJobApplication \? personalInfoTab : getFirstIncompleteTab\(initialStudentInfo\)/);
-  assert.match(internshipFormSource, /<h1>\{applicationTitle\}<\/h1>/);
+  assert.match(internshipFormSource, /<h1>\{applicationPageTitle\}<\/h1>/);
+});
+
+test("job application header includes the selected vacancy title", () => {
+  assert.match(internshipFormSource, /const selectedJobTitle = isJobApplication \? String\(internshipVacancy\?\.title \|\| ""\)\.trim\(\) : ""/);
+  assert.match(internshipFormSource, /selectedJobTitle\s*\?\s*`\$\{applicationTitle\} \(\$\{selectedJobTitle\}\)`\s*:\s*applicationTitle/);
 });
 
 test("draft and incomplete job applications reopen the job form", () => {
