@@ -1287,6 +1287,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
           {renderPassportPhotoUpload()}
         </div>
       ) : renderPassportPhotoUpload()}
+      {isJobApplication ? renderInfoHeading() : null}
       <div className="student-personal-table-wrap">
         <table className="student-personal-table">
           <tbody>
@@ -1436,6 +1437,9 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
   const activeInfoHeading = isJobApplication && activeInfoTab === personalInfoTab
     ? "(A) MAKLUMAT PERIBADI PEMOHON"
     : activeInfoTab;
+  const renderInfoHeading = () => (
+    <h2 className={isJobApplication && activeInfoTab === personalInfoTab ? "job-section-heading" : undefined}>{activeInfoHeading}</h2>
+  );
   const requiredInfoTabsComplete = requiredInfoTabs.every((tab) => isTabComplete(tab, studentInfo));
   const isApplicationReadyToSubmit = declarationAccepted && requiredInfoTabsComplete;
 
@@ -1470,7 +1474,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
                 </nav>
 
                 <form className="student-info-form" onSubmit={handleUpdate}>
-                  <h2 className={isJobApplication && activeInfoTab === personalInfoTab ? "job-section-heading" : undefined}>{activeInfoHeading}</h2>
+                  {isJobApplication && activeInfoTab === personalInfoTab ? null : renderInfoHeading()}
                   {notice ? <p className={`student-info-notice ${noticeStatus}`}>{notice}</p> : null}
 
                   {activeInfoTab === personalInfoTab ? renderApplicantFields() : null}
