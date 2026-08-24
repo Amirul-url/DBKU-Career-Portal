@@ -31,13 +31,15 @@ test("job application header includes the selected vacancy title", () => {
   assert.match(internshipFormSource, /selectedJobTitle\s*\?\s*`Nama Jawatan Yang Dipohon: \$\{selectedJobTitle\}`\s*:\s*applicationTitle/);
 });
 
-test("job application personal heading is rendered inside the personal table", () => {
+test("job application section headings stay inside official tables", () => {
   assert.match(internshipFormSource, /const activeInfoHeading = isJobApplication\s*\?\s*getJobInfoHeading\(activeInfoTab, currentInfoTabs\.indexOf\(activeInfoTab\)\)\s*:\s*activeInfoTab/);
   assert.match(internshipFormSource, /const renderInfoHeading = \(\) => \(/);
   assert.match(internshipFormSource, /<h2[\s\S]*>\{activeInfoHeading\}<\/h2>/);
   assert.doesNotMatch(internshipFormSource, /\{isJobApplication \? renderInfoHeading\(\) : null\}[\s\S]*<div className="student-personal-table-wrap">/);
+  assert.doesNotMatch(internshipFormSource, /\{isJobApplication && activeInfoTab === personalInfoTab \? null : renderInfoHeading\(\)\}/);
+  assert.match(internshipFormSource, /\{!isJobApplication \? renderInfoHeading\(\) : null\}/);
   assert.match(internshipFormSource, /<thead>\s*\{isJobApplication \? \(\s*<tr className="student-personal-section-heading">[\s\S]*<th colSpan=\{2\}>\{activeInfoHeading\}<\/th>/);
-  assert.match(internshipFormSource, /\{isJobApplication && activeInfoTab === personalInfoTab \? null : renderInfoHeading\(\)\}/);
+  assert.match(internshipFormSource, /<thead>\s*<tr>\s*<th colSpan=\{4\}>\{activeInfoHeading\}<\/th>/);
   assert.match(cssSource, /\.student-personal-table \.student-personal-section-heading th \{[\s\S]*background: #d9d9d9;/);
   assert.match(cssSource, /\.student-personal-table \.student-personal-section-heading th \{[\s\S]*text-decoration: underline;/);
 });

@@ -1730,7 +1730,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
                 </nav>
 
                 <form className="student-info-form" onSubmit={handleUpdate}>
-                  {isJobApplication && activeInfoTab === personalInfoTab ? null : renderInfoHeading()}
+                  {!isJobApplication ? renderInfoHeading() : null}
                   {notice ? <p className={`student-info-notice ${noticeStatus}`}>{notice}</p> : null}
 
                   {activeInfoTab === personalInfoTab ? renderApplicantFields() : null}
