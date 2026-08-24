@@ -36,6 +36,20 @@ const jobInfoTabs = [
   jobDeclarationTab,
   documentSupportTab,
 ];
+const jobTabShortLabels = {
+  [personalInfoTab]: "Peribadi",
+  [jobSpmTab]: "SPM/UEC",
+  [jobBmJulyTab]: "BM Julai/STPM",
+  [jobMathJulyTab]: "Matematik Julai",
+  [jobStpmTab]: "STPM/STAM",
+  [jobHigherEducationTab]: "Pengajian Tinggi",
+  [jobLanguageSkillsTab]: "Bahasa",
+  [jobComputerSkillsTab]: "Komputer",
+  [jobWorkExperienceTab]: "Pengalaman",
+  [jobReferencesTab]: "Rujukan",
+  [jobDeclarationTab]: "Perakuan",
+  [documentSupportTab]: "Dokumen",
+};
 const editableApplicationStatuses = new Set(["draft", "incomplete"]);
 
 const academicLevelOptions = [
@@ -1530,12 +1544,14 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
   );
 
   const nextInfoTab = currentInfoTabs[currentInfoTabs.indexOf(activeInfoTab) + 1] || null;
+  const getJobTabCode = (index) => `(${String.fromCharCode(65 + index)})`;
   const getInfoTabLabel = (tab, index) => {
     if (!isJobApplication) return tab;
-    return `(${String.fromCharCode(65 + index)}) ${tab.toUpperCase()}`;
+    return `${getJobTabCode(index)} ${jobTabShortLabels[tab] || tab}`;
   };
+  const getJobInfoHeading = (tab, index) => `${getJobTabCode(index)} ${tab.toUpperCase()}`;
   const activeInfoHeading = isJobApplication
-    ? getInfoTabLabel(activeInfoTab, currentInfoTabs.indexOf(activeInfoTab))
+    ? getJobInfoHeading(activeInfoTab, currentInfoTabs.indexOf(activeInfoTab))
     : activeInfoTab;
   const renderInfoHeading = () => (
     <h2 className={isJobApplication && activeInfoTab === personalInfoTab ? "job-section-heading" : undefined}>{activeInfoHeading}</h2>
@@ -1560,11 +1576,12 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
 
             <div className="student-info-workspace">
               <div className="student-info-content">
-                <nav className="student-info-tabs" aria-label="Bahagian permohonan latihan industri">
+                <nav className={`student-info-tabs ${isJobApplication ? "job-application-tabs" : ""}`} aria-label="Bahagian permohonan latihan industri">
                   {currentInfoTabs.map((tab, index) => (
                     <button
                       className={activeInfoTab === tab ? "active" : ""}
                       key={tab}
+                      title={isJobApplication ? getJobInfoHeading(tab, index) : undefined}
                       type="button"
                       onClick={() => openInfoTab(tab)}
                     >

@@ -32,7 +32,7 @@ test("job application header includes the selected vacancy title", () => {
 });
 
 test("job application personal heading uses uppercase numbered label", () => {
-  assert.match(internshipFormSource, /const activeInfoHeading = isJobApplication\s*\?\s*getInfoTabLabel\(activeInfoTab, currentInfoTabs\.indexOf\(activeInfoTab\)\)\s*:\s*activeInfoTab/);
+  assert.match(internshipFormSource, /const activeInfoHeading = isJobApplication\s*\?\s*getJobInfoHeading\(activeInfoTab, currentInfoTabs\.indexOf\(activeInfoTab\)\)\s*:\s*activeInfoTab/);
   assert.match(internshipFormSource, /const renderInfoHeading = \(\) => \(/);
   assert.match(internshipFormSource, /className=\{isJobApplication && activeInfoTab === personalInfoTab \? "job-section-heading" : undefined\}/);
   assert.match(internshipFormSource, /<h2[\s\S]*>\{activeInfoHeading\}<\/h2>/);
@@ -44,20 +44,26 @@ test("job application personal heading uses uppercase numbered label", () => {
   assert.match(cssSource, /\.student-info-form h2\.job-section-heading \{[\s\S]*text-decoration: underline;/);
 });
 
-test("job application tabs show letter numbering without changing tab state values", () => {
+test("job application tabs use compact labels without changing tab state values", () => {
   assert.match(internshipFormSource, /const internshipInfoTabs = \[personalInfoTab, academicInfoTab, documentSupportTab\]/);
   assert.match(internshipFormSource, /const jobSpmTab = "MAKLUMAT PEPERIKSAAN SPM\/SC\/MCE\/SPM\(V\) MENGIKUT SISTEM TERBUKA\/ UNIFIED EXAMINATION CERTIFICATE \(UEC\) ATAU SETARAF \(SILA KEMUKAKAN SEMUA MATA PELAJARAN YANG DIAMBIL\)"/);
   assert.match(internshipFormSource, /const jobInfoTabs = \[[\s\S]*personalInfoTab[\s\S]*jobSpmTab[\s\S]*jobDeclarationTab[\s\S]*documentSupportTab[\s\S]*\]/);
+  assert.match(internshipFormSource, /const jobTabShortLabels = \{[\s\S]*\[personalInfoTab\]: "Peribadi"[\s\S]*\[jobSpmTab\]: "SPM\/UEC"[\s\S]*\[jobDeclarationTab\]: "Perakuan"[\s\S]*\[documentSupportTab\]: "Dokumen"[\s\S]*\}/);
   assert.match(internshipFormSource, /const currentInfoTabs = isJobApplication \? jobInfoTabs : internshipInfoTabs/);
   assert.match(internshipFormSource, /const currentRequiredInfoTabs = isJobApplication \? jobInfoTabs : internshipRequiredInfoTabs/);
+  assert.match(internshipFormSource, /const getJobTabCode = \(index\) => `\(\$\{String\.fromCharCode\(65 \+ index\)\}\)`/);
   assert.match(internshipFormSource, /const getInfoTabLabel = \(tab, index\) => \{/);
   assert.match(internshipFormSource, /if \(!isJobApplication\) return tab;/);
-  assert.match(internshipFormSource, /return `\(\$\{String\.fromCharCode\(65 \+ index\)\}\) \$\{tab\.toUpperCase\(\)\}`;/);
+  assert.match(internshipFormSource, /return `\$\{getJobTabCode\(index\)\} \$\{jobTabShortLabels\[tab\] \|\| tab\}`;/);
+  assert.match(internshipFormSource, /const getJobInfoHeading = \(tab, index\) => `\$\{getJobTabCode\(index\)\} \$\{tab\.toUpperCase\(\)\}`/);
   assert.match(internshipFormSource, /currentInfoTabs\.map\(\(tab, index\) =>/);
   assert.match(internshipFormSource, /className=\{activeInfoTab === tab \? "active" : ""\}/);
+  assert.match(internshipFormSource, /title=\{isJobApplication \? getJobInfoHeading\(tab, index\) : undefined\}/);
   assert.match(internshipFormSource, /onClick=\{\(\) => openInfoTab\(tab\)\}/);
   assert.match(internshipFormSource, /\{getInfoTabLabel\(tab, index\)\}/);
   assert.match(internshipFormSource, /activeInfoTab === documentSupportTab/);
+  assert.match(cssSource, /\.student-info-tabs\.job-application-tabs \{[\s\S]*overflow-x: auto;/);
+  assert.match(cssSource, /\.student-info-tabs\.job-application-tabs button \{[\s\S]*white-space: nowrap;/);
 });
 
 test("job application extra sections are mandatory before submission", () => {

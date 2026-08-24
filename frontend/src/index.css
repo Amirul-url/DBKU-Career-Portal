@@ -6724,6 +6724,14 @@ body:has(.applicant-profile-page) {
   padding: 10px;
 }
 
+.student-info-tabs.job-application-tabs {
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 12px;
+  scrollbar-width: thin;
+}
+
 .student-info-tabs button {
   min-height: 42px;
   border: 1px solid transparent;
@@ -6734,6 +6742,14 @@ body:has(.applicant-profile-page) {
   font: inherit;
   font-size: 12px;
   font-weight: 750;
+}
+
+.student-info-tabs.job-application-tabs button {
+  flex: 0 0 auto;
+  min-width: 0;
+  min-height: 40px;
+  white-space: nowrap;
+  padding: 0 14px;
 }
 
 .student-info-tabs button.active {
