@@ -7691,6 +7691,49 @@ body:has(.applicant-profile-page) {
   outline: 0;
 }
 
+.student-save-draft-dialog {
+  width: min(100%, 520px);
+}
+
+.student-save-draft-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.student-submit-dialog .student-save-draft-actions button {
+  min-width: 136px;
+  background: #16a34a;
+}
+
+.student-submit-dialog .student-save-draft-actions button:hover,
+.student-submit-dialog .student-save-draft-actions button:focus-visible {
+  background: #15803d;
+}
+
+.student-submit-dialog .student-save-draft-actions .student-save-draft-cancel {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.student-submit-dialog .student-save-draft-actions .student-save-draft-cancel:hover,
+.student-submit-dialog .student-save-draft-actions .student-save-draft-cancel:focus-visible {
+  background: #f8fafc;
+}
+
+.student-submit-dialog .student-save-draft-actions .student-save-draft-discard {
+  border: 1px solid #fecaca;
+  background: #fff1f2;
+  color: #b91c1c;
+}
+
+.student-submit-dialog .student-save-draft-actions .student-save-draft-discard:hover,
+.student-submit-dialog .student-save-draft-actions .student-save-draft-discard:focus-visible {
+  background: #fee2e2;
+}
+
 .student-readonly-summary {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

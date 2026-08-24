@@ -315,6 +315,21 @@ test("internship uploaded documents stay in form local state until submission", 
   assert.match(formSource, /const \[passportPhotoPreviewUrl, setPassportPhotoPreviewUrl\] = useState\(""\)/);
 });
 
+test("internship back action asks applicant to save a visible draft", () => {
+  assert.match(formSource, /const \[showSaveDraftDialog, setShowSaveDraftDialog\] = useState\(false\)/);
+  assert.match(formSource, /const requestExitApplicationForm = \(\) => \{/);
+  assert.match(formSource, /setShowSaveDraftDialog\(true\)/);
+  assert.match(formSource, /onClick=\{requestExitApplicationForm\}/);
+  assert.match(formSource, /const saveDraftAndExit = \(\) => \{/);
+  assert.match(formSource, /visibleInApplications: true/);
+  assert.match(formSource, /studentInfo: getDraftStudentInfo\(studentInfo\)/);
+  assert.match(formSource, /Simpan draf permohonan\?/);
+  assert.match(formSource, /dipaparkan dalam Permohonan Saya/);
+  assert.match(formSource, /Simpan draf/);
+  assert.match(formSource, /Keluar tanpa simpan/);
+  assert.match(listSource, /if \(!draft\.visibleInApplications\) return null/);
+});
+
 test("internship submission requires all mandatory info tabs", () => {
   assert.match(formSource, /const requiredInfoTabs = \[personalInfoTab, "Maklumat Akademik", "Dokumen Sokongan"\]/);
   assert.match(formSource, /requiredInfoTabs\.find\(\(tab\) => !isTabComplete\(tab, studentInfo\)\)/);

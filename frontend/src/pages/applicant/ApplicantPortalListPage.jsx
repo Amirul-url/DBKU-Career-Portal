@@ -69,6 +69,8 @@ function getInternshipDraftApplication(user) {
     if (!saved) return null;
 
     const draft = JSON.parse(saved);
+    if (!draft.visibleInApplications) return null;
+
     return {
       id: "internship-draft",
       isLocalDraft: true,

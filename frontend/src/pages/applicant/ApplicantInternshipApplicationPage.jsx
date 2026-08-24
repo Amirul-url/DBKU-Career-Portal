@@ -747,6 +747,7 @@ export default function ApplicantInternshipApplicationPage() {
   const [internshipVacancyLoading, setInternshipVacancyLoading] = useState(true);
   const [editableApplication, setEditableApplication] = useState(null);
   const [submittedReferenceNo, setSubmittedReferenceNo] = useState("");
+  const [showSaveDraftDialog, setShowSaveDraftDialog] = useState(false);
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
   const email = user?.email || "Belum dikemaskini";
 
@@ -774,16 +775,6 @@ export default function ApplicantInternshipApplicationPage() {
       navigate("/", { replace: true });
     }
   }, [navigate, user]);
-
-  useEffect(() => {
-    if (user?.role === "applicant") {
-      saveStudentInfoDraft(user, {
-        purpose: isStartingNewApplication || savedDraft?.purpose === "new-application" ? "new-application" : "manual",
-        savedAt: new Date().toISOString(),
-        studentInfo: getDraftStudentInfo(studentInfo),
-      });
-    }
-  }, [isStartingNewApplication, savedDraft?.purpose, studentInfo, user]);
 
   useEffect(() => {
     if (user?.role !== "applicant") {
@@ -1086,7 +1077,24 @@ export default function ApplicantInternshipApplicationPage() {
     setActiveInfoTab(tab);
   };
 
-  const exitApplicationForm = () => {
+  const requestExitApplicationForm = () => {
+    setShowSaveDraftDialog(true);
+  };
+
+  const saveDraftAndExit = () => {
+    saveStudentInfoDraft(user, {
+      purpose: isStartingNewApplication || savedDraft?.purpose === "new-application" ? "new-application" : "manual",
+      savedAt: new Date().toISOString(),
+      studentInfo: getDraftStudentInfo(studentInfo),
+      visibleInApplications: true,
+    });
+    setShowSaveDraftDialog(false);
+    navigate(APPLICANT_ROUTES.applications);
+  };
+
+  const exitWithoutSavingDraft = () => {
+    clearStudentInfoDraft(user);
+    setShowSaveDraftDialog(false);
     navigate(APPLICANT_ROUTES.applications);
   };
 
@@ -1311,7 +1319,7 @@ export default function ApplicantInternshipApplicationPage() {
           <section className="student-info-panel" aria-label="Maklumat permohonan latihan industri">
             <header className="student-info-titlebar">
               <h1>Permohonan Latihan Industri</h1>
-              <button className="student-info-back" type="button" onClick={exitApplicationForm}>
+              <button className="student-info-back" type="button" onClick={requestExitApplicationForm}>
                 <Icon>arrow_back</Icon>
                 Kembali
               </button>
@@ -1376,6 +1384,28 @@ export default function ApplicantInternshipApplicationPage() {
             <h2 id="student-submit-dialog-title">Permohonan Berjaya Dihantar</h2>
             <p>Permohonan anda sudah berjaya dihantar.</p>
             <button type="button" onClick={closeSubmitSuccessPopup}>OK</button>
+          </section>
+        </div>
+      ) : null}
+      {showSaveDraftDialog ? (
+        <div className="student-submit-dialog-backdrop" role="presentation">
+          <section
+            aria-labelledby="student-save-draft-dialog-title"
+            aria-modal="true"
+            className="student-submit-dialog student-save-draft-dialog"
+            role="dialog"
+          >
+            <h2 id="student-save-draft-dialog-title">Simpan draf permohonan?</h2>
+            <p>Maklumat yang telah diisi boleh disimpan sebagai draf dan dipaparkan dalam Permohonan Saya.</p>
+            <div className="student-save-draft-actions">
+              <button className="student-save-draft-cancel" type="button" onClick={() => setShowSaveDraftDialog(false)}>
+                Batal
+              </button>
+              <button className="student-save-draft-discard" type="button" onClick={exitWithoutSavingDraft}>
+                Keluar tanpa simpan
+              </button>
+              <button type="button" onClick={saveDraftAndExit}>Simpan draf</button>
+            </div>
           </section>
         </div>
       ) : null}
