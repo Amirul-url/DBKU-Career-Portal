@@ -38,6 +38,8 @@ const jobInfoTabs = [
 ];
 const jobSpmSubjectRowCount = 12;
 const minimumJobSpmSubjectRows = 3;
+const jobStpmSubjectRowCount = 5;
+const minimumJobStpmSubjectRows = 3;
 const jobTabShortLabels = {
   [personalInfoTab]: "Peribadi",
   [jobSpmTab]: "SPM/UEC",
@@ -278,11 +280,17 @@ const getDefaultStudentInfo = () => ({
   height: "",
   icNo: "",
   institution: "",
+  jobBmJulyExamName: "",
+  jobBmJulyGradeDecision: "",
   jobBmJulyDetails: "",
+  jobBmJulyOralExam: "",
+  jobBmJulyYear: "",
   jobComputerSkills: "",
   jobDeclaration: "",
   jobLanguageSkills: "",
+  jobMathJulyGradeDecision: "",
   jobMathJulyDetails: "",
+  jobMathJulyYear: "",
   jobReferences: "",
   jobSpmDetails: "",
   jobSpmExamName: "",
@@ -290,6 +298,10 @@ const getDefaultStudentInfo = () => ({
   jobSpmSubjects: Array.from({ length: jobSpmSubjectRowCount }, () => ({ grade: "", subject: "" })),
   jobSpmYear: "",
   jobStpmDetails: "",
+  jobStpmExamName: "",
+  jobStpmSchool: "",
+  jobStpmSubjects: Array.from({ length: jobStpmSubjectRowCount }, () => ({ grade: "", subject: "" })),
+  jobStpmYear: "",
   jobWorkExperience: "",
   maritalStatus: "",
   motherBirthState: "",
@@ -342,13 +354,19 @@ const requiredFieldsByTab = {
     ["jobSpmExamName", "Nama Peperiksaan"],
   ],
   [jobBmJulyTab]: [
-    ["jobBmJulyDetails", "Butiran BM Kertas Julai/STPM/Universiti atau setaraf"],
+    ["jobBmJulyYear", "Tahun"],
+    ["jobBmJulyExamName", "Nama Peperiksaan"],
+    ["jobBmJulyGradeDecision", "Keputusan Gred"],
+    ["jobBmJulyOralExam", "Ujian Lisan"],
   ],
   [jobMathJulyTab]: [
-    ["jobMathJulyDetails", "Butiran Peperiksaan Matematik Kertas Julai"],
+    ["jobMathJulyYear", "Tahun"],
+    ["jobMathJulyGradeDecision", "Keputusan Gred"],
   ],
   [jobStpmTab]: [
-    ["jobStpmDetails", "Butiran Peperiksaan STPM/STAM/STP/HSC/Sijil Matrikulasi"],
+    ["jobStpmSchool", "Sekolah"],
+    ["jobStpmYear", "Tahun"],
+    ["jobStpmExamName", "Nama Peperiksaan"],
   ],
   [jobHigherEducationTab]: [
     ["institution", "Institusi Pengajian"],
@@ -676,8 +694,49 @@ function getJobSpmSubjects(studentInfo = {}) {
   });
 }
 
+function getJobStpmSubjects(studentInfo = {}) {
+  const sourceRows = Array.isArray(studentInfo.jobStpmSubjects) ? studentInfo.jobStpmSubjects : [];
+
+  return Array.from({ length: jobStpmSubjectRowCount }, (_, index) => {
+    const row = sourceRows[index] || {};
+    return {
+      grade: normalizeJobTableValue(row.grade),
+      subject: normalizeJobTableValue(row.subject),
+    };
+  });
+}
+
+function buildJobBmJulySummary(studentInfo = {}) {
+  return [
+    ["Tahun", studentInfo.jobBmJulyYear],
+    ["Nama Peperiksaan", studentInfo.jobBmJulyExamName],
+    ["Keputusan Gred", studentInfo.jobBmJulyGradeDecision],
+    ["Ujian Lisan", studentInfo.jobBmJulyOralExam],
+  ]
+    .filter(([, value]) => String(value || "").trim())
+    .map(([label, value]) => `${label}: ${normalizeJobTableValue(value)}`)
+    .join("\n");
+}
+
+function buildJobMathJulySummary(studentInfo = {}) {
+  return [
+    ["Tahun", studentInfo.jobMathJulyYear],
+    ["Keputusan Gred", studentInfo.jobMathJulyGradeDecision],
+  ]
+    .filter(([, value]) => String(value || "").trim())
+    .map(([label, value]) => `${label}: ${normalizeJobTableValue(value)}`)
+    .join("\n");
+}
+
 function buildJobSpmSubjectSummary(studentInfo = {}) {
   return getJobSpmSubjects(studentInfo)
+    .filter((row) => row.subject.trim() && row.grade.trim())
+    .map((row, index) => `${index + 1}. ${row.subject} - ${row.grade}`)
+    .join("\n");
+}
+
+function buildJobStpmSubjectSummary(studentInfo = {}) {
+  return getJobStpmSubjects(studentInfo)
     .filter((row) => row.subject.trim() && row.grade.trim())
     .map((row, index) => `${index + 1}. ${row.subject} - ${row.grade}`)
     .join("\n");
@@ -706,6 +765,29 @@ function getJobSpmValidation(studentInfo = {}) {
   return { completedRows, errors, missingFields, partialRows };
 }
 
+function getJobStpmValidation(studentInfo = {}) {
+  const rows = getJobStpmSubjects(studentInfo);
+  const completedRows = rows.filter((row) => row.subject.trim() && row.grade.trim());
+  const partialRows = rows
+    .map((row, index) => ({ ...row, rowNumber: index + 1 }))
+    .filter((row) => (row.subject.trim() && !row.grade.trim()) || (!row.subject.trim() && row.grade.trim()))
+    .map((row) => row.rowNumber);
+  const missingFields = [];
+  const errors = {};
+
+  if (completedRows.length < minimumJobStpmSubjectRows) {
+    missingFields.push(`Sekurang-kurangnya ${minimumJobStpmSubjectRows} mata pelajaran bersama gred`);
+    errors.jobStpmSubjects = `Isi sekurang-kurangnya ${minimumJobStpmSubjectRows} mata pelajaran bersama gred.`;
+  }
+
+  if (partialRows.length) {
+    missingFields.push(`Lengkapkan Mata Pelajaran dan Gred pada baris ${partialRows.join(", ")}`);
+    errors.jobStpmSubjects = "Lengkapkan pasangan Mata Pelajaran dan Gred.";
+  }
+
+  return { completedRows, errors, missingFields, partialRows };
+}
+
 function isJobSpmTabComplete(studentInfo = {}) {
   const hasRequiredFields = (requiredFieldsByTab[jobSpmTab] || [])
     .every(([field]) => String(studentInfo[field] || "").trim());
@@ -714,10 +796,19 @@ function isJobSpmTabComplete(studentInfo = {}) {
   return hasRequiredFields && validation.missingFields.length === 0;
 }
 
+function isJobStpmTabComplete(studentInfo = {}) {
+  const hasRequiredFields = (requiredFieldsByTab[jobStpmTab] || [])
+    .every(([field]) => String(studentInfo[field] || "").trim());
+  const validation = getJobStpmValidation(studentInfo);
+
+  return hasRequiredFields && validation.missingFields.length === 0;
+}
+
 function normalizeStudentInfoDraft(studentInfo = {}, user = null) {
   const defaults = getDefaultStudentInfo();
   const birthDate = studentInfo.birthDate || studentInfo.dateOfBirth || "";
   const normalizedJobSpmSubjects = getJobSpmSubjects(studentInfo);
+  const normalizedJobStpmSubjects = getJobStpmSubjects(studentInfo);
 
   return {
     ...defaults,
@@ -727,11 +818,24 @@ function normalizeStudentInfoDraft(studentInfo = {}, user = null) {
     birthDate,
     email: studentInfo.email || user?.email || "",
     icNo: String(studentInfo.icNo || "").replace(/\D/g, ""),
+    jobBmJulyDetails: studentInfo.jobBmJulyDetails || buildJobBmJulySummary(studentInfo),
+    jobBmJulyExamName: normalizeJobTableValue(studentInfo.jobBmJulyExamName),
+    jobBmJulyGradeDecision: normalizeJobTableValue(studentInfo.jobBmJulyGradeDecision),
+    jobBmJulyOralExam: normalizeJobTableValue(studentInfo.jobBmJulyOralExam),
+    jobBmJulyYear: normalizeJobTableValue(studentInfo.jobBmJulyYear),
+    jobMathJulyDetails: studentInfo.jobMathJulyDetails || buildJobMathJulySummary(studentInfo),
+    jobMathJulyGradeDecision: normalizeJobTableValue(studentInfo.jobMathJulyGradeDecision),
+    jobMathJulyYear: normalizeJobTableValue(studentInfo.jobMathJulyYear),
     jobSpmDetails: studentInfo.jobSpmDetails || buildJobSpmSubjectSummary({ ...studentInfo, jobSpmSubjects: normalizedJobSpmSubjects }),
     jobSpmExamName: normalizeJobTableValue(studentInfo.jobSpmExamName),
     jobSpmSchool: normalizeJobTableValue(studentInfo.jobSpmSchool),
     jobSpmSubjects: normalizedJobSpmSubjects,
     jobSpmYear: normalizeJobTableValue(studentInfo.jobSpmYear),
+    jobStpmDetails: studentInfo.jobStpmDetails || buildJobStpmSubjectSummary({ ...studentInfo, jobStpmSubjects: normalizedJobStpmSubjects }),
+    jobStpmExamName: normalizeJobTableValue(studentInfo.jobStpmExamName),
+    jobStpmSchool: normalizeJobTableValue(studentInfo.jobStpmSchool),
+    jobStpmSubjects: normalizedJobStpmSubjects,
+    jobStpmYear: normalizeJobTableValue(studentInfo.jobStpmYear),
     name: String(studentInfo.name || user?.full_name || user?.first_name || "").toUpperCase(),
     phone: String(studentInfo.phone || studentInfo.address1Phone || "").replace(/\D/g, ""),
     age: studentInfo.age || calculateAge(birthDate),
@@ -785,6 +889,7 @@ function clearStudentInfoDraft(user, applicationType = "internship") {
 
 function isTabComplete(tab, studentInfo) {
   if (tab === jobSpmTab) return isJobSpmTabComplete(studentInfo);
+  if (tab === jobStpmTab) return isJobStpmTabComplete(studentInfo);
 
   const requiredFields = requiredFieldsByTab[tab] || [];
   const hasRequiredFields = requiredFields.every(([field]) => String(studentInfo[field] || "").trim());
@@ -813,6 +918,12 @@ function getMissingApplicationFields(studentInfo, requiredTabs = internshipRequi
       const jobSpmValidation = getJobSpmValidation(studentInfo);
       missingFields.push(...jobSpmValidation.missingFields.map((field) => `${tab}: ${field}`));
       Object.assign(errors, jobSpmValidation.errors);
+    }
+
+    if (tab === jobStpmTab) {
+      const jobStpmValidation = getJobStpmValidation(studentInfo);
+      missingFields.push(...jobStpmValidation.missingFields.map((field) => `${tab}: ${field}`));
+      Object.assign(errors, jobStpmValidation.errors);
     }
   });
 
@@ -1113,15 +1224,54 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
     });
   };
 
+  const updateJobBmJulyValue = (field) => (event) => {
+    setNotice("");
+    clearValidationFields([field]);
+    setStudentInfo((current) => {
+      const next = { ...current, [field]: normalizeJobTableValue(event.target.value) };
+      return { ...next, jobBmJulyDetails: buildJobBmJulySummary(next) };
+    });
+  };
+
+  const updateJobMathJulyValue = (field) => (event) => {
+    setNotice("");
+    clearValidationFields([field]);
+    setStudentInfo((current) => {
+      const next = { ...current, [field]: normalizeJobTableValue(event.target.value) };
+      return { ...next, jobMathJulyDetails: buildJobMathJulySummary(next) };
+    });
+  };
+
+  const updateJobStpmValue = (field) => (event) => {
+    setNotice("");
+    clearValidationFields([field]);
+    setStudentInfo((current) => {
+      const next = { ...current, [field]: normalizeJobTableValue(event.target.value) };
+      return { ...next, jobStpmDetails: buildJobStpmSubjectSummary(next) };
+    });
+  };
+
   const updateJobSpmSubjectRow = (index, field) => (event) => {
     setNotice("");
-    clearValidationFields(["jobSpmDetails"]);
+    clearValidationFields(["jobSpmDetails", "jobSpmSubjects"]);
     setStudentInfo((current) => {
       const nextSubjects = getJobSpmSubjects(current).map((row, rowIndex) => (
         rowIndex === index ? { ...row, [field]: normalizeJobTableValue(event.target.value) } : row
       ));
       const next = { ...current, jobSpmSubjects: nextSubjects };
       return { ...next, jobSpmDetails: buildJobSpmSubjectSummary(next) };
+    });
+  };
+
+  const updateJobStpmSubjectRow = (index, field) => (event) => {
+    setNotice("");
+    clearValidationFields(["jobStpmDetails", "jobStpmSubjects"]);
+    setStudentInfo((current) => {
+      const nextSubjects = getJobStpmSubjects(current).map((row, rowIndex) => (
+        rowIndex === index ? { ...row, [field]: normalizeJobTableValue(event.target.value) } : row
+      ));
+      const next = { ...current, jobStpmSubjects: nextSubjects };
+      return { ...next, jobStpmDetails: buildJobStpmSubjectSummary(next) };
     });
   };
 
@@ -1246,6 +1396,12 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
       const jobSpmValidation = getJobSpmValidation(studentInfo);
       missingFields.push(...jobSpmValidation.missingFields);
       Object.assign(errors, jobSpmValidation.errors);
+    }
+
+    if (activeInfoTab === jobStpmTab) {
+      const jobStpmValidation = getJobStpmValidation(studentInfo);
+      missingFields.push(...jobStpmValidation.missingFields);
+      Object.assign(errors, jobStpmValidation.errors);
     }
 
     setValidationErrors(errors);
@@ -1676,6 +1832,130 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
     </div>
   );
 
+  const renderJobBmJulySection = () => (
+    <div className="student-job-spm-table-wrap">
+      <table className="student-job-spm-table student-job-compact-table">
+        <thead>
+          <tr>
+            <th className="student-job-spm-heading" colSpan={4}>{activeInfoHeading}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Tahun</td>
+            <td colSpan={3}>
+              <input value={studentInfo.jobBmJulyYear} onChange={updateJobBmJulyValue("jobBmJulyYear")} />
+            </td>
+          </tr>
+          <tr>
+            <td>Nama Peperiksaan</td>
+            <td colSpan={3}>
+              <input value={studentInfo.jobBmJulyExamName} onChange={updateJobBmJulyValue("jobBmJulyExamName")} />
+            </td>
+          </tr>
+          <tr>
+            <td>Keputusan Gred</td>
+            <td>
+              <input value={studentInfo.jobBmJulyGradeDecision} onChange={updateJobBmJulyValue("jobBmJulyGradeDecision")} />
+            </td>
+            <td>Ujian Lisan</td>
+            <td>
+              <input value={studentInfo.jobBmJulyOralExam} onChange={updateJobBmJulyValue("jobBmJulyOralExam")} />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+
+  const renderJobMathJulySection = () => (
+    <div className="student-job-spm-table-wrap">
+      <table className="student-job-spm-table student-job-compact-table">
+        <thead>
+          <tr>
+            <th className="student-job-spm-heading" colSpan={2}>{activeInfoHeading}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Tahun</td>
+            <td>
+              <input value={studentInfo.jobMathJulyYear} onChange={updateJobMathJulyValue("jobMathJulyYear")} />
+            </td>
+          </tr>
+          <tr>
+            <td>Keputusan Gred</td>
+            <td>
+              <input value={studentInfo.jobMathJulyGradeDecision} onChange={updateJobMathJulyValue("jobMathJulyGradeDecision")} />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+
+  const renderJobStpmSection = () => (
+    <div className="student-job-spm-table-wrap">
+      <table className="student-job-spm-table student-job-stpm-table">
+        <thead>
+          <tr>
+            <th className="student-job-spm-heading" colSpan={3}>{activeInfoHeading}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colSpan={3}>
+              <label>
+                <span>Sekolah</span>
+                <input value={studentInfo.jobStpmSchool} onChange={updateJobStpmValue("jobStpmSchool")} />
+              </label>
+            </td>
+          </tr>
+          <tr>
+            <td colSpan={3}>
+              <label>
+                <span>Tahun</span>
+                <input value={studentInfo.jobStpmYear} onChange={updateJobStpmValue("jobStpmYear")} />
+              </label>
+            </td>
+          </tr>
+          <tr>
+            <td colSpan={3}>
+              <label>
+                <span>Nama Peperiksaan</span>
+                <input value={studentInfo.jobStpmExamName} onChange={updateJobStpmValue("jobStpmExamName")} />
+              </label>
+            </td>
+          </tr>
+          <tr>
+            <th>Bil</th>
+            <th>Mata Pelajaran</th>
+            <th>Gred</th>
+          </tr>
+          {getJobStpmSubjects(studentInfo).map((row, index) => (
+            <tr key={index}>
+              <td>{index + 1}</td>
+              <td>
+                <input
+                  aria-label={`Mata Pelajaran STPM ${index + 1}`}
+                  value={row.subject}
+                  onChange={updateJobStpmSubjectRow(index, "subject")}
+                />
+              </td>
+              <td>
+                <input
+                  aria-label={`Gred STPM ${index + 1}`}
+                  value={row.grade}
+                  onChange={updateJobStpmSubjectRow(index, "grade")}
+                />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+
   const renderDocumentFields = () => (
     <>
       <div className="student-personal-table-wrap">
@@ -1780,9 +2060,9 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
 
                   {activeInfoTab === personalInfoTab ? renderApplicantFields() : null}
                   {activeInfoTab === jobSpmTab ? renderJobSpmSection() : null}
-                  {activeInfoTab === jobBmJulyTab ? renderJobSimpleSection("jobBmJulyDetails", "Masukkan butiran BM Kertas Julai/STPM/Universiti atau setaraf.") : null}
-                  {activeInfoTab === jobMathJulyTab ? renderJobSimpleSection("jobMathJulyDetails", "Masukkan butiran Peperiksaan Matematik Kertas Julai.") : null}
-                  {activeInfoTab === jobStpmTab ? renderJobSimpleSection("jobStpmDetails", "Masukkan butiran STPM/STAM/STP/HSC/Sijil Matrikulasi.") : null}
+                  {activeInfoTab === jobBmJulyTab ? renderJobBmJulySection() : null}
+                  {activeInfoTab === jobMathJulyTab ? renderJobMathJulySection() : null}
+                  {activeInfoTab === jobStpmTab ? renderJobStpmSection() : null}
                   {activeInfoTab === academicInfoTab || activeInfoTab === jobHigherEducationTab ? renderAcademicFields() : null}
                   {activeInfoTab === jobLanguageSkillsTab ? renderJobSimpleSection("jobLanguageSkills", "Masukkan pengetahuan dan kemahiran bahasa.") : null}
                   {activeInfoTab === jobComputerSkillsTab ? renderJobSimpleSection("jobComputerSkills", "Masukkan maklumat kemahiran komputer.") : null}

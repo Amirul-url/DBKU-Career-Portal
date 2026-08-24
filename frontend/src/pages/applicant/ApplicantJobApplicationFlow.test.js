@@ -107,6 +107,46 @@ test("job application SPM section renders the official subject and grade table",
   assert.match(cssSource, /\.student-job-spm-table thead th\.student-job-spm-heading \{[\s\S]*padding-left: 38px;[\s\S]*text-align: left;[\s\S]*text-indent: -24px;/);
 });
 
+test("job application BM July, Math July and STPM sections render official tables", () => {
+  assert.match(internshipFormSource, /const jobStpmSubjectRowCount = 5/);
+  assert.match(internshipFormSource, /const minimumJobStpmSubjectRows = 3/);
+  assert.match(internshipFormSource, /jobBmJulyYear: ""/);
+  assert.match(internshipFormSource, /jobBmJulyExamName: ""/);
+  assert.match(internshipFormSource, /jobBmJulyGradeDecision: ""/);
+  assert.match(internshipFormSource, /jobBmJulyOralExam: ""/);
+  assert.match(internshipFormSource, /jobMathJulyYear: ""/);
+  assert.match(internshipFormSource, /jobMathJulyGradeDecision: ""/);
+  assert.match(internshipFormSource, /jobStpmSchool: ""/);
+  assert.match(internshipFormSource, /jobStpmYear: ""/);
+  assert.match(internshipFormSource, /jobStpmExamName: ""/);
+  assert.match(internshipFormSource, /jobStpmSubjects: Array\.from\(\{ length: jobStpmSubjectRowCount \}/);
+  assert.match(internshipFormSource, /\["jobBmJulyYear", "Tahun"\]/);
+  assert.match(internshipFormSource, /\["jobBmJulyExamName", "Nama Peperiksaan"\]/);
+  assert.match(internshipFormSource, /\["jobBmJulyGradeDecision", "Keputusan Gred"\]/);
+  assert.match(internshipFormSource, /\["jobBmJulyOralExam", "Ujian Lisan"\]/);
+  assert.match(internshipFormSource, /\["jobMathJulyYear", "Tahun"\]/);
+  assert.match(internshipFormSource, /\["jobMathJulyGradeDecision", "Keputusan Gred"\]/);
+  assert.match(internshipFormSource, /\["jobStpmSchool", "Sekolah"\]/);
+  assert.match(internshipFormSource, /\["jobStpmYear", "Tahun"\]/);
+  assert.match(internshipFormSource, /\["jobStpmExamName", "Nama Peperiksaan"\]/);
+  assert.doesNotMatch(internshipFormSource, /\["jobBmJulyDetails", "Butiran BM Kertas Julai\/STPM\/Universiti atau setaraf"\]/);
+  assert.doesNotMatch(internshipFormSource, /\["jobMathJulyDetails", "Butiran Peperiksaan Matematik Kertas Julai"\]/);
+  assert.doesNotMatch(internshipFormSource, /\["jobStpmDetails", "Butiran Peperiksaan STPM\/STAM\/STP\/HSC\/Sijil Matrikulasi"\]/);
+  assert.match(internshipFormSource, /function getJobStpmValidation\(studentInfo = \{\}\) \{/);
+  assert.match(internshipFormSource, /completedRows\.length < minimumJobStpmSubjectRows/);
+  assert.match(internshipFormSource, /`Sekurang-kurangnya \$\{minimumJobStpmSubjectRows\} mata pelajaran bersama gred`/);
+  assert.match(internshipFormSource, /if \(tab === jobStpmTab\) return isJobStpmTabComplete\(studentInfo\);/);
+  assert.match(internshipFormSource, /const renderJobBmJulySection = \(\) => \(/);
+  assert.match(internshipFormSource, /const renderJobMathJulySection = \(\) => \(/);
+  assert.match(internshipFormSource, /const renderJobStpmSection = \(\) => \(/);
+  assert.match(internshipFormSource, /activeInfoTab === jobBmJulyTab \? renderJobBmJulySection\(\) : null/);
+  assert.match(internshipFormSource, /activeInfoTab === jobMathJulyTab \? renderJobMathJulySection\(\) : null/);
+  assert.match(internshipFormSource, /activeInfoTab === jobStpmTab \? renderJobStpmSection\(\) : null/);
+  assert.doesNotMatch(internshipFormSource, /activeInfoTab === jobBmJulyTab \? renderJobSimpleSection\("jobBmJulyDetails"/);
+  assert.doesNotMatch(internshipFormSource, /activeInfoTab === jobMathJulyTab \? renderJobSimpleSection\("jobMathJulyDetails"/);
+  assert.doesNotMatch(internshipFormSource, /activeInfoTab === jobStpmTab \? renderJobSimpleSection\("jobStpmDetails"/);
+});
+
 test("job application personal table includes required salutation row above name", () => {
   assert.match(internshipFormSource, /const salutationOptions = \["Encik", "Puan", "Cik"\]/);
   assert.match(internshipFormSource, /salutation: ""/);

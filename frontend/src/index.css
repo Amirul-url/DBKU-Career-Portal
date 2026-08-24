@@ -7438,6 +7438,27 @@ body:has(.applicant-profile-page) {
   background: rgba(255, 255, 255, .55);
 }
 
+.student-job-compact-table {
+  min-width: 560px;
+}
+
+.student-job-compact-table th:first-child,
+.student-job-compact-table td:first-child,
+.student-job-compact-table th:nth-child(3),
+.student-job-compact-table td:nth-child(3) {
+  width: 190px;
+  text-align: left;
+}
+
+.student-job-compact-table td:nth-child(2),
+.student-job-compact-table td:nth-child(4) {
+  width: auto;
+}
+
+.student-job-stpm-table {
+  min-width: 720px;
+}
+
 .student-passport-upload {
   position: relative;
   box-sizing: border-box;
