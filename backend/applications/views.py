@@ -10,6 +10,7 @@ from .serializers import CandidateApplicationSerializer
 from .services import (
     InvalidApplicationStatus,
     notify_hrm_offer_accepted,
+    notify_hrm_offer_rejected,
     review_application,
     submit_application,
     withdraw_application,
@@ -164,6 +165,7 @@ class CandidateApplicationViewSet(viewsets.ModelViewSet):
         application.profile_data = profile_data
         application.status = "rejected"
         application.save(update_fields=["status", "profile_data", "updated_at"])
+        notify_hrm_offer_rejected(application)
         return Response(self.get_serializer(application).data)
 
     @action(detail=True, methods=["post"])

@@ -552,6 +552,64 @@ class CandidateApplicationReferenceNoTests(TestCase):
         self.assertEqual(confirmation["status"], "rejected")
         self.assertIn("submitted_at", confirmation)
 
+    @override_settings(NOTIFICATION_EMAIL_ENABLED=True, WHATSAPP_ENABLED=True)
+    @patch("applications.services.send_whatsapp_message")
+    @patch("notifications.services.send_notification_email")
+    def test_applicant_offer_rejection_notifies_hrm_by_email_and_whatsapp(
+        self,
+        mock_send_email,
+        mock_send_whatsapp,
+    ):
+        applicant = self.create_applicant("reject-offer-notify@example.com")
+        hrm = self.user_model.objects.create_user(
+            username="hrm-offer-rejected@example.com",
+            email="hrm-offer-rejected@example.com",
+            password="Password123!",
+            role="admin",
+            department="Bahagian Pengurusan Sumber Manusia (HRM)",
+            mobile_number="60127770301",
+        )
+        finance_head = self.user_model.objects.create_user(
+            username="finance-offer-rejected@example.com",
+            email="finance-offer-rejected@example.com",
+            password="Password123!",
+            role="admin",
+            department="Bahagian Kewangan (FIN)",
+            department_role="Ketua Bahagian",
+            mobile_number="60127770302",
+        )
+        application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=self.vacancy,
+            status="offered",
+            reference_no="PK.2026-0003",
+            profile_data={
+                "organization_feedback_release": {
+                    "internship_period": "25 Ogos 2026 - 24 Februari 2027",
+                    "sent_to_applicant_at": "2026-08-24T08:00:00+08:00",
+                },
+            },
+        )
+        client = APIClient()
+        client.force_authenticate(user=applicant)
+
+        response = client.post(f"/api/applications/{application.id}/reject-offer/")
+
+        self.assertEqual(response.status_code, 200)
+        expected_title = "Penolakan Tawaran LI - PK.2026-0003"
+        expected_message = (
+            "Portal Kerjaya DBKU\n\n"
+            "Pemohon telah menolak tawaran Latihan Industri.\n"
+            "No. Rujukan: PK.2026-0003\n\n"
+            "Sila semak pengesahan penerimaan tawaran melalui Portal Kerjaya DBKU."
+        )
+        notification = Notification.objects.get(application=application, user=hrm)
+        self.assertEqual(notification.title, expected_title)
+        self.assertEqual(notification.message, expected_message)
+        mock_send_email.assert_any_call(hrm, expected_title, expected_message)
+        mock_send_whatsapp.assert_any_call(hrm.mobile_number, expected_message)
+        self.assertFalse(Notification.objects.filter(application=application, user=finance_head).exists())
+
     def test_staff_application_list_excludes_drafts(self):
         applicant = self.create_applicant("hidden-draft@example.com")
         staff = self.user_model.objects.create_user(
