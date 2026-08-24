@@ -95,7 +95,8 @@ test("job application SPM section renders the official subject and grade table",
   assert.match(internshipFormSource, /activeInfoTab === jobSpmTab \? renderJobSpmSection\(\) : null/);
   assert.match(cssSource, /\.student-job-spm-table \{[\s\S]*border-collapse: collapse;/);
   assert.match(cssSource, /\.student-job-spm-table \.hrm-use-cell \{[\s\S]*background: #d9d9d9;/);
-  assert.match(cssSource, /\.student-job-spm-table thead th\.student-job-spm-heading \{[\s\S]*padding-left: 24px;[\s\S]*text-align: left;[\s\S]*text-indent: -14px;/);
+  assert.match(cssSource, /\.student-job-spm-table \.hrm-use-cell \{[\s\S]*min-width: 210px;[\s\S]*width: 210px;/);
+  assert.match(cssSource, /\.student-job-spm-table thead th\.student-job-spm-heading \{[\s\S]*padding-left: 38px;[\s\S]*text-align: left;[\s\S]*text-indent: -24px;/);
 });
 
 test("job application personal table includes required salutation row above name", () => {
