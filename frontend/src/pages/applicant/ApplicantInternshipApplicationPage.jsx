@@ -1569,7 +1569,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
       <table className="student-job-spm-table">
         <thead>
           <tr>
-            <th colSpan={4}>{activeInfoHeading}</th>
+            <th className="student-job-spm-heading" colSpan={4}>{activeInfoHeading}</th>
           </tr>
         </thead>
         <tbody>

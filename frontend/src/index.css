@@ -7394,6 +7394,10 @@ body:has(.applicant-profile-page) {
   white-space: normal;
 }
 
+.student-job-spm-table .student-job-spm-heading {
+  text-align: left;
+}
+
 .student-job-spm-table th:first-child,
 .student-job-spm-table td:first-child {
   width: 44px;
