@@ -217,6 +217,7 @@ test("applicant can submit acceptance confirmation after organization feedback",
   assert.match(viewSource, /submittedAt: getApplicantConfirmationSubmittedAt\(updatedApplication\)/);
   assert.match(viewSource, /setSelectedFiles\(\(current\) => \[\.\.\.current, \.\.\.files\]\)/);
   assert.doesNotMatch(viewSource, /setSelectedFiles\(files\)/);
+  assert.match(viewSource, /!\s*hasResponded \? \(\s*<div className="organization-feedback-section-actions">/);
   assert.match(viewSource, /file,\s*index/);
   assert.match(viewSource, /URL\.createObjectURL\(document\.file\)/);
   assert.match(viewSource, /URL\.revokeObjectURL\(previewUrl\)/);

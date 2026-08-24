@@ -768,22 +768,24 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
             </h3>
             <p>Wajib muat naik sekurang-kurangnya satu dokumen pengesahan penerimaan tawaran dalam format PDF.</p>
           </div>
-          <div className="organization-feedback-section-actions">
-            <label className="organization-feedback-add">
-              <Icon>upload_file</Icon>
-              <span>Muat Naik Dokumen</span>
-              <input
-                key={fileInputKey}
-                accept="application/pdf,.pdf"
-                className="organization-feedback-hidden-input"
-                disabled={hasResponded || isSaving}
-                multiple
-                name="applicantConfirmationDocuments"
-                onChange={selectConfirmationFiles}
-                type="file"
-              />
-            </label>
-          </div>
+          {!hasResponded ? (
+            <div className="organization-feedback-section-actions">
+              <label className="organization-feedback-add">
+                <Icon>upload_file</Icon>
+                <span>Muat Naik Dokumen</span>
+                <input
+                  key={fileInputKey}
+                  accept="application/pdf,.pdf"
+                  className="organization-feedback-hidden-input"
+                  disabled={isSaving}
+                  multiple
+                  name="applicantConfirmationDocuments"
+                  onChange={selectConfirmationFiles}
+                  type="file"
+                />
+              </label>
+            </div>
+          ) : null}
         </div>
         {message ? <p className="organization-feedback-message">{message}</p> : null}
         <div className="organization-feedback-table-wrap">
