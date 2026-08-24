@@ -34,6 +34,13 @@ test("completed internships do not block a new internship application CTA", () =
   assert.match(infoSource, /setHasSubmittedInternshipApplication\(applications\.some\(isBlockingInternshipApplication\)\)/);
 });
 
+test("internship CTA ignores auto-saved empty applicant drafts", () => {
+  assert.match(infoSource, /const autoFilledDraftFields = new Set\(\["name", "email"\]\)/);
+  assert.match(infoSource, /function hasMeaningfulInternshipDraft\(studentInfo = \{\}\)/);
+  assert.match(infoSource, /!autoFilledDraftFields\.has\(field\)/);
+  assert.match(infoSource, /const hasDraft = Boolean\(draft\?\.studentInfo && hasMeaningfulInternshipDraft\(draft\.studentInfo\)\)/);
+});
+
 test("applicant rejected applications use Ditolak status label", () => {
   assert.match(listSource, /rejected: "Ditolak"/);
   assert.match(viewSource, /rejected: "Ditolak"/);

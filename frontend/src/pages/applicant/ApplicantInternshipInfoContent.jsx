@@ -58,6 +58,13 @@ function isInternshipApplication(application) {
 }
 
 const reapplyAllowedApplicationStatuses = new Set(["rejected", "withdrawn"]);
+const autoFilledDraftFields = new Set(["name", "email"]);
+
+function hasMeaningfulInternshipDraft(studentInfo = {}) {
+  return Object.entries(studentInfo).some(([field, value]) =>
+    !autoFilledDraftFields.has(field) && String(value || "").trim()
+  );
+}
 
 function isCompletedInternshipApplication(application) {
   return getApplicantAgreedInternshipStatus(application) === "internship_completed";
@@ -88,7 +95,7 @@ export default function ApplicantInternshipInfoContent() {
   const userId = user?.id || user?.email || "";
   const userRole = user?.role;
   const draft = getInternshipDraft(user);
-  const hasDraft = Boolean(draft?.studentInfo);
+  const hasDraft = Boolean(draft?.studentInfo && hasMeaningfulInternshipDraft(draft.studentInfo));
   const hasNewApplicationDraft = draft?.purpose === "new-application";
   const [hasSubmittedInternshipApplication, setHasSubmittedInternshipApplication] = useState(false);
   const [hasReapplyAllowedInternshipApplication, setHasReapplyAllowedInternshipApplication] = useState(false);
