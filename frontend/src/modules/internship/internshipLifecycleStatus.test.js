@@ -33,7 +33,7 @@ test("marks agreed internship as completed after the internship period ends", ()
   assert.equal(getApplicantAgreedInternshipStatus(application, new Date("2026-08-29T08:00:00+08:00")), "internship_completed");
 });
 
-test("keeps agreed status before internship starts or when period is missing", () => {
+test("marks agreed internships as active before the internship starts or when the period is missing", () => {
   const application = {
     profile_data: {
       applicant_confirmation: { status: "agreed" },
@@ -43,6 +43,6 @@ test("keeps agreed status before internship starts or when period is missing", (
     },
   };
 
-  assert.equal(getApplicantAgreedInternshipStatus(application, new Date("2026-03-15T08:00:00+08:00")), "applicant_agreed");
-  assert.equal(getApplicantAgreedInternshipStatus({ profile_data: { applicant_confirmation: { status: "agreed" } } }), "applicant_agreed");
+  assert.equal(getApplicantAgreedInternshipStatus(application, new Date("2026-03-15T08:00:00+08:00")), "internship_active");
+  assert.equal(getApplicantAgreedInternshipStatus({ profile_data: { applicant_confirmation: { status: "agreed" } } }), "internship_active");
 });

@@ -127,5 +127,5 @@ export function getInternshipLifecycleStatus(application, currentDate = new Date
 
 export function getApplicantAgreedInternshipStatus(application, currentDate = new Date()) {
   if (!hasApplicantAgreedToOffer(application)) return "";
-  return getInternshipLifecycleStatus(application, currentDate) || "applicant_agreed";
+  return getInternshipLifecycleStatus(application, currentDate) || "internship_active";
 }
