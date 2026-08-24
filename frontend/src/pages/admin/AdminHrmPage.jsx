@@ -2965,12 +2965,6 @@ function ApplicantConfirmationReadOnlyTab({ application }) {
         </div>
       </section>
 
-      <section className="applicant-confirmation-statement" aria-label="Pengesahan penerimaan tawaran">
-        <p>
-          Dengan ini, saya mengesahkan penerimaan tawaran menjalani latihan industri di Dewan Bandaraya Kuching Utara (DBKU) seperti yang dinyatakan.
-        </p>
-        <p>Sekian, terima kasih atas perhatian dan kerjasama pihak puan.</p>
-      </section>
     </div>
   );
 }

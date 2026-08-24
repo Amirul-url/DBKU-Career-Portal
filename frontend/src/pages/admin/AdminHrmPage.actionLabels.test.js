@@ -425,6 +425,7 @@ test("HRM can see applicant offer confirmation after applicant agrees", () => {
   assert.match(source, /\.\.\.\(hasApplicantAgreedToOffer\(application\) \? \[applicantConfirmationTab\] : \[\]\)/);
   assert.match(source, /function ApplicantConfirmationReadOnlyTab/);
   assert.match(source, /Dokumen pengesahan pemohon/);
-  assert.match(source, /Dengan ini, saya mengesahkan penerimaan tawaran menjalani latihan industri di Dewan Bandaraya Kuching Utara \(DBKU\)/);
+  assert.doesNotMatch(source, /Dengan ini, saya mengesahkan penerimaan tawaran menjalani latihan industri di Dewan Bandaraya Kuching Utara \(DBKU\)/);
+  assert.doesNotMatch(source, /Sekian, terima kasih atas perhatian dan kerjasama pihak puan\./);
   assert.match(source, /applicantConfirmationDocuments/);
 });

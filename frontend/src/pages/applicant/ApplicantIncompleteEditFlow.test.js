@@ -215,8 +215,8 @@ test("applicant can submit acceptance confirmation after organization feedback",
   assert.match(viewSource, /aria-label=\{`Buang \$\{document\.name\}`\}/);
   assert.match(viewSource, /disabled=\{!document\.url && !document\.file\}/);
   assert.match(viewSource, /disabled=\{hasResponded \|\| isSaving \|\| !selectedFiles\.length\}/);
-  assert.match(viewSource, /Dengan ini, saya mengesahkan penerimaan tawaran menjalani latihan industri di Dewan Bandaraya Kuching Utara \(DBKU\)/);
-  assert.match(viewSource, /Sekian, terima kasih atas perhatian dan kerjasama pihak puan\./);
+  assert.doesNotMatch(viewSource, /Dengan ini, saya mengesahkan penerimaan tawaran menjalani latihan industri di Dewan Bandaraya Kuching Utara \(DBKU\)/);
+  assert.doesNotMatch(viewSource, /Sekian, terima kasih atas perhatian dan kerjasama pihak puan\./);
   assert.match(viewSource, /function ApplicantConfirmationSendConfirmModal/);
   assert.match(viewSource, /profile-confirm-dialog applicant-confirmation-send-dialog/);
   assert.match(viewSource, /Anda yakin mahu menghantar pengesahan penerimaan tawaran ini\?/);

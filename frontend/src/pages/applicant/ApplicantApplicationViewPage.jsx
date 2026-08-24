@@ -852,13 +852,6 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
         </div>
       </section>
 
-      <section className="applicant-confirmation-statement" aria-label="Pengesahan penerimaan tawaran">
-        <p>
-          Dengan ini, saya mengesahkan penerimaan tawaran menjalani latihan industri di Dewan Bandaraya Kuching Utara (DBKU) seperti yang dinyatakan.
-        </p>
-        <p>Sekian, terima kasih atas perhatian dan kerjasama pihak puan.</p>
-      </section>
-
       <footer className="organization-feedback-send-actions">
         {isAgreed ? <p className="organization-feedback-sent-note">Pengesahan penerimaan tawaran telah dihantar.</p> : null}
         {isRejected ? <p className="organization-feedback-sent-note">Penolakan tawaran telah dihantar.</p> : null}
