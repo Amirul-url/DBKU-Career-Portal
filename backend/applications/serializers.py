@@ -12,7 +12,7 @@ from rest_framework import serializers
 from jobs.serializers import VacancySerializer
 
 from .models import CandidateApplication
-from .services import notify_organization_feedback_released
+from .services import notify_hrm_department_decision_submitted, notify_organization_feedback_released
 
 
 REAPPLY_ALLOWED_STATUSES = {"rejected", "withdrawn"}
@@ -49,6 +49,11 @@ MALAY_MONTH_NUMBERS = {
 def has_organization_feedback_been_released(profile_data):
     release = (profile_data or {}).get("organization_feedback_release") or {}
     return bool(release.get("sent_to_applicant_at"))
+
+
+def has_department_decision_been_submitted(profile_data):
+    decision = (profile_data or {}).get("department_decision") or {}
+    return bool(decision.get("submitted_at"))
 
 
 def parse_date_value(value):
@@ -586,6 +591,7 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
         clear_organization_feedback_document = validated_data.pop("clearOrganizationFeedbackDocument", False)
         clear_organization_feedback_document_id = validated_data.pop("clearOrganizationFeedbackDocumentId", "")
         was_organization_feedback_released = has_organization_feedback_been_released(instance.profile_data)
+        was_department_decision_submitted = has_department_decision_been_submitted(instance.profile_data)
         new_status = validated_data.get("status")
         if new_status == "submitted" and instance.status == "draft" and not instance.submitted_at:
             validated_data["submitted_at"] = timezone.now()
@@ -607,6 +613,12 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
             not was_organization_feedback_released
             and has_organization_feedback_been_released(instance.profile_data)
         )
+        department_decision_was_just_submitted = (
+            not was_department_decision_submitted
+            and has_department_decision_been_submitted(instance.profile_data)
+        )
+        if department_decision_was_just_submitted:
+            notify_hrm_department_decision_submitted(instance)
         if organization_feedback_was_just_released:
             if instance.status != "offered":
                 instance.status = "offered"
