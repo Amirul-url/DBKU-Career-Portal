@@ -772,6 +772,34 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
   const applicationPageTitle = selectedJobTitle
     ? `Nama Jawatan Yang Dipohon: ${selectedJobTitle}`
     : applicationTitle;
+  const jobUppercasePersonalFields = new Set([
+    "address",
+    "birthPlace",
+    "stateOfBirth",
+    "motherBirthState",
+    "fatherBirthState",
+    "race",
+    "religion",
+    "citizenship",
+    "maritalStatus",
+    "disability",
+    "drivingLicense",
+  ]);
+  const normalizeJobPersonalValue = (field, value) =>
+    isJobApplication && jobUppercasePersonalFields.has(field)
+      ? String(value || "").toUpperCase()
+      : value;
+  const normalizeJobPersonalInfo = (info) => {
+    if (!isJobApplication) {
+      return info;
+    }
+
+    const next = { ...info };
+    jobUppercasePersonalFields.forEach((field) => {
+      next[field] = normalizeJobPersonalValue(field, next[field]);
+    });
+    return next;
+  };
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
   const email = user?.email || "Belum dikemaskini";
 
@@ -883,7 +911,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
       const { [field]: _field, ...next } = current;
       return next;
     });
-    setStudentInfo((current) => ({ ...current, [field]: event.target.value }));
+    setStudentInfo((current) => ({ ...current, [field]: normalizeJobPersonalValue(field, event.target.value) }));
   };
 
   const updateStudentValue = (field, value) => {
@@ -893,7 +921,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
       const { [field]: _field, ...next } = current;
       return next;
     });
-    setStudentInfo((current) => ({ ...current, [field]: value }));
+    setStudentInfo((current) => ({ ...current, [field]: normalizeJobPersonalValue(field, value) }));
   };
 
   const updateStudentName = (event) => {
@@ -959,7 +987,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
     });
     setStudentInfo((current) => ({
       ...current,
-      address: location.address ? dedupeAddressText(location.address) : current.address,
+      address: location.address ? normalizeJobPersonalValue("address", dedupeAddressText(location.address)) : current.address,
       latitude: location.latitude ?? current.latitude,
       longitude: location.longitude ?? current.longitude,
     }));
@@ -1022,6 +1050,9 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
     }
 
     setNoticeStatus("success");
+    if (isJobApplication && activeInfoTab === personalInfoTab) {
+      setStudentInfo((current) => normalizeJobPersonalInfo(current));
+    }
     setNotice(`${activeInfoTab} telah dikemas kini untuk draf ${applicationNoticeNoun}.`);
   };
 
@@ -1073,7 +1104,8 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
         setNotice(`Tiada ${applicationOpportunityNoun} aktif ditemui untuk menerima permohonan ini.`);
         return;
       }
-      const payload = buildApplicationPayload(studentInfo, targetVacancy, documentFiles, applicationType);
+      const normalizedStudentInfo = normalizeJobPersonalInfo(studentInfo);
+      const payload = buildApplicationPayload(normalizedStudentInfo, targetVacancy, documentFiles, applicationType);
       const application = existingApplication
         ? await apiRequest(`/applications/${existingApplication.id}/`, {
             method: "PATCH",
@@ -1113,7 +1145,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
       applicationType,
       purpose: isStartingNewApplication || savedDraft?.purpose === "new-application" ? "new-application" : "manual",
       savedAt: new Date().toISOString(),
-      studentInfo: getDraftStudentInfo(studentInfo),
+      studentInfo: getDraftStudentInfo(normalizeJobPersonalInfo(studentInfo)),
       vacancy: internshipVacancy
         ? {
             id: internshipVacancy.id,
@@ -1135,13 +1167,16 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
   };
 
   const textInput = (field, props = {}) => (
-    <input required value={studentInfo[field]} onChange={updateStudentInfo(field)} {...props} />
+    <input required value={normalizeJobPersonalValue(field, studentInfo[field])} onChange={updateStudentInfo(field)} {...props} />
   );
 
   const selectInput = (field, options) => (
-    <select required value={studentInfo[field]} onChange={updateStudentInfo(field)}>
+    <select required value={normalizeJobPersonalValue(field, studentInfo[field])} onChange={updateStudentInfo(field)}>
       <option value="">Sila pilih</option>
-      {options.map((option) => <option key={option}>{option}</option>)}
+      {options.map((option) => {
+        const optionValue = normalizeJobPersonalValue(field, option);
+        return <option key={option} value={optionValue}>{optionValue}</option>;
+      })}
     </select>
   );
 
@@ -1256,7 +1291,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
             {renderPersonalRow(
               "Alamat Surat Menyurat",
               <ApplicantAddressMap
-                address={studentInfo.address}
+                address={normalizeJobPersonalValue("address", studentInfo.address)}
                 addressError={validationErrors.address}
                 latitude={studentInfo.latitude}
                 locationError={validationErrors.location}

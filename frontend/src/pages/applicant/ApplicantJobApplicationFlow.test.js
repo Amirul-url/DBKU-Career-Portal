@@ -39,6 +39,17 @@ test("job application personal tab shows instructions beside passport upload", (
   assert.match(cssSource, /\.student-job-instructions-table \{[\s\S]*border-collapse: collapse;/);
 });
 
+test("job application personal information values are normalized to uppercase only for job applications", () => {
+  assert.match(internshipFormSource, /const jobUppercasePersonalFields = new Set\(\[[\s\S]*"address"[\s\S]*"birthPlace"[\s\S]*"drivingLicense"[\s\S]*\]\)/);
+  assert.match(internshipFormSource, /const normalizeJobPersonalValue = \(field, value\) =>\s*isJobApplication && jobUppercasePersonalFields\.has\(field\)[\s\S]*String\(value \|\| ""\)\.toUpperCase\(\)[\s\S]*value/);
+  assert.match(internshipFormSource, /setStudentInfo\(\(current\) => \(\{ \.\.\.current, \[field\]: normalizeJobPersonalValue\(field, event\.target\.value\) \}\)\)/);
+  assert.match(internshipFormSource, /const optionValue = normalizeJobPersonalValue\(field, option\);/);
+  assert.match(internshipFormSource, /address: location\.address \? normalizeJobPersonalValue\("address", dedupeAddressText\(location\.address\)\) : current\.address/);
+  assert.match(internshipFormSource, /const normalizeJobPersonalInfo = \(info\) => \{[\s\S]*jobUppercasePersonalFields\.forEach\(\(field\) => \{[\s\S]*next\[field\] = normalizeJobPersonalValue\(field, next\[field\]\);/);
+  assert.match(internshipFormSource, /const normalizedStudentInfo = normalizeJobPersonalInfo\(studentInfo\);[\s\S]*buildApplicationPayload\(normalizedStudentInfo, targetVacancy, documentFiles, applicationType\)/);
+  assert.match(internshipFormSource, /studentInfo: getDraftStudentInfo\(normalizeJobPersonalInfo\(studentInfo\)\)/);
+});
+
 test("draft and incomplete job applications reopen the job form", () => {
   assert.match(routesSource, /jobApplicationEdit: \(id\) => `\/profile\/job-application\?application=\$\{id\}`/);
   assert.match(listSource, /isInternshipApplication\(application\)\s*\?\s*APPLICANT_ROUTES\.internshipApplicationEdit\(application\.id\)\s*:\s*APPLICANT_ROUTES\.jobApplicationEdit\(application\.id\)/);

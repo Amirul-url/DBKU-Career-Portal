@@ -331,7 +331,8 @@ test("internship uploaded documents stay in form local state until submission", 
   assert.match(formSource, /const draftStudentInfo = \{ \.\.\.studentInfo \};/);
   assert.match(formSource, /documentFields\.forEach\(\(\{ field \}\) => \{/);
   assert.match(formSource, /delete draftStudentInfo\[field\];/);
-  assert.match(formSource, /studentInfo: getDraftStudentInfo\(studentInfo\)/);
+  assert.match(formSource, /const normalizeJobPersonalInfo = \(info\) => \{\s*if \(!isJobApplication\) \{\s*return info;/);
+  assert.match(formSource, /studentInfo: getDraftStudentInfo\(normalizeJobPersonalInfo\(studentInfo\)\)/);
   assert.match(formSource, /const \[documentFiles, setDocumentFiles\] = useState\(\{\}\)/);
   assert.match(formSource, /const \[passportPhotoPreviewUrl, setPassportPhotoPreviewUrl\] = useState\(""\)/);
 });
@@ -343,7 +344,7 @@ test("internship back action asks applicant to save a visible draft", () => {
   assert.match(formSource, /onClick=\{requestExitApplicationForm\}/);
   assert.match(formSource, /const saveDraftAndExit = \(\) => \{/);
   assert.match(formSource, /visibleInApplications: true/);
-  assert.match(formSource, /studentInfo: getDraftStudentInfo\(studentInfo\)/);
+  assert.match(formSource, /studentInfo: getDraftStudentInfo\(normalizeJobPersonalInfo\(studentInfo\)\)/);
   assert.doesNotMatch(formSource, /Simpan draf permohonan\?/);
   assert.match(
     formSource,
