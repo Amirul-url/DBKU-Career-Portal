@@ -79,7 +79,7 @@ function getReadOnlyStatusLabel(status, maskAcceptedStatus, application = null) 
     const lifecycleStatus = getApplicantAgreedInternshipStatus(application);
     return applicantInternshipLifecycleStatusLabels[lifecycleStatus] || "Pengesahan Dihantar";
   }
-  if (hasApplicantRejectedOffer(application)) return "Ditolak";
+  if (hasApplicantRejectedOffer(application)) return "Tolak Tawaran";
   const visibleStatus = getApplicantVisibleStatus(status, maskAcceptedStatus, application);
   return statusLabels[visibleStatus] || visibleStatus;
 }

@@ -113,6 +113,10 @@ function hasApplicantAgreedToOffer(application) {
   return application?.profile_data?.applicant_confirmation?.status === "agreed";
 }
 
+function hasApplicantRejectedOffer(application) {
+  return application?.profile_data?.applicant_confirmation?.status === "rejected";
+}
+
 function hasSubmittedDepartmentDecision(application) {
   return Boolean(application?.profile_data?.department_decision?.submitted_at);
 }
@@ -161,6 +165,7 @@ function getApplicantStatusLabel(status, application = null) {
     const lifecycleStatus = getApplicantAgreedInternshipStatus(application);
     return applicantInternshipLifecycleStatusLabels[lifecycleStatus] || "Pengesahan Dihantar";
   }
+  if (hasApplicantRejectedOffer(application)) return "Tolak Tawaran";
   if (status === "offered") return "Pengesahan Pemohon";
   if (status === "accepted" && hasOrganizationFeedbackBeenSent(application)) return "Pengesahan Pemohon";
   return statusLabels[getApplicantVisibleStatus(status, application)] || status;

@@ -429,3 +429,18 @@ test("HRM can see applicant offer confirmation after applicant agrees", () => {
   assert.doesNotMatch(source, /Sekian, terima kasih atas perhatian dan kerjasama pihak puan\./);
   assert.match(source, /applicantConfirmationDocuments/);
 });
+
+test("HRM internship rows show applicant offer rejections distinctly", () => {
+  assert.match(source, /applicant_offer_rejected: "Tolak Tawaran"/);
+  assert.match(source, /applicant_offer_rejected: "red"/);
+  assert.match(source, /function hasApplicantRejectedOffer\(application\)/);
+  assert.match(source, /if \(hasApplicantRejectedOffer\(application\)\) return "applicant_offer_rejected"/);
+  const displayStatusSource = source.slice(
+    source.indexOf("function getInternshipApplicationDisplayStatus"),
+    source.indexOf("function getInternshipDashboardStatus"),
+  );
+  assert.ok(
+    displayStatusSource.indexOf('if (hasApplicantRejectedOffer(application)) return "applicant_offer_rejected"') <
+      displayStatusSource.indexOf('if (hasOrganizationFeedbackBeenSent(application)) return "offered"'),
+  );
+});

@@ -75,6 +75,7 @@ const statusLabel = {
   hrm_department_accepted: "Diterima Bahagian",
   hrm_department_rejected: "Ditolak Bahagian",
   applicant_agreed: "Pemohon Bersetuju",
+  applicant_offer_rejected: "Tolak Tawaran",
   internship_active: internshipLifecycleStatusLabels.internship_active,
   internship_completed: internshipLifecycleStatusLabels.internship_completed,
   submitted: "Menunggu Semakan HRM",
@@ -94,6 +95,7 @@ const statusClass = {
   hrm_department_accepted: "green",
   hrm_department_rejected: "red",
   applicant_agreed: "green",
+  applicant_offer_rejected: "red",
   internship_active: internshipLifecycleStatusClasses.internship_active,
   internship_completed: internshipLifecycleStatusClasses.internship_completed,
   submitted: "blue",
@@ -277,6 +279,10 @@ function hasApplicantAgreedToOffer(application) {
   return application?.profile_data?.applicant_confirmation?.status === "agreed";
 }
 
+function hasApplicantRejectedOffer(application) {
+  return application?.profile_data?.applicant_confirmation?.status === "rejected";
+}
+
 function isDepartmentPendingDecisionApplication(application) {
   return Boolean(application?.assigned_department && !hasSubmittedDepartmentDecision(application));
 }
@@ -318,6 +324,7 @@ function getHrmDepartmentDecisionStatus(application) {
 
 function getInternshipApplicationDisplayStatus(application, isHrmWorkspace) {
   if (hasApplicantAgreedToOffer(application)) return getApplicantAgreedInternshipStatus(application);
+  if (hasApplicantRejectedOffer(application)) return "applicant_offer_rejected";
   if (hasOrganizationFeedbackBeenSent(application)) return "offered";
   if (isHrmWorkspace && isDepartmentPendingDecisionApplication(application)) return "department_new";
   if (isHrmWorkspace && isHrmPendingDepartmentDecisionApplication(application)) return getHrmDepartmentDecisionStatus(application);
@@ -328,6 +335,7 @@ function getInternshipApplicationDisplayStatus(application, isHrmWorkspace) {
 
 function getInternshipDashboardStatus(application, isHrmWorkspace) {
   if (hasApplicantAgreedToOffer(application)) return getApplicantAgreedInternshipStatus(application);
+  if (hasApplicantRejectedOffer(application)) return "applicant_offer_rejected";
   if (hasOrganizationFeedbackBeenSent(application)) return "offered";
   if (isDepartmentPendingDecisionApplication(application)) return "department_new";
   if (isDepartmentAcceptedApplication(application)) return "hrm_department_accepted";
