@@ -37,6 +37,7 @@ const jobInfoTabs = [
   documentSupportTab,
 ];
 const jobSpmSubjectRowCount = 12;
+const minimumJobSpmSubjectRows = 3;
 const jobTabShortLabels = {
   [personalInfoTab]: "Peribadi",
   [jobSpmTab]: "SPM/UEC",
@@ -339,7 +340,6 @@ const requiredFieldsByTab = {
     ["jobSpmSchool", "Sekolah"],
     ["jobSpmYear", "Tahun"],
     ["jobSpmExamName", "Nama Peperiksaan"],
-    ["jobSpmDetails", "Butiran Peperiksaan SPM/SC/MCE/SPM(V)/UEC atau setaraf"],
   ],
   [jobBmJulyTab]: [
     ["jobBmJulyDetails", "Butiran BM Kertas Julai/STPM/Universiti atau setaraf"],
@@ -683,6 +683,37 @@ function buildJobSpmSubjectSummary(studentInfo = {}) {
     .join("\n");
 }
 
+function getJobSpmValidation(studentInfo = {}) {
+  const rows = getJobSpmSubjects(studentInfo);
+  const completedRows = rows.filter((row) => row.subject.trim() && row.grade.trim());
+  const partialRows = rows
+    .map((row, index) => ({ ...row, rowNumber: index + 1 }))
+    .filter((row) => (row.subject.trim() && !row.grade.trim()) || (!row.subject.trim() && row.grade.trim()))
+    .map((row) => row.rowNumber);
+  const missingFields = [];
+  const errors = {};
+
+  if (completedRows.length < minimumJobSpmSubjectRows) {
+    missingFields.push(`Sekurang-kurangnya ${minimumJobSpmSubjectRows} mata pelajaran bersama gred`);
+    errors.jobSpmSubjects = `Isi sekurang-kurangnya ${minimumJobSpmSubjectRows} mata pelajaran bersama gred.`;
+  }
+
+  if (partialRows.length) {
+    missingFields.push(`Lengkapkan Mata Pelajaran dan Gred pada baris ${partialRows.join(", ")}`);
+    errors.jobSpmSubjects = "Lengkapkan pasangan Mata Pelajaran dan Gred.";
+  }
+
+  return { completedRows, errors, missingFields, partialRows };
+}
+
+function isJobSpmTabComplete(studentInfo = {}) {
+  const hasRequiredFields = (requiredFieldsByTab[jobSpmTab] || [])
+    .every(([field]) => String(studentInfo[field] || "").trim());
+  const validation = getJobSpmValidation(studentInfo);
+
+  return hasRequiredFields && validation.missingFields.length === 0;
+}
+
 function normalizeStudentInfoDraft(studentInfo = {}, user = null) {
   const defaults = getDefaultStudentInfo();
   const birthDate = studentInfo.birthDate || studentInfo.dateOfBirth || "";
@@ -753,6 +784,8 @@ function clearStudentInfoDraft(user, applicationType = "internship") {
 }
 
 function isTabComplete(tab, studentInfo) {
+  if (tab === jobSpmTab) return isJobSpmTabComplete(studentInfo);
+
   const requiredFields = requiredFieldsByTab[tab] || [];
   const hasRequiredFields = requiredFields.every(([field]) => String(studentInfo[field] || "").trim());
   const hasRequiredLocation = tab !== personalInfoTab || (studentInfo.latitude && studentInfo.longitude);
@@ -775,6 +808,12 @@ function getMissingApplicationFields(studentInfo, requiredTabs = internshipRequi
         errors[field] = "Wajib diisi.";
       }
     });
+
+    if (tab === jobSpmTab) {
+      const jobSpmValidation = getJobSpmValidation(studentInfo);
+      missingFields.push(...jobSpmValidation.missingFields.map((field) => `${tab}: ${field}`));
+      Object.assign(errors, jobSpmValidation.errors);
+    }
   });
 
   if (!studentInfo.latitude || !studentInfo.longitude) {
@@ -1201,6 +1240,12 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
     if (activeInfoTab === personalInfoTab && (!studentInfo.latitude || !studentInfo.longitude)) {
       missingFields.push("Lokasi alamat pada map");
       errors.location = "Sila pilih lokasi alamat pada map.";
+    }
+
+    if (activeInfoTab === jobSpmTab) {
+      const jobSpmValidation = getJobSpmValidation(studentInfo);
+      missingFields.push(...jobSpmValidation.missingFields);
+      Object.assign(errors, jobSpmValidation.errors);
     }
 
     setValidationErrors(errors);

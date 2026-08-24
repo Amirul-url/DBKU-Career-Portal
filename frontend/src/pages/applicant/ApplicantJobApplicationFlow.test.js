@@ -69,7 +69,7 @@ test("job application tabs use compact labels without changing tab state values"
 test("job application extra sections are mandatory before submission", () => {
   assert.match(internshipFormSource, /jobSpmDetails: ""/);
   assert.match(internshipFormSource, /jobDeclaration: ""/);
-  assert.match(internshipFormSource, /\["jobSpmDetails", "Butiran Peperiksaan SPM\/SC\/MCE\/SPM\(V\)\/UEC atau setaraf"\]/);
+  assert.doesNotMatch(internshipFormSource, /\["jobSpmDetails", "Butiran Peperiksaan SPM\/SC\/MCE\/SPM\(V\)\/UEC atau setaraf"\]/);
   assert.match(internshipFormSource, /\["jobDeclaration", "Perakuan Pemohon"\]/);
   assert.match(internshipFormSource, /const renderJobSimpleSection = \(field, placeholder\) => \(/);
   assert.doesNotMatch(internshipFormSource, /activeInfoTab === jobSpmTab \? renderJobSimpleSection\("jobSpmDetails"/);
@@ -78,6 +78,7 @@ test("job application extra sections are mandatory before submission", () => {
 
 test("job application SPM section renders the official subject and grade table", () => {
   assert.match(internshipFormSource, /const jobSpmSubjectRowCount = 12/);
+  assert.match(internshipFormSource, /const minimumJobSpmSubjectRows = 3/);
   assert.match(internshipFormSource, /jobSpmSchool: ""/);
   assert.match(internshipFormSource, /jobSpmYear: ""/);
   assert.match(internshipFormSource, /jobSpmExamName: ""/);
@@ -85,6 +86,13 @@ test("job application SPM section renders the official subject and grade table",
   assert.match(internshipFormSource, /\["jobSpmSchool", "Sekolah"\]/);
   assert.match(internshipFormSource, /\["jobSpmYear", "Tahun"\]/);
   assert.match(internshipFormSource, /\["jobSpmExamName", "Nama Peperiksaan"\]/);
+  assert.doesNotMatch(internshipFormSource, /\["jobSpmDetails", "Butiran Peperiksaan SPM\/SC\/MCE\/SPM\(V\)\/UEC atau setaraf"\]/);
+  assert.match(internshipFormSource, /function getJobSpmValidation\(studentInfo = \{\}\) \{/);
+  assert.match(internshipFormSource, /completedRows\.length < minimumJobSpmSubjectRows/);
+  assert.match(internshipFormSource, /`Sekurang-kurangnya \$\{minimumJobSpmSubjectRows\} mata pelajaran bersama gred`/);
+  assert.match(internshipFormSource, /`Lengkapkan Mata Pelajaran dan Gred pada baris \$\{partialRows\.join\(", "\)\}`/);
+  assert.match(internshipFormSource, /if \(tab === jobSpmTab\) return isJobSpmTabComplete\(studentInfo\);/);
+  assert.match(internshipFormSource, /if \(tab === jobSpmTab\) \{[\s\S]*const jobSpmValidation = getJobSpmValidation\(studentInfo\);[\s\S]*missingFields\.push\(\.\.\.jobSpmValidation\.missingFields\);/);
   assert.match(internshipFormSource, /const renderJobSpmSection = \(\) => \(/);
   assert.match(internshipFormSource, /className="student-job-spm-table"/);
   assert.match(internshipFormSource, /<th className="student-job-spm-heading" colSpan=\{4\}>\{activeInfoHeading\}<\/th>/);
