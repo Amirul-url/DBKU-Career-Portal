@@ -7349,6 +7349,79 @@ body:has(.applicant-profile-page) {
   text-align: center;
 }
 
+.student-job-spm-table-wrap {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.student-job-spm-table {
+  width: 100%;
+  min-width: 780px;
+  border: 2px solid #111827;
+  border-collapse: collapse;
+  background: rgba(255, 255, 255, .92);
+  color: #030712;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.student-job-spm-table th,
+.student-job-spm-table td {
+  border: 1px solid #111827;
+  padding: 7px 10px;
+  vertical-align: middle;
+}
+
+.student-job-spm-table thead th,
+.student-job-spm-table .hrm-use-cell {
+  background: #d9d9d9;
+  font-weight: 900;
+  text-align: center;
+  text-decoration: underline;
+}
+
+.student-job-spm-table .hrm-use-cell {
+  width: 150px;
+  white-space: normal;
+}
+
+.student-job-spm-table th:first-child,
+.student-job-spm-table td:first-child {
+  width: 44px;
+  text-align: center;
+}
+
+.student-job-spm-table th:nth-child(3),
+.student-job-spm-table td:nth-child(3) {
+  width: 100px;
+}
+
+.student-job-spm-table label {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+
+.student-job-spm-table input {
+  width: 100%;
+  min-height: 26px;
+  border: 0;
+  background: transparent;
+  color: #030712;
+  font: inherit;
+  text-transform: uppercase;
+}
+
+.student-job-spm-table input:focus {
+  outline: 2px solid rgba(22, 163, 74, .28);
+  outline-offset: 1px;
+}
+
+.student-job-spm-table .hrm-check-cell {
+  background: rgba(255, 255, 255, .55);
+}
+
 .student-passport-upload {
   position: relative;
   box-sizing: border-box;

@@ -36,6 +36,7 @@ const jobInfoTabs = [
   jobDeclarationTab,
   documentSupportTab,
 ];
+const jobSpmSubjectRowCount = 12;
 const jobTabShortLabels = {
   [personalInfoTab]: "Peribadi",
   [jobSpmTab]: "SPM/UEC",
@@ -283,6 +284,10 @@ const getDefaultStudentInfo = () => ({
   jobMathJulyDetails: "",
   jobReferences: "",
   jobSpmDetails: "",
+  jobSpmExamName: "",
+  jobSpmSchool: "",
+  jobSpmSubjects: Array.from({ length: jobSpmSubjectRowCount }, () => ({ grade: "", subject: "" })),
+  jobSpmYear: "",
   jobStpmDetails: "",
   jobWorkExperience: "",
   maritalStatus: "",
@@ -331,6 +336,9 @@ const requiredFieldsByTab = {
     ["supervisorPhone", "No. Telefon Penyelaras Program"],
   ],
   [jobSpmTab]: [
+    ["jobSpmSchool", "Sekolah"],
+    ["jobSpmYear", "Tahun"],
+    ["jobSpmExamName", "Nama Peperiksaan"],
     ["jobSpmDetails", "Butiran Peperiksaan SPM/SC/MCE/SPM(V)/UEC atau setaraf"],
   ],
   [jobBmJulyTab]: [
@@ -652,9 +660,33 @@ function InstitutionSearchSelect({ onChange, value }) {
   );
 }
 
+function normalizeJobTableValue(value) {
+  return String(value || "").toUpperCase();
+}
+
+function getJobSpmSubjects(studentInfo = {}) {
+  const sourceRows = Array.isArray(studentInfo.jobSpmSubjects) ? studentInfo.jobSpmSubjects : [];
+
+  return Array.from({ length: jobSpmSubjectRowCount }, (_, index) => {
+    const row = sourceRows[index] || {};
+    return {
+      grade: normalizeJobTableValue(row.grade),
+      subject: normalizeJobTableValue(row.subject),
+    };
+  });
+}
+
+function buildJobSpmSubjectSummary(studentInfo = {}) {
+  return getJobSpmSubjects(studentInfo)
+    .filter((row) => row.subject.trim() && row.grade.trim())
+    .map((row, index) => `${index + 1}. ${row.subject} - ${row.grade}`)
+    .join("\n");
+}
+
 function normalizeStudentInfoDraft(studentInfo = {}, user = null) {
   const defaults = getDefaultStudentInfo();
   const birthDate = studentInfo.birthDate || studentInfo.dateOfBirth || "";
+  const normalizedJobSpmSubjects = getJobSpmSubjects(studentInfo);
 
   return {
     ...defaults,
@@ -664,6 +696,11 @@ function normalizeStudentInfoDraft(studentInfo = {}, user = null) {
     birthDate,
     email: studentInfo.email || user?.email || "",
     icNo: String(studentInfo.icNo || "").replace(/\D/g, ""),
+    jobSpmDetails: studentInfo.jobSpmDetails || buildJobSpmSubjectSummary({ ...studentInfo, jobSpmSubjects: normalizedJobSpmSubjects }),
+    jobSpmExamName: normalizeJobTableValue(studentInfo.jobSpmExamName),
+    jobSpmSchool: normalizeJobTableValue(studentInfo.jobSpmSchool),
+    jobSpmSubjects: normalizedJobSpmSubjects,
+    jobSpmYear: normalizeJobTableValue(studentInfo.jobSpmYear),
     name: String(studentInfo.name || user?.full_name || user?.first_name || "").toUpperCase(),
     phone: String(studentInfo.phone || studentInfo.address1Phone || "").replace(/\D/g, ""),
     age: studentInfo.age || calculateAge(birthDate),
@@ -1016,6 +1053,37 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
       return next;
     });
     setStudentInfo((current) => ({ ...current, [field]: normalizeJobPersonalValue(field, value) }));
+  };
+
+  const clearValidationFields = (fields) => {
+    setValidationErrors((current) => {
+      const next = { ...current };
+      fields.forEach((field) => {
+        delete next[field];
+      });
+      return next;
+    });
+  };
+
+  const updateJobSpmValue = (field) => (event) => {
+    setNotice("");
+    clearValidationFields([field]);
+    setStudentInfo((current) => {
+      const next = { ...current, [field]: normalizeJobTableValue(event.target.value) };
+      return { ...next, jobSpmDetails: buildJobSpmSubjectSummary(next) };
+    });
+  };
+
+  const updateJobSpmSubjectRow = (index, field) => (event) => {
+    setNotice("");
+    clearValidationFields(["jobSpmDetails"]);
+    setStudentInfo((current) => {
+      const nextSubjects = getJobSpmSubjects(current).map((row, rowIndex) => (
+        rowIndex === index ? { ...row, [field]: normalizeJobTableValue(event.target.value) } : row
+      ));
+      const next = { ...current, jobSpmSubjects: nextSubjects };
+      return { ...next, jobSpmDetails: buildJobSpmSubjectSummary(next) };
+    });
   };
 
   const updateStudentName = (event) => {
@@ -1492,6 +1560,73 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
     </div>
   );
 
+  const renderJobSpmSection = () => (
+    <div className="student-job-spm-table-wrap">
+      <table className="student-job-spm-table">
+        <thead>
+          <tr>
+            <th colSpan={4}>{activeInfoHeading}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colSpan={3}>
+              <label>
+                <span>Sekolah :</span>
+                <input value={studentInfo.jobSpmSchool} onChange={updateJobSpmValue("jobSpmSchool")} />
+              </label>
+            </td>
+            <td className="hrm-use-cell" rowSpan={3}>
+              UNTUK KEGUNAAN URUSETIA (BHG HRM)
+            </td>
+          </tr>
+          <tr>
+            <td colSpan={3}>
+              <label>
+                <span>Tahun :</span>
+                <input value={studentInfo.jobSpmYear} onChange={updateJobSpmValue("jobSpmYear")} />
+              </label>
+            </td>
+          </tr>
+          <tr>
+            <td colSpan={3}>
+              <label>
+                <span>Nama Peperiksaan</span>
+                <input value={studentInfo.jobSpmExamName} onChange={updateJobSpmValue("jobSpmExamName")} />
+              </label>
+            </td>
+          </tr>
+          <tr>
+            <th>Bil</th>
+            <th>Mata Pelajaran</th>
+            <th>Gred</th>
+            <th>Semakan</th>
+          </tr>
+          {getJobSpmSubjects(studentInfo).map((row, index) => (
+            <tr key={index}>
+              <td>{index + 1}</td>
+              <td>
+                <input
+                  aria-label={`Mata Pelajaran ${index + 1}`}
+                  value={row.subject}
+                  onChange={updateJobSpmSubjectRow(index, "subject")}
+                />
+              </td>
+              <td>
+                <input
+                  aria-label={`Gred ${index + 1}`}
+                  value={row.grade}
+                  onChange={updateJobSpmSubjectRow(index, "grade")}
+                />
+              </td>
+              <td className="hrm-check-cell" aria-label={`Semakan ${index + 1}`} />
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+
   const renderDocumentFields = () => (
     <>
       <div className="student-personal-table-wrap">
@@ -1595,7 +1730,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
                   {notice ? <p className={`student-info-notice ${noticeStatus}`}>{notice}</p> : null}
 
                   {activeInfoTab === personalInfoTab ? renderApplicantFields() : null}
-                  {activeInfoTab === jobSpmTab ? renderJobSimpleSection("jobSpmDetails", "Senaraikan semua mata pelajaran dan keputusan yang diambil.") : null}
+                  {activeInfoTab === jobSpmTab ? renderJobSpmSection() : null}
                   {activeInfoTab === jobBmJulyTab ? renderJobSimpleSection("jobBmJulyDetails", "Masukkan butiran BM Kertas Julai/STPM/Universiti atau setaraf.") : null}
                   {activeInfoTab === jobMathJulyTab ? renderJobSimpleSection("jobMathJulyDetails", "Masukkan butiran Peperiksaan Matematik Kertas Julai.") : null}
                   {activeInfoTab === jobStpmTab ? renderJobSimpleSection("jobStpmDetails", "Masukkan butiran STPM/STAM/STP/HSC/Sijil Matrikulasi.") : null}

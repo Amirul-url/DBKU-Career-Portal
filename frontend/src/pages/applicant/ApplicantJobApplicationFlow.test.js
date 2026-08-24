@@ -72,8 +72,28 @@ test("job application extra sections are mandatory before submission", () => {
   assert.match(internshipFormSource, /\["jobSpmDetails", "Butiran Peperiksaan SPM\/SC\/MCE\/SPM\(V\)\/UEC atau setaraf"\]/);
   assert.match(internshipFormSource, /\["jobDeclaration", "Perakuan Pemohon"\]/);
   assert.match(internshipFormSource, /const renderJobSimpleSection = \(field, placeholder\) => \(/);
-  assert.match(internshipFormSource, /activeInfoTab === jobSpmTab \? renderJobSimpleSection\("jobSpmDetails"/);
+  assert.doesNotMatch(internshipFormSource, /activeInfoTab === jobSpmTab \? renderJobSimpleSection\("jobSpmDetails"/);
   assert.match(internshipFormSource, /activeInfoTab === jobDeclarationTab \? renderJobSimpleSection\("jobDeclaration"/);
+});
+
+test("job application SPM section renders the official subject and grade table", () => {
+  assert.match(internshipFormSource, /const jobSpmSubjectRowCount = 12/);
+  assert.match(internshipFormSource, /jobSpmSchool: ""/);
+  assert.match(internshipFormSource, /jobSpmYear: ""/);
+  assert.match(internshipFormSource, /jobSpmExamName: ""/);
+  assert.match(internshipFormSource, /jobSpmSubjects: Array\.from\(\{ length: jobSpmSubjectRowCount \}/);
+  assert.match(internshipFormSource, /\["jobSpmSchool", "Sekolah"\]/);
+  assert.match(internshipFormSource, /\["jobSpmYear", "Tahun"\]/);
+  assert.match(internshipFormSource, /\["jobSpmExamName", "Nama Peperiksaan"\]/);
+  assert.match(internshipFormSource, /const renderJobSpmSection = \(\) => \(/);
+  assert.match(internshipFormSource, /className="student-job-spm-table"/);
+  assert.match(internshipFormSource, /UNTUK KEGUNAAN\s*URUSETIA\s*\(BHG HRM\)/);
+  assert.match(internshipFormSource, /getJobSpmSubjects\(studentInfo\)\.map\(\(row, index\) =>/);
+  assert.match(internshipFormSource, /updateJobSpmSubjectRow\(index, "subject"\)/);
+  assert.match(internshipFormSource, /updateJobSpmSubjectRow\(index, "grade"\)/);
+  assert.match(internshipFormSource, /activeInfoTab === jobSpmTab \? renderJobSpmSection\(\) : null/);
+  assert.match(cssSource, /\.student-job-spm-table \{[\s\S]*border-collapse: collapse;/);
+  assert.match(cssSource, /\.student-job-spm-table \.hrm-use-cell \{[\s\S]*background: #d9d9d9;/);
 });
 
 test("job application personal table includes optional salutation row above name", () => {
