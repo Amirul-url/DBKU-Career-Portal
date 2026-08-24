@@ -71,6 +71,18 @@ def build_hrm_department_decision_notification(application):
     }
 
 
+def build_hrm_offer_acceptance_notification(application):
+    return {
+        "title": f"Pengesahan Penerimaan Tawaran LI - {application.reference_no}",
+        "message": (
+            "Portal Kerjaya DBKU\n\n"
+            "Pemohon telah menerima tawaran Latihan Industri.\n"
+            f"No. Rujukan: {application.reference_no}\n\n"
+            "Sila semak pengesahan penerimaan tawaran melalui Portal Kerjaya DBKU."
+        ),
+    }
+
+
 def build_application_review_notification(application, next_status):
     copy = {
         "incomplete": {
@@ -193,6 +205,18 @@ def notify_hrm_department_decision_submitted(application):
             application=application,
         )
         send_recipient_whatsapp(recipient, notification["message"], "HRM department decision submission", application)
+
+
+def notify_hrm_offer_accepted(application):
+    notification = build_hrm_offer_acceptance_notification(application)
+    for recipient in get_hrm_notification_recipients().exclude(pk=application.applicant_id):
+        create_notification(
+            user=recipient,
+            title=notification["title"],
+            message=notification["message"],
+            application=application,
+        )
+        send_recipient_whatsapp(recipient, notification["message"], "HRM offer acceptance", application)
 
 
 def submit_application(application):

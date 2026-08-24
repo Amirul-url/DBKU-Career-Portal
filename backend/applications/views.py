@@ -9,6 +9,7 @@ from .permissions import CandidateApplicationPermission
 from .serializers import CandidateApplicationSerializer
 from .services import (
     InvalidApplicationStatus,
+    notify_hrm_offer_accepted,
     review_application,
     submit_application,
     withdraw_application,
@@ -112,6 +113,7 @@ class CandidateApplicationViewSet(viewsets.ModelViewSet):
                 {"detail": "Maklumbalas organisasi belum dihantar kepada pemohon."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        was_offer_accepted = (profile_data.get("applicant_confirmation") or {}).get("status") == "agreed"
 
         serializer = self.get_serializer(application)
         try:
@@ -129,6 +131,8 @@ class CandidateApplicationViewSet(viewsets.ModelViewSet):
             uploads,
             submitted_by=request.user.get_full_name() or request.user.email,
         )
+        if not was_offer_accepted:
+            notify_hrm_offer_accepted(application)
         return Response(self.get_serializer(application).data)
 
     @action(detail=True, methods=["post"], url_path="reject-offer")
