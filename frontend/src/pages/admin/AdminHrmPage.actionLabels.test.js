@@ -426,6 +426,7 @@ test("HRM can see applicant offer confirmation after applicant agrees", () => {
   assert.match(source, /\.\.\.\(hasApplicantRespondedToOffer\(application\) \? \[applicantConfirmationTab\] : \[\]\)/);
   assert.match(source, /function ApplicantConfirmationReadOnlyTab/);
   assert.match(source, /Dokumen pengesahan pemohon/);
+  assert.match(source, /Pemohon telah menerima tawaran latihan industri ini pada \$\{dateValue\(confirmation\.submitted_at\)\}\./);
   assert.match(source, /Pemohon telah menolak tawaran latihan industri ini\./);
   const applicantConfirmationSource = source.slice(
     source.indexOf("function ApplicantConfirmationReadOnlyTab"),

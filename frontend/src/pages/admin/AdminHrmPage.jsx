@@ -2926,7 +2926,7 @@ function ApplicantConfirmationReadOnlyTab({ application }) {
             <h3>Dokumen pengesahan pemohon</h3>
             <p>
               {confirmation.submitted_at
-                ? `Dihantar oleh pemohon pada ${dateValue(confirmation.submitted_at)}.`
+                ? `Pemohon telah menerima tawaran latihan industri ini pada ${dateValue(confirmation.submitted_at)}.`
                 : "Dokumen pengesahan pemohon akan dipaparkan selepas dihantar."}
             </p>
           </div>
