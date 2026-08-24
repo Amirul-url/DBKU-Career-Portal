@@ -1,4 +1,5 @@
 import logging
+import re
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -40,6 +41,18 @@ def build_hrm_application_submission_notification(application):
         "message": (
             "Portal Kerjaya DBKU\n\n"
             "Terdapat permohonan Latihan Industri baharu untuk semakan HRM.\n"
+            f"No. Rujukan: {application.reference_no}\n\n"
+            "Sila semak permohonan melalui Portal Kerjaya DBKU."
+        ),
+    }
+
+
+def build_department_application_assignment_notification(application):
+    return {
+        "title": f"Permohonan LI Baharu Untuk Semakan - {application.reference_no}",
+        "message": (
+            "Portal Kerjaya DBKU\n\n"
+            "Terdapat permohonan Latihan Industri baharu untuk semakan Bahagian.\n"
             f"No. Rujukan: {application.reference_no}\n\n"
             "Sila semak permohonan melalui Portal Kerjaya DBKU."
         ),
@@ -103,6 +116,37 @@ def get_hrm_notification_recipients():
     ).distinct()
 
 
+def get_department_aliases(department):
+    department_name = str(department or "").strip()
+    aliases = {department_name}
+    code_match = re.search(r"\(([^)]+)\)\s*$", department_name)
+    if code_match:
+        aliases.add(code_match.group(1))
+    return {alias for alias in aliases if alias}
+
+
+def get_department_notification_recipients(department):
+    aliases = get_department_aliases(department)
+    if not aliases:
+        return get_user_model().objects.none()
+    return get_user_model().objects.filter(role="admin", department__in=aliases).distinct()
+
+
+def send_recipient_whatsapp(recipient, message, context, application):
+    if not recipient.mobile_number or not getattr(settings, "WHATSAPP_ENABLED", False):
+        return
+
+    try:
+        send_whatsapp_message(recipient.mobile_number, message)
+    except OTPDeliveryError:
+        logger.exception(
+            "Unable to send %s WhatsApp for application %s to user %s",
+            context,
+            application.pk,
+            recipient.pk,
+        )
+
+
 def notify_hrm_application_submitted(application):
     notification = build_hrm_application_submission_notification(application)
     for recipient in get_hrm_notification_recipients().exclude(pk=application.applicant_id):
@@ -112,15 +156,19 @@ def notify_hrm_application_submitted(application):
             message=notification["message"],
             application=application,
         )
-        if recipient.mobile_number and getattr(settings, "WHATSAPP_ENABLED", False):
-            try:
-                send_whatsapp_message(recipient.mobile_number, notification["message"])
-            except OTPDeliveryError:
-                logger.exception(
-                    "Unable to send HRM application submission WhatsApp for application %s to user %s",
-                    application.pk,
-                    recipient.pk,
-                )
+        send_recipient_whatsapp(recipient, notification["message"], "HRM application submission", application)
+
+
+def notify_department_application_assigned(application):
+    notification = build_department_application_assignment_notification(application)
+    for recipient in get_department_notification_recipients(application.assigned_department).exclude(pk=application.applicant_id):
+        create_notification(
+            user=recipient,
+            title=notification["title"],
+            message=notification["message"],
+            application=application,
+        )
+        send_recipient_whatsapp(recipient, notification["message"], "department application assignment", application)
 
 
 def submit_application(application):
@@ -184,4 +232,6 @@ def review_application(application, next_status, remark=None, assigned_departmen
     )
     if next_status in {"incomplete", "rejected"}:
         send_application_whatsapp(application, notification["message"], "application review")
+    if next_status == "shortlisted" and assigned_department:
+        notify_department_application_assigned(application)
     return application

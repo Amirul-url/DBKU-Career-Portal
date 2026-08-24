@@ -654,6 +654,83 @@ class CandidateApplicationReferenceNoTests(TestCase):
         application.refresh_from_db()
         self.assertEqual(application.assigned_department, "Bahagian Teknologi Maklumat (ICT)")
 
+    @override_settings(NOTIFICATION_EMAIL_ENABLED=True, WHATSAPP_ENABLED=True)
+    @patch("applications.services.send_whatsapp_message")
+    @patch("notifications.services.send_notification_email")
+    def test_hrm_assignment_notifies_selected_department_by_email_and_whatsapp(
+        self,
+        mock_send_email,
+        mock_send_whatsapp,
+    ):
+        applicant = self.create_applicant("department-assignment-target@example.com")
+        hrm = self.user_model.objects.create_user(
+            username="hrm-assignment@example.com",
+            email="hrm-assignment@example.com",
+            password="Password123!",
+            role="admin",
+            department="Bahagian Pengurusan Sumber Manusia (HRM)",
+        )
+        ict_head = self.user_model.objects.create_user(
+            username="ict-assignment@example.com",
+            email="ict-assignment@example.com",
+            password="Password123!",
+            role="admin",
+            department="Bahagian Teknologi Maklumat (ICT)",
+            department_role="Ketua Bahagian",
+            mobile_number="60127770001",
+        )
+        legacy_ict_head = self.user_model.objects.create_user(
+            username="legacy-ict-assignment@example.com",
+            email="legacy-ict-assignment@example.com",
+            password="Password123!",
+            role="admin",
+            department="ICT",
+            department_role="Ketua Bahagian",
+            mobile_number="60127770002",
+        )
+        finance_head = self.user_model.objects.create_user(
+            username="finance-assignment@example.com",
+            email="finance-assignment@example.com",
+            password="Password123!",
+            role="admin",
+            department="Bahagian Kewangan (FIN)",
+            department_role="Ketua Bahagian",
+            mobile_number="60127770003",
+        )
+        application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=self.vacancy,
+            status="submitted",
+            reference_no="PK.2026-0003",
+        )
+        client = APIClient()
+        client.force_authenticate(user=hrm)
+
+        response = client.post(
+            f"/api/applications/{application.id}/review/",
+            {
+                "status": "shortlisted",
+                "assigned_department": "Bahagian Teknologi Maklumat (ICT)",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        expected_title = "Permohonan LI Baharu Untuk Semakan - PK.2026-0003"
+        expected_message = (
+            "Portal Kerjaya DBKU\n\n"
+            "Terdapat permohonan Latihan Industri baharu untuk semakan Bahagian.\n"
+            "No. Rujukan: PK.2026-0003\n\n"
+            "Sila semak permohonan melalui Portal Kerjaya DBKU."
+        )
+        for recipient in (ict_head, legacy_ict_head):
+            notification = Notification.objects.get(application=application, user=recipient)
+            self.assertEqual(notification.title, expected_title)
+            self.assertEqual(notification.message, expected_message)
+            mock_send_email.assert_any_call(recipient, expected_title, expected_message)
+            mock_send_whatsapp.assert_any_call(recipient.mobile_number, expected_message)
+        self.assertFalse(Notification.objects.filter(application=application, user=finance_head).exists())
+
     def test_department_admin_cannot_reassign_application_to_another_department(self):
         applicant = self.create_applicant("department-review@example.com")
         ict_admin = self.user_model.objects.create_user(
