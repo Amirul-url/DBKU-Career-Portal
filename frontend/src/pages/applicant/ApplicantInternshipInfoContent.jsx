@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { apiRequest, getStoredUser } from "../../lib/authApi";
 import { APPLICANT_ROUTES } from "../../modules/applicant/applicantRoutes";
+import { getApplicantAgreedInternshipStatus } from "../../modules/internship/internshipLifecycleStatus";
 
 const fieldOptions = [
   "Kejuruteraan Awam",
@@ -58,16 +59,22 @@ function isInternshipApplication(application) {
 
 const reapplyAllowedApplicationStatuses = new Set(["rejected", "withdrawn"]);
 
+function isCompletedInternshipApplication(application) {
+  return getApplicantAgreedInternshipStatus(application) === "internship_completed";
+}
+
 function isReapplyAllowedInternshipApplication(application) {
   const status = application?.status || "draft";
-  return isInternshipApplication(application) && reapplyAllowedApplicationStatuses.has(status);
+  return isInternshipApplication(application)
+    && (reapplyAllowedApplicationStatuses.has(status) || isCompletedInternshipApplication(application));
 }
 
 function isBlockingInternshipApplication(application) {
   const status = application?.status || "draft";
   return isInternshipApplication(application)
     && status !== "draft"
-    && !reapplyAllowedApplicationStatuses.has(status);
+    && !reapplyAllowedApplicationStatuses.has(status)
+    && !isCompletedInternshipApplication(application);
 }
 
 function getApplicationRows(data) {

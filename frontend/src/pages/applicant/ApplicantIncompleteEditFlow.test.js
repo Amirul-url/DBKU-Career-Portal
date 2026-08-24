@@ -27,6 +27,13 @@ test("applicant incomplete applications can be reopened for editing", () => {
   );
 });
 
+test("completed internships do not block a new internship application CTA", () => {
+  assert.match(infoSource, /getApplicantAgreedInternshipStatus/);
+  assert.match(infoSource, /return getApplicantAgreedInternshipStatus\(application\) === "internship_completed"/);
+  assert.match(infoSource, /&& !isCompletedInternshipApplication\(application\)/);
+  assert.match(infoSource, /setHasSubmittedInternshipApplication\(applications\.some\(isBlockingInternshipApplication\)\)/);
+});
+
 test("applicant rejected applications use Ditolak status label", () => {
   assert.match(listSource, /rejected: "Ditolak"/);
   assert.match(viewSource, /rejected: "Ditolak"/);
