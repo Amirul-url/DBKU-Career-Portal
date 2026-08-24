@@ -210,8 +210,11 @@ test("applicant can submit acceptance confirmation after organization feedback",
   assert.match(viewSource, /const \[confirmationState, setConfirmationState\] = useState\(\(\) => \(\{/);
   assert.match(viewSource, /isAgreed: hasApplicantAgreedToOffer\(application\)/);
   assert.match(viewSource, /documents: getApplicantConfirmationDocuments\(application\)/);
+  assert.match(viewSource, /submittedAt: getApplicantConfirmationSubmittedAt\(application\)/);
   assert.match(viewSource, /const isAgreed = confirmationState\.isAgreed/);
+  assert.match(viewSource, /const confirmationSubmittedDate = formatDate\(confirmationState\.submittedAt\)/);
   assert.match(viewSource, /setConfirmationState\(\{/);
+  assert.match(viewSource, /submittedAt: getApplicantConfirmationSubmittedAt\(updatedApplication\)/);
   assert.match(viewSource, /setSelectedFiles\(\(current\) => \[\.\.\.current, \.\.\.files\]\)/);
   assert.doesNotMatch(viewSource, /setSelectedFiles\(files\)/);
   assert.match(viewSource, /file,\s*index/);
@@ -232,6 +235,7 @@ test("applicant can submit acceptance confirmation after organization feedback",
   assert.match(cssSource, /padding: 0;/);
   assert.match(viewSource, /\/confirm-offer\//);
   assert.match(viewSource, /\/reject-offer\//);
+  assert.match(viewSource, /Pengesahan penerimaan tawaran telah dihantar pada \{confirmationSubmittedDate\}\./);
   assert.match(viewSource, /Tolak Tawaran/);
   assert.match(viewSource, /function handleApplicantConfirmationSent\(updatedApplication\)/);
   assert.match(viewSource, /setApplication\(updatedApplication\)/);

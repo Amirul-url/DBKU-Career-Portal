@@ -427,6 +427,10 @@ function getApplicantConfirmationDocuments(application) {
   }));
 }
 
+function getApplicantConfirmationSubmittedAt(application) {
+  return application?.profile_data?.applicant_confirmation?.submitted_at || "";
+}
+
 function getInternshipStudentInfo(application) {
   return application?.profile_data?.student_info || {};
 }
@@ -644,6 +648,7 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
   const [confirmationState, setConfirmationState] = useState(() => ({
     isAgreed: hasApplicantAgreedToOffer(application),
     documents: getApplicantConfirmationDocuments(application),
+    submittedAt: getApplicantConfirmationSubmittedAt(application),
   }));
   const [fileInputKey, setFileInputKey] = useState(0);
   const [message, setMessage] = useState("");
@@ -653,6 +658,7 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
   const isAgreed = confirmationState.isAgreed;
   const isRejected = hasApplicantRejectedOffer(application);
   const hasResponded = isAgreed || isRejected;
+  const confirmationSubmittedDate = formatDate(confirmationState.submittedAt);
   const documents = isAgreed
     ? confirmationState.documents
     : selectedFiles.map((file, index) => ({ file, id: `${file.name}-${index}`, name: file.name, url: "" }));
@@ -708,6 +714,7 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
       setConfirmationState({
         isAgreed: hasApplicantAgreedToOffer(updatedApplication),
         documents: getApplicantConfirmationDocuments(updatedApplication),
+        submittedAt: getApplicantConfirmationSubmittedAt(updatedApplication),
       });
       setSelectedFiles([]);
       setFileInputKey((current) => current + 1);
@@ -853,7 +860,15 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
       </section>
 
       <footer className="organization-feedback-send-actions">
-        {isAgreed ? <p className="organization-feedback-sent-note">Pengesahan penerimaan tawaran telah dihantar.</p> : null}
+        {isAgreed ? (
+          <p className="organization-feedback-sent-note">
+            {confirmationState.submittedAt ? (
+              <>Pengesahan penerimaan tawaran telah dihantar pada {confirmationSubmittedDate}.</>
+            ) : (
+              "Pengesahan penerimaan tawaran telah dihantar."
+            )}
+          </p>
+        ) : null}
         {isRejected ? <p className="organization-feedback-sent-note">Penolakan tawaran telah dihantar.</p> : null}
         {!hasResponded ? (
           <button
