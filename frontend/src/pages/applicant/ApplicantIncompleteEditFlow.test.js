@@ -338,7 +338,9 @@ test("internship back action asks applicant to save a visible draft", () => {
   assert.match(formSource, /Simpan draf permohonan\?/);
   assert.match(formSource, /dipaparkan dalam Permohonan Saya/);
   assert.match(formSource, /Simpan draf/);
-  assert.match(formSource, /Keluar tanpa simpan/);
+  assert.doesNotMatch(formSource, /Keluar tanpa simpan/);
+  assert.doesNotMatch(formSource, /student-save-draft-discard/);
+  assert.doesNotMatch(formSource, /exitWithoutSavingDraft/);
   assert.doesNotMatch(formSource, /student-save-draft-cancel/);
   assert.doesNotMatch(formSource, />\s*Batal\s*<\/button>/);
   assert.match(listSource, /if \(!draft\.visibleInApplications\) return null/);

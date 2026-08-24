@@ -1092,12 +1092,6 @@ export default function ApplicantInternshipApplicationPage() {
     navigate(APPLICANT_ROUTES.applications);
   };
 
-  const exitWithoutSavingDraft = () => {
-    clearStudentInfoDraft(user);
-    setShowSaveDraftDialog(false);
-    navigate(APPLICANT_ROUTES.applications);
-  };
-
   const closeSubmitSuccessPopup = () => {
     setSubmittedReferenceNo("");
     navigate(APPLICANT_ROUTES.applications);
@@ -1398,9 +1392,6 @@ export default function ApplicantInternshipApplicationPage() {
             <h2 id="student-save-draft-dialog-title">Simpan draf permohonan?</h2>
             <p>Maklumat yang telah diisi boleh disimpan sebagai draf dan dipaparkan dalam Permohonan Saya.</p>
             <div className="student-save-draft-actions">
-              <button className="student-save-draft-discard" type="button" onClick={exitWithoutSavingDraft}>
-                Keluar tanpa simpan
-              </button>
               <button type="button" onClick={saveDraftAndExit}>Simpan draf</button>
             </div>
           </section>
