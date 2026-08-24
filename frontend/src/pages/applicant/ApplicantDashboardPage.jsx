@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { apiRequest, getStoredUser } from "../../lib/authApi";
+import { getApplicantApplicationBadgeCount, getApplicationRows } from "../../modules/applicant/applicationBadges";
 import { APPLICANT_ROUTES } from "../../modules/applicant/applicantRoutes";
 import { useApplicantSidebarState } from "../../modules/applicant/useApplicantSidebarState";
 import { Icon } from "./ApplicantAuthShared";
@@ -31,6 +32,7 @@ function getProfileChecklist(user, profileData) {
 export default function ApplicantDashboardPage() {
   const navigate = useNavigate();
   const [user] = useState(() => getStoredUser());
+  const [applicationBadgeCount, setApplicationBadgeCount] = useState(0);
   const [profileData, setProfileData] = useState(null);
   const [sidebarOpen, toggleSidebar] = useApplicantSidebarState();
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
@@ -66,13 +68,39 @@ export default function ApplicantDashboardPage() {
     };
   }, [user]);
 
+  useEffect(() => {
+    if (!user || user.role !== "applicant") {
+      return undefined;
+    }
+
+    const controller = new AbortController();
+    let isMounted = true;
+
+    apiRequest("/applications/", { signal: controller.signal })
+      .then((data) => {
+        if (isMounted) {
+          setApplicationBadgeCount(getApplicantApplicationBadgeCount(getApplicationRows(data)));
+        }
+      })
+      .catch(() => null);
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+  }, [user]);
+
   if (!user || user.role !== "applicant") {
     return null;
   }
 
   return (
     <div className={`applicant-profile-page ${sidebarOpen ? "sidebar-open" : "sidebar-collapsed"}`}>
-      <ProfileSidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
+      <ProfileSidebar
+        applicationBadgeCount={applicationBadgeCount}
+        isOpen={sidebarOpen}
+        onToggle={toggleSidebar}
+      />
       <div className="profile-main-area">
         <ProfileContentHeader displayName={displayName} email={email} photoUrl={user.profile_photo_url} />
         <main className="profile-shell applicant-dashboard-shell">

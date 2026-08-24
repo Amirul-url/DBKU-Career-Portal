@@ -3,7 +3,9 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const routesSource = readFileSync(new URL("../../modules/applicant/applicantRoutes.js", import.meta.url), "utf8");
+const applicationBadgesSource = readFileSync(new URL("../../modules/applicant/applicationBadges.js", import.meta.url), "utf8");
 const cssSource = readFileSync(new URL("../../index.css", import.meta.url), "utf8");
+const dashboardSource = readFileSync(new URL("./ApplicantDashboardPage.jsx", import.meta.url), "utf8");
 const listSource = readFileSync(new URL("./ApplicantPortalListPage.jsx", import.meta.url), "utf8");
 const profileSource = readFileSync(new URL("./ApplicantProfilePage.jsx", import.meta.url), "utf8");
 const viewSource = readFileSync(new URL("./ApplicantApplicationViewPage.jsx", import.meta.url), "utf8");
@@ -192,11 +194,18 @@ test("applicant internship department workflow statuses stay applicant friendly"
 });
 
 test("applicant organization feedback notification shows red badges", () => {
-  assert.match(listSource, /function hasNewOrganizationFeedbackForApplicant\(application\)/);
-  assert.match(listSource, /\(application\?\.status \|\| ""\) === "offered" && hasOrganizationFeedbackBeenSent\(application\) && !hasApplicantAgreedToOffer\(application\)/);
+  assert.match(applicationBadgesSource, /function hasNewOrganizationFeedbackForApplicant\(application\)/);
+  assert.match(applicationBadgesSource, /\(application\?\.status \|\| ""\) === "offered" && hasOrganizationFeedbackBeenSent\(application\) && !hasApplicantAgreedToOffer\(application\)/);
+  assert.match(applicationBadgesSource, /export function getApplicantApplicationBadgeCount\(applications = \[\]\)/);
+  assert.match(applicationBadgesSource, /applications\.filter\(hasNewOrganizationFeedbackForApplicant\)\.length/);
+  assert.match(listSource, /getApplicantApplicationBadgeCount/);
   assert.match(listSource, /const newApplicationFeedbackCount = useMemo/);
-  assert.match(listSource, /displayApplications\.filter\(hasNewOrganizationFeedbackForApplicant\)\.length/);
+  assert.match(listSource, /getApplicantApplicationBadgeCount\(displayApplications\)/);
   assert.match(listSource, /applicationBadgeCount=\{newApplicationFeedbackCount\}/);
+  assert.match(dashboardSource, /getApplicantApplicationBadgeCount/);
+  assert.match(dashboardSource, /apiRequest\("\/applications\/"/);
+  assert.match(dashboardSource, /setApplicationBadgeCount\(getApplicantApplicationBadgeCount\(getApplicationRows\(data\)\)\)/);
+  assert.match(dashboardSource, /applicationBadgeCount=\{applicationBadgeCount\}/);
   assert.match(listSource, /className="applicant-applications-table applicant-profile-applications-table"/);
   assert.match(listSource, /className="applicant-reference-col"/);
   assert.match(listSource, /className="applicant-reference-cell"/);

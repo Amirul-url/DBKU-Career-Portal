@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { apiRequest, getStoredUser } from "../../lib/authApi";
+import {
+  getApplicantApplicationBadgeCount,
+  getApplicationRows,
+  hasNewOrganizationFeedbackForApplicant,
+} from "../../modules/applicant/applicationBadges";
 import { APPLICANT_ROUTES } from "../../modules/applicant/applicantRoutes";
 import { getSavedVacancies, removeSavedVacancy } from "../../modules/applicant/savedVacancies";
 import { useApplicantSidebarState } from "../../modules/applicant/useApplicantSidebarState";
@@ -112,10 +117,6 @@ function shouldHideLocalDraftForApplication(application) {
 
 function hasOrganizationFeedbackBeenSent(application) {
   return Boolean(application?.profile_data?.organization_feedback_release?.sent_to_applicant_at);
-}
-
-function hasNewOrganizationFeedbackForApplicant(application) {
-  return (application?.status || "") === "offered" && hasOrganizationFeedbackBeenSent(application) && !hasApplicantAgreedToOffer(application);
 }
 
 function hasApplicantAgreedToOffer(application) {
@@ -493,12 +494,6 @@ function SavedVacancyList({ onRemove, vacancies }) {
   );
 }
 
-function getApplicationRows(data) {
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.results)) return data.results;
-  return [];
-}
-
 export default function ApplicantPortalListPage({ page }) {
   const navigate = useNavigate();
   const [user] = useState(() => getStoredUser());
@@ -521,7 +516,7 @@ export default function ApplicantPortalListPage({ page }) {
     return hasBlockingInternshipApplication ? applications : [localDraftApplication, ...applications];
   }, [applications, isApplicationsPage, localDraftApplication]);
   const newApplicationFeedbackCount = useMemo(
-    () => (isApplicationsPage ? displayApplications.filter(hasNewOrganizationFeedbackForApplicant).length : 0),
+    () => (isApplicationsPage ? getApplicantApplicationBadgeCount(displayApplications) : 0),
     [displayApplications, isApplicationsPage],
   );
 
