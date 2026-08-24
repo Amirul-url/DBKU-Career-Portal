@@ -74,14 +74,14 @@ function isPendingDepartmentReview(application) {
   return Boolean(application?.assigned_department && !hasSubmittedDepartmentDecision(application));
 }
 
-function getReadOnlyStatusLabel(status, maskAcceptedStatus, application = null) {
+function getReadOnlyStatusLabel(status, maskAcceptedStatus, application = null, statusLabelOverrides = {}) {
   if (hasApplicantAgreedToOffer(application)) {
     const lifecycleStatus = getApplicantAgreedInternshipStatus(application);
-    return applicantInternshipLifecycleStatusLabels[lifecycleStatus] || "Pengesahan Dihantar";
+    return statusLabelOverrides[lifecycleStatus] || applicantInternshipLifecycleStatusLabels[lifecycleStatus] || "Pengesahan Dihantar";
   }
-  if (hasApplicantRejectedOffer(application)) return "Tolak Tawaran";
+  if (hasApplicantRejectedOffer(application)) return statusLabelOverrides.applicant_offer_rejected || "Tolak Tawaran";
   const visibleStatus = getApplicantVisibleStatus(status, maskAcceptedStatus, application);
-  return statusLabels[visibleStatus] || visibleStatus;
+  return statusLabelOverrides[visibleStatus] || statusLabels[visibleStatus] || visibleStatus;
 }
 
 function getOrganizationFeedbackRelease(application) {
@@ -980,6 +980,7 @@ export function InternshipApplicationReadOnlyPanel({
   onBack,
   onTabChange,
   renderExtraTabContent,
+  statusLabelOverrides = {},
   tabGroups = [],
 }) {
   const profileData = application?.profile_data || {};
@@ -1094,7 +1095,7 @@ export function InternshipApplicationReadOnlyPanel({
                 <div>
                   <span>Status</span>
                   <strong className={`applicant-status-pill ${visibleStatus}`}>
-                    {getReadOnlyStatusLabel(status, maskAcceptedStatus, application)}
+                    {getReadOnlyStatusLabel(status, maskAcceptedStatus, application, statusLabelOverrides)}
                   </strong>
                 </div>
               </section>

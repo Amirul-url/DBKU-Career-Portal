@@ -3061,6 +3061,9 @@ function InternshipApplicationDetailPage({
         loading={loading}
         maskAcceptedStatus={false}
         onBack={onBack}
+        statusLabelOverrides={{
+          submitted: statusLabel.submitted,
+        }}
         onTabChange={setActiveTab}
         tabGroups={detailTabGroups}
         renderExtraTabContent={(tab) =>

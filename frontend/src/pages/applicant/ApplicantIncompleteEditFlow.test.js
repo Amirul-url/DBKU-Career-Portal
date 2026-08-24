@@ -64,7 +64,7 @@ test("applicant offer rejections use Tolak Tawaran status label", () => {
   assert.match(listSource, /function hasApplicantRejectedOffer\(application\)/);
   assert.match(listSource, /if \(hasApplicantRejectedOffer\(application\)\) return "Tolak Tawaran"/);
   assert.match(viewSource, /function hasApplicantRejectedOffer\(application\)/);
-  assert.match(viewSource, /if \(hasApplicantRejectedOffer\(application\)\) return "Tolak Tawaran"/);
+  assert.match(viewSource, /if \(hasApplicantRejectedOffer\(application\)\) return statusLabelOverrides\.applicant_offer_rejected \|\| "Tolak Tawaran"/);
 });
 
 test("applicant header no longer renders notification bell", () => {

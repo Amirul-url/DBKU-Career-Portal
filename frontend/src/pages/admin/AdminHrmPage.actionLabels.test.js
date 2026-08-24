@@ -9,6 +9,7 @@ const decisionCopySource = readFileSync(new URL("../../modules/internship/intern
 
 test("HRM application action labels match the department review workflow", () => {
   assert.match(source, /submitted: "Menunggu Semakan HRM"/);
+  assert.match(source, /statusLabelOverrides=\{\{\s*submitted: statusLabel\.submitted,\s*\}\}/);
   assert.match(source, />\s*Hantar ke Bahagian\s*</);
   assert.match(source, />\s*Tidak Lengkap\s*</);
   assert.match(source, />\s*Tidak Layak\s*</);
