@@ -8,8 +8,34 @@ import { Icon } from "./ApplicantAuthShared";
 import { ApplicantAddressMap, ProfileContentHeader, ProfileSidebar } from "./ApplicantProfilePage";
 
 const personalInfoTab = "Maklumat Peribadi Pemohon";
-const infoTabs = [personalInfoTab, "Maklumat Akademik", "Dokumen Sokongan"];
-const requiredInfoTabs = [personalInfoTab, "Maklumat Akademik", "Dokumen Sokongan"];
+const academicInfoTab = "Maklumat Akademik";
+const documentSupportTab = "Dokumen Sokongan";
+const jobSpmTab = "MAKLUMAT PEPERIKSAAN SPM/SC/MCE/SPM(V) MENGIKUT SISTEM TERBUKA/ UNIFIED EXAMINATION CERTIFICATE (UEC) ATAU SETARAF (SILA KEMUKAKAN SEMUA MATA PELAJARAN YANG DIAMBIL)";
+const jobBmJulyTab = "BM KERTAS JULAI/ STPM/ UNIVERSITI ATAU SETARAF";
+const jobMathJulyTab = "PEPERIKSAAN MATEMATIK KERTAS JULAI";
+const jobStpmTab = "PEPERIKSAAN STPM/ STAM/ STP/ HSC/ SIJIL MATRIKULASI";
+const jobHigherEducationTab = "KELULUSAN PENGAJIAN TINGGI (PHD/ MASTER/ IJAZAH/ DIPLOMA/ SIJIL)";
+const jobLanguageSkillsTab = "PENGETAHUAN DAN KEMAHIRAN BAHASA";
+const jobComputerSkillsTab = "MAKLUMAT KEMAHIRAN KOMPUTER";
+const jobWorkExperienceTab = "PENGALAMAN BEKERJA";
+const jobReferencesTab = "RUJUKAN";
+const jobDeclarationTab = "PERAKUAN PEMOHON";
+const internshipInfoTabs = [personalInfoTab, academicInfoTab, documentSupportTab];
+const internshipRequiredInfoTabs = [personalInfoTab, academicInfoTab, documentSupportTab];
+const jobInfoTabs = [
+  personalInfoTab,
+  jobSpmTab,
+  jobBmJulyTab,
+  jobMathJulyTab,
+  jobStpmTab,
+  jobHigherEducationTab,
+  jobLanguageSkillsTab,
+  jobComputerSkillsTab,
+  jobWorkExperienceTab,
+  jobReferencesTab,
+  jobDeclarationTab,
+  documentSupportTab,
+];
 const editableApplicationStatuses = new Set(["draft", "incomplete"]);
 
 const academicLevelOptions = [
@@ -236,6 +262,15 @@ const getDefaultStudentInfo = () => ({
   height: "",
   icNo: "",
   institution: "",
+  jobBmJulyDetails: "",
+  jobComputerSkills: "",
+  jobDeclaration: "",
+  jobLanguageSkills: "",
+  jobMathJulyDetails: "",
+  jobReferences: "",
+  jobSpmDetails: "",
+  jobStpmDetails: "",
+  jobWorkExperience: "",
   maritalStatus: "",
   motherBirthState: "",
   name: "",
@@ -261,14 +296,14 @@ const getDefaultStudentInfo = () => ({
 });
 
 const requiredFieldsByTab = {
-  "Dokumen Sokongan": [
+  [documentSupportTab]: [
     ["universityLetterFile", "Surat rasmi daripada institusi / kolej / universiti"],
     ["transcriptFile", "Transkrip akademik terkini"],
     ["resumeFile", "Curriculum Vitae (CV)"],
     ["passportPhotoFile", "1 keping gambar berukuran passport"],
     ["bankAccountFile", "1 salinan muka depan akaun bank"],
   ],
-  "Maklumat Akademik": [
+  [academicInfoTab]: [
     ["institution", "Institusi Pengajian"],
     ["program", "Program / Kursus"],
     ["academicLevel", "Tahap Pengajian"],
@@ -280,6 +315,46 @@ const requiredFieldsByTab = {
     ["supervisorName", "Nama Penyelaras Program"],
     ["supervisorEmail", "Emel Penyelaras Program"],
     ["supervisorPhone", "No. Telefon Penyelaras Program"],
+  ],
+  [jobSpmTab]: [
+    ["jobSpmDetails", "Butiran Peperiksaan SPM/SC/MCE/SPM(V)/UEC atau setaraf"],
+  ],
+  [jobBmJulyTab]: [
+    ["jobBmJulyDetails", "Butiran BM Kertas Julai/STPM/Universiti atau setaraf"],
+  ],
+  [jobMathJulyTab]: [
+    ["jobMathJulyDetails", "Butiran Peperiksaan Matematik Kertas Julai"],
+  ],
+  [jobStpmTab]: [
+    ["jobStpmDetails", "Butiran Peperiksaan STPM/STAM/STP/HSC/Sijil Matrikulasi"],
+  ],
+  [jobHigherEducationTab]: [
+    ["institution", "Institusi Pengajian"],
+    ["program", "Program / Kursus"],
+    ["academicLevel", "Tahap Pengajian"],
+    ["totalStudyYears", "Jumlah Tahun Pengajian"],
+    ["totalSemesters", "Jumlah Semester"],
+    ["currentYear", "Tahun Pengajian Terkini"],
+    ["semester", "Semester Terkini"],
+    ["cgpa", "CGPA / Keputusan Terkini"],
+    ["supervisorName", "Nama Penyelaras Program"],
+    ["supervisorEmail", "Emel Penyelaras Program"],
+    ["supervisorPhone", "No. Telefon Penyelaras Program"],
+  ],
+  [jobLanguageSkillsTab]: [
+    ["jobLanguageSkills", "Pengetahuan dan Kemahiran Bahasa"],
+  ],
+  [jobComputerSkillsTab]: [
+    ["jobComputerSkills", "Maklumat Kemahiran Komputer"],
+  ],
+  [jobWorkExperienceTab]: [
+    ["jobWorkExperience", "Pengalaman Bekerja"],
+  ],
+  [jobReferencesTab]: [
+    ["jobReferences", "Rujukan"],
+  ],
+  [jobDeclarationTab]: [
+    ["jobDeclaration", "Perakuan Pemohon"],
   ],
   [personalInfoTab]: [
     ["name", "Nama"],
@@ -634,15 +709,15 @@ function isTabComplete(tab, studentInfo) {
   return hasRequiredFields && hasRequiredLocation;
 }
 
-function getFirstIncompleteTab(studentInfo) {
-  return requiredInfoTabs.find((tab) => !isTabComplete(tab, studentInfo)) || personalInfoTab;
+function getFirstIncompleteTab(studentInfo, requiredTabs = internshipRequiredInfoTabs) {
+  return requiredTabs.find((tab) => !isTabComplete(tab, studentInfo)) || personalInfoTab;
 }
 
-function getMissingApplicationFields(studentInfo) {
+function getMissingApplicationFields(studentInfo, requiredTabs = internshipRequiredInfoTabs) {
   const missingFields = [];
   const errors = {};
 
-  requiredInfoTabs.forEach((tab) => {
+  requiredTabs.forEach((tab) => {
     (requiredFieldsByTab[tab] || []).forEach(([field, label]) => {
       if (!String(studentInfo[field] || "").trim()) {
         missingFields.push(`${tab}: ${label}`);
@@ -739,6 +814,8 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
   const applicationTitle = isJobApplication ? "Permohonan Jawatan Kosong DBKU" : "Permohonan Latihan Industri";
   const applicationNoticeNoun = isJobApplication ? "permohonan jawatan kosong" : "permohonan latihan industri";
   const applicationOpportunityNoun = isJobApplication ? "jawatan kosong" : "peluang latihan industri";
+  const currentInfoTabs = isJobApplication ? jobInfoTabs : internshipInfoTabs;
+  const currentRequiredInfoTabs = isJobApplication ? jobInfoTabs : internshipRequiredInfoTabs;
   const [savedDraft] = useState(() => loadStudentInfoDraft(user, applicationType));
   const activeSavedDraft = isStartingNewApplication ? null : savedDraft;
   const applicantRole = user?.role || "";
@@ -753,7 +830,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
   const initialStudentInfo = normalizeStudentInfoDraft(activeSavedDraft?.studentInfo || {}, applicantDraftDefaults);
   const [sidebarOpen, toggleSidebar] = useApplicantSidebarState();
   const [activeInfoTab, setActiveInfoTab] = useState(() => (
-    isJobApplication ? personalInfoTab : getFirstIncompleteTab(initialStudentInfo)
+    isJobApplication ? personalInfoTab : getFirstIncompleteTab(initialStudentInfo, currentRequiredInfoTabs)
   ));
   const [notice, setNotice] = useState("");
   const [noticeStatus, setNoticeStatus] = useState("success");
@@ -882,7 +959,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
           setInternshipVacancy(draftApplication.vacancy_detail);
         }
         setStudentInfo(nextStudentInfo);
-        setActiveInfoTab(getFirstIncompleteTab(nextStudentInfo));
+        setActiveInfoTab(getFirstIncompleteTab(nextStudentInfo, currentRequiredInfoTabs));
         if ((draftApplication.status || "draft") === "incomplete") {
           setNoticeStatus("error");
           setNotice("Permohonan ini ditanda Tidak Lengkap. Sila kemaskini maklumat atau dokumen dan hantar semula.");
@@ -1068,12 +1145,12 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
       return;
     }
 
-    const { errors, missingFields } = getMissingApplicationFields(studentInfo);
+    const { errors, missingFields } = getMissingApplicationFields(studentInfo, currentRequiredInfoTabs);
     setValidationErrors(errors);
 
     if (missingFields.length) {
       setNoticeStatus("error");
-      setActiveInfoTab(getFirstIncompleteTab(studentInfo));
+      setActiveInfoTab(getFirstIncompleteTab(studentInfo, currentRequiredInfoTabs));
       setNotice(`Sila lengkapkan: ${missingFields.join(", ")}.`);
       return;
     }
@@ -1382,6 +1459,25 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
     </div>
   );
 
+  const renderJobSimpleSection = (field, placeholder) => (
+    <div className="student-personal-table-wrap">
+      <table className="student-personal-table">
+        <tbody>
+          {renderPersonalRow(
+            activeInfoTab,
+            <textarea
+              required
+              rows={8}
+              placeholder={placeholder}
+              value={studentInfo[field]}
+              onChange={updateStudentInfo(field)}
+            />,
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+
   const renderDocumentFields = () => (
     <>
       <div className="student-personal-table-wrap">
@@ -1433,18 +1529,18 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
     </>
   );
 
-  const nextInfoTab = infoTabs[infoTabs.indexOf(activeInfoTab) + 1] || null;
-  const activeInfoHeading = isJobApplication && activeInfoTab === personalInfoTab
-    ? "(A) MAKLUMAT PERIBADI PEMOHON"
+  const nextInfoTab = currentInfoTabs[currentInfoTabs.indexOf(activeInfoTab) + 1] || null;
+  const getInfoTabLabel = (tab, index) => {
+    if (!isJobApplication) return tab;
+    return `(${String.fromCharCode(65 + index)}) ${tab.toUpperCase()}`;
+  };
+  const activeInfoHeading = isJobApplication
+    ? getInfoTabLabel(activeInfoTab, currentInfoTabs.indexOf(activeInfoTab))
     : activeInfoTab;
   const renderInfoHeading = () => (
     <h2 className={isJobApplication && activeInfoTab === personalInfoTab ? "job-section-heading" : undefined}>{activeInfoHeading}</h2>
   );
-  const getInfoTabLabel = (tab, index) => {
-    if (!isJobApplication) return tab;
-    return `(${String.fromCharCode(65 + index)}) ${tab}`;
-  };
-  const requiredInfoTabsComplete = requiredInfoTabs.every((tab) => isTabComplete(tab, studentInfo));
+  const requiredInfoTabsComplete = currentRequiredInfoTabs.every((tab) => isTabComplete(tab, studentInfo));
   const isApplicationReadyToSubmit = declarationAccepted && requiredInfoTabsComplete;
 
   return (
@@ -1465,7 +1561,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
             <div className="student-info-workspace">
               <div className="student-info-content">
                 <nav className="student-info-tabs" aria-label="Bahagian permohonan latihan industri">
-                  {infoTabs.map((tab, index) => (
+                  {currentInfoTabs.map((tab, index) => (
                     <button
                       className={activeInfoTab === tab ? "active" : ""}
                       key={tab}
@@ -1482,8 +1578,17 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
                   {notice ? <p className={`student-info-notice ${noticeStatus}`}>{notice}</p> : null}
 
                   {activeInfoTab === personalInfoTab ? renderApplicantFields() : null}
-                  {activeInfoTab === "Maklumat Akademik" ? renderAcademicFields() : null}
-                  {activeInfoTab === "Dokumen Sokongan" ? renderDocumentFields() : null}
+                  {activeInfoTab === jobSpmTab ? renderJobSimpleSection("jobSpmDetails", "Senaraikan semua mata pelajaran dan keputusan yang diambil.") : null}
+                  {activeInfoTab === jobBmJulyTab ? renderJobSimpleSection("jobBmJulyDetails", "Masukkan butiran BM Kertas Julai/STPM/Universiti atau setaraf.") : null}
+                  {activeInfoTab === jobMathJulyTab ? renderJobSimpleSection("jobMathJulyDetails", "Masukkan butiran Peperiksaan Matematik Kertas Julai.") : null}
+                  {activeInfoTab === jobStpmTab ? renderJobSimpleSection("jobStpmDetails", "Masukkan butiran STPM/STAM/STP/HSC/Sijil Matrikulasi.") : null}
+                  {activeInfoTab === academicInfoTab || activeInfoTab === jobHigherEducationTab ? renderAcademicFields() : null}
+                  {activeInfoTab === jobLanguageSkillsTab ? renderJobSimpleSection("jobLanguageSkills", "Masukkan pengetahuan dan kemahiran bahasa.") : null}
+                  {activeInfoTab === jobComputerSkillsTab ? renderJobSimpleSection("jobComputerSkills", "Masukkan maklumat kemahiran komputer.") : null}
+                  {activeInfoTab === jobWorkExperienceTab ? renderJobSimpleSection("jobWorkExperience", "Masukkan pengalaman bekerja.") : null}
+                  {activeInfoTab === jobReferencesTab ? renderJobSimpleSection("jobReferences", "Masukkan maklumat rujukan.") : null}
+                  {activeInfoTab === jobDeclarationTab ? renderJobSimpleSection("jobDeclaration", "Masukkan perakuan pemohon.") : null}
+                  {activeInfoTab === documentSupportTab ? renderDocumentFields() : null}
 
                   <div className="student-info-actions">
                     <button className="student-info-update" type="submit">Kemas Kini</button>
@@ -1493,7 +1598,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
                         <Icon>arrow_forward</Icon>
                       </button>
                     ) : null}
-                    {activeInfoTab === "Dokumen Sokongan" ? (
+                    {activeInfoTab === documentSupportTab ? (
                       <button
                         className="student-info-submit"
                         disabled={!isApplicationReadyToSubmit || isSubmittingApplication}

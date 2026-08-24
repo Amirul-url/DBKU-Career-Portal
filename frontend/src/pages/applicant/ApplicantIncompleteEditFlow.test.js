@@ -360,10 +360,11 @@ test("internship back action asks applicant to save a visible draft", () => {
 });
 
 test("internship submission requires all mandatory info tabs", () => {
-  assert.match(formSource, /const requiredInfoTabs = \[personalInfoTab, "Maklumat Akademik", "Dokumen Sokongan"\]/);
-  assert.match(formSource, /requiredInfoTabs\.find\(\(tab\) => !isTabComplete\(tab, studentInfo\)\)/);
-  assert.match(formSource, /requiredInfoTabs\.forEach\(\(tab\) => \{/);
-  assert.match(formSource, /const requiredInfoTabsComplete = requiredInfoTabs\.every\(\(tab\) => isTabComplete\(tab, studentInfo\)\)/);
+  assert.match(formSource, /const internshipRequiredInfoTabs = \[personalInfoTab, academicInfoTab, documentSupportTab\]/);
+  assert.match(formSource, /requiredTabs\.find\(\(tab\) => !isTabComplete\(tab, studentInfo\)\)/);
+  assert.match(formSource, /requiredTabs\.forEach\(\(tab\) => \{/);
+  assert.match(formSource, /const currentRequiredInfoTabs = isJobApplication \? jobInfoTabs : internshipRequiredInfoTabs/);
+  assert.match(formSource, /const requiredInfoTabsComplete = currentRequiredInfoTabs\.every\(\(tab\) => isTabComplete\(tab, studentInfo\)\)/);
   assert.match(formSource, /const isApplicationReadyToSubmit = declarationAccepted && requiredInfoTabsComplete/);
   assert.match(formSource, /disabled=\{!isApplicationReadyToSubmit \|\| isSubmittingApplication\}/);
 });
@@ -376,7 +377,7 @@ test("internship mandatory tabs and fields show red required markers", () => {
   assert.doesNotMatch(formSource, /<h2>\{renderRequiredLabel\(activeInfoTab, isRequiredInfoTab\(activeInfoTab\)\)\}<\/h2>/);
   assert.match(formSource, /if \(!isJobApplication\) return tab;/);
   assert.match(formSource, />\s*\{getInfoTabLabel\(tab, index\)\}\s*<\/button>/);
-  assert.match(formSource, /const activeInfoHeading = isJobApplication && activeInfoTab === personalInfoTab[\s\S]*:\s*activeInfoTab/);
+  assert.match(formSource, /const activeInfoHeading = isJobApplication[\s\S]*getInfoTabLabel\(activeInfoTab, currentInfoTabs\.indexOf\(activeInfoTab\)\)[\s\S]*:\s*activeInfoTab/);
   assert.match(formSource, /<h2 className=\{isJobApplication && activeInfoTab === personalInfoTab \? "job-section-heading" : undefined\}>\{activeInfoHeading\}<\/h2>/);
   assert.match(formSource, /const renderPersonalRow = \(label, fieldContent, className = "", required = true\)/);
   assert.match(formSource, /<th scope="row">\{renderRequiredLabel\(label, required\)\}<\/th>/);

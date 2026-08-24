@@ -22,7 +22,7 @@ test("job application form reuses the internship personal information table", ()
   assert.match(jobFormSource, /<ApplicantInternshipApplicationPage applicationType="job" \/>/);
   assert.match(internshipFormSource, /applicationType = "internship"/);
   assert.match(internshipFormSource, /const isJobApplication = applicationType === "job"/);
-  assert.match(internshipFormSource, /isJobApplication \? personalInfoTab : getFirstIncompleteTab\(initialStudentInfo\)/);
+  assert.match(internshipFormSource, /isJobApplication \? personalInfoTab : getFirstIncompleteTab\(initialStudentInfo, currentRequiredInfoTabs\)/);
   assert.match(internshipFormSource, /<h1>\{applicationPageTitle\}<\/h1>/);
 });
 
@@ -32,7 +32,7 @@ test("job application header includes the selected vacancy title", () => {
 });
 
 test("job application personal heading uses uppercase numbered label", () => {
-  assert.match(internshipFormSource, /const activeInfoHeading = isJobApplication && activeInfoTab === personalInfoTab\s*\?\s*"\(A\) MAKLUMAT PERIBADI PEMOHON"\s*:\s*activeInfoTab/);
+  assert.match(internshipFormSource, /const activeInfoHeading = isJobApplication\s*\?\s*getInfoTabLabel\(activeInfoTab, currentInfoTabs\.indexOf\(activeInfoTab\)\)\s*:\s*activeInfoTab/);
   assert.match(internshipFormSource, /const renderInfoHeading = \(\) => \(/);
   assert.match(internshipFormSource, /className=\{isJobApplication && activeInfoTab === personalInfoTab \? "job-section-heading" : undefined\}/);
   assert.match(internshipFormSource, /<h2[\s\S]*>\{activeInfoHeading\}<\/h2>/);
@@ -45,13 +45,29 @@ test("job application personal heading uses uppercase numbered label", () => {
 });
 
 test("job application tabs show letter numbering without changing tab state values", () => {
+  assert.match(internshipFormSource, /const internshipInfoTabs = \[personalInfoTab, academicInfoTab, documentSupportTab\]/);
+  assert.match(internshipFormSource, /const jobSpmTab = "MAKLUMAT PEPERIKSAAN SPM\/SC\/MCE\/SPM\(V\) MENGIKUT SISTEM TERBUKA\/ UNIFIED EXAMINATION CERTIFICATE \(UEC\) ATAU SETARAF \(SILA KEMUKAKAN SEMUA MATA PELAJARAN YANG DIAMBIL\)"/);
+  assert.match(internshipFormSource, /const jobInfoTabs = \[[\s\S]*personalInfoTab[\s\S]*jobSpmTab[\s\S]*jobDeclarationTab[\s\S]*documentSupportTab[\s\S]*\]/);
+  assert.match(internshipFormSource, /const currentInfoTabs = isJobApplication \? jobInfoTabs : internshipInfoTabs/);
+  assert.match(internshipFormSource, /const currentRequiredInfoTabs = isJobApplication \? jobInfoTabs : internshipRequiredInfoTabs/);
   assert.match(internshipFormSource, /const getInfoTabLabel = \(tab, index\) => \{/);
   assert.match(internshipFormSource, /if \(!isJobApplication\) return tab;/);
-  assert.match(internshipFormSource, /return `\(\$\{String\.fromCharCode\(65 \+ index\)\}\) \$\{tab\}`;/);
-  assert.match(internshipFormSource, /infoTabs\.map\(\(tab, index\) =>/);
+  assert.match(internshipFormSource, /return `\(\$\{String\.fromCharCode\(65 \+ index\)\}\) \$\{tab\.toUpperCase\(\)\}`;/);
+  assert.match(internshipFormSource, /currentInfoTabs\.map\(\(tab, index\) =>/);
   assert.match(internshipFormSource, /className=\{activeInfoTab === tab \? "active" : ""\}/);
   assert.match(internshipFormSource, /onClick=\{\(\) => openInfoTab\(tab\)\}/);
   assert.match(internshipFormSource, /\{getInfoTabLabel\(tab, index\)\}/);
+  assert.match(internshipFormSource, /activeInfoTab === documentSupportTab/);
+});
+
+test("job application extra sections are mandatory before submission", () => {
+  assert.match(internshipFormSource, /jobSpmDetails: ""/);
+  assert.match(internshipFormSource, /jobDeclaration: ""/);
+  assert.match(internshipFormSource, /\["jobSpmDetails", "Butiran Peperiksaan SPM\/SC\/MCE\/SPM\(V\)\/UEC atau setaraf"\]/);
+  assert.match(internshipFormSource, /\["jobDeclaration", "Perakuan Pemohon"\]/);
+  assert.match(internshipFormSource, /const renderJobSimpleSection = \(field, placeholder\) => \(/);
+  assert.match(internshipFormSource, /activeInfoTab === jobSpmTab \? renderJobSimpleSection\("jobSpmDetails"/);
+  assert.match(internshipFormSource, /activeInfoTab === jobDeclarationTab \? renderJobSimpleSection\("jobDeclaration"/);
 });
 
 test("job application personal table includes optional salutation row above name", () => {
