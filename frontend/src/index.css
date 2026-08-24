@@ -6803,6 +6803,11 @@ body:has(.applicant-profile-page) {
   font-weight: 850;
 }
 
+.student-info-form h2.job-section-heading {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .student-info-notice {
   width: fit-content;
   max-width: 100%;

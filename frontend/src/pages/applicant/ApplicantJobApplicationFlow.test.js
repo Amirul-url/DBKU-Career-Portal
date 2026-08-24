@@ -31,6 +31,13 @@ test("job application header includes the selected vacancy title", () => {
   assert.match(internshipFormSource, /selectedJobTitle\s*\?\s*`Nama Jawatan Yang Dipohon: \$\{selectedJobTitle\}`\s*:\s*applicationTitle/);
 });
 
+test("job application personal heading uses uppercase numbered label", () => {
+  assert.match(internshipFormSource, /const activeInfoHeading = isJobApplication && activeInfoTab === personalInfoTab\s*\?\s*"A\. MAKLUMAT PERIBADI PEMOHON"\s*:\s*activeInfoTab/);
+  assert.match(internshipFormSource, /className=\{isJobApplication && activeInfoTab === personalInfoTab \? "job-section-heading" : undefined\}/);
+  assert.match(internshipFormSource, /<h2[\s\S]*>\{activeInfoHeading\}<\/h2>/);
+  assert.match(cssSource, /\.student-info-form h2\.job-section-heading \{[\s\S]*text-decoration: underline;/);
+});
+
 test("job application personal tab shows instructions beside passport upload", () => {
   assert.match(internshipFormSource, /isJobApplication \? \(\s*<div className="student-job-photo-guidance-row">/);
   assert.match(internshipFormSource, /SILA BACA ARAHAN DI BAWAH DENGAN TELITI/);

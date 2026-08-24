@@ -1424,6 +1424,9 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
   );
 
   const nextInfoTab = infoTabs[infoTabs.indexOf(activeInfoTab) + 1] || null;
+  const activeInfoHeading = isJobApplication && activeInfoTab === personalInfoTab
+    ? "A. MAKLUMAT PERIBADI PEMOHON"
+    : activeInfoTab;
   const requiredInfoTabsComplete = requiredInfoTabs.every((tab) => isTabComplete(tab, studentInfo));
   const isApplicationReadyToSubmit = declarationAccepted && requiredInfoTabsComplete;
 
@@ -1458,7 +1461,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
                 </nav>
 
                 <form className="student-info-form" onSubmit={handleUpdate}>
-                  <h2>{activeInfoTab}</h2>
+                  <h2 className={isJobApplication && activeInfoTab === personalInfoTab ? "job-section-heading" : undefined}>{activeInfoHeading}</h2>
                   {notice ? <p className={`student-info-notice ${noticeStatus}`}>{notice}</p> : null}
 
                   {activeInfoTab === personalInfoTab ? renderApplicantFields() : null}

@@ -375,7 +375,8 @@ test("internship mandatory tabs and fields show red required markers", () => {
   assert.doesNotMatch(formSource, /renderRequiredLabel\(tab, isRequiredInfoTab\(tab\)\)/);
   assert.doesNotMatch(formSource, /<h2>\{renderRequiredLabel\(activeInfoTab, isRequiredInfoTab\(activeInfoTab\)\)\}<\/h2>/);
   assert.match(formSource, />\s*\{tab\}\s*<\/button>/);
-  assert.match(formSource, /<h2>\{activeInfoTab\}<\/h2>/);
+  assert.match(formSource, /const activeInfoHeading = isJobApplication && activeInfoTab === personalInfoTab[\s\S]*:\s*activeInfoTab/);
+  assert.match(formSource, /<h2 className=\{isJobApplication && activeInfoTab === personalInfoTab \? "job-section-heading" : undefined\}>\{activeInfoHeading\}<\/h2>/);
   assert.match(formSource, /const renderPersonalRow = \(label, fieldContent, className = "", required = true\)/);
   assert.match(formSource, /<th scope="row">\{renderRequiredLabel\(label, required\)\}<\/th>/);
   assert.match(formSource, /\["supervisorName", "Nama Penyelaras Program"\]/);
