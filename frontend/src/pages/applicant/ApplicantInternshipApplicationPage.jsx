@@ -770,7 +770,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
   const [showSaveDraftDialog, setShowSaveDraftDialog] = useState(false);
   const selectedJobTitle = isJobApplication ? String(internshipVacancy?.title || "").trim() : "";
   const applicationPageTitle = selectedJobTitle
-    ? `${applicationTitle} (${selectedJobTitle})`
+    ? `${applicationTitle} (Nama Jawatan Yang Dipohon: ${selectedJobTitle})`
     : applicationTitle;
   const displayName = user?.full_name || user?.first_name || "Pemohon DBKU";
   const email = user?.email || "Belum dikemaskini";
