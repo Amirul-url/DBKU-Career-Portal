@@ -1170,9 +1170,11 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
     <input required value={normalizeJobPersonalValue(field, studentInfo[field])} onChange={updateStudentInfo(field)} {...props} />
   );
 
+  const selectPlaceholder = isJobApplication ? "SILA PILIH" : "Sila pilih";
+
   const selectInput = (field, options) => (
     <select required value={normalizeJobPersonalValue(field, studentInfo[field])} onChange={updateStudentInfo(field)}>
-      <option value="">Sila pilih</option>
+      <option value="">{selectPlaceholder}</option>
       {options.map((option) => {
         const optionValue = normalizeJobPersonalValue(field, option);
         return <option key={option} value={optionValue}>{optionValue}</option>;
