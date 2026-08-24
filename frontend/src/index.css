@@ -7395,7 +7395,9 @@ body:has(.applicant-profile-page) {
 }
 
 .student-job-spm-table thead th.student-job-spm-heading {
+  padding-left: 24px;
   text-align: left;
+  text-indent: -14px;
 }
 
 .student-job-spm-table th:first-child,
