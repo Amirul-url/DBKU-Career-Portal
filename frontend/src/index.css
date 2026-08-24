@@ -7394,7 +7394,7 @@ body:has(.applicant-profile-page) {
   white-space: normal;
 }
 
-.student-job-spm-table .student-job-spm-heading {
+.student-job-spm-table thead th.student-job-spm-heading {
   text-align: left;
 }
 
