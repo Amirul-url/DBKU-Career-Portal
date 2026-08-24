@@ -3062,6 +3062,9 @@ function InternshipApplicationDetailPage({
         maskAcceptedStatus={false}
         onBack={onBack}
         statusLabelOverrides={{
+          applicant_agreed: statusLabel.applicant_agreed,
+          internship_active: statusLabel.internship_active,
+          internship_completed: statusLabel.internship_completed,
           submitted: statusLabel.submitted,
         }}
         onTabChange={setActiveTab}

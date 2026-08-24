@@ -9,7 +9,7 @@ const decisionCopySource = readFileSync(new URL("../../modules/internship/intern
 
 test("HRM application action labels match the department review workflow", () => {
   assert.match(source, /submitted: "Menunggu Semakan HRM"/);
-  assert.match(source, /statusLabelOverrides=\{\{\s*submitted: statusLabel\.submitted,\s*\}\}/);
+  assert.match(source, /submitted: statusLabel\.submitted/);
   assert.match(source, />\s*Hantar ke Bahagian\s*</);
   assert.match(source, />\s*Tidak Lengkap\s*</);
   assert.match(source, />\s*Tidak Layak\s*</);
@@ -424,6 +424,9 @@ test("HRM can see applicant offer confirmation after applicant agrees", () => {
   assert.match(source, /function hasApplicantRespondedToOffer\(application\)/);
   assert.match(source, /function getApplicantConfirmationDocuments\(application\)/);
   assert.match(source, /return getApplicantAgreedInternshipStatus\(application\)/);
+  assert.match(source, /applicant_agreed: statusLabel\.applicant_agreed/);
+  assert.match(source, /internship_active: statusLabel\.internship_active/);
+  assert.match(source, /internship_completed: statusLabel\.internship_completed/);
   assert.match(source, /const applicantConfirmationTab = "Pengesahan Pemohon"/);
   assert.match(source, /\.\.\.\(hasApplicantRespondedToOffer\(application\) \? \[applicantConfirmationTab\] : \[\]\)/);
   assert.match(source, /function ApplicantConfirmationReadOnlyTab/);
