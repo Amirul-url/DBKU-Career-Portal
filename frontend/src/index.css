@@ -7712,17 +7712,6 @@ body:has(.applicant-profile-page) {
   background: #15803d;
 }
 
-.student-submit-dialog .student-save-draft-actions .student-save-draft-cancel {
-  border: 1px solid #cbd5e1;
-  background: #ffffff;
-  color: #0f172a;
-}
-
-.student-submit-dialog .student-save-draft-actions .student-save-draft-cancel:hover,
-.student-submit-dialog .student-save-draft-actions .student-save-draft-cancel:focus-visible {
-  background: #f8fafc;
-}
-
 .student-submit-dialog .student-save-draft-actions .student-save-draft-discard {
   border: 1px solid #fecaca;
   background: #fff1f2;

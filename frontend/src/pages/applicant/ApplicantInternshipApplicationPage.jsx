@@ -1398,9 +1398,6 @@ export default function ApplicantInternshipApplicationPage() {
             <h2 id="student-save-draft-dialog-title">Simpan draf permohonan?</h2>
             <p>Maklumat yang telah diisi boleh disimpan sebagai draf dan dipaparkan dalam Permohonan Saya.</p>
             <div className="student-save-draft-actions">
-              <button className="student-save-draft-cancel" type="button" onClick={() => setShowSaveDraftDialog(false)}>
-                Batal
-              </button>
               <button className="student-save-draft-discard" type="button" onClick={exitWithoutSavingDraft}>
                 Keluar tanpa simpan
               </button>
