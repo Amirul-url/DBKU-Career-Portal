@@ -775,6 +775,78 @@ class CandidateApplicationReferenceNoTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(CandidateApplication.objects.filter(applicant=applicant, vacancy=self.vacancy).count(), 1)
 
+    def test_applicant_cannot_create_new_application_while_internship_is_active(self):
+        applicant = self.create_applicant("active-internship@example.com")
+        CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=self.vacancy,
+            status="accepted",
+            profile_data={
+                "applicant_confirmation": {"status": "agreed"},
+                "organization_feedback_release": {"internship_period": "1 Ogos 2026 - 31 Ogos 2026"},
+            },
+        )
+        client = APIClient()
+        client.force_authenticate(user=applicant)
+
+        with patch("applications.serializers.timezone.localdate", return_value=date(2026, 8, 24)):
+            response = client.post(
+                "/api/applications/",
+                {"vacancy": self.vacancy.id, "cover_letter": "Permohonan kedua."},
+                format="json",
+            )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(CandidateApplication.objects.filter(applicant=applicant, vacancy=self.vacancy).count(), 1)
+
+    def test_applicant_cannot_create_new_application_before_agreed_internship_starts(self):
+        applicant = self.create_applicant("agreed-future-internship@example.com")
+        CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=self.vacancy,
+            status="accepted",
+            profile_data={
+                "applicant_confirmation": {"status": "agreed"},
+                "organization_feedback_release": {"internship_period": "1 September 2026 - 28 Februari 2027"},
+            },
+        )
+        client = APIClient()
+        client.force_authenticate(user=applicant)
+
+        with patch("applications.serializers.timezone.localdate", return_value=date(2026, 8, 24)):
+            response = client.post(
+                "/api/applications/",
+                {"vacancy": self.vacancy.id, "cover_letter": "Permohonan kedua."},
+                format="json",
+            )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(CandidateApplication.objects.filter(applicant=applicant, vacancy=self.vacancy).count(), 1)
+
+    def test_applicant_can_create_new_application_after_internship_completed(self):
+        applicant = self.create_applicant("completed-internship@example.com")
+        CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=self.vacancy,
+            status="accepted",
+            profile_data={
+                "applicant_confirmation": {"status": "agreed"},
+                "organization_feedback_release": {"internship_period": "1 Februari 2026 - 23 Ogos 2026"},
+            },
+        )
+        client = APIClient()
+        client.force_authenticate(user=applicant)
+
+        with patch("applications.serializers.timezone.localdate", return_value=date(2026, 8, 24)):
+            response = client.post(
+                "/api/applications/",
+                {"vacancy": self.vacancy.id, "cover_letter": "Permohonan selepas tamat LI."},
+                format="json",
+            )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(CandidateApplication.objects.filter(applicant=applicant, vacancy=self.vacancy).count(), 2)
+
     @override_settings(NOTIFICATION_EMAIL_ENABLED=True, WHATSAPP_ENABLED=True)
     @patch("applications.services.send_whatsapp_message")
     @patch("notifications.services.send_notification_email")

@@ -1,5 +1,7 @@
 import json
 import os
+import re
+from datetime import date, datetime
 from uuid import uuid4
 
 from django.core.files.storage import default_storage
@@ -14,11 +16,128 @@ from .services import notify_organization_feedback_released
 
 
 REAPPLY_ALLOWED_STATUSES = {"rejected", "withdrawn"}
+MALAY_MONTH_NUMBERS = {
+    "januari": 1,
+    "jan": 1,
+    "februari": 2,
+    "feb": 2,
+    "mac": 3,
+    "march": 3,
+    "april": 4,
+    "apr": 4,
+    "mei": 5,
+    "may": 5,
+    "jun": 6,
+    "june": 6,
+    "julai": 7,
+    "july": 7,
+    "ogos": 8,
+    "aug": 8,
+    "august": 8,
+    "september": 9,
+    "sep": 9,
+    "oktober": 10,
+    "oct": 10,
+    "november": 11,
+    "nov": 11,
+    "disember": 12,
+    "dec": 12,
+    "december": 12,
+}
 
 
 def has_organization_feedback_been_released(profile_data):
     release = (profile_data or {}).get("organization_feedback_release") or {}
     return bool(release.get("sent_to_applicant_at"))
+
+
+def parse_date_value(value):
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, date):
+        return value
+
+    text = str(value or "").strip()
+    if not text:
+        return None
+
+    iso_match = re.match(r"^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$", text)
+    if iso_match:
+        return date(int(iso_match.group(1)), int(iso_match.group(2)), int(iso_match.group(3)))
+
+    malay_match = re.match(r"^(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})$", text)
+    if malay_match:
+        month = MALAY_MONTH_NUMBERS.get(malay_match.group(2).lower())
+        if month:
+            return date(int(malay_match.group(3)), month, int(malay_match.group(1)))
+
+    try:
+        return datetime.fromisoformat(text.replace("Z", "+00:00")).date()
+    except ValueError:
+        return None
+
+
+def parse_internship_period_text(value):
+    parts = re.split(r"\s+-\s+|\s+hingga\s+|\s+to\s+", str(value or "").strip(), maxsplit=1, flags=re.IGNORECASE)
+    if len(parts) != 2:
+        return None
+    start_date = parse_date_value(parts[0])
+    end_date = parse_date_value(parts[1])
+    if start_date and end_date:
+        return start_date, end_date
+    return None
+
+
+def get_first_available_value(*values):
+    return next((value for value in values if str(value or "").strip()), "")
+
+
+def get_internship_period_range(profile_data):
+    release = (profile_data or {}).get("organization_feedback_release") or {}
+    release_range = parse_internship_period_text(release.get("internship_period"))
+    if release_range:
+        return release_range
+
+    student_info = (profile_data or {}).get("student_info") or {}
+    start_date = parse_date_value(get_first_available_value(
+        student_info.get("trainingStartDate"),
+        student_info.get("training_start_date"),
+        student_info.get("internshipStartDate"),
+        student_info.get("internship_start_date"),
+        student_info.get("practicalStartDate"),
+    ))
+    end_date = parse_date_value(get_first_available_value(
+        student_info.get("trainingEndDate"),
+        student_info.get("training_end_date"),
+        student_info.get("internshipEndDate"),
+        student_info.get("internship_end_date"),
+        student_info.get("practicalEndDate"),
+    ))
+    if start_date and end_date:
+        return start_date, end_date
+
+    return parse_internship_period_text(student_info.get("trainingPeriod") or student_info.get("internshipPeriod"))
+
+
+def is_completed_internship_application(application, today=None):
+    if application.vacancy.vacancy_type != "internship":
+        return False
+
+    profile_data = application.profile_data or {}
+    confirmation = profile_data.get("applicant_confirmation") or {}
+    if confirmation.get("status") != "agreed":
+        return False
+
+    internship_range = get_internship_period_range(profile_data)
+    if not internship_range:
+        return False
+
+    _start_date, end_date = internship_range
+    return (today or timezone.localdate()) > end_date
+
+
+def can_create_new_application_after(application, today=None):
+    return application.status in REAPPLY_ALLOWED_STATUSES or is_completed_internship_application(application, today)
 
 
 class CandidateApplicationSerializer(serializers.ModelSerializer):
@@ -244,10 +363,14 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
         if not user or not getattr(user, "is_authenticated", False) or not vacancy:
             return attrs
 
-        has_active_application = CandidateApplication.objects.filter(
+        existing_applications = CandidateApplication.objects.filter(
             applicant=user,
             vacancy=vacancy,
-        ).exclude(status__in=REAPPLY_ALLOWED_STATUSES).exists()
+        )
+        has_active_application = any(
+            not can_create_new_application_after(application)
+            for application in existing_applications
+        )
         if has_active_application:
             raise serializers.ValidationError({
                 "vacancy": "Anda sudah mempunyai permohonan aktif untuk peluang ini.",
