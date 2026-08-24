@@ -283,6 +283,10 @@ function hasApplicantRejectedOffer(application) {
   return application?.profile_data?.applicant_confirmation?.status === "rejected";
 }
 
+function hasApplicantRespondedToOffer(application) {
+  return hasApplicantAgreedToOffer(application) || hasApplicantRejectedOffer(application);
+}
+
 function isDepartmentPendingDecisionApplication(application) {
   return Boolean(application?.assigned_department && !hasSubmittedDepartmentDecision(application));
 }
@@ -2892,6 +2896,7 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
 function ApplicantConfirmationReadOnlyTab({ application }) {
   const documents = getApplicantConfirmationDocuments(application);
   const confirmation = application?.profile_data?.applicant_confirmation || {};
+  const isRejected = hasApplicantRejectedOffer(application);
   const openConfirmationDocument = (document) => {
     if (!document?.url) return;
     window.open(document.url, "_blank", "noreferrer");
@@ -2904,9 +2909,11 @@ function ApplicantConfirmationReadOnlyTab({ application }) {
           <div className="organization-feedback-section-title">
             <h3>Dokumen pengesahan pemohon</h3>
             <p>
-              {confirmation.submitted_at
-                ? `Dihantar oleh pemohon pada ${dateValue(confirmation.submitted_at)}.`
-                : "Dokumen pengesahan pemohon akan dipaparkan selepas dihantar."}
+              {isRejected
+                ? "Pemohon telah menolak tawaran latihan industri ini."
+                : confirmation.submitted_at
+                  ? `Dihantar oleh pemohon pada ${dateValue(confirmation.submitted_at)}.`
+                  : "Dokumen pengesahan pemohon akan dipaparkan selepas dihantar."}
             </p>
           </div>
         </div>
@@ -3015,7 +3022,7 @@ function InternshipApplicationDetailPage({
     ...(shouldShowDepartmentDecision ? [departmentDecisionTab] : []),
     ...(shouldShowHrmFinalDecision ? [hrmFinalDecisionTab] : []),
     ...(shouldShowOrganizationFeedback ? [organizationFeedbackTab] : []),
-    ...(hasApplicantAgreedToOffer(application) ? [applicantConfirmationTab] : []),
+    ...(hasApplicantRespondedToOffer(application) ? [applicantConfirmationTab] : []),
   ];
   const detailTabGroups = [
     { label: "Pemohon", tabs: applicantDetailTabs },

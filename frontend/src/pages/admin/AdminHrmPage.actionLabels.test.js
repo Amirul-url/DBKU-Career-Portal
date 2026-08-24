@@ -419,12 +419,14 @@ test("HRM can see applicant offer confirmation after applicant agrees", () => {
   assert.match(source, /internship_completed: internshipLifecycleStatusLabels\.internship_completed/);
   assert.match(source, /getApplicantAgreedInternshipStatus/);
   assert.match(source, /function hasApplicantAgreedToOffer\(application\)/);
+  assert.match(source, /function hasApplicantRespondedToOffer\(application\)/);
   assert.match(source, /function getApplicantConfirmationDocuments\(application\)/);
   assert.match(source, /return getApplicantAgreedInternshipStatus\(application\)/);
   assert.match(source, /const applicantConfirmationTab = "Pengesahan Pemohon"/);
-  assert.match(source, /\.\.\.\(hasApplicantAgreedToOffer\(application\) \? \[applicantConfirmationTab\] : \[\]\)/);
+  assert.match(source, /\.\.\.\(hasApplicantRespondedToOffer\(application\) \? \[applicantConfirmationTab\] : \[\]\)/);
   assert.match(source, /function ApplicantConfirmationReadOnlyTab/);
   assert.match(source, /Dokumen pengesahan pemohon/);
+  assert.match(source, /Pemohon telah menolak tawaran latihan industri ini\./);
   assert.doesNotMatch(source, /Dengan ini, saya mengesahkan penerimaan tawaran menjalani latihan industri di Dewan Bandaraya Kuching Utara \(DBKU\)/);
   assert.doesNotMatch(source, /Sekian, terima kasih atas perhatian dan kerjasama pihak puan\./);
   assert.match(source, /applicantConfirmationDocuments/);
