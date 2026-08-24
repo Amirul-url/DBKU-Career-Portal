@@ -335,8 +335,11 @@ test("internship back action asks applicant to save a visible draft", () => {
   assert.match(formSource, /const saveDraftAndExit = \(\) => \{/);
   assert.match(formSource, /visibleInApplications: true/);
   assert.match(formSource, /studentInfo: getDraftStudentInfo\(studentInfo\)/);
-  assert.match(formSource, /Simpan draf permohonan\?/);
-  assert.match(formSource, /dipaparkan dalam Permohonan Saya/);
+  assert.doesNotMatch(formSource, /Simpan draf permohonan\?/);
+  assert.match(
+    formSource,
+    /Maklumat yang telah diisi akan disimpan sebagai draf dan dipaparkan dalam Permohonan Saya\./,
+  );
   assert.match(formSource, /Simpan draf/);
   assert.doesNotMatch(formSource, /Keluar tanpa simpan/);
   assert.doesNotMatch(formSource, /student-save-draft-discard/);

@@ -1384,13 +1384,12 @@ export default function ApplicantInternshipApplicationPage() {
       {showSaveDraftDialog ? (
         <div className="student-submit-dialog-backdrop" role="presentation">
           <section
-            aria-labelledby="student-save-draft-dialog-title"
+            aria-label="Simpan draf"
             aria-modal="true"
             className="student-submit-dialog student-save-draft-dialog"
             role="dialog"
           >
-            <h2 id="student-save-draft-dialog-title">Simpan draf permohonan?</h2>
-            <p>Maklumat yang telah diisi boleh disimpan sebagai draf dan dipaparkan dalam Permohonan Saya.</p>
+            <p>Maklumat yang telah diisi akan disimpan sebagai draf dan dipaparkan dalam Permohonan Saya.</p>
             <div className="student-save-draft-actions">
               <button type="button" onClick={saveDraftAndExit}>Simpan draf</button>
             </div>
