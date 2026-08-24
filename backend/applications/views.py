@@ -22,7 +22,8 @@ HRM_DEPARTMENT_ALIASES = {
 
 
 def is_hrm_staff(user):
-    return getattr(user, "role", None) == "superadmin" or getattr(user, "department", "") in HRM_DEPARTMENT_ALIASES
+    department = getattr(user, "department", "")
+    return getattr(user, "role", None) == "superadmin" or not department or department in HRM_DEPARTMENT_ALIASES
 
 
 class CandidateApplicationViewSet(viewsets.ModelViewSet):
@@ -38,7 +39,9 @@ class CandidateApplicationViewSet(viewsets.ModelViewSet):
         else:
             queryset = queryset.exclude(status="draft")
             if user.role == "admin" and not is_hrm_staff(user):
-                queryset = queryset.filter(assigned_department=user.department)
+                queryset = queryset.filter(assigned_department=user.department, status="shortlisted").filter(
+                    profile_data__department_decision__submitted_at__isnull=True
+                )
 
         status_filter = self.request.query_params.get("status")
         vacancy_type = self.request.query_params.get("type")

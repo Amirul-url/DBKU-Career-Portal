@@ -507,6 +507,67 @@ class CandidateApplicationReferenceNoTests(TestCase):
         self.assertIn(finance_application.id, finance_ids)
         self.assertNotIn(ict_application.id, finance_ids)
 
+    def test_department_admin_does_not_see_applications_after_department_decision(self):
+        applicant = self.create_applicant("department-confidential@example.com")
+        ict_admin = self.user_model.objects.create_user(
+            username="ict-confidential@example.com",
+            email="ict-confidential@example.com",
+            password="Password123!",
+            role="admin",
+            department="Bahagian Teknologi Maklumat (ICT)",
+            department_role="Ketua Bahagian",
+        )
+        hrm = self.user_model.objects.create_user(
+            username="hrm-confidential@example.com",
+            email="hrm-confidential@example.com",
+            password="Password123!",
+            role="admin",
+            department="Bahagian Pengurusan Sumber Manusia (HRM)",
+        )
+        pending_application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=self.vacancy,
+            status="shortlisted",
+            assigned_department="Bahagian Teknologi Maklumat (ICT)",
+        )
+        decided_application = CandidateApplication.objects.create(
+            applicant=self.create_applicant("department-decided@example.com"),
+            vacancy=self.vacancy,
+            status="shortlisted",
+            assigned_department="Bahagian Teknologi Maklumat (ICT)",
+            profile_data={
+                "department_decision": {
+                    "recommendation": "Tolak",
+                    "remarks": "Tidak memenuhi keperluan bahagian.",
+                    "submitted_at": "2026-08-21T09:00:00+08:00",
+                }
+            },
+        )
+
+        client = APIClient()
+        client.force_authenticate(user=ict_admin)
+        department_response = client.get("/api/applications/")
+        hidden_detail_response = client.get(f"/api/applications/{decided_application.id}/")
+        client.force_authenticate(user=hrm)
+        hrm_response = client.get("/api/applications/")
+
+        self.assertEqual(department_response.status_code, 200)
+        department_applications = (
+            department_response.data.get("results", department_response.data)
+            if isinstance(department_response.data, dict)
+            else department_response.data
+        )
+        department_ids = {application["id"] for application in department_applications}
+        self.assertIn(pending_application.id, department_ids)
+        self.assertNotIn(decided_application.id, department_ids)
+        self.assertEqual(hidden_detail_response.status_code, 404)
+
+        self.assertEqual(hrm_response.status_code, 200)
+        hrm_applications = hrm_response.data.get("results", hrm_response.data) if isinstance(hrm_response.data, dict) else hrm_response.data
+        hrm_ids = {application["id"] for application in hrm_applications}
+        self.assertIn(pending_application.id, hrm_ids)
+        self.assertIn(decided_application.id, hrm_ids)
+
     def test_hrm_review_can_assign_application_to_department(self):
         applicant = self.create_applicant("assign-target@example.com")
         hrm = self.user_model.objects.create_user(
