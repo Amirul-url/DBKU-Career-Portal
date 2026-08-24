@@ -32,7 +32,7 @@ test("job application header includes the selected vacancy title", () => {
 });
 
 test("job application personal heading uses uppercase numbered label", () => {
-  assert.match(internshipFormSource, /const activeInfoHeading = isJobApplication && activeInfoTab === personalInfoTab\s*\?\s*"A\. MAKLUMAT PERIBADI PEMOHON"\s*:\s*activeInfoTab/);
+  assert.match(internshipFormSource, /const activeInfoHeading = isJobApplication && activeInfoTab === personalInfoTab\s*\?\s*"\(A\) MAKLUMAT PERIBADI PEMOHON"\s*:\s*activeInfoTab/);
   assert.match(internshipFormSource, /className=\{isJobApplication && activeInfoTab === personalInfoTab \? "job-section-heading" : undefined\}/);
   assert.match(internshipFormSource, /<h2[\s\S]*>\{activeInfoHeading\}<\/h2>/);
   assert.match(cssSource, /\.student-info-form h2\.job-section-heading \{[\s\S]*text-decoration: underline;/);

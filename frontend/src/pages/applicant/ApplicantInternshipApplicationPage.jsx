@@ -1425,7 +1425,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
 
   const nextInfoTab = infoTabs[infoTabs.indexOf(activeInfoTab) + 1] || null;
   const activeInfoHeading = isJobApplication && activeInfoTab === personalInfoTab
-    ? "A. MAKLUMAT PERIBADI PEMOHON"
+    ? "(A) MAKLUMAT PERIBADI PEMOHON"
     : activeInfoTab;
   const requiredInfoTabsComplete = requiredInfoTabs.every((tab) => isTabComplete(tab, studentInfo));
   const isApplicationReadyToSubmit = declarationAccepted && requiredInfoTabsComplete;
