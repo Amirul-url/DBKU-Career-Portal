@@ -100,6 +100,61 @@ class CandidateApplicationReferenceNoTests(TestCase):
         self.assertEqual(response.status_code, 201)
         self.assertFalse(Notification.objects.filter(user=applicant).exists())
 
+    @override_settings(NOTIFICATION_EMAIL_ENABLED=True, WHATSAPP_ENABLED=True)
+    @patch("applications.services.send_whatsapp_message")
+    @patch("notifications.services.send_notification_email")
+    def test_submitting_internship_application_notifies_hrm_by_email_and_whatsapp(
+        self,
+        mock_send_email,
+        mock_send_whatsapp,
+    ):
+        applicant = self.create_applicant("new-submission@example.com")
+        applicant.first_name = "MUHAMMAD AMIRUL"
+        applicant.last_name = "AQMAL"
+        applicant.save(update_fields=["first_name", "last_name"])
+        hrm = self.user_model.objects.create_user(
+            username="hrm-new-submission@example.com",
+            email="hrm-new-submission@example.com",
+            password="Password123!",
+            role="admin",
+            department="Bahagian Pengurusan Sumber Manusia (HRM)",
+            mobile_number="60128889991",
+        )
+        ict_admin = self.user_model.objects.create_user(
+            username="ict-new-submission@example.com",
+            email="ict-new-submission@example.com",
+            password="Password123!",
+            role="admin",
+            department="Bahagian Teknologi Maklumat (ICT)",
+            mobile_number="60128889992",
+        )
+        application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=self.vacancy,
+            status="draft",
+            reference_no="PK.2026-0003",
+        )
+        client = APIClient()
+        client.force_authenticate(user=applicant)
+
+        response = client.post(f"/api/applications/{application.id}/submit/")
+
+        self.assertEqual(response.status_code, 200)
+        expected_title = "Permohonan LI Baharu Untuk Semakan - PK.2026-0003"
+        expected_message = (
+            "Portal Kerjaya DBKU\n\n"
+            "Terdapat permohonan Latihan Industri baharu untuk semakan HRM.\n"
+            "No. Rujukan: PK.2026-0003\n\n"
+            "Sila semak permohonan melalui Portal Kerjaya DBKU."
+        )
+        hrm_notification = Notification.objects.get(application=application, user=hrm)
+        self.assertEqual(hrm_notification.title, expected_title)
+        self.assertEqual(hrm_notification.message, expected_message)
+        self.assertNotIn(applicant.get_full_name(), hrm_notification.message)
+        self.assertFalse(Notification.objects.filter(application=application, user=ict_admin).exists())
+        mock_send_email.assert_any_call(hrm, expected_title, expected_message)
+        mock_send_whatsapp.assert_any_call(hrm.mobile_number, expected_message)
+
     def test_internship_document_upload_is_saved_and_returned(self):
         applicant = self.create_applicant("documents@example.com")
         client = APIClient()

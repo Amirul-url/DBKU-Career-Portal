@@ -1,6 +1,8 @@
 import logging
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.db.models import Q
 from django.utils import timezone
 
 from accounts.otp_delivery import OTPDeliveryError, send_whatsapp_message
@@ -16,12 +18,32 @@ class InvalidApplicationStatus(ValueError):
     pass
 
 
+HRM_DEPARTMENT_ALIASES = {
+    "",
+    "HRM",
+    "Pengurusan Sumber Manusia (HRM)",
+    "Bahagian Pengurusan Sumber Manusia (HRM)",
+}
+
+
 def build_application_submitted_message(application):
     return (
         f"Permohonan latihan industri anda telah berjaya dihantar. "
         f"No. rujukan: {application.reference_no}. "
         "Sila semak status permohonan melalui Portal Kerjaya DBKU."
     )
+
+
+def build_hrm_application_submission_notification(application):
+    return {
+        "title": f"Permohonan LI Baharu Untuk Semakan - {application.reference_no}",
+        "message": (
+            "Portal Kerjaya DBKU\n\n"
+            "Terdapat permohonan Latihan Industri baharu untuk semakan HRM.\n"
+            f"No. Rujukan: {application.reference_no}\n\n"
+            "Sila semak permohonan melalui Portal Kerjaya DBKU."
+        ),
+    }
 
 
 def build_application_review_notification(application, next_status):
@@ -73,6 +95,34 @@ def send_application_whatsapp(application, message, context):
         logger.exception("Unable to send %s WhatsApp for application %s", context, application.pk)
 
 
+def get_hrm_notification_recipients():
+    user_model = get_user_model()
+    return user_model.objects.filter(
+        Q(role="superadmin")
+        | Q(role="admin", department__in=HRM_DEPARTMENT_ALIASES)
+    ).distinct()
+
+
+def notify_hrm_application_submitted(application):
+    notification = build_hrm_application_submission_notification(application)
+    for recipient in get_hrm_notification_recipients().exclude(pk=application.applicant_id):
+        create_notification(
+            user=recipient,
+            title=notification["title"],
+            message=notification["message"],
+            application=application,
+        )
+        if recipient.mobile_number and getattr(settings, "WHATSAPP_ENABLED", False):
+            try:
+                send_whatsapp_message(recipient.mobile_number, notification["message"])
+            except OTPDeliveryError:
+                logger.exception(
+                    "Unable to send HRM application submission WhatsApp for application %s to user %s",
+                    application.pk,
+                    recipient.pk,
+                )
+
+
 def submit_application(application):
     application.status = "submitted"
     application.submitted_at = application.submitted_at or timezone.now()
@@ -85,6 +135,7 @@ def submit_application(application):
         application=application,
     )
     send_application_whatsapp(application, message, "application submission")
+    notify_hrm_application_submitted(application)
     return application
 
 
