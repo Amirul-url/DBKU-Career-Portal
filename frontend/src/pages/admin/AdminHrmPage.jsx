@@ -922,7 +922,9 @@ export default function AdminHrmPage() {
                       onViewApplications: isHrmWorkspace ? () => openFilteredPanel(item.applicationsLabel, "Permohonan", item.type) : null,
                     }))}
                   />
-                  <StatusSummaryPanel applications={overallMetrics.applications} isHrmWorkspace={isHrmWorkspace} />
+                  {isHrmWorkspace ? (
+                    <StatusSummaryPanel applications={overallMetrics.applications} isHrmWorkspace={isHrmWorkspace} />
+                  ) : null}
                 </aside>
               </div>
             </>

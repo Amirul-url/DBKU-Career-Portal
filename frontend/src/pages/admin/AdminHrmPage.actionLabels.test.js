@@ -75,7 +75,7 @@ test("HRM and department dashboards keep assignment status separate from shortli
   assert.match(source, /function getDashboardApplicationStatus\(application, isHrmWorkspace\)/);
   assert.match(source, /return getInternshipDashboardStatus\(application, isHrmWorkspace\)/);
   assert.match(source, /const displayStatus = useDashboardStatus \? getDashboardApplicationStatus\(app, isHrmWorkspace\) : app\.status/);
-  assert.match(source, /<StatusSummaryPanel applications=\{overallMetrics\.applications\} isHrmWorkspace=\{isHrmWorkspace\} \/>/);
+  assert.match(source, /\{isHrmWorkspace \? \(\s*<StatusSummaryPanel applications=\{overallMetrics\.applications\} isHrmWorkspace=\{isHrmWorkspace\} \/>\s*\) : null\}/);
   assert.match(source, /applications\.filter\(\(app\) => getDashboardApplicationStatus\(app, isHrmWorkspace\) === status\)\.length/);
 });
 
