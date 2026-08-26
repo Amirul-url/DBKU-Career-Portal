@@ -3320,7 +3320,7 @@ function HrmApplicationDetailPage({
     ...(shouldShowDepartmentDecision ? [departmentDecisionTab] : []),
     ...(!isJobApplication && shouldShowHrmFinalDecision ? [hrmFinalDecisionTab] : []),
     ...(shouldShowOrganizationFeedback ? [organizationFeedbackTab] : []),
-    ...(!isJobApplication && hasApplicantRespondedToOffer(application) ? [applicantConfirmationTab] : []),
+    ...(hasApplicantRespondedToOffer(application) ? [applicantConfirmationTab] : []),
   ];
   const detailTabGroups = isJobApplication ? [] : [
     { label: "Pemohon", tabs: applicantDetailTabs },

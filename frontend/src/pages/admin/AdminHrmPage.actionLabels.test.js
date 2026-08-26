@@ -558,7 +558,8 @@ test("HRM can see applicant offer confirmation after applicant agrees", () => {
   assert.match(source, /internship_active: statusLabel\.internship_active/);
   assert.match(source, /internship_completed: statusLabel\.internship_completed/);
   assert.match(source, /const applicantConfirmationTab = "Pengesahan Pemohon"/);
-  assert.match(source, /\.\.\.\(!isJobApplication && hasApplicantRespondedToOffer\(application\) \? \[applicantConfirmationTab\] : \[\]\)/);
+  assert.match(source, /\.\.\.\(hasApplicantRespondedToOffer\(application\) \? \[applicantConfirmationTab\] : \[\]\)/);
+  assert.doesNotMatch(source, /\.\.\.\(!isJobApplication && hasApplicantRespondedToOffer\(application\) \? \[applicantConfirmationTab\] : \[\]\)/);
   assert.match(source, /function ApplicantConfirmationReadOnlyTab/);
   assert.match(source, /Dokumen pengesahan pemohon/);
   assert.match(source, /Pemohon telah menerima tawaran latihan industri ini pada \$\{dateValue\(confirmation\.submitted_at\)\}\./);
