@@ -1115,13 +1115,21 @@ export function InternshipApplicationReadOnlyPanel({
   const visibleStatus = hasApplicantAgreedToOffer(application)
     ? getApplicantAgreedInternshipStatus(application)
     : getApplicantVisibleStatus(status, maskAcceptedStatus, application);
-  const panelTabs = isJobApplication ? readOnlyJobInfoTabs : [...infoTabs, ...extraTabs];
+  const panelTabs = isJobApplication ? [...readOnlyJobInfoTabs, ...extraTabs] : [...infoTabs, ...extraTabs];
   const panelTitle = isJobApplication ? `Nama Jawatan Yang Dipohon: ${vacancy.title || "Jawatan DBKU"}` : "Permohonan Latihan Industri";
   const activeInfoHeading = isJobApplication
-    ? getReadOnlyJobInfoHeading(activeInfoTab, readOnlyJobInfoTabs.indexOf(activeInfoTab))
+    ? readOnlyJobInfoTabs.includes(activeInfoTab)
+      ? getReadOnlyJobInfoHeading(activeInfoTab, readOnlyJobInfoTabs.indexOf(activeInfoTab))
+      : activeInfoTab
     : activeInfoTab;
   const currentDocumentFields = isJobApplication ? jobDocumentFields : documentFields;
-  const groupedTabs = tabGroups
+  const defaultJobTabGroups = isJobApplication && extraTabs.length
+    ? [
+        { label: "PEMOHON", tabs: readOnlyJobInfoTabs },
+        { label: "URUSAN DALAMAN", tabs: extraTabs },
+      ]
+    : [];
+  const groupedTabs = (tabGroups.length ? tabGroups : defaultJobTabGroups)
     .map((group) => ({
       ...group,
       tabs: (group.tabs || []).filter((tab) => panelTabs.includes(tab)),
@@ -1132,11 +1140,11 @@ export function InternshipApplicationReadOnlyPanel({
     <button
       className={activeInfoTab === tab ? "active" : ""}
       key={tab}
-      title={isJobApplication ? getReadOnlyJobInfoHeading(tab, readOnlyJobInfoTabs.indexOf(tab)) : undefined}
+      title={isJobApplication && readOnlyJobInfoTabs.includes(tab) ? getReadOnlyJobInfoHeading(tab, readOnlyJobInfoTabs.indexOf(tab)) : undefined}
       type="button"
       onClick={() => onTabChange(tab)}
     >
-      {isJobApplication ? getReadOnlyJobTabLabel(tab, readOnlyJobInfoTabs.indexOf(tab)) : tab}
+      {isJobApplication && readOnlyJobInfoTabs.includes(tab) ? getReadOnlyJobTabLabel(tab, readOnlyJobInfoTabs.indexOf(tab)) : tab}
     </button>
   );
 
@@ -1598,22 +1606,28 @@ export function InternshipApplicationReadOnlyPanel({
     );
   };
 
-  const renderJobActiveTabContent = () => (
-    <>
-      {activeInfoTab === personalInfoTab ? renderJobPersonalFields() : null}
-      {activeInfoTab === jobSpmTab ? renderJobSpmFields() : null}
-      {activeInfoTab === jobBmJulyTab ? renderJobBmJulyFields() : null}
-      {activeInfoTab === jobMathJulyTab ? renderJobMathJulyFields() : null}
-      {activeInfoTab === jobStpmTab ? renderJobStpmFields() : null}
-      {activeInfoTab === jobHigherEducationTab ? renderJobHigherEducationFields() : null}
-      {activeInfoTab === jobLanguageSkillsTab ? renderJobLanguageSkillsFields() : null}
-      {activeInfoTab === jobComputerSkillsTab ? renderJobComputerSkillsFields() : null}
-      {activeInfoTab === jobWorkExperienceTab ? renderJobWorkExperienceFields() : null}
-      {activeInfoTab === jobReferencesTab ? renderJobReferencesFields() : null}
-      {activeInfoTab === documentSupportTab ? renderDocumentFields() : null}
-      {activeInfoTab === jobDeclarationTab ? renderJobDeclarationFields() : null}
-    </>
-  );
+  const renderJobActiveTabContent = () => {
+    if (!readOnlyJobInfoTabs.includes(activeInfoTab)) {
+      return renderExtraTabContent ? renderExtraTabContent(activeInfoTab) : null;
+    }
+
+    return (
+      <>
+        {activeInfoTab === personalInfoTab ? renderJobPersonalFields() : null}
+        {activeInfoTab === jobSpmTab ? renderJobSpmFields() : null}
+        {activeInfoTab === jobBmJulyTab ? renderJobBmJulyFields() : null}
+        {activeInfoTab === jobMathJulyTab ? renderJobMathJulyFields() : null}
+        {activeInfoTab === jobStpmTab ? renderJobStpmFields() : null}
+        {activeInfoTab === jobHigherEducationTab ? renderJobHigherEducationFields() : null}
+        {activeInfoTab === jobLanguageSkillsTab ? renderJobLanguageSkillsFields() : null}
+        {activeInfoTab === jobComputerSkillsTab ? renderJobComputerSkillsFields() : null}
+        {activeInfoTab === jobWorkExperienceTab ? renderJobWorkExperienceFields() : null}
+        {activeInfoTab === jobReferencesTab ? renderJobReferencesFields() : null}
+        {activeInfoTab === documentSupportTab ? renderDocumentFields() : null}
+        {activeInfoTab === jobDeclarationTab ? renderJobDeclarationFields() : null}
+      </>
+    );
+  };
 
   return (
     <section

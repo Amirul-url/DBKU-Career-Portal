@@ -5,6 +5,7 @@ import test from "node:test";
 const source = readFileSync(new URL("./AdminHrmPage.jsx", import.meta.url), "utf8");
 const cssSource = readFileSync(new URL("../../index.css", import.meta.url), "utf8");
 const adminRoutesSource = readFileSync(new URL("../../modules/admin/adminRoutes.js", import.meta.url), "utf8");
+const applicantViewSource = readFileSync(new URL("../applicant/ApplicantApplicationViewPage.jsx", import.meta.url), "utf8");
 const decisionCopySource = readFileSync(new URL("../../modules/internship/internshipDecisionCopy.js", import.meta.url), "utf8");
 
 test("HRM application action labels match the department review workflow", () => {
@@ -16,7 +17,7 @@ test("HRM application action labels match the department review workflow", () =>
   assert.match(source, /reviewWithAssessment\("incomplete", "Tidak Lengkap"\)/);
   assert.match(source, /onReview\(app\.id, "incomplete"\)/);
   assert.doesNotMatch(source, />\s*Senarai pendek\s*</);
-  assert.doesNotMatch(source, /className="reject"[\s\S]*>\s*Tolak\s*</);
+  assert.doesNotMatch(source, /className="reject"[\s\S]{0,200}>\s*Tolak\s*</);
 });
 
 test("HRM sidebar shows red badges for new application counts", () => {
@@ -87,6 +88,70 @@ test("internship application table uses icon-only view actions", () => {
   assert.doesNotMatch(source, /<Icon>visibility<\/Icon>\s*Lihat\s*<\/button>/);
 });
 
+test("HRM job application table follows the internship list layout", () => {
+  assert.match(source, /function JobApplicationsPanel\(\{ applications, onView \}\)/);
+  assert.match(source, /<JobApplicationsPanel[\s\S]*applications=\{filteredApplications\}[\s\S]*onView=\{\(application\) => navigate\(`\$\{ADMIN_ROUTES\.applications\.job\}\/\$\{application\.id\}`\)\}/);
+  assert.match(source, /className="hrm-internship-applications-card hrm-job-applications-card"/);
+  assert.match(source, /className="applicant-table-controls hrm-internship-filters hrm-job-application-filters"/);
+  assert.match(source, />\s*Jawatan Dipohon\s*</);
+  assert.match(source, />\s*No\. Rujukan\s*</);
+  assert.match(source, />\s*Nama Calon\s*</);
+  assert.match(source, />\s*Tarikh\s*<\/th>\s*<th>Status<\/th>/);
+  assert.match(source, /formatReferenceNo\(app\)/);
+  assert.match(source, /dateValue\(getApplicationDateValue\(app\)\)/);
+  assert.match(source, /<footer className="applicant-table-pagination">[\s\S]*Memaparkan \{visibleStart\}-\{visibleEnd\} daripada \{filteredApplications\.length\} permohonan/);
+  assert.match(cssSource, /\.hrm-job-applications-table \{[\s\S]*min-width: 1080px;/);
+  assert.match(cssSource, /\.hrm-job-applications-table th:nth-child\(6\),[\s\S]*\.hrm-job-applications-table td:nth-child\(6\) \{[\s\S]*width: 9%;[\s\S]*text-align: center;/);
+});
+
+test("HRM job application table uses only the blue eye action", () => {
+  const jobPanelSource = source.slice(
+    source.indexOf("function JobApplicationsPanel"),
+    source.indexOf("function InternshipApplicationsPanel"),
+  );
+  assert.match(jobPanelSource, /<button className="view" type="button" aria-label="Lihat" title="Lihat" onClick=\{\(\) => onView\(app\)\}>/);
+  assert.match(jobPanelSource, /<Icon>visibility<\/Icon>/);
+  assert.doesNotMatch(jobPanelSource, /className="shortlist"/);
+  assert.doesNotMatch(jobPanelSource, /className="incomplete"/);
+  assert.doesNotMatch(jobPanelSource, /className="reject"/);
+  assert.doesNotMatch(source, /function JobApplicationDetailModal/);
+  assert.ok(adminRoutesSource.includes("const jobApplicationDetailMatch = currentPath.match(/^\\/admin\\/jobs\\/applications\\/([^/]+)$/);"));
+  assert.match(adminRoutesSource, /label: "Butiran Permohonan Jawatan DBKU"/);
+});
+
+test("HRM job application detail shows A-L tabs and HRM review tab", () => {
+  assert.match(source, /function HrmApplicationDetailPage\(\{/);
+  assert.match(source, /applicationType=\{activeVacancyType\}/);
+  assert.match(source, /const isJobApplication = applicationType === "job"/);
+  assert.match(source, /\.\.\.\(isHrmWorkspace \? \[hrmReviewTab\] : \[\]\)/);
+  assert.match(source, /const detailTabGroups = isJobApplication \? \[\] : \[/);
+  assert.match(source, /tab === hrmReviewTab \? \(\s*<HrmInternshipAssessmentTab/);
+  assert.match(applicantViewSource, /const readOnlyJobInfoTabs = \[/);
+  assert.match(applicantViewSource, /const panelTabs = isJobApplication \? \[\.\.\.readOnlyJobInfoTabs, \.\.\.extraTabs\] : \[\.\.\.infoTabs, \.\.\.extraTabs\]/);
+  assert.match(applicantViewSource, /const defaultJobTabGroups = isJobApplication && extraTabs\.length/);
+  assert.match(applicantViewSource, /\{ label: "PEMOHON", tabs: readOnlyJobInfoTabs \}/);
+  assert.match(applicantViewSource, /\{ label: "URUSAN DALAMAN", tabs: extraTabs \}/);
+  assert.match(applicantViewSource, /\(tabGroups\.length \? tabGroups : defaultJobTabGroups\)/);
+  assert.match(applicantViewSource, /if \(!readOnlyJobInfoTabs\.includes\(activeInfoTab\)\) \{\s*return renderExtraTabContent \? renderExtraTabContent\(activeInfoTab\) : null;/);
+  assert.match(applicantViewSource, /isJobApplication && readOnlyJobInfoTabs\.includes\(tab\) \? getReadOnlyJobTabLabel\(tab, readOnlyJobInfoTabs\.indexOf\(tab\)\) : tab/);
+});
+
+test("HRM assessment higher education fields can be edited and saved", () => {
+  assert.match(source, /const \[assessmentInstitution, setAssessmentInstitution\] = useState\(savedAssessment\.institution \|\| studentInfo\.institution \|\| ""\)/);
+  assert.match(source, /const \[assessmentSpecialization, setAssessmentSpecialization\] = useState\(savedAssessment\.specialization \|\| studentInfo\.program \|\| ""\)/);
+  assert.match(source, /const \[assessmentCgpa, setAssessmentCgpa\] = useState\(savedAssessment\.cgpa \|\| studentInfo\.cgpa \|\| ""\)/);
+  assert.match(source, /institution: values\.institution \|\| studentInfo\.institution \|\| ""/);
+  assert.match(source, /specialization: values\.specialization \|\| studentInfo\.program \|\| ""/);
+  assert.match(source, /cgpa: values\.cgpa \|\| studentInfo\.cgpa \|\| ""/);
+  assert.match(source, /value=\{assessmentInstitution\}/);
+  assert.match(source, /onChange=\{\(event\) => setAssessmentInstitution\(event\.target\.value\)\}/);
+  assert.match(source, /value=\{assessmentSpecialization\}/);
+  assert.match(source, /onChange=\{\(event\) => setAssessmentSpecialization\(event\.target\.value\)\}/);
+  assert.match(source, /value=\{assessmentCgpa\}/);
+  assert.match(source, /onChange=\{\(event\) => setAssessmentCgpa\(event\.target\.value\)\}/);
+  assert.match(source, /saveAssessment\(\{ decision: nextDecision, educationLevel, institution: assessmentInstitution, specialization: assessmentSpecialization, cgpa: assessmentCgpa \}\)/);
+});
+
 test("recent application pagination keeps controls evenly aligned", () => {
   assert.match(source, /<footer className="hrm-recent-pagination">[\s\S]*<strong>\{recentApplications\.activePage\} \/ \{recentApplications\.totalPages\}<\/strong>/);
   assert.match(cssSource, /\.hrm-recent-pagination div \{[\s\S]*display: grid;[\s\S]*grid-template-columns: 42px minmax\(42px, auto\) 42px;[\s\S]*justify-items: center;/);
@@ -127,6 +192,10 @@ test("admin workspace labels and navigation follow the signed-in department", ()
   assert.doesNotMatch(source, />Papan pemuka HRM<\/h1>/);
 });
 
+test("application detail sidebar only highlights the matching application type", () => {
+  assert.match(source, /const isDetailActive =\s*panel === "application-detail" &&\s*item\.panel === "applications" &&\s*item\.vacancyType === activeVacancyType &&\s*item\.to === ADMIN_ROUTES\.applications\[item\.vacancyType\]/);
+});
+
 test("department job management is read-only", () => {
   assert.match(adminRoutesSource, /label: "Jawatan Kosong DBKU"/);
   assert.doesNotMatch(adminRoutesSource, /label: "Urus Jawatan DBKU"/);
@@ -160,9 +229,11 @@ test("department dashboards keep the HRM layout without HRM-only workflow links"
   assert.doesNotMatch(source, /function DepartmentDashboardPanel/);
 });
 
-test("internship application list does not repeat the page title inside the table card", () => {
-  assert.match(source, /activeVacancyType !== "internship" \? \(/);
-  assert.match(source, /<h2>Permohonan \{activeOpportunityLabel\}<\/h2>/);
+test("application lists do not repeat the page title inside the table card", () => {
+  assert.match(source, /activeVacancyType === "internship" \? \(/);
+  assert.match(source, /<InternshipApplicationsPanel[\s\S]*applications=\{filteredApplications\}/);
+  assert.match(source, /<JobApplicationsPanel[\s\S]*applications=\{filteredApplications\}/);
+  assert.doesNotMatch(source, /<h2>Permohonan \{activeOpportunityLabel\}<\/h2>/);
 });
 
 test("HRM review can assign internship applications to a department dashboard", () => {
@@ -200,7 +271,7 @@ test("department decision tab replaces HRM review for department workspaces", ()
   assert.match(source, /disabled=\{isLocked\}/);
   assert.match(source, /\{!isLocked \? \(/);
   assert.match(source, /\.\.\.\(isHrmWorkspace \? \[hrmReviewTab\] : \[\]\)/);
-  assert.match(source, /\.\.\.\(shouldShowDepartmentDecision \? \[departmentDecisionTab\] : \[\]\)/);
+  assert.match(source, /\.\.\.\(!isJobApplication && shouldShowDepartmentDecision \? \[departmentDecisionTab\] : \[\]\)/);
   assert.match(source, /isReadOnly=\{isHrmWorkspace\}/);
   assert.match(source, /maskAcceptedStatus=\{false\}/);
 });
@@ -217,11 +288,11 @@ test("HRM makes the final internship decision after department recommendation", 
   assert.match(source, /status: nextStatus/);
   assert.match(source, /const nextStatus = "rejected"/);
   assert.match(source, /onSaveFinalDecision=\{saveHrmFinalDecision\}/);
-  assert.match(source, /\.\.\.\(shouldShowHrmFinalDecision \? \[hrmFinalDecisionTab\] : \[\]\)/);
+  assert.match(source, /\.\.\.\(!isJobApplication && shouldShowHrmFinalDecision \? \[hrmFinalDecisionTab\] : \[\]\)/);
   assert.match(source, /const departmentRecommendation = getSavedDepartmentDecision\(application\)\.recommendation \|\| ""/);
   assert.match(source, /departmentRecommendation === "Tolak"[\s\S]*application\?\.status === "shortlisted"/);
   assert.match(source, /const shouldShowHrmFinalDecision = isHrmWorkspace && \(needsFinalDecision \|\| hasFinalRejectionDecision\)/);
-  assert.match(source, /\.\.\.\(shouldShowOrganizationFeedback \? \[organizationFeedbackTab\] : \[\]\)/);
+  assert.match(source, /\.\.\.\(!isJobApplication && shouldShowOrganizationFeedback \? \[organizationFeedbackTab\] : \[\]\)/);
   assert.match(source, /const \[finalRemarks, setFinalRemarks\] = useState/);
   assert.match(source, /<textarea[\s\S]*value=\{finalRemarks\}[\s\S]*onChange=\{\(event\) => setFinalRemarks\(event\.target\.value\)\}/);
   assert.match(source, /buildHrmFinalDecisionPayload\(application, user, finalRemarks\)/);
@@ -265,7 +336,7 @@ test("HRM and department decision tabs keep draft selections in local state unti
   assert.match(source, /const \[educationLevel, setEducationLevel\] = useState/);
   assert.match(source, /const \[recommendation, setRecommendation\] = useState/);
   assert.match(source, /const \[remarks, setRemarks\] = useState/);
-  assert.match(source, /const isSaved = await saveAssessment\(\{ decision: nextDecision, educationLevel \}\)/);
+  assert.match(source, /const isSaved = await saveAssessment\(\{ decision: nextDecision, educationLevel, institution: assessmentInstitution, specialization: assessmentSpecialization, cgpa: assessmentCgpa \}\)/);
   assert.match(source, /const chooseDecision = \(item\) => \{\s*if \(isAssessmentLocked\) return;\s*const nextDecision = decision === item \? "" : item;\s*setDecision\(nextDecision\);\s*\};/);
   assert.match(source, /const chooseEducationLevel = \(item\) => \{\s*if \(isAssessmentLocked\) return;\s*const nextEducationLevel = educationLevel === item \? "" : item;\s*setEducationLevel\(nextEducationLevel\);\s*\};/);
   assert.match(source, /await onSaveDecision\(application, buildDepartmentDecisionPayload/);
@@ -279,15 +350,15 @@ test("HRM and department decision tabs keep draft selections in local state unti
   assert.match(source, />\s*\{isSaving \? "Menghantar\.\.\." : "Ya"\}\s*</);
   assert.match(source, /setShowConfirmModal\(true\)/);
   assert.match(source, /onSubmitted\?\.\(\)/);
-  assert.match(source, /onDepartmentDecisionSubmitted=\{\(\) => navigate\(ADMIN_ROUTES\.applications\.internship\)\}/);
+  assert.match(source, /onDepartmentDecisionSubmitted=\{\(\) => navigate\(ADMIN_ROUTES\.applications\[activeVacancyType\] \|\| ADMIN_ROUTES\.applications\.job\)\}/);
 });
 
 test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /const organizationFeedbackTab = "Maklumbalas Organisasi"/);
   assert.match(source, /const applicantDetailTabs = \["Maklumat Peribadi Pemohon", "Maklumat Akademik", "Dokumen Sokongan"\]/);
   assert.match(source, /const shouldShowOrganizationFeedback =\s*isHrmWorkspace &&\s*\(departmentRecommendation === "Terima" \|\| application\?\.status === "offered" \|\| application\?\.status === "accepted"\)/);
-  assert.match(source, /\.\.\.\(shouldShowOrganizationFeedback \? \[organizationFeedbackTab\] : \[\]\)/);
-  assert.match(source, /const detailTabGroups = \[\s*\{ label: "Pemohon", tabs: applicantDetailTabs \},\s*\{ label: "Urusan Dalaman", tabs: extraTabs \},\s*\]/);
+  assert.match(source, /\.\.\.\(!isJobApplication && shouldShowOrganizationFeedback \? \[organizationFeedbackTab\] : \[\]\)/);
+  assert.match(source, /const detailTabGroups = isJobApplication \? \[\] : \[\s*\{ label: "Pemohon", tabs: applicantDetailTabs \},\s*\{ label: "Urusan Dalaman", tabs: extraTabs \},\s*\]/);
   assert.match(source, /tabGroups=\{detailTabGroups\}/);
   assert.match(source, /import \{ InternshipApplicationReadOnlyPanel \} from "\.\.\/applicant\/ApplicantApplicationViewPage"/);
   assert.match(source, /className="hrm-application-direct-panel"/);
@@ -389,7 +460,7 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /sent_to_applicant_at:/);
   assert.match(source, /onSendOrganizationFeedbackToApplicant=\{sendOrganizationFeedbackToApplicant\}/);
   assert.match(source, /onSendToApplicant=\{onSendOrganizationFeedbackToApplicant\}/);
-  assert.match(source, /onOrganizationFeedbackSent=\{\(\) => navigate\(ADMIN_ROUTES\.applications\.internship\)\}/);
+  assert.match(source, /onOrganizationFeedbackSent=\{\(\) => navigate\(ADMIN_ROUTES\.applications\[activeVacancyType\] \|\| ADMIN_ROUTES\.applications\.job\)\}/);
   assert.match(source, /onSubmitted=\{onOrganizationFeedbackSent\}/);
   assert.match(source, /await onSendToApplicant\(application, \{/);
   assert.match(source, /reportDate: feedbackReportDate\.trim\(\)/);
@@ -428,14 +499,14 @@ test("HRM can see applicant offer confirmation after applicant agrees", () => {
   assert.match(source, /internship_active: statusLabel\.internship_active/);
   assert.match(source, /internship_completed: statusLabel\.internship_completed/);
   assert.match(source, /const applicantConfirmationTab = "Pengesahan Pemohon"/);
-  assert.match(source, /\.\.\.\(hasApplicantRespondedToOffer\(application\) \? \[applicantConfirmationTab\] : \[\]\)/);
+  assert.match(source, /\.\.\.\(!isJobApplication && hasApplicantRespondedToOffer\(application\) \? \[applicantConfirmationTab\] : \[\]\)/);
   assert.match(source, /function ApplicantConfirmationReadOnlyTab/);
   assert.match(source, /Dokumen pengesahan pemohon/);
   assert.match(source, /Pemohon telah menerima tawaran latihan industri ini pada \$\{dateValue\(confirmation\.submitted_at\)\}\./);
   assert.match(source, /Pemohon telah menolak tawaran latihan industri ini\./);
   const applicantConfirmationSource = source.slice(
     source.indexOf("function ApplicantConfirmationReadOnlyTab"),
-    source.indexOf("function InternshipApplicationDetailPage"),
+    source.indexOf("function HrmApplicationDetailPage"),
   );
   assert.match(applicantConfirmationSource, /if \(isRejected\) return \(/);
   assert.ok(

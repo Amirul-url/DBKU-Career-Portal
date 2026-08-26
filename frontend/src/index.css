@@ -11157,6 +11157,57 @@ body:has(.applicant-profile-page) {
   font-size: 17px;
 }
 
+.hrm-job-application-filters {
+  grid-template-columns:
+    minmax(300px, 1.22fr)
+    minmax(145px, 0.55fr)
+    minmax(135px, 0.5fr)
+    minmax(165px, 0.65fr)
+    auto;
+}
+
+.hrm-job-applications-table {
+  min-width: 1080px;
+}
+
+.hrm-job-applications-table th:nth-child(1),
+.hrm-job-applications-table td:nth-child(1) {
+  width: 14%;
+}
+
+.hrm-job-applications-table th:nth-child(2),
+.hrm-job-applications-table td:nth-child(2) {
+  width: 22%;
+}
+
+.hrm-job-applications-table th:nth-child(3),
+.hrm-job-applications-table td:nth-child(3) {
+  width: 24%;
+}
+
+.hrm-job-applications-table th:nth-child(4),
+.hrm-job-applications-table td:nth-child(4) {
+  width: 12%;
+  white-space: nowrap;
+}
+
+.hrm-job-applications-table th:nth-child(5),
+.hrm-job-applications-table td:nth-child(5) {
+  width: 14%;
+  text-align: center;
+}
+
+.hrm-job-applications-table th:nth-child(6),
+.hrm-job-applications-table td:nth-child(6) {
+  width: 9%;
+  text-align: center;
+}
+
+.hrm-job-candidate-name {
+  font-weight: 600;
+  line-height: 1.35;
+}
+
 .hrm-application-detail-page {
   overflow: hidden;
   border-radius: 8px;
@@ -11290,6 +11341,25 @@ body:has(.applicant-profile-page) {
   border-bottom: 1px dotted #000000;
   font-weight: 500;
   overflow-wrap: anywhere;
+}
+
+.hrm-assessment-right dd input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: #020617;
+  font: inherit;
+  outline: 0;
+}
+
+.hrm-assessment-right dd input:focus {
+  box-shadow: 0 2px 0 #bbf7d0;
+}
+
+.hrm-assessment-right dd input:disabled {
+  color: #020617;
+  cursor: not-allowed;
 }
 
 .hrm-assessment-right dl div::before {

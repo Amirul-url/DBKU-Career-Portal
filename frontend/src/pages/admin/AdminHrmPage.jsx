@@ -763,7 +763,11 @@ export default function AdminHrmPage() {
             return (
               <NavLink
                 className={({ isActive }) => {
-                  const isDetailActive = panel === "application-detail" && item.to === ADMIN_ROUTES.applications.internship;
+                  const isDetailActive =
+                    panel === "application-detail" &&
+                    item.panel === "applications" &&
+                    item.vacancyType === activeVacancyType &&
+                    item.to === ADMIN_ROUTES.applications[item.vacancyType];
                   return `relative flex w-full items-center rounded-md py-3 text-left text-[14px] font-bold ${isSidebarOpen ? "gap-4 px-4" : "justify-center px-0"} ${isActive || isDetailActive ? "bg-emerald-50 text-slate-950" : "text-slate-950"}`;
                 }}
                 end
@@ -1252,14 +1256,6 @@ export default function AdminHrmPage() {
                 </div>
               </div>
               <section className="hrm-card hrm-table-card">
-                {activeVacancyType !== "internship" ? (
-                  <header>
-                    <div>
-                      <h2>Permohonan {activeOpportunityLabel}</h2>
-                      <p>{filteredApplications.length} permohonan direkodkan</p>
-                    </div>
-                  </header>
-                ) : null}
                 {activeVacancyType === "internship" ? (
                   <InternshipApplicationsPanel
                     applications={filteredApplications}
@@ -1267,31 +1263,32 @@ export default function AdminHrmPage() {
                     onView={(application) => navigate(`${ADMIN_ROUTES.applications.internship}/${application.id}`)}
                   />
                 ) : (
-                  <ApplicationTable
+                  <JobApplicationsPanel
                     applications={filteredApplications}
-                    onReview={setReview}
+                    onView={(application) => navigate(`${ADMIN_ROUTES.applications.job}/${application.id}`)}
                   />
                 )}
               </section>
             </>
           )}
           {panel === "application-detail" && (
-            <InternshipApplicationDetailPage
+            <HrmApplicationDetailPage
               application={selectedApplication}
+              applicationType={activeVacancyType}
               isHrmWorkspace={isHrmWorkspace}
               loading={loading}
-              onBack={() => navigate(ADMIN_ROUTES.applications.internship)}
+              onBack={() => navigate(ADMIN_ROUTES.applications[activeVacancyType] || ADMIN_ROUTES.applications.job)}
               onReview={async (id, status, options) => {
                 await setReview(id, status, options);
-                navigate(ADMIN_ROUTES.applications.internship);
+                navigate(ADMIN_ROUTES.applications[activeVacancyType] || ADMIN_ROUTES.applications.job);
               }}
               onSaveAssessment={saveHrmAssessment}
-              onDepartmentDecisionSubmitted={() => navigate(ADMIN_ROUTES.applications.internship)}
-              onFinalDecisionSubmitted={() => navigate(ADMIN_ROUTES.applications.internship)}
+              onDepartmentDecisionSubmitted={() => navigate(ADMIN_ROUTES.applications[activeVacancyType] || ADMIN_ROUTES.applications.job)}
+              onFinalDecisionSubmitted={() => navigate(ADMIN_ROUTES.applications[activeVacancyType] || ADMIN_ROUTES.applications.job)}
               onSaveFinalDecision={saveHrmFinalDecision}
               onSaveDepartmentDecision={saveDepartmentDecision}
               onDeleteOrganizationFeedbackDocument={deleteOrganizationFeedbackDocument}
-              onOrganizationFeedbackSent={() => navigate(ADMIN_ROUTES.applications.internship)}
+              onOrganizationFeedbackSent={() => navigate(ADMIN_ROUTES.applications[activeVacancyType] || ADMIN_ROUTES.applications.job)}
               onSaveOrganizationFeedbackDocument={saveOrganizationFeedbackDocument}
               onSendOrganizationFeedbackToApplicant={sendOrganizationFeedbackToApplicant}
               user={user}
@@ -1721,6 +1718,9 @@ function getInternshipStudentInfo(application) {
 function getInternshipInstitution(application) {
   return getInternshipStudentInfo(application).institution || "Belum diisi";
 }
+function getJobApplicationTitle(application) {
+  return application?.vacancy_detail?.title || "Belum diisi";
+}
 function getInternshipStudentName(application) {
   const studentInfo = getInternshipStudentInfo(application);
   return studentInfo.name || application?.applicant_name || "Belum diisi";
@@ -1907,6 +1907,214 @@ function InstitutionSearchFilter({ onChange, options, value }) {
         </div>
       ) : null}
     </div>
+  );
+}
+function JobApplicationsPanel({ applications, onView }) {
+  const rowsPerPage = 5;
+  const [jobFilter, setJobFilter] = useState("all");
+  const [monthFilter, setMonthFilter] = useState("all");
+  const [yearFilter, setYearFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const jobOptions = useMemo(() => {
+    const jobs = new Set(
+      applications
+        .map((application) => getJobApplicationTitle(application))
+        .filter((title) => title && title !== "Belum diisi"),
+    );
+    return Array.from(jobs).sort((first, second) => first.localeCompare(second));
+  }, [applications]);
+  const yearOptions = useMemo(() => {
+    const years = new Set(
+      applications
+        .map((application) => getApplicationDateParts(application).year)
+        .filter(Boolean),
+    );
+    return Array.from(years).sort((first, second) => Number(second) - Number(first));
+  }, [applications]);
+  const statusOptions = useMemo(() => {
+    const statuses = new Set(applications.map((application) => application.status || "submitted"));
+    return Array.from(statuses);
+  }, [applications]);
+  const filteredApplications = useMemo(() => {
+    return applications.filter((application) => {
+      const jobTitle = getJobApplicationTitle(application);
+      const applicationDate = getApplicationDateParts(application);
+      const displayStatus = application.status || "submitted";
+      return (
+        (jobFilter === "all" || jobTitle === jobFilter) &&
+        (monthFilter === "all" || applicationDate.month === monthFilter) &&
+        (yearFilter === "all" || applicationDate.year === yearFilter) &&
+        (statusFilter === "all" || displayStatus === statusFilter)
+      );
+    });
+  }, [applications, jobFilter, monthFilter, statusFilter, yearFilter]);
+  const totalPages = Math.max(1, Math.ceil(filteredApplications.length / rowsPerPage));
+  const activePage = Math.min(currentPage, totalPages);
+  const startIndex = (activePage - 1) * rowsPerPage;
+  const visibleApplications = filteredApplications.slice(startIndex, startIndex + rowsPerPage);
+  const visibleStart = filteredApplications.length ? startIndex + 1 : 0;
+  const visibleEnd = Math.min(startIndex + rowsPerPage, filteredApplications.length);
+
+  const resetFilters = () => {
+    setJobFilter("all");
+    setMonthFilter("all");
+    setYearFilter("all");
+    setStatusFilter("all");
+    setCurrentPage(1);
+  };
+
+  return (
+    <section className="hrm-internship-applications-card hrm-job-applications-card">
+      <div className="applicant-table-toolbar hrm-internship-toolbar">
+        <div className="applicant-table-controls hrm-internship-filters hrm-job-application-filters">
+          <label>
+            <span>Jawatan Dipohon</span>
+            <select
+              value={jobFilter}
+              onChange={(event) => {
+                setJobFilter(event.target.value);
+                setCurrentPage(1);
+              }}
+            >
+              <option value="all">Semua</option>
+              {jobOptions.map((jobTitle) => (
+                <option key={jobTitle} value={jobTitle}>
+                  {jobTitle}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>Bulan</span>
+            <select
+              value={monthFilter}
+              onChange={(event) => {
+                setMonthFilter(event.target.value);
+                setCurrentPage(1);
+              }}
+            >
+              <option value="all">Semua</option>
+              {monthFilterOptions.map((month) => (
+                <option key={month.value} value={month.value}>
+                  {month.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>Tahun</span>
+            <select
+              value={yearFilter}
+              onChange={(event) => {
+                setYearFilter(event.target.value);
+                setCurrentPage(1);
+              }}
+            >
+              <option value="all">Semua</option>
+              {yearOptions.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>Status</span>
+            <select
+              value={statusFilter}
+              onChange={(event) => {
+                setStatusFilter(event.target.value);
+                setCurrentPage(1);
+              }}
+            >
+              <option value="all">Semua</option>
+              {statusOptions.map((status) => (
+                <option key={status} value={status}>
+                  {statusLabel[status] || status}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button className="hrm-filter-reset" type="button" onClick={resetFilters}>
+            Set semula
+          </button>
+        </div>
+      </div>
+      <div className="applicant-applications-table-wrap">
+        <table className="applicant-applications-table hrm-internship-applications-table hrm-job-applications-table">
+          <thead>
+            <tr>
+              <th>No. Rujukan</th>
+              <th>Nama Calon</th>
+              <th>Jawatan Dipohon</th>
+              <th>Tarikh</th>
+              <th>Status</th>
+              <th>Tindakan</th>
+            </tr>
+          </thead>
+          <tbody>
+            {visibleApplications.length ? (
+              visibleApplications.map((app) => {
+                const displayStatus = app.status || "submitted";
+                return (
+                  <tr key={app.id}>
+                    <td>
+                      <div className="hrm-reference-cell">
+                        <span>{formatReferenceNo(app)}</span>
+                      </div>
+                    </td>
+                    <td className="hrm-job-candidate-name">{app.applicant_name || "Pemohon"}</td>
+                    <td>{getJobApplicationTitle(app)}</td>
+                    <td>{dateValue(getApplicationDateValue(app))}</td>
+                    <td>
+                      <Badge status={displayStatus} />
+                    </td>
+                    <td>
+                      <div className="hrm-actions hrm-internship-actions">
+                        <button className="view" type="button" aria-label="Lihat" title="Lihat" onClick={() => onView(app)}>
+                          <Icon>visibility</Icon>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td className="applicant-table-empty" colSpan="6">
+                  Tiada permohonan jawatan DBKU ditemui.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+      <footer className="applicant-table-pagination">
+        <span>
+          Memaparkan {visibleStart}-{visibleEnd} daripada {filteredApplications.length} permohonan
+        </span>
+        <div>
+          <button
+            type="button"
+            aria-label="Halaman sebelumnya"
+            disabled={activePage === 1}
+            onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+          >
+            &lt;
+          </button>
+          <strong>{activePage} / {totalPages}</strong>
+          <button
+            type="button"
+            aria-label="Halaman seterusnya"
+            disabled={activePage === totalPages}
+            onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+          >
+            &gt;
+          </button>
+        </div>
+      </footer>
+    </section>
   );
 }
 function InternshipApplicationsPanel({ applications, isHrmWorkspace, onView }) {
@@ -2121,11 +2329,11 @@ function getSavedHrmAssessment(application) {
 function buildHrmAssessmentPayload(application, values) {
   const studentInfo = getInternshipStudentInfo(application);
   return {
-    cgpa: studentInfo.cgpa || "",
+    cgpa: values.cgpa || studentInfo.cgpa || "",
     decision: values.decision || "",
     education_level: values.educationLevel || "",
-    institution: studentInfo.institution || "",
-    specialization: studentInfo.program || "",
+    institution: values.institution || studentInfo.institution || "",
+    specialization: values.specialization || studentInfo.program || "",
     updated_at: new Date().toISOString(),
   };
 }
@@ -2134,6 +2342,9 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
   const savedAssessment = getSavedHrmAssessment(application);
   const [decision, setDecision] = useState(savedAssessment.decision || "");
   const [educationLevel, setEducationLevel] = useState(savedAssessment.education_level || savedAssessment.educationLevel || "");
+  const [assessmentInstitution, setAssessmentInstitution] = useState(savedAssessment.institution || studentInfo.institution || "");
+  const [assessmentSpecialization, setAssessmentSpecialization] = useState(savedAssessment.specialization || studentInfo.program || "");
+  const [assessmentCgpa, setAssessmentCgpa] = useState(savedAssessment.cgpa || studentInfo.cgpa || "");
   const [assignedDepartment, setAssignedDepartment] = useState(application?.assigned_department || "");
   const [isSavingAssessment, setIsSavingAssessment] = useState(false);
   const isFinal = application ? ["shortlisted", "rejected"].includes(application.status) : false;
@@ -2171,7 +2382,7 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
     if (!application || isAssessmentLocked) return;
 
     setDecision(nextDecision);
-    const isSaved = await saveAssessment({ decision: nextDecision, educationLevel });
+    const isSaved = await saveAssessment({ decision: nextDecision, educationLevel, institution: assessmentInstitution, specialization: assessmentSpecialization, cgpa: assessmentCgpa });
     if (!isSaved) return;
     await onReview(
       application.id,
@@ -2223,15 +2434,39 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
             <dl>
               <div>
                 <dt>Institusi</dt>
-                <dd>{studentInfo.institution || ""}</dd>
+                <dd>
+                  <input
+                    aria-label="Institusi"
+                    disabled={isAssessmentLocked}
+                    type="text"
+                    value={assessmentInstitution}
+                    onChange={(event) => setAssessmentInstitution(event.target.value)}
+                  />
+                </dd>
               </div>
               <div>
                 <dt>Pengkhususan</dt>
-                <dd>{studentInfo.program || ""}</dd>
+                <dd>
+                  <input
+                    aria-label="Pengkhususan"
+                    disabled={isAssessmentLocked}
+                    type="text"
+                    value={assessmentSpecialization}
+                    onChange={(event) => setAssessmentSpecialization(event.target.value)}
+                  />
+                </dd>
               </div>
               <div>
                 <dt>CGPA</dt>
-                <dd>{studentInfo.cgpa || ""}</dd>
+                <dd>
+                  <input
+                    aria-label="CGPA"
+                    disabled={isAssessmentLocked}
+                    type="text"
+                    value={assessmentCgpa}
+                    onChange={(event) => setAssessmentCgpa(event.target.value)}
+                  />
+                </dd>
               </div>
             </dl>
           </section>
@@ -3003,8 +3238,9 @@ function ApplicantConfirmationReadOnlyTab({ application }) {
     </div>
   );
 }
-function InternshipApplicationDetailPage({
+function HrmApplicationDetailPage({
   application,
+  applicationType,
   isHrmWorkspace,
   loading,
   onBack,
@@ -3021,6 +3257,7 @@ function InternshipApplicationDetailPage({
   user,
 }) {
   const [activeTab, setActiveTab] = useState("Maklumat Peribadi Pemohon");
+  const isJobApplication = applicationType === "job";
   const shouldShowDepartmentDecision = !isHrmWorkspace || Boolean(application?.assigned_department);
   const departmentRecommendation = getSavedDepartmentDecision(application).recommendation || "";
   const hasFinalDecision = hasSubmittedHrmFinalDecision(application);
@@ -3039,12 +3276,12 @@ function InternshipApplicationDetailPage({
     (departmentRecommendation === "Terima" || application?.status === "offered" || application?.status === "accepted");
   const extraTabs = [
     ...(isHrmWorkspace ? [hrmReviewTab] : []),
-    ...(shouldShowDepartmentDecision ? [departmentDecisionTab] : []),
-    ...(shouldShowHrmFinalDecision ? [hrmFinalDecisionTab] : []),
-    ...(shouldShowOrganizationFeedback ? [organizationFeedbackTab] : []),
-    ...(hasApplicantRespondedToOffer(application) ? [applicantConfirmationTab] : []),
+    ...(!isJobApplication && shouldShowDepartmentDecision ? [departmentDecisionTab] : []),
+    ...(!isJobApplication && shouldShowHrmFinalDecision ? [hrmFinalDecisionTab] : []),
+    ...(!isJobApplication && shouldShowOrganizationFeedback ? [organizationFeedbackTab] : []),
+    ...(!isJobApplication && hasApplicantRespondedToOffer(application) ? [applicantConfirmationTab] : []),
   ];
-  const detailTabGroups = [
+  const detailTabGroups = isJobApplication ? [] : [
     { label: "Pemohon", tabs: applicantDetailTabs },
     { label: "Urusan Dalaman", tabs: extraTabs },
   ];
@@ -3071,9 +3308,9 @@ function InternshipApplicationDetailPage({
         tabGroups={detailTabGroups}
         renderExtraTabContent={(tab) =>
           tab === hrmReviewTab ? (
-            <HrmInternshipAssessmentTab
-              application={application}
-              key={application?.id || "hrm-assessment"}
+              <HrmInternshipAssessmentTab
+                application={application}
+                key={application?.id || "hrm-assessment"}
               onReview={onReview}
               onSaveAssessment={onSaveAssessment}
             />

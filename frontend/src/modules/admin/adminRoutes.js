@@ -27,6 +27,18 @@ export const adminNavItems = [
 
 export function getAdminRouteState(pathname) {
   const currentPath = pathname.replace(/\/+$/, "") || "/admin";
+  const jobApplicationDetailMatch = currentPath.match(/^\/admin\/jobs\/applications\/([^/]+)$/);
+  if (jobApplicationDetailMatch) {
+    return {
+      icon: "group",
+      label: "Butiran Permohonan Jawatan DBKU",
+      panel: "application-detail",
+      to: currentPath,
+      vacancyType: "job",
+      applicationId: jobApplicationDetailMatch[1],
+    };
+  }
+
   const internshipApplicationDetailMatch = currentPath.match(/^\/admin\/internships\/applications\/([^/]+)$/);
   if (internshipApplicationDetailMatch) {
     return {
