@@ -220,10 +220,14 @@ test("job application language and computer sections render official skill table
   assert.match(internshipFormSource, /className="student-job-other-language-input"/);
   assert.match(internshipFormSource, /updateJobLanguageSkillRow\(index, "speaking"/);
   assert.match(internshipFormSource, /updateJobLanguageSkillRow\(index, "writing"/);
+  assert.match(internshipFormSource, /const isRequiredLanguageLevel = row\.required \|\| Boolean\(row\.language\.trim\(\)\);/);
+  assert.match(internshipFormSource, /required=\{isRequiredLanguageLevel\}/);
   assert.match(internshipFormSource, /const renderJobComputerSkillsSection = \(\) => \(/);
   assert.match(internshipFormSource, /student-job-computer-table/);
   assert.match(internshipFormSource, /updateJobComputerSkillRow\(index, "softwareName"/);
   assert.match(internshipFormSource, /updateJobComputerSkillRow\(index, "level"/);
+  assert.match(internshipFormSource, /const isRequiredComputerRow = index < minimumJobComputerSkillRows/);
+  assert.match(internshipFormSource, /required=\{isRequiredComputerRow\}/);
   assert.match(internshipFormSource, /activeInfoTab === jobLanguageSkillsTab \? renderJobLanguageSkillsSection\(\) : null/);
   assert.match(internshipFormSource, /activeInfoTab === jobComputerSkillsTab \? renderJobComputerSkillsSection\(\) : null/);
   assert.doesNotMatch(internshipFormSource, /activeInfoTab === jobLanguageSkillsTab \? renderJobSimpleSection\("jobLanguageSkills"/);

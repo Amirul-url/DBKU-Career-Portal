@@ -2270,6 +2270,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
 
   const renderJobLanguageLevelCell = (row, index, field, option, onChange) => {
     const normalizedOption = normalizeJobTableValue(option);
+    const isRequiredLanguageLevel = row.required || Boolean(row.language.trim());
 
     return (
       <td key={option}>
@@ -2278,6 +2279,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
             aria-label={`${row.language || "Bahasa Lain"} ${field} ${option}`}
             checked={row[field] === normalizedOption}
             name={`job-language-${index}-${field}`}
+            required={isRequiredLanguageLevel}
             type="radio"
             value={normalizedOption}
             onChange={onChange}
@@ -2362,36 +2364,43 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
           </tr>
         </thead>
         <tbody>
-          {getJobComputerSkillRows(studentInfo).map((row, index) => (
-            <tr key={index}>
-              <td>
-                <input
-                  aria-label={`Nama Perisian ${index + 1}`}
-                  value={row.softwareName}
-                  onChange={updateJobComputerSkillRow(index, "softwareName")}
-                />
-              </td>
-              {jobComputerLevelOptions.map((option) => {
-                const normalizedOption = normalizeJobTableValue(option);
+          {getJobComputerSkillRows(studentInfo).map((row, index) => {
+            const isRequiredComputerRow = index < minimumJobComputerSkillRows
+              || Boolean(row.softwareName.trim() || row.level.trim());
 
-                return (
-                  <td key={option}>
-                    <label className="student-job-radio-cell">
-                      <input
-                        aria-label={`Tahap Kemahiran ${option} ${index + 1}`}
-                        checked={row.level === normalizedOption}
-                        name={`job-computer-${index}-level`}
-                        type="radio"
-                        value={normalizedOption}
-                        onChange={updateJobComputerSkillRow(index, "level")}
-                      />
-                      <span>/</span>
-                    </label>
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
+            return (
+              <tr key={index}>
+                <td>
+                  <input
+                    aria-label={`Nama Perisian ${index + 1}`}
+                    required={isRequiredComputerRow}
+                    value={row.softwareName}
+                    onChange={updateJobComputerSkillRow(index, "softwareName")}
+                  />
+                </td>
+                {jobComputerLevelOptions.map((option) => {
+                  const normalizedOption = normalizeJobTableValue(option);
+
+                  return (
+                    <td key={option}>
+                      <label className="student-job-radio-cell">
+                        <input
+                          aria-label={`Tahap Kemahiran ${option} ${index + 1}`}
+                          checked={row.level === normalizedOption}
+                          name={`job-computer-${index}-level`}
+                          required={isRequiredComputerRow}
+                          type="radio"
+                          value={normalizedOption}
+                          onChange={updateJobComputerSkillRow(index, "level")}
+                        />
+                        <span>/</span>
+                      </label>
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
