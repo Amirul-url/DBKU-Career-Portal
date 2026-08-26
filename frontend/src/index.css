@@ -7740,8 +7740,8 @@ body:has(.applicant-profile-page) {
   max-width: 100%;
   margin: 0;
   color: #030712;
-  font-size: 16px;
-  line-height: 1.75;
+  font-size: 13px;
+  line-height: 1.65;
   text-align: left;
 }
 
@@ -7757,6 +7757,7 @@ body:has(.applicant-profile-page) {
   grid-template-columns: 260px 16px minmax(260px, 470px);
   gap: 8px;
   align-items: end;
+  font-size: 13px;
   min-height: 54px;
 }
 
