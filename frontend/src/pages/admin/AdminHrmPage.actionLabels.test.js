@@ -503,9 +503,10 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /setFeedbackRelease\(getOrganizationFeedbackRelease\(updatedApplication \|\| application\)\)/);
   assert.match(source, /onSubmitted\?\.\(\)/);
   assert.match(source, /application\?\.document_files\?\.organizationFeedbackDocuments/);
-  assert.match(source, /Nama Pelajar/);
+  assert.match(source, /<th>\{isJobFeedbackApplication \? "Nama Pemohon" : "Nama Pelajar"\}<\/th>/);
   assert.match(source, /const isJobFeedbackApplication = isJobApplicationDetail\(application\)/);
   assert.match(source, /const jobApplicationTitle = getJobApplicationTitle\(application\)/);
+  assert.match(source, /Nama Pemohon/);
   assert.match(source, /<th>Jawatan Dipohon<\/th>/);
   assert.match(source, /<td>\{jobApplicationTitle\}<\/td>/);
   assert.match(source, /if \(!isJobFeedbackApplication && !trimmedPeriod\)/);

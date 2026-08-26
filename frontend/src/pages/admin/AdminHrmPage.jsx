@@ -2924,7 +2924,7 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
         <table className="organization-feedback-table">
           <thead>
             <tr>
-              <th>Nama Pelajar</th>
+              <th>{isJobFeedbackApplication ? "Nama Pemohon" : "Nama Pelajar"}</th>
               {isJobFeedbackApplication ? (
                 <th>Jawatan Dipohon</th>
               ) : (
