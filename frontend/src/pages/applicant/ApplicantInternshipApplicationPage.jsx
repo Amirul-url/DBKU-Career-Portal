@@ -300,6 +300,11 @@ const documentFields = [
     label: "1 salinan muka depan akaun bank",
   },
 ];
+const jobExcludedDocumentFields = new Set(["universityLetterFile", "transcriptFile"]);
+const getDocumentFieldsForApplication = (applicationType = "internship") =>
+  applicationType === "job"
+    ? documentFields.filter((document) => !jobExcludedDocumentFields.has(document.field))
+    : documentFields;
 
 const getDefaultStudentInfo = () => ({
   academicLevel: "",
@@ -449,6 +454,16 @@ const requiredFieldsByTab = {
     ["drivingLicense", "Lesen Memandu"],
   ],
 };
+
+function getRequiredFieldsForTab(tab, applicationType = "internship") {
+  const requiredFields = requiredFieldsByTab[tab] || [];
+
+  if (tab === documentSupportTab && applicationType === "job") {
+    return requiredFields.filter(([field]) => !jobExcludedDocumentFields.has(field));
+  }
+
+  return requiredFields;
+}
 
 const getInternshipDraftStorageKey = (user) => `dbku_internship_student_info_manual_${user?.id || user?.email || "guest"}`;
 const getJobDraftStorageKey = (user) => `dbku_job_application_student_info_manual_${user?.id || user?.email || "guest"}`;
@@ -1217,7 +1232,7 @@ function clearStudentInfoDraft(user, applicationType = "internship") {
   }
 }
 
-function isTabComplete(tab, studentInfo) {
+function isTabComplete(tab, studentInfo, applicationType = "internship") {
   if (tab === jobSpmTab) return isJobSpmTabComplete(studentInfo);
   if (tab === jobStpmTab) return isJobStpmTabComplete(studentInfo);
   if (tab === jobHigherEducationTab) return isJobHigherEducationTabComplete(studentInfo);
@@ -1227,23 +1242,23 @@ function isTabComplete(tab, studentInfo) {
   if (tab === jobReferencesTab) return isJobReferencesTabComplete(studentInfo);
   if (tab === jobDeclarationTab) return isJobDeclarationTabComplete(studentInfo);
 
-  const requiredFields = requiredFieldsByTab[tab] || [];
+  const requiredFields = getRequiredFieldsForTab(tab, applicationType);
   const hasRequiredFields = requiredFields.every(([field]) => String(studentInfo[field] || "").trim());
   const hasRequiredLocation = tab !== personalInfoTab || (studentInfo.latitude && studentInfo.longitude);
 
   return hasRequiredFields && hasRequiredLocation;
 }
 
-function getFirstIncompleteTab(studentInfo, requiredTabs = internshipRequiredInfoTabs) {
-  return requiredTabs.find((tab) => !isTabComplete(tab, studentInfo)) || personalInfoTab;
+function getFirstIncompleteTab(studentInfo, requiredTabs = internshipRequiredInfoTabs, applicationType = "internship") {
+  return requiredTabs.find((tab) => !isTabComplete(tab, studentInfo, applicationType)) || personalInfoTab;
 }
 
-function getMissingApplicationFields(studentInfo, requiredTabs = internshipRequiredInfoTabs) {
+function getMissingApplicationFields(studentInfo, requiredTabs = internshipRequiredInfoTabs, applicationType = "internship") {
   const missingFields = [];
   const errors = {};
 
   requiredTabs.forEach((tab) => {
-    (requiredFieldsByTab[tab] || []).forEach(([field, label]) => {
+    getRequiredFieldsForTab(tab, applicationType).forEach(([field, label]) => {
       if (!String(studentInfo[field] || "").trim()) {
         missingFields.push(`${tab}: ${label}`);
         errors[field] = "Wajib diisi.";
@@ -1320,9 +1335,9 @@ function renderRequiredLabel(label, required = true) {
   );
 }
 
-function getDocumentSummary(studentInfo) {
+function getDocumentSummary(studentInfo, applicationType = "internship") {
   return Object.fromEntries(
-    documentFields.map((document) => {
+    getDocumentFieldsForApplication(applicationType).map((document) => {
       const fileName = studentInfo[document.field] || "";
       return [document.field, fileName];
     }),
@@ -1335,7 +1350,7 @@ function buildApplicationPayload(studentInfo, vacancy, documentFiles, applicatio
   payload.append("profile_data", JSON.stringify(buildApplicationProfileData(studentInfo, vacancy, applicationType)));
   payload.append("vacancy", vacancy.id);
 
-  documentFields.forEach((document) => {
+  getDocumentFieldsForApplication(applicationType).forEach((document) => {
     const uploadedFile = documentFiles[document.field];
     if (uploadedFile) {
       payload.append(document.field, uploadedFile);
@@ -1354,7 +1369,7 @@ function buildApplicationProfileData(studentInfo, vacancy, applicationType = "in
       text:
         "Saya dengan ini mengaku bahawa semua maklumat yang saya berikan adalah BENAR dan TEPAT. Saya juga bersetuju dan menerima bahawa sekiranya mana-mana daripada pengakuan ini didapati palsu atau tidak benar, pihak Dewan Bandaraya Kuching Utara berhak menarik balik keputusan tawaran dan menamatkan perkhidmatan saya dengan serta-merta tanpa apa-apa syarat",
     },
-    documents: getDocumentSummary(studentInfo),
+    documents: getDocumentSummary(studentInfo, applicationType),
     job_vacancy: applicationType === "job" && vacancy
       ? {
           id: vacancy.id,
@@ -1403,7 +1418,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
   const initialStudentInfo = normalizeStudentInfoDraft(activeSavedDraft?.studentInfo || {}, applicantDraftDefaults);
   const [sidebarOpen, toggleSidebar] = useApplicantSidebarState();
   const [activeInfoTab, setActiveInfoTab] = useState(() => (
-    isJobApplication ? personalInfoTab : getFirstIncompleteTab(initialStudentInfo, currentRequiredInfoTabs)
+    isJobApplication ? personalInfoTab : getFirstIncompleteTab(initialStudentInfo, currentRequiredInfoTabs, applicationType)
   ));
   const [notice, setNotice] = useState("");
   const [noticeStatus, setNoticeStatus] = useState("success");
@@ -1532,7 +1547,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
           setInternshipVacancy(draftApplication.vacancy_detail);
         }
         setStudentInfo(nextStudentInfo);
-        setActiveInfoTab(getFirstIncompleteTab(nextStudentInfo, currentRequiredInfoTabs));
+        setActiveInfoTab(getFirstIncompleteTab(nextStudentInfo, currentRequiredInfoTabs, applicationType));
         if ((draftApplication.status || "draft") === "incomplete") {
           setNoticeStatus("error");
           setNotice("Permohonan ini ditanda Tidak Lengkap. Sila kemaskini maklumat atau dokumen dan hantar semula.");
@@ -1545,7 +1560,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
     return () => {
       isMounted = false;
     };
-  }, [activeSavedDraft?.studentInfo, applicantDraftDefaults, applicantRole, applicationTypeQuery, editApplicationId]);
+  }, [activeSavedDraft?.studentInfo, applicantDraftDefaults, applicantRole, applicationType, applicationTypeQuery, currentRequiredInfoTabs, editApplicationId]);
 
   useEffect(() => () => {
     if (passportPhotoPreviewUrlRef.current) {
@@ -1818,11 +1833,12 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
   const handleUpdate = (event) => {
     event.preventDefault();
 
-    const missingFields = requiredFieldsByTab[activeInfoTab]
+    const activeRequiredFields = getRequiredFieldsForTab(activeInfoTab, applicationType);
+    const missingFields = activeRequiredFields
       .filter(([field]) => !String(studentInfo[field] || "").trim())
       .map(([, label]) => label);
     const errors = Object.fromEntries(
-      requiredFieldsByTab[activeInfoTab]
+      activeRequiredFields
         .filter(([field]) => !String(studentInfo[field] || "").trim())
         .map(([field]) => [field, "Wajib diisi."]),
     );
@@ -1886,12 +1902,12 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
       return;
     }
 
-    const { errors, missingFields } = getMissingApplicationFields(studentInfo, currentRequiredInfoTabs);
+    const { errors, missingFields } = getMissingApplicationFields(studentInfo, currentRequiredInfoTabs, applicationType);
     setValidationErrors(errors);
 
     if (missingFields.length) {
       setNoticeStatus("error");
-      setActiveInfoTab(getFirstIncompleteTab(studentInfo, currentRequiredInfoTabs));
+      setActiveInfoTab(getFirstIncompleteTab(studentInfo, currentRequiredInfoTabs, applicationType));
       setNotice(`Sila lengkapkan: ${missingFields.join(", ")}.`);
       return;
     }
@@ -2794,7 +2810,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
       <div className="student-personal-table-wrap">
         <table className="student-personal-table">
           <tbody>
-            {documentFields.map((document) => renderPersonalRow(
+            {getDocumentFieldsForApplication(applicationType).map((document) => renderPersonalRow(
               document.label,
               <div className="student-document-table-cell">
                 <input
@@ -2855,7 +2871,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
   const renderInfoHeading = () => (
     <h2>{activeInfoHeading}</h2>
   );
-  const requiredInfoTabsComplete = currentRequiredInfoTabs.every((tab) => isTabComplete(tab, studentInfo));
+  const requiredInfoTabsComplete = currentRequiredInfoTabs.every((tab) => isTabComplete(tab, studentInfo, applicationType));
   const isApplicationReadyToSubmit = (isJobApplication || declarationAccepted) && requiredInfoTabsComplete;
   const isFinalInfoTab = activeInfoTab === currentInfoTabs[currentInfoTabs.length - 1];
 
