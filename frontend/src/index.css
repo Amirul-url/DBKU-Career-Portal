@@ -6752,6 +6752,19 @@ body:has(.applicant-profile-page) {
   padding: 0 14px;
 }
 
+.applicant-application-readonly-panel .student-info-tabs.job-application-tabs {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  overflow-x: visible;
+}
+
+.applicant-application-readonly-panel .student-info-tabs.job-application-tabs button {
+  width: 100%;
+  white-space: normal;
+  padding: 0 6px;
+}
+
 .student-info-tabs button.active {
   border-color: #d7e8df;
   background: #ffffff;
@@ -8334,6 +8347,18 @@ body:has(.applicant-profile-page) {
 
 .student-readonly-panel .student-info-tabs {
   margin-bottom: 22px;
+}
+
+@media (max-width: 1100px) {
+  .applicant-application-readonly-panel .student-info-tabs.job-application-tabs {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .applicant-application-readonly-panel .student-info-tabs.job-application-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .student-readonly-document-cell {

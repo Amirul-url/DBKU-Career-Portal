@@ -1848,6 +1848,7 @@ export default function ApplicantApplicationViewPage() {
           <InternshipApplicationReadOnlyPanel
             activeInfoTab={activeInfoTab}
             application={application}
+            className="applicant-application-readonly-panel"
             disableDefaultTabGroups
             error={error}
             extraTabs={applicantExtraTabs}
