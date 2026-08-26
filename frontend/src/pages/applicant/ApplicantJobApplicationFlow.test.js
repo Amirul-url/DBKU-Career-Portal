@@ -195,6 +195,46 @@ test("job application required exam table labels show required markers", () => {
   assert.match(internshipFormSource, /renderJobRequiredTableLabel\("Gred"\)/);
 });
 
+test("job application sections A to H use local studentInfo state", () => {
+  assert.match(internshipFormSource, /const \[studentInfo, setStudentInfo\] = useState\(\(\) => initialStudentInfo\);/);
+
+  assert.match(internshipFormSource, /activeInfoTab === personalInfoTab \? renderApplicantFields\(\) : null/);
+  assert.match(internshipFormSource, /value=\{studentInfo\.name\}[\s\S]*onChange=\{updateStudentName\}/);
+  assert.match(internshipFormSource, /const updateStudentName = \(event\) => \{[\s\S]*setStudentInfo\(\(current\) => \(\{ \.\.\.current, name: event\.target\.value\.toUpperCase\(\) \}\)\);/);
+
+  assert.match(internshipFormSource, /activeInfoTab === jobSpmTab \? renderJobSpmSection\(\) : null/);
+  assert.match(internshipFormSource, /value=\{studentInfo\.jobSpmSchool\} onChange=\{updateJobSpmValue\("jobSpmSchool"\)\}/);
+  assert.match(internshipFormSource, /getJobSpmSubjects\(studentInfo\)\.map\(\(row, index\) =>/);
+  assert.match(internshipFormSource, /const updateJobSpmValue = \(field\) => \(event\) => \{[\s\S]*setStudentInfo\(\(current\) => \{/);
+  assert.match(internshipFormSource, /const updateJobSpmSubjectRow = \(index, field\) => \(event\) => \{[\s\S]*setStudentInfo\(\(current\) => \{/);
+
+  assert.match(internshipFormSource, /activeInfoTab === jobBmJulyTab \? renderJobBmJulySection\(\) : null/);
+  assert.match(internshipFormSource, /value=\{studentInfo\.jobBmJulyYear\} onChange=\{updateJobBmJulyValue\("jobBmJulyYear"\)\}/);
+  assert.match(internshipFormSource, /const updateJobBmJulyValue = \(field\) => \(event\) => \{[\s\S]*setStudentInfo\(\(current\) => \{/);
+
+  assert.match(internshipFormSource, /activeInfoTab === jobMathJulyTab \? renderJobMathJulySection\(\) : null/);
+  assert.match(internshipFormSource, /value=\{studentInfo\.jobMathJulyYear\} onChange=\{updateJobMathJulyValue\("jobMathJulyYear"\)\}/);
+  assert.match(internshipFormSource, /const updateJobMathJulyValue = \(field\) => \(event\) => \{[\s\S]*setStudentInfo\(\(current\) => \{/);
+
+  assert.match(internshipFormSource, /activeInfoTab === jobStpmTab \? renderJobStpmSection\(\) : null/);
+  assert.match(internshipFormSource, /value=\{studentInfo\.jobStpmSchool\} onChange=\{updateJobStpmValue\("jobStpmSchool"\)\}/);
+  assert.match(internshipFormSource, /getJobStpmSubjects\(studentInfo\)\.map\(\(row, index\) =>/);
+  assert.match(internshipFormSource, /const updateJobStpmValue = \(field\) => \(event\) => \{[\s\S]*setStudentInfo\(\(current\) => \{/);
+  assert.match(internshipFormSource, /const updateJobStpmSubjectRow = \(index, field\) => \(event\) => \{[\s\S]*setStudentInfo\(\(current\) => \{/);
+
+  assert.match(internshipFormSource, /activeInfoTab === jobHigherEducationTab \? renderJobHigherEducationSection\(\) : null/);
+  assert.match(internshipFormSource, /getJobHigherEducationQualifications\(studentInfo\)\.map\(\(row, index\) =>/);
+  assert.match(internshipFormSource, /const updateJobHigherEducationRow = \(index, field\) => \(event\) => \{[\s\S]*setStudentInfo\(\(current\) => \(\{/);
+
+  assert.match(internshipFormSource, /activeInfoTab === jobLanguageSkillsTab \? renderJobLanguageSkillsSection\(\) : null/);
+  assert.match(internshipFormSource, /getJobLanguageSkillRows\(studentInfo\)\.map\(\(row, index\) =>/);
+  assert.match(internshipFormSource, /const updateJobLanguageSkillRow = \(index, field\) => \(event\) => \{[\s\S]*setStudentInfo\(\(current\) => \{/);
+
+  assert.match(internshipFormSource, /activeInfoTab === jobComputerSkillsTab \? renderJobComputerSkillsSection\(\) : null/);
+  assert.match(internshipFormSource, /getJobComputerSkillRows\(studentInfo\)\.map\(\(row, index\) =>/);
+  assert.match(internshipFormSource, /const updateJobComputerSkillRow = \(index, field\) => \(event\) => \{[\s\S]*setStudentInfo\(\(current\) => \{/);
+});
+
 test("job application language and computer sections render official skill tables", () => {
   assert.match(internshipFormSource, /const minimumJobComputerSkillRows = 2/);
   assert.match(internshipFormSource, /jobLanguageSkillRows: getDefaultJobLanguageSkillRows\(\)/);
