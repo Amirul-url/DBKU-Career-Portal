@@ -289,12 +289,12 @@ test("applicant can submit acceptance confirmation after organization feedback",
   assert.doesNotMatch(viewSource, /setSelectedFiles\(files\)/);
   assert.match(viewSource, /!\s*hasResponded \? \(\s*<div className="organization-feedback-section-actions">/);
   assert.match(viewSource, /file,\s*index/);
-  assert.match(viewSource, /URL\.createObjectURL\(document\.file\)/);
-  assert.match(viewSource, /URL\.revokeObjectURL\(previewUrl\)/);
+  assert.doesNotMatch(viewSource, /URL\.createObjectURL\(document\.file\)/);
+  assert.doesNotMatch(viewSource, /URL\.revokeObjectURL\(previewUrl\)/);
   assert.match(viewSource, /function removeConfirmationFile\(index\)/);
   assert.match(viewSource, /organization-feedback-icon-button organization-feedback-icon-button-remove-file/);
   assert.match(viewSource, /aria-label=\{`Buang \$\{document\.name\}`\}/);
-  assert.match(viewSource, /disabled=\{!document\.url && !document\.file\}/);
+  assert.match(viewSource, /disabled=\{!document\.url\}/);
   assert.match(viewSource, /disabled=\{hasResponded \|\| isSaving \|\| !selectedFiles\.length\}/);
   assert.doesNotMatch(viewSource, /Dengan ini, saya mengesahkan penerimaan tawaran menjalani latihan industri di Dewan Bandaraya Kuching Utara \(DBKU\)/);
   assert.doesNotMatch(viewSource, /Sekian, terima kasih atas perhatian dan kerjasama pihak puan\./);

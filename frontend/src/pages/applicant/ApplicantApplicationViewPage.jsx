@@ -911,13 +911,7 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
   const openConfirmationDocument = (document) => {
     if (document?.url) {
       openDocumentFile(document);
-      return;
     }
-    if (!document?.file || typeof window === "undefined") return;
-
-    const previewUrl = URL.createObjectURL(document.file);
-    window.open(previewUrl, "_blank", "noopener,noreferrer");
-    window.setTimeout(() => URL.revokeObjectURL(previewUrl), 1000);
   };
 
   return (
@@ -991,7 +985,7 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
                         <button
                           aria-label={`Lihat ${document.name}`}
                           className="organization-feedback-icon-button organization-feedback-icon-button-view"
-                          disabled={!document.url && !document.file}
+                          disabled={!document.url}
                           onClick={() => openConfirmationDocument(document)}
                           title="Lihat fail"
                           type="button"
