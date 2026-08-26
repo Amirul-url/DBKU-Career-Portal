@@ -1807,18 +1807,6 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
       Object.assign(errors, jobComputerValidation.errors);
     }
 
-    if (activeInfoTab === jobWorkExperienceTab) {
-      const jobWorkExperienceValidation = getJobWorkExperienceValidation(studentInfo);
-      missingFields.push(...jobWorkExperienceValidation.missingFields);
-      Object.assign(errors, jobWorkExperienceValidation.errors);
-    }
-
-    if (activeInfoTab === jobReferencesTab) {
-      const jobReferencesValidation = getJobReferencesValidation(studentInfo);
-      missingFields.push(...jobReferencesValidation.missingFields);
-      Object.assign(errors, jobReferencesValidation.errors);
-    }
-
     setValidationErrors(errors);
 
     if (missingFields.length) {
@@ -2216,6 +2204,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
               <td>
                 <input
                   aria-label={`Nama dan Alamat Majikan ${index + 1}`}
+                  required={index === 0}
                   value={row.employerAddress}
                   onChange={updateJobWorkExperienceRow(index, "employerAddress")}
                 />
@@ -2223,6 +2212,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
               <td>
                 <input
                   aria-label={`Nama Jawatan ${index + 1}`}
+                  required={index === 0}
                   value={row.jobTitle}
                   onChange={updateJobWorkExperienceRow(index, "jobTitle")}
                 />
@@ -2230,6 +2220,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
               <td>
                 <input
                   aria-label={`Gaji Bersih Sebulan ${index + 1}`}
+                  required={index === 0}
                   value={row.netSalary}
                   onChange={updateJobWorkExperienceRow(index, "netSalary")}
                 />
@@ -2237,6 +2228,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
               <td>
                 <input
                   aria-label={`Tempoh Bekerja Dari ${index + 1}`}
+                  required={index === 0}
                   value={row.periodFrom}
                   onChange={updateJobWorkExperienceRow(index, "periodFrom")}
                 />
@@ -2244,6 +2236,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
               <td>
                 <input
                   aria-label={`Tempoh Bekerja Hingga ${index + 1}`}
+                  required={index === 0}
                   value={row.periodTo}
                   onChange={updateJobWorkExperienceRow(index, "periodTo")}
                 />
@@ -2251,6 +2244,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
               <td>
                 <input
                   aria-label={`Tempoh ${index + 1}`}
+                  required={index === 0}
                   value={row.duration}
                   onChange={updateJobWorkExperienceRow(index, "duration")}
                 />
@@ -2268,6 +2262,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
       <b aria-hidden="true">:</b>
       <input
         aria-label={`${label} rujukan ${index + 1}`}
+        required
         value={row[field]}
         onChange={updateJobReferenceRow(index, field)}
       />
