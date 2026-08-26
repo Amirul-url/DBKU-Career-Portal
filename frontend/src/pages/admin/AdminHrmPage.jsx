@@ -2774,6 +2774,8 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
   const identityNo = getInternshipStudentIdentityNo(application);
   const program = getInternshipProgram(application);
   const placementDepartment = getInternshipPlacementDepartment(application);
+  const isJobFeedbackApplication = isJobApplicationDetail(application);
+  const jobApplicationTitle = getJobApplicationTitle(application);
   const feedbackIntroText = getOrganizationFeedbackIntroText(application);
   const isSentToApplicant = Boolean(feedbackRelease.sent_to_applicant_at);
   const isPdfFile = (file) => file?.type === "application/pdf" || file?.name?.toLowerCase().endsWith(".pdf");
@@ -2783,7 +2785,7 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
     !isBusy &&
       !isSentToApplicant &&
       hasRequiredOrganizationFeedbackDocuments &&
-      feedbackInternshipPeriod.trim(),
+      (isJobFeedbackApplication || feedbackInternshipPeriod.trim()),
   );
 
   const addDocumentRow = () => {
@@ -2874,7 +2876,7 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
   const requestSendToApplicant = () => {
     const trimmedPeriod = feedbackInternshipPeriod.trim();
     if (isSentToApplicant) return;
-    if (!trimmedPeriod) {
+    if (!isJobFeedbackApplication && !trimmedPeriod) {
       setMessage("Sila isi tempoh latihan industri / praktikal sebelum hantar kepada pemohon.");
       return;
     }
@@ -2923,11 +2925,17 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
           <thead>
             <tr>
               <th>Nama Pelajar</th>
-              <th>
-                Tempoh Latihan Industri / Praktikal
-                <span className="organization-feedback-required" aria-hidden="true">*</span>
-              </th>
-              <th>Program</th>
+              {isJobFeedbackApplication ? (
+                <th>Jawatan Dipohon</th>
+              ) : (
+                <>
+                  <th>
+                    Tempoh Latihan Industri / Praktikal
+                    <span className="organization-feedback-required" aria-hidden="true">*</span>
+                  </th>
+                  <th>Program</th>
+                </>
+              )}
               <th>Bahagian Ditempatkan</th>
             </tr>
           </thead>
@@ -2937,19 +2945,25 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
                 <strong>{studentName}</strong>
                 <span>No. Kad Pengenalan: {identityNo}</span>
               </td>
-              <td>
-                <input
-                  aria-label="Tempoh latihan industri atau praktikal"
-                  className="organization-feedback-period-input"
-                  disabled={isSentToApplicant}
-                  onChange={(event) => setFeedbackInternshipPeriod(event.target.value)}
-                  placeholder="Contoh: 16 Mac 2026 - 29 Ogos 2026"
-                  required
-                  type="text"
-                  value={feedbackInternshipPeriod}
-                />
-              </td>
-              <td>{program}</td>
+              {isJobFeedbackApplication ? (
+                <td>{jobApplicationTitle}</td>
+              ) : (
+                <>
+                  <td>
+                    <input
+                      aria-label="Tempoh latihan industri atau praktikal"
+                      className="organization-feedback-period-input"
+                      disabled={isSentToApplicant}
+                      onChange={(event) => setFeedbackInternshipPeriod(event.target.value)}
+                      placeholder="Contoh: 16 Mac 2026 - 29 Ogos 2026"
+                      required
+                      type="text"
+                      value={feedbackInternshipPeriod}
+                    />
+                  </td>
+                  <td>{program}</td>
+                </>
+              )}
               <td>{placementDepartment}</td>
             </tr>
           </tbody>

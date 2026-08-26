@@ -128,6 +128,10 @@ test("applicant accepted applications stay hidden behind review status until HRM
   assert.match(viewSource, /function getApplicantFeedbackPlacementDepartment\(application\)/);
   assert.match(viewSource, /className="organization-feedback-table applicant-organization-feedback-table"/);
   assert.match(viewSource, /<th>Nama Pelajar<\/th>/);
+  assert.match(viewSource, /const isJobFeedbackApplication = isJobApplicationDetail\(application\)/);
+  assert.match(viewSource, /const jobApplicationTitle = getJobApplicationTitle\(application\)/);
+  assert.match(viewSource, /<th>Jawatan Dipohon<\/th>/);
+  assert.match(viewSource, /<td>\{jobApplicationTitle\}<\/td>/);
   assert.match(viewSource, /<th>Tempoh Latihan Industri \/ Praktikal<\/th>/);
   assert.match(viewSource, /<th>Program<\/th>/);
   assert.match(viewSource, /<th>Bahagian Ditempatkan<\/th>/);

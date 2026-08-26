@@ -455,7 +455,7 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /const hasRequiredOrganizationFeedbackDocuments = feedbackDocuments\.length > 0/);
   assert.match(source, /const canSendOrganizationFeedbackToApplicant = Boolean\(/);
   assert.match(source, /hasRequiredOrganizationFeedbackDocuments/);
-  assert.match(source, /feedbackInternshipPeriod\.trim\(\)/);
+  assert.match(source, /\(isJobFeedbackApplication \|\| feedbackInternshipPeriod\.trim\(\)\)/);
   assert.match(source, /disabled=\{!canSendOrganizationFeedbackToApplicant\}/);
   assert.match(source, /className="organization-feedback-required"/);
   assert.match(source, /className="organization-feedback-period-input"/);
@@ -504,6 +504,11 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /onSubmitted\?\.\(\)/);
   assert.match(source, /application\?\.document_files\?\.organizationFeedbackDocuments/);
   assert.match(source, /Nama Pelajar/);
+  assert.match(source, /const isJobFeedbackApplication = isJobApplicationDetail\(application\)/);
+  assert.match(source, /const jobApplicationTitle = getJobApplicationTitle\(application\)/);
+  assert.match(source, /<th>Jawatan Dipohon<\/th>/);
+  assert.match(source, /<td>\{jobApplicationTitle\}<\/td>/);
+  assert.match(source, /if \(!isJobFeedbackApplication && !trimmedPeriod\)/);
   assert.match(source, /Tempoh Latihan Industri \/ Praktikal/);
   assert.match(source, /Program/);
   assert.match(source, /Bahagian Ditempatkan/);

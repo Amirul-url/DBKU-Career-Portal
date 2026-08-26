@@ -582,6 +582,10 @@ function getInternshipProgram(application) {
   return getInternshipStudentInfo(application).program || "Belum diisi";
 }
 
+function getJobApplicationTitle(application) {
+  return application?.vacancy_detail?.title || "Belum diisi";
+}
+
 function getApplicantFeedbackPlacementDepartment(application) {
   const department =
     application?.assigned_department ||
@@ -604,6 +608,8 @@ function ApplicantOrganizationFeedbackTab({ application, onNext }) {
   const identityNo = getInternshipStudentIdentityNo(application);
   const program = getInternshipProgram(application);
   const placementDepartment = getApplicantFeedbackPlacementDepartment(application);
+  const isJobFeedbackApplication = isJobApplicationDetail(application);
+  const jobApplicationTitle = getJobApplicationTitle(application);
   const feedbackIntroText = getOrganizationFeedbackIntroText(application);
 
   return (
@@ -617,8 +623,14 @@ function ApplicantOrganizationFeedbackTab({ application, onNext }) {
           <thead>
             <tr>
               <th>Nama Pelajar</th>
-              <th>Tempoh Latihan Industri / Praktikal</th>
-              <th>Program</th>
+              {isJobFeedbackApplication ? (
+                <th>Jawatan Dipohon</th>
+              ) : (
+                <>
+                  <th>Tempoh Latihan Industri / Praktikal</th>
+                  <th>Program</th>
+                </>
+              )}
               <th>Bahagian Ditempatkan</th>
             </tr>
           </thead>
@@ -628,8 +640,14 @@ function ApplicantOrganizationFeedbackTab({ application, onNext }) {
                 <strong>{studentName}</strong>
                 <span>No. Kad Pengenalan: {identityNo}</span>
               </td>
-              <td>{internshipPeriod}</td>
-              <td>{program}</td>
+              {isJobFeedbackApplication ? (
+                <td>{jobApplicationTitle}</td>
+              ) : (
+                <>
+                  <td>{internshipPeriod}</td>
+                  <td>{program}</td>
+                </>
+              )}
               <td>{placementDepartment}</td>
             </tr>
           </tbody>
