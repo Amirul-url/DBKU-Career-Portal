@@ -359,6 +359,7 @@ test("submitted job application detail uses the job A to L read-only module", ()
   assert.match(cssSource, /\.student-job-work-experience-table tbody td \{[\s\S]*text-align: left;/);
   assert.match(applicationViewSource, /student-job-reference-heading-title[\s\S]*student-job-heading-note/);
   assert.match(cssSource, /\.student-job-references-table \.student-job-reference-line \.student-readonly-value \{[\s\S]*border-bottom: 1px solid #111827;/);
+  assert.match(cssSource, /\.student-job-declaration-table \.student-job-declaration-line \.student-readonly-value \{[\s\S]*border-bottom: 1px solid #111827;/);
 });
 
 test("saved job vacancies open the selected job application form", () => {

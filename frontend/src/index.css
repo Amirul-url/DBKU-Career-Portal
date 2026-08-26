@@ -7803,6 +7803,16 @@ body:has(.applicant-profile-page) {
   padding: 0 4px;
 }
 
+.student-job-declaration-table .student-job-declaration-line .student-readonly-value {
+  display: flex;
+  width: 100%;
+  min-height: 28px;
+  align-items: center;
+  border-bottom: 1px solid #111827;
+  padding: 0 4px;
+  text-align: left;
+}
+
 .student-passport-upload {
   position: relative;
   box-sizing: border-box;
