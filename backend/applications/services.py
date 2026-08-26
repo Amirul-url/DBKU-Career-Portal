@@ -128,6 +128,18 @@ def build_hrm_department_decision_notification(application):
 
 
 def build_hrm_offer_acceptance_notification(application):
+    if application.vacancy.vacancy_type == "job":
+        job_label = get_job_application_label(application)
+        return {
+            "title": f"Pengesahan Penerimaan Tawaran {job_label} - {application.reference_no}",
+            "message": (
+                "Portal Kerjaya DBKU\n\n"
+                f"Pemohon telah menerima tawaran {job_label}.\n"
+                f"No. Rujukan: {application.reference_no}\n\n"
+                "Sila semak pengesahan penerimaan tawaran melalui Portal Kerjaya DBKU."
+            ),
+        }
+
     return {
         "title": f"Pengesahan Penerimaan Tawaran LI - {application.reference_no}",
         "message": (
@@ -140,6 +152,18 @@ def build_hrm_offer_acceptance_notification(application):
 
 
 def build_hrm_offer_rejection_notification(application):
+    if application.vacancy.vacancy_type == "job":
+        job_label = get_job_application_label(application)
+        return {
+            "title": f"Penolakan Tawaran {job_label} - {application.reference_no}",
+            "message": (
+                "Portal Kerjaya DBKU\n\n"
+                f"Pemohon telah menolak tawaran {job_label}.\n"
+                f"No. Rujukan: {application.reference_no}\n\n"
+                "Sila semak pengesahan penerimaan tawaran melalui Portal Kerjaya DBKU."
+            ),
+        }
+
     return {
         "title": f"Penolakan Tawaran LI - {application.reference_no}",
         "message": (

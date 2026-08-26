@@ -650,6 +650,71 @@ class CandidateApplicationReferenceNoTests(TestCase):
         mock_send_whatsapp.assert_any_call(hrm.mobile_number, expected_message)
         self.assertFalse(Notification.objects.filter(application=application, user=finance_head).exists())
 
+    @override_settings(NOTIFICATION_EMAIL_ENABLED=True, WHATSAPP_ENABLED=True)
+    @patch("applications.services.send_whatsapp_message")
+    @patch("notifications.services.send_notification_email")
+    def test_applicant_job_offer_acceptance_notifies_hrm_by_email_and_whatsapp(
+        self,
+        mock_send_email,
+        mock_send_whatsapp,
+    ):
+        applicant = self.create_applicant("confirm-job-offer-notify@example.com")
+        hrm = self.user_model.objects.create_user(
+            username="hrm-job-offer-accepted@example.com",
+            email="hrm-job-offer-accepted@example.com",
+            password="Password123!",
+            role="admin",
+            department="Bahagian Pengurusan Sumber Manusia (HRM)",
+            mobile_number="60127770401",
+        )
+        job_vacancy = Vacancy.objects.create(
+            title="Penolong Pegawai Penerangan Gred S5",
+            vacancy_type="job",
+            department="Dewan Bandaraya Kuching Utara",
+            summary="Jawatan kosong DBKU.",
+            status="open",
+        )
+        application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=job_vacancy,
+            status="offered",
+            reference_no="PK.2026-0004",
+            profile_data={
+                "organization_feedback_release": {
+                    "sent_to_applicant_at": "2026-08-24T08:00:00+08:00",
+                },
+            },
+        )
+        uploaded_file = SimpleUploadedFile(
+            "Borang_Permohonan_Jawatan.pdf",
+            b"%PDF-1.4\n% job offer acceptance\n",
+            content_type="application/pdf",
+        )
+        client = APIClient()
+        client.force_authenticate(user=applicant)
+
+        response = client.post(
+            f"/api/applications/{application.id}/confirm-offer/",
+            {"applicantConfirmationDocuments": [uploaded_file]},
+            format="multipart",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        expected_title = (
+            "Pengesahan Penerimaan Tawaran Jawatan Penolong Pegawai Penerangan Gred S5 - PK.2026-0004"
+        )
+        expected_message = (
+            "Portal Kerjaya DBKU\n\n"
+            "Pemohon telah menerima tawaran Jawatan Penolong Pegawai Penerangan Gred S5.\n"
+            "No. Rujukan: PK.2026-0004\n\n"
+            "Sila semak pengesahan penerimaan tawaran melalui Portal Kerjaya DBKU."
+        )
+        notification = Notification.objects.get(application=application, user=hrm)
+        self.assertEqual(notification.title, expected_title)
+        self.assertEqual(notification.message, expected_message)
+        mock_send_email.assert_any_call(hrm, expected_title, expected_message)
+        mock_send_whatsapp.assert_any_call(hrm.mobile_number, expected_message)
+
     def test_applicant_can_reject_released_internship_offer(self):
         applicant = self.create_applicant("reject-offer-target@example.com")
         application = CandidateApplication.objects.create(
@@ -731,6 +796,60 @@ class CandidateApplicationReferenceNoTests(TestCase):
         mock_send_email.assert_any_call(hrm, expected_title, expected_message)
         mock_send_whatsapp.assert_any_call(hrm.mobile_number, expected_message)
         self.assertFalse(Notification.objects.filter(application=application, user=finance_head).exists())
+
+    @override_settings(NOTIFICATION_EMAIL_ENABLED=True, WHATSAPP_ENABLED=True)
+    @patch("applications.services.send_whatsapp_message")
+    @patch("notifications.services.send_notification_email")
+    def test_applicant_job_offer_rejection_notifies_hrm_by_email_and_whatsapp(
+        self,
+        mock_send_email,
+        mock_send_whatsapp,
+    ):
+        applicant = self.create_applicant("reject-job-offer-notify@example.com")
+        hrm = self.user_model.objects.create_user(
+            username="hrm-job-offer-rejected@example.com",
+            email="hrm-job-offer-rejected@example.com",
+            password="Password123!",
+            role="admin",
+            department="Bahagian Pengurusan Sumber Manusia (HRM)",
+            mobile_number="60127770501",
+        )
+        job_vacancy = Vacancy.objects.create(
+            title="Penolong Pegawai Penerangan Gred S5",
+            vacancy_type="job",
+            department="Dewan Bandaraya Kuching Utara",
+            summary="Jawatan kosong DBKU.",
+            status="open",
+        )
+        application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=job_vacancy,
+            status="offered",
+            reference_no="PK.2026-0004",
+            profile_data={
+                "organization_feedback_release": {
+                    "sent_to_applicant_at": "2026-08-24T08:00:00+08:00",
+                },
+            },
+        )
+        client = APIClient()
+        client.force_authenticate(user=applicant)
+
+        response = client.post(f"/api/applications/{application.id}/reject-offer/")
+
+        self.assertEqual(response.status_code, 200)
+        expected_title = "Penolakan Tawaran Jawatan Penolong Pegawai Penerangan Gred S5 - PK.2026-0004"
+        expected_message = (
+            "Portal Kerjaya DBKU\n\n"
+            "Pemohon telah menolak tawaran Jawatan Penolong Pegawai Penerangan Gred S5.\n"
+            "No. Rujukan: PK.2026-0004\n\n"
+            "Sila semak pengesahan penerimaan tawaran melalui Portal Kerjaya DBKU."
+        )
+        notification = Notification.objects.get(application=application, user=hrm)
+        self.assertEqual(notification.title, expected_title)
+        self.assertEqual(notification.message, expected_message)
+        mock_send_email.assert_any_call(hrm, expected_title, expected_message)
+        mock_send_whatsapp.assert_any_call(hrm.mobile_number, expected_message)
 
     def test_staff_application_list_excludes_drafts(self):
         applicant = self.create_applicant("hidden-draft@example.com")
