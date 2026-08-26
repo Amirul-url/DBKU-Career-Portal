@@ -2273,7 +2273,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
     const isRequiredLanguageLevel = row.required || Boolean(row.language.trim());
 
     return (
-      <td key={option}>
+      <td className="student-job-radio-table-cell" key={option}>
         <label className="student-job-radio-cell">
           <input
             aria-label={`${row.language || "Bahasa Lain"} ${field} ${option}`}
@@ -2382,7 +2382,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
                   const normalizedOption = normalizeJobTableValue(option);
 
                   return (
-                    <td key={option}>
+                    <td className="student-job-radio-table-cell" key={option}>
                       <label className="student-job-radio-cell">
                         <input
                           aria-label={`Tahap Kemahiran ${option} ${index + 1}`}

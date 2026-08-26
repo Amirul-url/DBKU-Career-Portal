@@ -220,6 +220,7 @@ test("job application language and computer sections render official skill table
   assert.match(internshipFormSource, /className="student-job-other-language-input"/);
   assert.match(internshipFormSource, /updateJobLanguageSkillRow\(index, "speaking"/);
   assert.match(internshipFormSource, /updateJobLanguageSkillRow\(index, "writing"/);
+  assert.match(internshipFormSource, /<td className="student-job-radio-table-cell" key=\{option\}>/);
   assert.match(internshipFormSource, /const isRequiredLanguageLevel = row\.required \|\| Boolean\(row\.language\.trim\(\)\);/);
   assert.match(internshipFormSource, /required=\{isRequiredLanguageLevel\}/);
   assert.match(internshipFormSource, /const renderJobComputerSkillsSection = \(\) => \(/);
@@ -239,7 +240,8 @@ test("job application language and computer sections render official skill table
   assert.match(cssSource, /\.student-job-language-table \.student-job-heading-note,/);
   assert.match(cssSource, /\.student-job-other-language-label \{[\s\S]*display: block;/);
   assert.match(cssSource, /\.student-job-spm-table \.student-job-other-language-input \{[\s\S]*border-bottom: 1px solid #111827;/);
-  assert.match(cssSource, /\.student-job-radio-cell \{[\s\S]*place-items: center;[\s\S]*width: 100%;/);
+  assert.match(cssSource, /\.student-job-language-table td\.student-job-radio-table-cell,[\s\S]*\.student-job-computer-table td\.student-job-radio-table-cell \{[\s\S]*padding: 0;[\s\S]*text-align: center;/);
+  assert.match(cssSource, /\.student-job-spm-table \.student-job-radio-cell \{[\s\S]*grid-template-columns: 1fr;[\s\S]*gap: 0;[\s\S]*place-items: center;[\s\S]*width: 100%;/);
 });
 
 test("job application personal table includes required salutation row above name", () => {

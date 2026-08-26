@@ -7520,6 +7520,12 @@ body:has(.applicant-profile-page) {
   text-align: center;
 }
 
+.student-job-language-table td.student-job-radio-table-cell,
+.student-job-computer-table td.student-job-radio-table-cell {
+  padding: 0;
+  text-align: center;
+}
+
 .student-job-language-table .student-job-language-column-row th {
   background: #fff;
   font-weight: 400;
@@ -7555,12 +7561,14 @@ body:has(.applicant-profile-page) {
   padding: 0;
 }
 
-.student-job-radio-cell {
+.student-job-spm-table .student-job-radio-cell {
   position: relative;
   display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
   place-items: center;
   width: 100%;
-  min-height: 24px;
+  min-height: 36px;
   cursor: pointer;
 }
 
