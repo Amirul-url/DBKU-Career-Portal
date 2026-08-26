@@ -2855,6 +2855,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
   );
   const requiredInfoTabsComplete = currentRequiredInfoTabs.every((tab) => isTabComplete(tab, studentInfo));
   const isApplicationReadyToSubmit = declarationAccepted && requiredInfoTabsComplete;
+  const isFinalInfoTab = activeInfoTab === currentInfoTabs[currentInfoTabs.length - 1];
 
   return (
     <div className={`applicant-profile-page ${sidebarOpen ? "sidebar-open" : "sidebar-collapsed"}`}>
@@ -2913,7 +2914,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
                         <Icon>arrow_forward</Icon>
                       </button>
                     ) : null}
-                    {activeInfoTab === documentSupportTab ? (
+                    {isFinalInfoTab ? (
                       <button
                         className="student-info-submit"
                         disabled={!isApplicationReadyToSubmit || isSubmittingApplication}
