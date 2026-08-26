@@ -180,6 +180,16 @@ def build_application_review_notification(application, next_status):
 
 
 def build_organization_feedback_released_notification(application):
+    if application.vacancy.vacancy_type == "job":
+        job_label = get_job_application_label(application)
+        return {
+            "title": f"Permohonan {job_label} Diterima - {application.reference_no}",
+            "message": (
+                f"Sukacita dimaklumkan bahawa permohonan No. rujukan {application.reference_no} anda diterima. "
+                "Sila buat pengesahan anda sekarang dengan melayari Portal Kerjaya DBKU."
+            ),
+        }
+
     return {
         "title": "Permohonan Latihan Industri Berjaya",
         "message": (

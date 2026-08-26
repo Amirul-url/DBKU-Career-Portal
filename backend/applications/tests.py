@@ -486,6 +486,66 @@ class CandidateApplicationReferenceNoTests(TestCase):
         mock_send_email.assert_called_once_with(applicant, notification.title, notification.message)
         mock_send_whatsapp.assert_called_once_with(applicant.mobile_number, notification.message)
 
+    @override_settings(NOTIFICATION_EMAIL_ENABLED=True, WHATSAPP_ENABLED=True)
+    @patch("applications.services.send_whatsapp_message")
+    @patch("notifications.services.send_notification_email")
+    def test_releasing_job_feedback_uses_job_acceptance_copy_for_email_and_whatsapp(
+        self,
+        mock_send_email,
+        mock_send_whatsapp,
+    ):
+        applicant = self.create_applicant("job-offer-feedback-target@example.com", mobile_number="60128889998")
+        hrm = self.user_model.objects.create_user(
+            username="hrm-job-offer-feedback@example.com",
+            email="hrm-job-offer-feedback@example.com",
+            password="Password123!",
+            role="admin",
+            department="Bahagian Pengurusan Sumber Manusia (HRM)",
+        )
+        vacancy = Vacancy.objects.create(
+            title="Penolong Pegawai Penerangan Gred S5",
+            vacancy_type="job",
+            department="Pengurusan Sumber Manusia",
+            summary="Jawatan kosong DBKU.",
+            status="open",
+        )
+        application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=vacancy,
+            status="shortlisted",
+            reference_no="PK.2026-0004",
+        )
+        client = APIClient()
+        client.force_authenticate(user=hrm)
+
+        response = client.patch(
+            f"/api/applications/{application.id}/",
+            {
+                "profile_data": {
+                    "organization_feedback_release": {
+                        "sent_to_applicant_at": "2026-08-21T09:00:00+08:00",
+                    },
+                },
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        application.refresh_from_db()
+        self.assertEqual(application.status, "offered")
+        notification = Notification.objects.get(application=application, user=applicant)
+        expected_title = (
+            "Permohonan Jawatan Penolong Pegawai Penerangan Gred S5 Diterima - PK.2026-0004"
+        )
+        expected_message = (
+            "Sukacita dimaklumkan bahawa permohonan No. rujukan PK.2026-0004 anda diterima. "
+            "Sila buat pengesahan anda sekarang dengan melayari Portal Kerjaya DBKU."
+        )
+        self.assertEqual(notification.title, expected_title)
+        self.assertEqual(notification.message, expected_message)
+        mock_send_email.assert_called_once_with(applicant, expected_title, expected_message)
+        mock_send_whatsapp.assert_called_once_with(applicant.mobile_number, expected_message)
+
     def test_applicant_can_confirm_released_internship_offer_with_document(self):
         applicant = self.create_applicant("confirm-offer-target@example.com")
         application = CandidateApplication.objects.create(
