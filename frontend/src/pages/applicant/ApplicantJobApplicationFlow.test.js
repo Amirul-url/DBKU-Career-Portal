@@ -77,11 +77,13 @@ test("job application tabs use compact labels without changing tab state values"
   assert.match(jobTabsCss, /overflow-x: auto;/);
   assert.match(jobTabsCss, /scrollbar-width: thin;/);
   assert.match(getCssBlock(".student-info-tabs.job-application-tabs button {"), /white-space: nowrap;/);
-  const applicantJobTabsCss = getCssBlock(".applicant-application-readonly-panel .student-info-tabs.job-application-tabs {");
+  assert.match(internshipFormSource, /className=\{`profile-shell internship-application-shell\$\{isJobApplication \? " applicant-job-application-shell" : ""\}`\}/);
+  const applicantJobTabsCss = getCssBlock(".applicant-job-application-shell .student-info-tabs.job-application-tabs,");
   assert.match(applicantJobTabsCss, /display: grid;/);
   assert.match(applicantJobTabsCss, /grid-template-columns: repeat\(7, minmax\(0, 1fr\)\);/);
   assert.match(applicantJobTabsCss, /overflow-x: visible;/);
-  assert.match(getCssBlock(".applicant-application-readonly-panel .student-info-tabs.job-application-tabs button {"), /white-space: normal;/);
+  assert.match(getCssBlock(".applicant-job-application-shell .student-info-tabs.job-application-tabs button,"), /white-space: normal;/);
+  assert.match(cssSource, /\.applicant-application-readonly-panel \.student-info-tabs\.job-application-tabs \{/);
 });
 
 test("job application extra sections are mandatory before submission", () => {

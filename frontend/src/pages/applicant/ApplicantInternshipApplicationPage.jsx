@@ -2922,7 +2922,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
       <ProfileSidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
       <div className="profile-main-area">
         <ProfileContentHeader displayName={displayName} email={email} photoUrl={user.profile_photo_url} />
-        <main className="profile-shell internship-application-shell">
+        <main className={`profile-shell internship-application-shell${isJobApplication ? " applicant-job-application-shell" : ""}`}>
           <section className="student-info-panel" aria-label="Maklumat permohonan latihan industri">
             <header className="student-info-titlebar">
               <h1>{applicationPageTitle}</h1>
