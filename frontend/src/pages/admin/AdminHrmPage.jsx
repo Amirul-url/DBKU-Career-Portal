@@ -127,11 +127,9 @@ const internshipOrganizationFeedbackIntro =
   "Sukacita dimaklumkan bahawa Dewan Bandaraya Kuching Utara tiada halangan untuk menerima anda bagi menjalani Latihan Industri / Praktikal seperti berikut:-";
 const jobOrganizationFeedbackIntro =
   "Sukacita dimaklumkan bahawa Dewan Bandaraya Kuching Utara telah bersetuju untuk melantik anda bagi mengisi jawatan yang telah dipohon seperti berikut:-";
-const jobFinalRejectionMessage = `Dukacita dimaklumkan bahawa permohonan tuan/puan untuk jawatan di Dewan Bandaraya Kuching Utara (DBKU) telah diterima dan diteliti oleh pihak kami.
+const jobFinalRejectionMessage = `Dukacita dimaklumkan bahawa setelah melalui proses penelitian dan penilaian, permohonan tuan/puan bagi jawatan di Dewan Bandaraya Kuching Utara (DBKU) tidak berjaya pada masa ini.
 
-Walau bagaimanapun, setelah mengambil kira keperluan semasa serta keputusan penilaian, dukacita dimaklumkan bahawa pihak DBKU tidak dapat mempertimbangkan permohonan jawatan tersebut buat masa ini.
-
-Pihak DBKU merakamkan setinggi-tinggi penghargaan atas minat dan kepercayaan tuan/puan untuk memohon jawatan bersama DBKU. Kami memohon maaf atas segala kesulitan yang mungkin timbul dan berharap tuan/puan akan memperoleh peluang pekerjaan yang bersesuaian pada masa akan datang.
+Pihak DBKU merakamkan setinggi-tinggi penghargaan atas minat dan kepercayaan tuan/puan untuk berkhidmat bersama DBKU. Semoga tuan/puan memperoleh peluang kerjaya yang bersesuaian pada masa akan datang.
 
 Sekian, terima kasih.`;
 const dateValue = (value) =>

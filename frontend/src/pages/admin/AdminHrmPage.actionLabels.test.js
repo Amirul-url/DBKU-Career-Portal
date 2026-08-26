@@ -313,8 +313,8 @@ test("department decision tab replaces HRM review for department workspaces", ()
 test("HRM makes the final decision after department recommendation", () => {
   assert.match(source, /const hrmFinalDecisionTab = "Keputusan Akhir HRM"/);
   assert.match(source, /hrmFinalRejectionMessage,[\s\S]*normalizeHrmFinalRejectionRemarks/);
-  assert.match(source, /const jobFinalRejectionMessage = `Dukacita dimaklumkan bahawa permohonan tuan\/puan untuk jawatan di Dewan Bandaraya Kuching Utara \(DBKU\) telah diterima dan diteliti/);
-  assert.match(source, /peluang pekerjaan yang bersesuaian pada masa akan datang/);
+  assert.match(source, /const jobFinalRejectionMessage = `Dukacita dimaklumkan bahawa setelah melalui proses penelitian dan penilaian, permohonan tuan\/puan bagi jawatan di Dewan Bandaraya Kuching Utara \(DBKU\) tidak berjaya pada masa ini/);
+  assert.match(source, /Semoga tuan\/puan memperoleh peluang kerjaya yang bersesuaian pada masa akan datang/);
   assert.match(source, /function getHrmFinalRejectionMessage\(application\)/);
   assert.match(source, /isJobApplicationDetail\(application\) \? jobFinalRejectionMessage : hrmFinalRejectionMessage/);
   assert.match(decisionCopySource, /Dukacita dimaklumkan bahawa permohonan saudara\/i untuk menjalani latihan industri di Dewan Bandaraya Kuching Utara \(DBKU\) telah diterima dan diteliti/);
