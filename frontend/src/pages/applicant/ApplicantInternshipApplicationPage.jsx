@@ -328,7 +328,6 @@ const getDefaultStudentInfo = () => ({
   jobDeclarationDate: "",
   jobDeclarationIcNo: "",
   jobDeclarationName: "",
-  jobDeclarationSignature: "",
   jobHigherEducationQualifications: Array.from({ length: jobHigherEducationRowCount }, () => ({
     certificateName: "",
     cgpa: "",
@@ -883,7 +882,6 @@ function buildJobDeclarationSummary(studentInfo = {}) {
     jobDeclarationText,
     `Nama: ${normalizeJobTableValue(studentInfo.jobDeclarationName) || "-"}`,
     `No. Kad Pengenalan: ${normalizeJobTableValue(studentInfo.jobDeclarationIcNo) || "-"}`,
-    `Tandatangan Pemohon: ${normalizeJobTableValue(studentInfo.jobDeclarationSignature) || "-"}`,
     `Tarikh: ${normalizeJobTableValue(studentInfo.jobDeclarationDate) || "-"}`,
   ].join("\n");
 }
@@ -1062,7 +1060,6 @@ function getJobDeclarationValidation(studentInfo = {}) {
   const requiredFields = [
     ["jobDeclarationName", "Nama"],
     ["jobDeclarationIcNo", "No. Kad Pengenalan"],
-    ["jobDeclarationSignature", "Tandatangan Pemohon"],
     ["jobDeclarationDate", "Tarikh"],
   ];
   const missingCells = requiredFields
@@ -1149,7 +1146,6 @@ function normalizeStudentInfoDraft(studentInfo = {}, user = null) {
     jobDeclarationDate: normalizeJobTableValue(studentInfo.jobDeclarationDate),
     jobDeclarationIcNo: normalizeJobTableValue(studentInfo.jobDeclarationIcNo),
     jobDeclarationName: normalizeJobTableValue(studentInfo.jobDeclarationName),
-    jobDeclarationSignature: normalizeJobTableValue(studentInfo.jobDeclarationSignature),
     jobHigherEducationQualifications: normalizedJobHigherEducationQualifications,
     jobLanguageSkillRows: normalizedJobLanguageSkillRows,
     jobLanguageSkills: studentInfo.jobLanguageSkills || buildJobLanguageSkillsSummary({ ...studentInfo, jobLanguageSkillRows: normalizedJobLanguageSkillRows }),
@@ -2240,7 +2236,6 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
               <div className="student-job-declaration-fields">
                 {renderJobDeclarationLine("jobDeclarationName", "Nama")}
                 {renderJobDeclarationLine("jobDeclarationIcNo", "No. Kad Pengenalan")}
-                {renderJobDeclarationLine("jobDeclarationSignature", "Tandatangan Pemohon")}
                 {renderJobDeclarationLine("jobDeclarationDate", "Tarikh")}
               </div>
             </td>
