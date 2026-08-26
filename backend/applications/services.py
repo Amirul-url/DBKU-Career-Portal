@@ -80,6 +80,18 @@ def build_hrm_application_submission_notification(application):
 
 
 def build_department_application_assignment_notification(application):
+    if application.vacancy.vacancy_type == "job":
+        job_label = get_job_application_label(application)
+        return {
+            "title": f"Permohonan {job_label} Untuk Semakan Bahagian - {application.reference_no}",
+            "message": (
+                "Portal Kerjaya DBKU\n\n"
+                f"Terdapat permohonan {job_label} semakan Bahagian.\n"
+                f"No. Rujukan: {application.reference_no}\n\n"
+                "Sila semak permohonan melalui Portal Kerjaya DBKU."
+            ),
+        }
+
     return {
         "title": f"Permohonan LI Baharu Untuk Semakan - {application.reference_no}",
         "message": (

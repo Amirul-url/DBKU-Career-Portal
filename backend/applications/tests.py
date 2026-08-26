@@ -921,6 +921,80 @@ class CandidateApplicationReferenceNoTests(TestCase):
     @override_settings(NOTIFICATION_EMAIL_ENABLED=True, WHATSAPP_ENABLED=True)
     @patch("applications.services.send_whatsapp_message")
     @patch("notifications.services.send_notification_email")
+    def test_hrm_job_assignment_notifies_only_selected_department_with_job_copy(
+        self,
+        mock_send_email,
+        mock_send_whatsapp,
+    ):
+        applicant = self.create_applicant("job-department-assignment-target@example.com")
+        hrm = self.user_model.objects.create_user(
+            username="hrm-job-assignment@example.com",
+            email="hrm-job-assignment@example.com",
+            password="Password123!",
+            role="admin",
+            department="Bahagian Pengurusan Sumber Manusia (HRM)",
+        )
+        ict_head = self.user_model.objects.create_user(
+            username="ict-job-assignment@example.com",
+            email="ict-job-assignment@example.com",
+            password="Password123!",
+            role="admin",
+            department="Bahagian Teknologi Maklumat (ICT)",
+            department_role="Ketua Bahagian",
+            mobile_number="60127770201",
+        )
+        finance_head = self.user_model.objects.create_user(
+            username="finance-job-assignment@example.com",
+            email="finance-job-assignment@example.com",
+            password="Password123!",
+            role="admin",
+            department="Bahagian Kewangan (FIN)",
+            department_role="Ketua Bahagian",
+            mobile_number="60127770202",
+        )
+        job_vacancy = Vacancy.objects.create(
+            title="Penolong Pegawai Penerangan Gred S5",
+            vacancy_type="job",
+            department="Dewan Bandaraya Kuching Utara",
+            summary="Jawatan kosong DBKU.",
+            status="open",
+        )
+        application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=job_vacancy,
+            status="submitted",
+            reference_no="PK.2026-0004",
+        )
+        client = APIClient()
+        client.force_authenticate(user=hrm)
+
+        response = client.post(
+            f"/api/applications/{application.id}/review/",
+            {
+                "status": "shortlisted",
+                "assigned_department": "Bahagian Teknologi Maklumat (ICT)",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        expected_title = "Permohonan Jawatan Penolong Pegawai Penerangan Gred S5 Untuk Semakan Bahagian - PK.2026-0004"
+        expected_message = (
+            "Portal Kerjaya DBKU\n\n"
+            "Terdapat permohonan Jawatan Penolong Pegawai Penerangan Gred S5 semakan Bahagian.\n"
+            "No. Rujukan: PK.2026-0004\n\n"
+            "Sila semak permohonan melalui Portal Kerjaya DBKU."
+        )
+        notification = Notification.objects.get(application=application, user=ict_head)
+        self.assertEqual(notification.title, expected_title)
+        self.assertEqual(notification.message, expected_message)
+        mock_send_email.assert_any_call(ict_head, expected_title, expected_message)
+        mock_send_whatsapp.assert_any_call(ict_head.mobile_number, expected_message)
+        self.assertFalse(Notification.objects.filter(application=application, user=finance_head).exists())
+
+    @override_settings(NOTIFICATION_EMAIL_ENABLED=True, WHATSAPP_ENABLED=True)
+    @patch("applications.services.send_whatsapp_message")
+    @patch("notifications.services.send_notification_email")
     def test_department_decision_submission_notifies_hrm_by_email_and_whatsapp(
         self,
         mock_send_email,
