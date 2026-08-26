@@ -1880,7 +1880,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
   const handleSubmitApplication = async () => {
     setNotice("");
 
-    if (!declarationAccepted) {
+    if (!isJobApplication && !declarationAccepted) {
       setNoticeStatus("error");
       setNotice("Sila tandakan perakuan pemohon sebelum menghantar permohonan.");
       return;
@@ -2825,18 +2825,20 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
         </table>
       </div>
 
-      <section className="student-declaration" aria-label="Perakuan pemohon">
-        <label>
-          <input
-            checked={declarationAccepted}
-            type="checkbox"
-            onChange={(event) => setDeclarationAccepted(event.target.checked)}
-          />
-          <span>
-            Saya dengan ini mengaku bahawa semua maklumat yang saya berikan adalah <strong>BENAR</strong> dan <strong>TEPAT</strong>. Saya juga bersetuju dan menerima bahawa sekiranya mana-mana daripada pengakuan ini didapati palsu atau tidak benar, pihak Dewan Bandaraya Kuching Utara berhak menarik balik keputusan tawaran dan menamatkan perkhidmatan saya dengan serta-merta tanpa apa-apa syarat
-          </span>
-        </label>
-      </section>
+      {!isJobApplication ? (
+        <section className="student-declaration" aria-label="Perakuan pemohon">
+          <label>
+            <input
+              checked={declarationAccepted}
+              type="checkbox"
+              onChange={(event) => setDeclarationAccepted(event.target.checked)}
+            />
+            <span>
+              Saya dengan ini mengaku bahawa semua maklumat yang saya berikan adalah <strong>BENAR</strong> dan <strong>TEPAT</strong>. Saya juga bersetuju dan menerima bahawa sekiranya mana-mana daripada pengakuan ini didapati palsu atau tidak benar, pihak Dewan Bandaraya Kuching Utara berhak menarik balik keputusan tawaran dan menamatkan perkhidmatan saya dengan serta-merta tanpa apa-apa syarat
+            </span>
+          </label>
+        </section>
+      ) : null}
     </>
   );
 
@@ -2854,7 +2856,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
     <h2>{activeInfoHeading}</h2>
   );
   const requiredInfoTabsComplete = currentRequiredInfoTabs.every((tab) => isTabComplete(tab, studentInfo));
-  const isApplicationReadyToSubmit = declarationAccepted && requiredInfoTabsComplete;
+  const isApplicationReadyToSubmit = (isJobApplication || declarationAccepted) && requiredInfoTabsComplete;
   const isFinalInfoTab = activeInfoTab === currentInfoTabs[currentInfoTabs.length - 1];
 
   return (
