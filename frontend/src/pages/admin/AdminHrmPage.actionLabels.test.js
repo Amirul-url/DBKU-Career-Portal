@@ -136,6 +136,15 @@ test("HRM job application detail shows A-L tabs and HRM review tab", () => {
   assert.match(applicantViewSource, /isJobApplication && readOnlyJobInfoTabs\.includes\(tab\) \? getReadOnlyJobTabLabel\(tab, readOnlyJobInfoTabs\.indexOf\(tab\)\) : tab/);
 });
 
+test("readonly job application details show the same summary cards as LI", () => {
+  assert.match(applicantViewSource, /<section className="student-readonly-summary" aria-label="Ringkasan permohonan">/);
+  assert.match(applicantViewSource, /<span>No\. Rujukan<\/span>\s*<strong>\{formatReferenceNo\(application\)\}<\/strong>/);
+  assert.match(applicantViewSource, /<span>Permohonan<\/span>\s*<strong>\{vacancy\.title \|\| "Permohonan DBKU"\}<\/strong>/);
+  assert.match(applicantViewSource, /<span>Tarikh<\/span>\s*<strong>\{formatDate\(getApplicationDate\(application\)\)\}<\/strong>/);
+  assert.match(applicantViewSource, /<span>Status<\/span>\s*<strong className=\{`applicant-status-pill \$\{visibleStatus\}`\}>/);
+  assert.doesNotMatch(applicantViewSource, /!\s*isJobApplication \? \(\s*<section className="student-readonly-summary"/);
+});
+
 test("HRM assessment higher education fields can be edited and saved", () => {
   assert.match(source, /const \[assessmentInstitution, setAssessmentInstitution\] = useState\(savedAssessment\.institution \|\| studentInfo\.institution \|\| ""\)/);
   assert.match(source, /const \[assessmentSpecialization, setAssessmentSpecialization\] = useState\(savedAssessment\.specialization \|\| studentInfo\.program \|\| ""\)/);
