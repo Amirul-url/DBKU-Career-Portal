@@ -1067,6 +1067,78 @@ class CandidateApplicationReferenceNoTests(TestCase):
         mock_send_whatsapp.assert_any_call(hrm.mobile_number, expected_message)
         self.assertFalse(Notification.objects.filter(application=application, user=finance_head).exists())
 
+    @override_settings(NOTIFICATION_EMAIL_ENABLED=True, WHATSAPP_ENABLED=True)
+    @patch("applications.services.send_whatsapp_message")
+    @patch("notifications.services.send_notification_email")
+    def test_job_department_decision_submission_notifies_hrm_with_job_copy(
+        self,
+        mock_send_email,
+        mock_send_whatsapp,
+    ):
+        applicant = self.create_applicant("job-department-to-hrm-target@example.com")
+        ict_head = self.user_model.objects.create_user(
+            username="ict-job-to-hrm@example.com",
+            email="ict-job-to-hrm@example.com",
+            password="Password123!",
+            role="admin",
+            department="Bahagian Teknologi Maklumat (ICT)",
+            department_role="Ketua Bahagian",
+            mobile_number="60127770301",
+        )
+        hrm = self.user_model.objects.create_user(
+            username="hrm-job-to-confirm@example.com",
+            email="hrm-job-to-confirm@example.com",
+            password="Password123!",
+            role="admin",
+            department="Bahagian Pengurusan Sumber Manusia (HRM)",
+            mobile_number="60127770302",
+        )
+        job_vacancy = Vacancy.objects.create(
+            title="Penolong Pegawai Penerangan Gred S5",
+            vacancy_type="job",
+            department="Dewan Bandaraya Kuching Utara",
+            summary="Jawatan kosong DBKU.",
+            status="open",
+        )
+        application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=job_vacancy,
+            status="shortlisted",
+            assigned_department="Bahagian Teknologi Maklumat (ICT)",
+            reference_no="PK.2026-0004",
+        )
+        client = APIClient()
+        client.force_authenticate(user=ict_head)
+
+        response = client.patch(
+            f"/api/applications/{application.id}/",
+            {
+                "profile_data": {
+                    "department_decision": {
+                        "department": "Bahagian Teknologi Maklumat (ICT)",
+                        "recommendation": "Terima",
+                        "remarks": "Pihak kami tiada halangan terhadap permohonan tersebut.",
+                        "submitted_at": "2026-08-26T09:00:00+08:00",
+                    },
+                },
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        expected_title = "Permohonan Jawatan Penolong Pegawai Penerangan Gred S5 Untuk Pengesahan - PK.2026-0004"
+        expected_message = (
+            "Portal Kerjaya DBKU\n\n"
+            "Terdapat permohonan Jawatan Penolong Pegawai Penerangan Gred S5 untuk pengesahan.\n"
+            "No. Rujukan: PK.2026-0004\n\n"
+            "Sila semak permohonan melalui Portal Kerjaya DBKU."
+        )
+        notification = Notification.objects.get(application=application, user=hrm)
+        self.assertEqual(notification.title, expected_title)
+        self.assertEqual(notification.message, expected_message)
+        mock_send_email.assert_any_call(hrm, expected_title, expected_message)
+        mock_send_whatsapp.assert_any_call(hrm.mobile_number, expected_message)
+
     def test_department_admin_cannot_reassign_application_to_another_department(self):
         applicant = self.create_applicant("department-review@example.com")
         ict_admin = self.user_model.objects.create_user(

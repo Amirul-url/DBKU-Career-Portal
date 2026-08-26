@@ -104,6 +104,18 @@ def build_department_application_assignment_notification(application):
 
 
 def build_hrm_department_decision_notification(application):
+    if application.vacancy.vacancy_type == "job":
+        job_label = get_job_application_label(application)
+        return {
+            "title": f"Permohonan {job_label} Untuk Pengesahan - {application.reference_no}",
+            "message": (
+                "Portal Kerjaya DBKU\n\n"
+                f"Terdapat permohonan {job_label} untuk pengesahan.\n"
+                f"No. Rujukan: {application.reference_no}\n\n"
+                "Sila semak permohonan melalui Portal Kerjaya DBKU."
+            ),
+        }
+
     return {
         "title": f"Permohonan LI Baharu Untuk Pengesahan - {application.reference_no}",
         "message": (

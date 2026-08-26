@@ -3277,7 +3277,7 @@ function HrmApplicationDetailPage({
     (departmentRecommendation === "Terima" || application?.status === "offered" || application?.status === "accepted");
   const extraTabs = [
     ...(isHrmWorkspace ? [hrmReviewTab] : []),
-    ...(!isJobApplication && shouldShowDepartmentDecision ? [departmentDecisionTab] : []),
+    ...(shouldShowDepartmentDecision ? [departmentDecisionTab] : []),
     ...(!isJobApplication && shouldShowHrmFinalDecision ? [hrmFinalDecisionTab] : []),
     ...(!isJobApplication && shouldShowOrganizationFeedback ? [organizationFeedbackTab] : []),
     ...(!isJobApplication && hasApplicantRespondedToOffer(application) ? [applicantConfirmationTab] : []),

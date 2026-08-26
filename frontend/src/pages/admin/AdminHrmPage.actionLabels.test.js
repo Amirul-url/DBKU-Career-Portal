@@ -137,8 +137,10 @@ test("HRM job application detail shows A-L tabs and HRM review tab", () => {
   assert.match(source, /applicationType=\{activeVacancyType\}/);
   assert.match(source, /const isJobApplication = applicationType === "job"/);
   assert.match(source, /\.\.\.\(isHrmWorkspace \? \[hrmReviewTab\] : \[\]\)/);
+  assert.match(source, /\.\.\.\(shouldShowDepartmentDecision \? \[departmentDecisionTab\] : \[\]\)/);
   assert.match(source, /const detailTabGroups = isJobApplication \? \[\] : \[/);
   assert.match(source, /tab === hrmReviewTab \? \(\s*<HrmInternshipAssessmentTab/);
+  assert.match(source, /tab === departmentDecisionTab \? \(\s*<DepartmentDecisionTab/);
   assert.match(applicantViewSource, /const readOnlyJobInfoTabs = \[/);
   assert.match(applicantViewSource, /const panelTabs = isJobApplication \? \[\.\.\.readOnlyJobInfoTabs, \.\.\.extraTabs\] : \[\.\.\.infoTabs, \.\.\.extraTabs\]/);
   assert.match(applicantViewSource, /const defaultJobTabGroups = isJobApplication && extraTabs\.length/);
@@ -293,7 +295,7 @@ test("department decision tab replaces HRM review for department workspaces", ()
   assert.match(source, /disabled=\{isLocked\}/);
   assert.match(source, /\{!isLocked \? \(/);
   assert.match(source, /\.\.\.\(isHrmWorkspace \? \[hrmReviewTab\] : \[\]\)/);
-  assert.match(source, /\.\.\.\(!isJobApplication && shouldShowDepartmentDecision \? \[departmentDecisionTab\] : \[\]\)/);
+  assert.match(source, /\.\.\.\(shouldShowDepartmentDecision \? \[departmentDecisionTab\] : \[\]\)/);
   assert.match(source, /isReadOnly=\{isHrmWorkspace\}/);
   assert.match(source, /maskAcceptedStatus=\{false\}/);
 });
