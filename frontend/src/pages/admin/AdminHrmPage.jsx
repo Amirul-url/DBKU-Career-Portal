@@ -2362,6 +2362,29 @@ function buildHrmAssessmentPayload(application, values) {
     updated_at: new Date().toISOString(),
   };
 }
+function HrmAssessmentConfirmModal({ action, isSaving, onCancel, onConfirm }) {
+  if (!action) return null;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/45 p-5" role="presentation">
+      <section className="w-full max-w-lg overflow-hidden rounded-xl bg-white shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="hrm-assessment-confirm-message">
+        <div className="px-6 py-5">
+          <p id="hrm-assessment-confirm-message" className="text-sm leading-6 text-slate-600">
+            {action.confirmMessage}
+          </p>
+          <footer className="mt-6 flex justify-end gap-3">
+            <button className="rounded-md border border-slate-300 px-4 py-2 font-bold text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-70" type="button" onClick={onCancel} disabled={isSaving}>
+              Tidak
+            </button>
+            <button className="inline-flex items-center gap-2 rounded-md bg-emerald-700 px-4 py-2 font-bold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-70" type="button" onClick={onConfirm} disabled={isSaving}>
+              {isSaving ? "Menghantar..." : "Ya"}
+            </button>
+          </footer>
+        </div>
+      </section>
+    </div>
+  );
+}
 function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment }) {
   const studentInfo = getInternshipStudentInfo(application);
   const savedAssessment = getSavedHrmAssessment(application);
@@ -2371,6 +2394,7 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
   const [assessmentSpecialization, setAssessmentSpecialization] = useState(savedAssessment.specialization || studentInfo.program || "");
   const [assessmentCgpa, setAssessmentCgpa] = useState(savedAssessment.cgpa || studentInfo.cgpa || "");
   const [assignedDepartment, setAssignedDepartment] = useState(application?.assigned_department || "");
+  const [pendingReviewAction, setPendingReviewAction] = useState(null);
   const [isSavingAssessment, setIsSavingAssessment] = useState(false);
   const isFinal = application ? hrmReviewFinalStatuses.has(application.status) : false;
   const isAssignedToDepartment = Boolean(application?.assigned_department);
@@ -2380,6 +2404,23 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
   const departmentAssignmentOptions = dbkuDepartments
     .filter((department) => department.code !== "HRM")
     .map((department) => `${department.name} (${department.code})`);
+  const reviewActions = {
+    shortlisted: {
+      status: "shortlisted",
+      decision: "Layak",
+      confirmMessage: "Anda yakin mahu menghantar permohonan ini kepada bahagian?",
+    },
+    incomplete: {
+      status: "incomplete",
+      decision: "Tidak Lengkap",
+      confirmMessage: "Anda yakin mahu menandakan permohonan ini sebagai tidak lengkap?",
+    },
+    rejected: {
+      status: "rejected",
+      decision: "Tidak Layak",
+      confirmMessage: "Anda yakin mahu menandakan permohonan ini sebagai tidak layak?",
+    },
+  };
   const saveAssessment = async (values) => {
     if (!application || !onSaveAssessment) return false;
 
@@ -2414,6 +2455,16 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
       status,
       status === "shortlisted" ? { assigned_department: assignedDepartment } : {},
     );
+  };
+  const requestReviewAction = (action) => {
+    if (!action || !application || isSavingAssessment || isAssessmentLocked) return;
+    if (action.status === "shortlisted" && !assignedDepartment) return;
+    setPendingReviewAction(action);
+  };
+  const confirmReviewAction = async () => {
+    if (!pendingReviewAction) return;
+    await reviewWithAssessment(pendingReviewAction.status, pendingReviewAction.decision);
+    setPendingReviewAction(null);
   };
 
   return (
@@ -2512,7 +2563,7 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
             className="hrm-primary"
             type="button"
             disabled={!application || isSavingAssessment || !assignedDepartment}
-            onClick={() => reviewWithAssessment("shortlisted", "Layak")}
+            onClick={() => requestReviewAction(reviewActions.shortlisted)}
           >
             Hantar ke Bahagian
           </button>
@@ -2520,7 +2571,7 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
             className="hrm-secondary"
             type="button"
             disabled={!application || isSavingAssessment}
-            onClick={() => reviewWithAssessment("incomplete", "Tidak Lengkap")}
+            onClick={() => requestReviewAction(reviewActions.incomplete)}
           >
             Tidak Lengkap
           </button>
@@ -2528,12 +2579,18 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
             className="hrm-danger"
             type="button"
             disabled={!application || isSavingAssessment}
-            onClick={() => reviewWithAssessment("rejected", "Tidak Layak")}
+            onClick={() => requestReviewAction(reviewActions.rejected)}
           >
             Tidak Layak
           </button>
         </footer>
       ) : null}
+      <HrmAssessmentConfirmModal
+        action={pendingReviewAction}
+        isSaving={isSavingAssessment}
+        onCancel={() => setPendingReviewAction(null)}
+        onConfirm={confirmReviewAction}
+      />
     </div>
   );
 }

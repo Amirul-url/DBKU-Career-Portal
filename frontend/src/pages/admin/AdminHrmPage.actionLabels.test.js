@@ -14,7 +14,10 @@ test("HRM application action labels match the department review workflow", () =>
   assert.match(source, />\s*Hantar ke Bahagian\s*</);
   assert.match(source, />\s*Tidak Lengkap\s*</);
   assert.match(source, />\s*Tidak Layak\s*</);
-  assert.match(source, /reviewWithAssessment\("incomplete", "Tidak Lengkap"\)/);
+  assert.match(source, /requestReviewAction\(reviewActions\.shortlisted\)/);
+  assert.match(source, /requestReviewAction\(reviewActions\.incomplete\)/);
+  assert.match(source, /requestReviewAction\(reviewActions\.rejected\)/);
+  assert.match(source, /reviewWithAssessment\(pendingReviewAction\.status, pendingReviewAction\.decision\)/);
   assert.match(source, /onReview\(app\.id, "incomplete"\)/);
   assert.doesNotMatch(source, />\s*Senarai pendek\s*</);
   assert.doesNotMatch(source, /className="reject"[\s\S]{0,200}>\s*Tolak\s*</);
@@ -389,6 +392,13 @@ test("HRM and department decision tabs keep draft selections in local state unti
   assert.match(source, /const isSaved = await saveAssessment\(\{ decision: nextDecision, educationLevel, institution: assessmentInstitution, specialization: assessmentSpecialization, cgpa: assessmentCgpa \}\)/);
   assert.match(source, /const chooseDecision = \(item\) => \{\s*if \(isAssessmentLocked\) return;\s*const nextDecision = decision === item \? "" : item;\s*setDecision\(nextDecision\);\s*\};/);
   assert.match(source, /const chooseEducationLevel = \(item\) => \{\s*if \(isAssessmentLocked\) return;\s*const nextEducationLevel = educationLevel === item \? "" : item;\s*setEducationLevel\(nextEducationLevel\);\s*\};/);
+  assert.match(source, /function HrmAssessmentConfirmModal/);
+  assert.match(source, /const \[pendingReviewAction, setPendingReviewAction\] = useState\(null\)/);
+  assert.match(source, /Anda yakin mahu menghantar permohonan ini kepada bahagian\?/);
+  assert.match(source, /Anda yakin mahu menandakan permohonan ini sebagai tidak lengkap\?/);
+  assert.match(source, /Anda yakin mahu menandakan permohonan ini sebagai tidak layak\?/);
+  assert.match(source, /setPendingReviewAction\(action\)/);
+  assert.match(source, /onCancel=\{\(\) => setPendingReviewAction\(null\)\}/);
   assert.match(source, /await onSaveDecision\(application, buildDepartmentDecisionPayload/);
   assert.doesNotMatch(source, /window\.alert/);
   assert.match(source, /function DepartmentDecisionConfirmModal/);
