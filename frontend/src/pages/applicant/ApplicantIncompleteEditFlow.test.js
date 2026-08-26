@@ -136,6 +136,13 @@ test("applicant accepted applications stay hidden behind review status until HRM
     viewSource,
     /Sukacita dimaklumkan bahawa Dewan Bandaraya Kuching Utara tiada halangan untuk menerima anda bagi menjalani/,
   );
+  assert.match(
+    viewSource,
+    /Sukacita dimaklumkan bahawa Dewan Bandaraya Kuching Utara telah bersetuju untuk melantik anda bagi mengisi jawatan yang telah dipohon seperti berikut:-/,
+  );
+  assert.match(viewSource, /function getOrganizationFeedbackIntroText\(application\)/);
+  assert.match(viewSource, /isJobApplicationDetail\(application\) \? jobOrganizationFeedbackIntro : internshipOrganizationFeedbackIntro/);
+  assert.match(viewSource, /<p>\{feedbackIntroText\}<\/p>/);
   assert.ok(
     viewSource.indexOf('className="organization-feedback-intro"') <
       viewSource.indexOf('className="organization-feedback-table applicant-organization-feedback-table"'),
@@ -361,11 +368,11 @@ test("internship back action asks applicant to save a visible draft", () => {
 
 test("internship submission requires all mandatory info tabs", () => {
   assert.match(formSource, /const internshipRequiredInfoTabs = \[personalInfoTab, academicInfoTab, documentSupportTab\]/);
-  assert.match(formSource, /requiredTabs\.find\(\(tab\) => !isTabComplete\(tab, studentInfo\)\)/);
+  assert.match(formSource, /requiredTabs\.find\(\(tab\) => !isTabComplete\(tab, studentInfo, applicationType\)\)/);
   assert.match(formSource, /requiredTabs\.forEach\(\(tab\) => \{/);
   assert.match(formSource, /const currentRequiredInfoTabs = isJobApplication \? jobInfoTabs : internshipRequiredInfoTabs/);
-  assert.match(formSource, /const requiredInfoTabsComplete = currentRequiredInfoTabs\.every\(\(tab\) => isTabComplete\(tab, studentInfo\)\)/);
-  assert.match(formSource, /const isApplicationReadyToSubmit = declarationAccepted && requiredInfoTabsComplete/);
+  assert.match(formSource, /const requiredInfoTabsComplete = currentRequiredInfoTabs\.every\(\(tab\) => isTabComplete\(tab, studentInfo, applicationType\)\)/);
+  assert.match(formSource, /const isApplicationReadyToSubmit = \(isJobApplication \|\| declarationAccepted\) && requiredInfoTabsComplete/);
   assert.match(formSource, /disabled=\{!isApplicationReadyToSubmit \|\| isSubmittingApplication\}/);
 });
 

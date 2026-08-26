@@ -513,6 +513,13 @@ test("HRM detail includes an organization feedback document tab", () => {
     source,
     /Sukacita dimaklumkan bahawa Dewan Bandaraya Kuching Utara tiada halangan untuk menerima anda bagi menjalani/,
   );
+  assert.match(
+    source,
+    /Sukacita dimaklumkan bahawa Dewan Bandaraya Kuching Utara telah bersetuju untuk melantik anda bagi mengisi jawatan yang telah dipohon seperti berikut:-/,
+  );
+  assert.match(source, /function getOrganizationFeedbackIntroText\(application\)/);
+  assert.match(source, /isJobApplicationDetail\(application\) \? jobOrganizationFeedbackIntro : internshipOrganizationFeedbackIntro/);
+  assert.match(source, /<p>\{feedbackIntroText\}<\/p>/);
   assert.ok(
     source.indexOf('className="organization-feedback-intro"') < source.indexOf('className="organization-feedback-table"'),
   );

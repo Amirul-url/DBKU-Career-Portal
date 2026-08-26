@@ -53,6 +53,10 @@ const organizationFeedbackReportDefaults = {
     "Unit Pengurusan Latihan\nBahagian Pengurusan Sumber Manusia\nTingkat 3, Bangunan Dewan Bandaraya Kuching Utara\nBukit Siol, Jalan Semariang, Petra Jaya\n93050 Kuching, SARAWAK",
   confirmationDate: "",
 };
+const internshipOrganizationFeedbackIntro =
+  "Sukacita dimaklumkan bahawa Dewan Bandaraya Kuching Utara tiada halangan untuk menerima anda bagi menjalani Latihan Industri / Praktikal seperti berikut:-";
+const jobOrganizationFeedbackIntro =
+  "Sukacita dimaklumkan bahawa Dewan Bandaraya Kuching Utara telah bersetuju untuk melantik anda bagi mengisi jawatan yang telah dipohon seperti berikut:-";
 const applicantInternshipLifecycleStatusLabels = {
   applicant_agreed: "Pengesahan Dihantar",
   internship_active: internshipLifecycleStatusLabels.internship_active,
@@ -216,6 +220,10 @@ function isJobApplicationDetail(application) {
   return application?.vacancy_type === "job"
     || application?.type === "job"
     || application?.vacancy_detail?.vacancy_type === "job";
+}
+
+function getOrganizationFeedbackIntroText(application) {
+  return isJobApplicationDetail(application) ? jobOrganizationFeedbackIntro : internshipOrganizationFeedbackIntro;
 }
 
 const getJobTabCode = (index) => `(${String.fromCharCode(65 + index)})`;
@@ -596,14 +604,13 @@ function ApplicantOrganizationFeedbackTab({ application, onNext }) {
   const identityNo = getInternshipStudentIdentityNo(application);
   const program = getInternshipProgram(application);
   const placementDepartment = getApplicantFeedbackPlacementDepartment(application);
+  const feedbackIntroText = getOrganizationFeedbackIntroText(application);
 
   return (
     <div className="organization-feedback-panel applicant-organization-feedback-panel">
       <div className="organization-feedback-intro">
         <p>Dengan segala hormatnya perkara di atas adalah dirujuk.</p>
-        <p>
-          Sukacita dimaklumkan bahawa Dewan Bandaraya Kuching Utara tiada halangan untuk menerima anda bagi menjalani Latihan Industri / Praktikal seperti berikut:-
-        </p>
+        <p>{feedbackIntroText}</p>
       </div>
       <div className="organization-feedback-table-wrap">
         <table className="organization-feedback-table applicant-organization-feedback-table">
