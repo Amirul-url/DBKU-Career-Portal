@@ -356,6 +356,7 @@ test("submitted job application detail uses the job A to L read-only module", ()
   assert.match(applicationViewSource, /isSameJobChoice\(row\.speaking, option\)/);
   assert.match(applicationViewSource, /isSameJobChoice\(row\.level, option\)/);
   assert.match(applicationViewSource, /student-job-work-experience-table[\s\S]*<colgroup>[\s\S]*<th className="student-job-spm-heading" colSpan=\{6\}>\{activeInfoHeading\}<\/th>/);
+  assert.match(cssSource, /\.student-job-work-experience-table tbody td \{[\s\S]*text-align: left;/);
   assert.match(applicationViewSource, /student-job-reference-heading-title[\s\S]*student-job-heading-note/);
 });
 

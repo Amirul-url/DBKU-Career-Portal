@@ -7654,6 +7654,11 @@ body:has(.applicant-profile-page) {
 
 .student-job-work-experience-table tbody td {
   height: 48px;
+  text-align: left;
+}
+
+.student-job-work-experience-table tbody td:first-child {
+  text-align: left;
 }
 
 .student-job-work-experience-table input {
