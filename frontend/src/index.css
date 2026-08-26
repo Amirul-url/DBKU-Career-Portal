@@ -7752,16 +7752,16 @@ body:has(.applicant-profile-page) {
   margin-top: 24px;
 }
 
-.student-job-declaration-line {
+.student-job-declaration-table .student-job-declaration-line {
   display: grid;
   grid-template-columns: 260px 16px minmax(260px, 470px);
   gap: 8px;
-  align-items: end;
+  align-items: center;
   font-size: 13px;
   min-height: 54px;
 }
 
-.student-job-declaration-line b {
+.student-job-declaration-table .student-job-declaration-line b {
   font-weight: 500;
 }
 
