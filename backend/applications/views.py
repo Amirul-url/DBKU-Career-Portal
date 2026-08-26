@@ -136,6 +136,32 @@ class CandidateApplicationViewSet(viewsets.ModelViewSet):
             notify_hrm_offer_accepted(application)
         return Response(self.get_serializer(application).data)
 
+    @action(detail=True, methods=["post"], url_path="preview-applicant-confirmation-document")
+    def preview_applicant_confirmation_document(self, request, pk=None):
+        application = self.get_object()
+        if application.applicant_id != request.user.id:
+            return Response({"detail": "Hanya pemohon boleh memuat naik dokumen pengesahan ini."}, status=403)
+        if application.status not in {"offered", "accepted"}:
+            return Response(
+                {"detail": "Dokumen hanya boleh dipratonton selepas tawaran diterima."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        profile_data = dict(application.profile_data or {})
+        feedback_release = profile_data.get("organization_feedback_release") or {}
+        if not feedback_release.get("sent_to_applicant_at"):
+            return Response(
+                {"detail": "Maklumbalas organisasi belum dihantar kepada pemohon."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        serializer = self.get_serializer(application)
+        try:
+            uploaded_file = serializer.get_applicant_confirmation_preview_upload(request)
+        except ValidationError as error:
+            return Response({"applicantConfirmationDocument": error.detail}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.save_applicant_confirmation_preview_document(uploaded_file))
+
     @action(detail=True, methods=["post"], url_path="reject-offer")
     def reject_offer(self, request, pk=None):
         application = self.get_object()

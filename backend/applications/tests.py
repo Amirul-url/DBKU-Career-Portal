@@ -583,6 +583,39 @@ class CandidateApplicationReferenceNoTests(TestCase):
         self.assertEqual(documents[0]["name"], "pengesahan-pemohon.pdf")
         self.assertIn("/media/applicant_confirmation_documents/", documents[0]["url"])
 
+    def test_applicant_can_upload_confirmation_document_preview_to_media(self):
+        applicant = self.create_applicant("preview-confirmation-document@example.com")
+        application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=self.vacancy,
+            status="offered",
+            profile_data={
+                "organization_feedback_release": {
+                    "sent_to_applicant_at": "2026-08-20T08:00:00+08:00",
+                },
+            },
+        )
+        uploaded_file = SimpleUploadedFile(
+            "pengesahan-preview.pdf",
+            b"%PDF-1.4\n% applicant confirmation preview\n",
+            content_type="application/pdf",
+        )
+        client = APIClient()
+        client.force_authenticate(user=applicant)
+
+        response = client.post(
+            f"/api/applications/{application.id}/preview-applicant-confirmation-document/",
+            {"applicantConfirmationDocument": uploaded_file},
+            format="multipart",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["name"], "pengesahan-preview.pdf")
+        self.assertIn("/media/applicant_confirmation_previews/", response.data["url"])
+        application.refresh_from_db()
+        self.assertEqual(application.status, "offered")
+        self.assertNotIn("applicant_confirmation", application.profile_data)
+
     @override_settings(NOTIFICATION_EMAIL_ENABLED=True, WHATSAPP_ENABLED=True)
     @patch("applications.services.send_whatsapp_message")
     @patch("notifications.services.send_notification_email")

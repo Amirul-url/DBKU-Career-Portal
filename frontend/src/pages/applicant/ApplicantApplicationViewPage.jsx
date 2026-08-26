@@ -809,6 +809,7 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
   const [fileInputKey, setFileInputKey] = useState(0);
   const [message, setMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingPreview, setIsUploadingPreview] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const isJobApplication = isJobApplicationDetail(application);
@@ -824,10 +825,30 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
     : "Anda yakin mahu menolak tawaran latihan industri ini?";
   const documents = isAgreed
     ? confirmationState.documents
-    : selectedFiles.map((file, index) => ({ file, id: `${file.name}-${index}`, name: file.name, url: "" }));
+    : selectedFiles.map((document, index) => ({
+      file: document.file,
+      id: document.id || `${document.name}-${index}`,
+      name: document.name,
+      url: document.url || "",
+    }));
   const isPdfFile = (file) => file?.type === "application/pdf" || file?.name?.toLowerCase().endsWith(".pdf");
 
-  const selectConfirmationFiles = (event) => {
+  const uploadConfirmationPreview = async (file) => {
+    const payload = new FormData();
+    payload.append("applicantConfirmationDocument", file);
+    const document = await apiRequest(`/applications/${application.id}/preview-applicant-confirmation-document/`, {
+      method: "POST",
+      body: payload,
+    });
+    return {
+      file,
+      id: document.id || `${file.name}-${Date.now()}`,
+      name: document.name || file.name,
+      url: resolveMediaUrl(document.url || ""),
+    };
+  };
+
+  const selectConfirmationFiles = async (event) => {
     const files = Array.from(event.target.files || []);
     if (!files.length) return;
     if (files.some((file) => !isPdfFile(file))) {
@@ -835,9 +856,20 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
       setMessage("Format fail mesti PDF sahaja.");
       return;
     }
+    setIsUploadingPreview(true);
     setMessage("");
-    setSelectedFiles((current) => [...current, ...files]);
-    setFileInputKey((current) => current + 1);
+    try {
+      const uploadedDocuments = [];
+      for (const file of files) {
+        uploadedDocuments.push(await uploadConfirmationPreview(file));
+      }
+      setSelectedFiles((current) => [...current, ...uploadedDocuments]);
+    } catch (error) {
+      setMessage(error.message || "Dokumen gagal dimuat naik untuk pratonton.");
+    } finally {
+      setIsUploadingPreview(false);
+      setFileInputKey((current) => current + 1);
+    }
   };
 
   const requestSubmitConfirmation = () => {
@@ -863,8 +895,8 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
 
   const submitConfirmation = async () => {
     const payload = new FormData();
-    selectedFiles.forEach((file) => {
-      payload.append("applicantConfirmationDocuments", file);
+    selectedFiles.forEach((document) => {
+      payload.append("applicantConfirmationDocuments", document.file);
     });
 
     setIsSaving(true);
@@ -934,7 +966,7 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
                   key={fileInputKey}
                   accept="application/pdf,.pdf"
                   className="organization-feedback-hidden-input"
-                  disabled={isSaving}
+                  disabled={isSaving || isUploadingPreview}
                   multiple
                   name="applicantConfirmationDocuments"
                   onChange={selectConfirmationFiles}
@@ -996,7 +1028,7 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
                           <button
                             aria-label={`Buang ${document.name}`}
                             className="organization-feedback-icon-button organization-feedback-icon-button-remove-file"
-                            disabled={isSaving}
+                            disabled={isSaving || isUploadingPreview}
                             onClick={() => removeConfirmationFile(index)}
                             title="Buang fail"
                             type="button"
@@ -1041,11 +1073,11 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
         ) : null}
         <button
           className="hrm-primary organization-feedback-send"
-          disabled={hasResponded || isSaving || !selectedFiles.length}
+          disabled={hasResponded || isSaving || isUploadingPreview || !selectedFiles.length}
           onClick={requestSubmitConfirmation}
           type="button"
         >
-          {isSaving ? "Menghantar..." : hasResponded ? "Telah dihantar" : <span>Hantar</span>}
+          {isUploadingPreview ? "Memuat naik..." : isSaving ? "Menghantar..." : hasResponded ? "Telah dihantar" : <span>Hantar</span>}
         </button>
       </footer>
 

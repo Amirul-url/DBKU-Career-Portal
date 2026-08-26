@@ -414,6 +414,15 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
             self.validate_pdf_document(uploaded_file)
         return uploads
 
+    def get_applicant_confirmation_preview_upload(self, request):
+        uploaded_file = request.FILES.get("applicantConfirmationDocument")
+        if not uploaded_file:
+            uploaded_files = request.FILES.getlist("applicantConfirmationDocuments")
+            uploaded_file = uploaded_files[0] if uploaded_files else None
+        if not uploaded_file:
+            raise serializers.ValidationError("Sila pilih dokumen PDF untuk dipratonton.")
+        return self.validate_pdf_document(uploaded_file)
+
     def apply_document_uploads(self, instance, uploads):
         if not uploads:
             return instance
@@ -511,6 +520,25 @@ class CandidateApplicationSerializer(serializers.ModelSerializer):
         instance.status = "accepted"
         instance.save(update_fields=["status", "profile_data", "updated_at"])
         return instance
+
+    def save_applicant_confirmation_preview_document(self, uploaded_file):
+        safe_name = get_valid_filename(uploaded_file.name or "pengesahan-pemohon.pdf")
+        _, extension = os.path.splitext(safe_name)
+        extension = extension or ".pdf"
+        document_id = uuid4().hex
+        saved_path = default_storage.save(
+            f"applicant_confirmation_previews/{document_id}{extension}",
+            uploaded_file,
+        )
+        size = getattr(uploaded_file, "size", 0) or 0
+        return {
+            "id": document_id,
+            "name": uploaded_file.name,
+            "url": self.build_absolute_file_url(saved_path),
+            "size": size,
+            "size_label": self.format_file_size(size),
+            "uploaded_at": timezone.now().isoformat(),
+        }
 
     def delete_organization_feedback_document_by_id(self, instance, document_id):
         if not document_id:
