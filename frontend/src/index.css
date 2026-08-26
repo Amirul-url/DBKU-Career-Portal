@@ -7606,7 +7606,8 @@ body:has(.applicant-profile-page) {
 }
 
 .student-job-work-experience-table {
-  min-width: 980px;
+  width: min(100%, 1120px);
+  min-width: 840px;
   table-layout: fixed;
 }
 
@@ -7623,14 +7624,14 @@ body:has(.applicant-profile-page) {
 
 .student-job-work-experience-table th:nth-child(3),
 .student-job-work-experience-table td:nth-child(3) {
-  width: 14%;
+  width: 13%;
 }
 
 .student-job-work-experience-table th:nth-child(4),
 .student-job-work-experience-table td:nth-child(4),
 .student-job-work-experience-table th:nth-child(5),
 .student-job-work-experience-table td:nth-child(5) {
-  width: 12%;
+  width: 11%;
 }
 
 .student-job-work-experience-table th:nth-child(6),
