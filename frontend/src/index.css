@@ -7605,6 +7605,119 @@ body:has(.applicant-profile-page) {
   margin-left: 4px;
 }
 
+.student-job-work-experience-table {
+  min-width: 980px;
+  table-layout: fixed;
+}
+
+.student-job-work-experience-table th:first-child,
+.student-job-work-experience-table td:first-child {
+  width: 26%;
+  text-align: center;
+}
+
+.student-job-work-experience-table th:nth-child(2),
+.student-job-work-experience-table td:nth-child(2) {
+  width: 24%;
+}
+
+.student-job-work-experience-table th:nth-child(3),
+.student-job-work-experience-table td:nth-child(3) {
+  width: 14%;
+}
+
+.student-job-work-experience-table th:nth-child(4),
+.student-job-work-experience-table td:nth-child(4),
+.student-job-work-experience-table th:nth-child(5),
+.student-job-work-experience-table td:nth-child(5) {
+  width: 12%;
+}
+
+.student-job-work-experience-table th:nth-child(6),
+.student-job-work-experience-table td:nth-child(6) {
+  width: 12%;
+}
+
+.student-job-work-experience-table tbody td {
+  height: 48px;
+}
+
+.student-job-work-experience-table input {
+  min-height: 32px;
+  text-align: left;
+}
+
+.student-job-references-table {
+  min-width: 980px;
+  table-layout: fixed;
+}
+
+.student-job-references-table th:first-child,
+.student-job-references-table td:first-child,
+.student-job-references-table th:nth-child(2),
+.student-job-references-table td:nth-child(2) {
+  width: 50%;
+  text-align: left;
+}
+
+.student-job-references-table thead th.student-job-spm-heading {
+  padding: 10px 16px;
+  text-indent: 0;
+}
+
+.student-job-references-table .student-job-heading-note {
+  display: block;
+  margin-top: 2px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.student-job-references-table td {
+  padding: 10px 16px;
+  vertical-align: top;
+}
+
+.student-job-reference-card {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 12px;
+}
+
+.student-job-reference-number {
+  padding-top: 2px;
+  font-weight: 700;
+}
+
+.student-job-reference-fields {
+  display: grid;
+  gap: 16px;
+}
+
+.student-job-reference-line {
+  display: grid;
+  grid-template-columns: 128px 12px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  min-height: 42px;
+}
+
+.student-job-spm-table .student-job-reference-line input {
+  min-height: 28px;
+  border-bottom: 1px solid #111827;
+  padding: 0 4px;
+}
+
+.student-job-reference-line b {
+  font-weight: 500;
+}
+
+.student-table-error {
+  margin: 8px 0 0;
+  color: #b91c1c;
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .student-passport-upload {
   position: relative;
   box-sizing: border-box;

@@ -51,6 +51,8 @@ const jobHigherEducationRequiredFields = [
 ];
 const jobComputerSkillRowCount = 5;
 const minimumJobComputerSkillRows = 2;
+const jobWorkExperienceRowCount = 5;
+const jobReferenceRowCount = 2;
 const jobSkillLevelOptions = ["Baik", "Sederhana", "Lemah"];
 const jobComputerLevelOptions = ["Sangat Mahir", "Mahir", "Sederhana", "Tidak Mahir"];
 const getDefaultJobLanguageSkillRows = () => [
@@ -60,6 +62,21 @@ const getDefaultJobLanguageSkillRows = () => [
   { language: "", required: false, speaking: "", writing: "" },
   { language: "", required: false, speaking: "", writing: "" },
 ];
+const getDefaultJobWorkExperienceRows = () => Array.from({ length: jobWorkExperienceRowCount }, () => ({
+  employerAddress: "",
+  jobTitle: "",
+  netSalary: "",
+  periodFrom: "",
+  periodTo: "",
+  duration: "",
+}));
+const getDefaultJobReferenceRows = () => Array.from({ length: jobReferenceRowCount }, () => ({
+  address: "",
+  employer: "",
+  name: "",
+  occupation: "",
+  phone: "",
+}));
 const jobTabShortLabels = {
   [personalInfoTab]: "Peribadi",
   [jobSpmTab]: "SPM/UEC",
@@ -322,6 +339,7 @@ const getDefaultStudentInfo = () => ({
   jobMathJulyDetails: "",
   jobMathJulyYear: "",
   jobReferences: "",
+  jobReferenceRows: getDefaultJobReferenceRows(),
   jobSpmDetails: "",
   jobSpmExamName: "",
   jobSpmSchool: "",
@@ -333,6 +351,7 @@ const getDefaultStudentInfo = () => ({
   jobStpmSubjects: Array.from({ length: jobStpmSubjectRowCount }, () => ({ grade: "", subject: "" })),
   jobStpmYear: "",
   jobWorkExperience: "",
+  jobWorkExperienceRows: getDefaultJobWorkExperienceRows(),
   maritalStatus: "",
   motherBirthState: "",
   name: "",
@@ -401,12 +420,8 @@ const requiredFieldsByTab = {
   [jobHigherEducationTab]: [],
   [jobLanguageSkillsTab]: [],
   [jobComputerSkillsTab]: [],
-  [jobWorkExperienceTab]: [
-    ["jobWorkExperience", "Pengalaman Bekerja"],
-  ],
-  [jobReferencesTab]: [
-    ["jobReferences", "Rujukan"],
-  ],
+  [jobWorkExperienceTab]: [],
+  [jobReferencesTab]: [],
   [jobDeclarationTab]: [
     ["jobDeclaration", "Perakuan Pemohon"],
   ],
@@ -768,6 +783,37 @@ function getJobComputerSkillRows(studentInfo = {}) {
   });
 }
 
+function getJobWorkExperienceRows(studentInfo = {}) {
+  const sourceRows = Array.isArray(studentInfo.jobWorkExperienceRows) ? studentInfo.jobWorkExperienceRows : [];
+
+  return Array.from({ length: jobWorkExperienceRowCount }, (_, index) => {
+    const row = sourceRows[index] || {};
+    return {
+      duration: normalizeJobTableValue(row.duration),
+      employerAddress: normalizeJobTableValue(row.employerAddress),
+      jobTitle: normalizeJobTableValue(row.jobTitle),
+      netSalary: normalizeJobTableValue(row.netSalary),
+      periodFrom: normalizeJobTableValue(row.periodFrom),
+      periodTo: normalizeJobTableValue(row.periodTo),
+    };
+  });
+}
+
+function getJobReferenceRows(studentInfo = {}) {
+  const sourceRows = Array.isArray(studentInfo.jobReferenceRows) ? studentInfo.jobReferenceRows : [];
+
+  return Array.from({ length: jobReferenceRowCount }, (_, index) => {
+    const row = sourceRows[index] || {};
+    return {
+      address: normalizeJobTableValue(row.address),
+      employer: normalizeJobTableValue(row.employer),
+      name: normalizeJobTableValue(row.name),
+      occupation: normalizeJobTableValue(row.occupation),
+      phone: normalizeJobTableValue(row.phone),
+    };
+  });
+}
+
 function buildJobBmJulySummary(studentInfo = {}) {
   return [
     ["Tahun", studentInfo.jobBmJulyYear],
@@ -801,6 +847,31 @@ function buildJobComputerSkillsSummary(studentInfo = {}) {
   return getJobComputerSkillRows(studentInfo)
     .filter((row) => row.softwareName.trim() || row.level.trim())
     .map((row, index) => `${index + 1}. ${row.softwareName || "-"} - ${row.level || "-"}`)
+    .join("\n");
+}
+
+function buildJobWorkExperienceSummary(studentInfo = {}) {
+  return getJobWorkExperienceRows(studentInfo)
+    .filter((row) => Object.values(row).some((value) => String(value || "").trim()))
+    .map((row, index) => [
+      `${index + 1}. ${row.employerAddress || "-"}`,
+      `Jawatan: ${row.jobTitle || "-"}`,
+      `Gaji: ${row.netSalary || "-"}`,
+      `Tempoh: ${row.periodFrom || "-"} hingga ${row.periodTo || "-"} (${row.duration || "-"})`,
+    ].join(" | "))
+    .join("\n");
+}
+
+function buildJobReferencesSummary(studentInfo = {}) {
+  return getJobReferenceRows(studentInfo)
+    .filter((row) => Object.values(row).some((value) => String(value || "").trim()))
+    .map((row, index) => [
+      `${index + 1}. ${row.name || "-"}`,
+      `Alamat: ${row.address || "-"}`,
+      `Pekerjaan: ${row.occupation || "-"}`,
+      `Majikan: ${row.employer || "-"}`,
+      `No. Telefon: ${row.phone || "-"}`,
+    ].join(" | "))
     .join("\n");
 }
 
@@ -929,6 +1000,51 @@ function getJobComputerSkillsValidation(studentInfo = {}) {
   return { completedRows, errors, missingFields, partialRows };
 }
 
+function getJobWorkExperienceValidation(studentInfo = {}) {
+  const rows = getJobWorkExperienceRows(studentInfo);
+  const requiredFields = ["employerAddress", "jobTitle", "netSalary", "periodFrom", "periodTo", "duration"];
+  const completedRows = rows.filter((row) => requiredFields.every((field) => row[field].trim()));
+  const partialRows = rows
+    .map((row, index) => ({ ...row, rowNumber: index + 1 }))
+    .filter((row) => {
+      const filledCount = requiredFields.filter((field) => row[field].trim()).length;
+      return filledCount > 0 && filledCount < requiredFields.length;
+    })
+    .map((row) => row.rowNumber);
+  const missingFields = [];
+  const errors = {};
+
+  if (!completedRows.length) {
+    missingFields.push("Sekurang-kurangnya satu pengalaman bekerja lengkap");
+    errors.jobWorkExperienceRows = "Isi sekurang-kurangnya satu baris pengalaman bekerja dengan lengkap.";
+  }
+
+  if (partialRows.length) {
+    missingFields.push(`Lengkapkan semua ruang pengalaman bekerja pada baris ${partialRows.join(", ")}`);
+    errors.jobWorkExperienceRows = "Lengkapkan semua ruang pada baris pengalaman bekerja yang diisi.";
+  }
+
+  return { completedRows, errors, missingFields, partialRows };
+}
+
+function getJobReferencesValidation(studentInfo = {}) {
+  const rows = getJobReferenceRows(studentInfo);
+  const requiredFields = ["name", "address", "occupation", "employer", "phone"];
+  const incompleteRows = rows
+    .map((row, index) => ({ ...row, rowNumber: index + 1 }))
+    .filter((row) => requiredFields.some((field) => !row[field].trim()))
+    .map((row) => row.rowNumber);
+  const missingFields = [];
+  const errors = {};
+
+  if (incompleteRows.length) {
+    missingFields.push("Lengkapkan maklumat dua orang penama rujukan");
+    errors.jobReferenceRows = `Lengkapkan semua ruang rujukan pada bahagian ${incompleteRows.join(", ")}.`;
+  }
+
+  return { errors, incompleteRows, missingFields };
+}
+
 function isJobSpmTabComplete(studentInfo = {}) {
   const hasRequiredFields = (requiredFieldsByTab[jobSpmTab] || [])
     .every(([field]) => String(studentInfo[field] || "").trim());
@@ -957,6 +1073,14 @@ function isJobComputerSkillsTabComplete(studentInfo = {}) {
   return getJobComputerSkillsValidation(studentInfo).missingFields.length === 0;
 }
 
+function isJobWorkExperienceTabComplete(studentInfo = {}) {
+  return getJobWorkExperienceValidation(studentInfo).missingFields.length === 0;
+}
+
+function isJobReferencesTabComplete(studentInfo = {}) {
+  return getJobReferencesValidation(studentInfo).missingFields.length === 0;
+}
+
 function normalizeStudentInfoDraft(studentInfo = {}, user = null) {
   const defaults = getDefaultStudentInfo();
   const birthDate = studentInfo.birthDate || studentInfo.dateOfBirth || "";
@@ -965,6 +1089,8 @@ function normalizeStudentInfoDraft(studentInfo = {}, user = null) {
   const normalizedJobHigherEducationQualifications = getJobHigherEducationQualifications(studentInfo);
   const normalizedJobLanguageSkillRows = getJobLanguageSkillRows(studentInfo);
   const normalizedJobComputerSkillRows = getJobComputerSkillRows(studentInfo);
+  const normalizedJobWorkExperienceRows = getJobWorkExperienceRows(studentInfo);
+  const normalizedJobReferenceRows = getJobReferenceRows(studentInfo);
 
   return {
     ...defaults,
@@ -987,6 +1113,8 @@ function normalizeStudentInfoDraft(studentInfo = {}, user = null) {
     jobMathJulyDetails: studentInfo.jobMathJulyDetails || buildJobMathJulySummary(studentInfo),
     jobMathJulyGradeDecision: normalizeJobTableValue(studentInfo.jobMathJulyGradeDecision),
     jobMathJulyYear: normalizeJobTableValue(studentInfo.jobMathJulyYear),
+    jobReferenceRows: normalizedJobReferenceRows,
+    jobReferences: studentInfo.jobReferences || buildJobReferencesSummary({ ...studentInfo, jobReferenceRows: normalizedJobReferenceRows }),
     jobSpmDetails: studentInfo.jobSpmDetails || buildJobSpmSubjectSummary({ ...studentInfo, jobSpmSubjects: normalizedJobSpmSubjects }),
     jobSpmExamName: normalizeJobTableValue(studentInfo.jobSpmExamName),
     jobSpmSchool: normalizeJobTableValue(studentInfo.jobSpmSchool),
@@ -997,6 +1125,8 @@ function normalizeStudentInfoDraft(studentInfo = {}, user = null) {
     jobStpmSchool: normalizeJobTableValue(studentInfo.jobStpmSchool),
     jobStpmSubjects: normalizedJobStpmSubjects,
     jobStpmYear: normalizeJobTableValue(studentInfo.jobStpmYear),
+    jobWorkExperience: studentInfo.jobWorkExperience || buildJobWorkExperienceSummary({ ...studentInfo, jobWorkExperienceRows: normalizedJobWorkExperienceRows }),
+    jobWorkExperienceRows: normalizedJobWorkExperienceRows,
     name: String(studentInfo.name || user?.full_name || user?.first_name || "").toUpperCase(),
     phone: String(studentInfo.phone || studentInfo.address1Phone || "").replace(/\D/g, ""),
     age: studentInfo.age || calculateAge(birthDate),
@@ -1054,6 +1184,8 @@ function isTabComplete(tab, studentInfo) {
   if (tab === jobHigherEducationTab) return isJobHigherEducationTabComplete(studentInfo);
   if (tab === jobLanguageSkillsTab) return isJobLanguageSkillsTabComplete(studentInfo);
   if (tab === jobComputerSkillsTab) return isJobComputerSkillsTabComplete(studentInfo);
+  if (tab === jobWorkExperienceTab) return isJobWorkExperienceTabComplete(studentInfo);
+  if (tab === jobReferencesTab) return isJobReferencesTabComplete(studentInfo);
 
   const requiredFields = requiredFieldsByTab[tab] || [];
   const hasRequiredFields = requiredFields.every(([field]) => String(studentInfo[field] || "").trim());
@@ -1106,6 +1238,18 @@ function getMissingApplicationFields(studentInfo, requiredTabs = internshipRequi
       const jobComputerValidation = getJobComputerSkillsValidation(studentInfo);
       missingFields.push(...jobComputerValidation.missingFields.map((field) => `${tab}: ${field}`));
       Object.assign(errors, jobComputerValidation.errors);
+    }
+
+    if (tab === jobWorkExperienceTab) {
+      const jobWorkExperienceValidation = getJobWorkExperienceValidation(studentInfo);
+      missingFields.push(...jobWorkExperienceValidation.missingFields.map((field) => `${tab}: ${field}`));
+      Object.assign(errors, jobWorkExperienceValidation.errors);
+    }
+
+    if (tab === jobReferencesTab) {
+      const jobReferencesValidation = getJobReferencesValidation(studentInfo);
+      missingFields.push(...jobReferencesValidation.missingFields.map((field) => `${tab}: ${field}`));
+      Object.assign(errors, jobReferencesValidation.errors);
     }
   });
 
@@ -1492,6 +1636,30 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
     });
   };
 
+  const updateJobWorkExperienceRow = (index, field) => (event) => {
+    setNotice("");
+    clearValidationFields(["jobWorkExperience", "jobWorkExperienceRows"]);
+    setStudentInfo((current) => {
+      const nextRows = getJobWorkExperienceRows(current).map((row, rowIndex) => (
+        rowIndex === index ? { ...row, [field]: normalizeJobTableValue(event.target.value) } : row
+      ));
+      const next = { ...current, jobWorkExperienceRows: nextRows };
+      return { ...next, jobWorkExperience: buildJobWorkExperienceSummary(next) };
+    });
+  };
+
+  const updateJobReferenceRow = (index, field) => (event) => {
+    setNotice("");
+    clearValidationFields(["jobReferences", "jobReferenceRows"]);
+    setStudentInfo((current) => {
+      const nextRows = getJobReferenceRows(current).map((row, rowIndex) => (
+        rowIndex === index ? { ...row, [field]: normalizeJobTableValue(event.target.value) } : row
+      ));
+      const next = { ...current, jobReferenceRows: nextRows };
+      return { ...next, jobReferences: buildJobReferencesSummary(next) };
+    });
+  };
+
   const updateStudentName = (event) => {
     setNotice("");
     setValidationErrors((current) => {
@@ -1637,6 +1805,18 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
       const jobComputerValidation = getJobComputerSkillsValidation(studentInfo);
       missingFields.push(...jobComputerValidation.missingFields);
       Object.assign(errors, jobComputerValidation.errors);
+    }
+
+    if (activeInfoTab === jobWorkExperienceTab) {
+      const jobWorkExperienceValidation = getJobWorkExperienceValidation(studentInfo);
+      missingFields.push(...jobWorkExperienceValidation.missingFields);
+      Object.assign(errors, jobWorkExperienceValidation.errors);
+    }
+
+    if (activeInfoTab === jobReferencesTab) {
+      const jobReferencesValidation = getJobReferencesValidation(studentInfo);
+      missingFields.push(...jobReferencesValidation.missingFields);
+      Object.assign(errors, jobReferencesValidation.errors);
     }
 
     setValidationErrors(errors);
@@ -1997,6 +2177,130 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
           )}
         </tbody>
       </table>
+    </div>
+  );
+
+  const renderJobWorkExperienceSection = () => (
+    <div className="student-job-spm-table-wrap">
+      <table className="student-job-spm-table student-job-work-experience-table">
+        <thead>
+          <tr>
+            <th className="student-job-spm-heading" colSpan={6}>
+              {activeInfoHeading}
+              <RequiredMarker />
+            </th>
+          </tr>
+          <tr>
+            <th rowSpan={2}>Nama &amp; Alamat Majikan</th>
+            <th rowSpan={2}>Nama Jawatan</th>
+            <th rowSpan={2}>Gaji Bersih Sebulan</th>
+            <th colSpan={2}>Tempoh Bekerja</th>
+            <th rowSpan={2}>Tempoh</th>
+          </tr>
+          <tr>
+            <th>Dari</th>
+            <th>Hingga</th>
+          </tr>
+        </thead>
+        <tbody>
+          {getJobWorkExperienceRows(studentInfo).map((row, index) => (
+            <tr key={index}>
+              <td>
+                <input
+                  aria-label={`Nama dan Alamat Majikan ${index + 1}`}
+                  value={row.employerAddress}
+                  onChange={updateJobWorkExperienceRow(index, "employerAddress")}
+                />
+              </td>
+              <td>
+                <input
+                  aria-label={`Nama Jawatan ${index + 1}`}
+                  value={row.jobTitle}
+                  onChange={updateJobWorkExperienceRow(index, "jobTitle")}
+                />
+              </td>
+              <td>
+                <input
+                  aria-label={`Gaji Bersih Sebulan ${index + 1}`}
+                  value={row.netSalary}
+                  onChange={updateJobWorkExperienceRow(index, "netSalary")}
+                />
+              </td>
+              <td>
+                <input
+                  aria-label={`Tempoh Bekerja Dari ${index + 1}`}
+                  value={row.periodFrom}
+                  onChange={updateJobWorkExperienceRow(index, "periodFrom")}
+                />
+              </td>
+              <td>
+                <input
+                  aria-label={`Tempoh Bekerja Hingga ${index + 1}`}
+                  value={row.periodTo}
+                  onChange={updateJobWorkExperienceRow(index, "periodTo")}
+                />
+              </td>
+              <td>
+                <input
+                  aria-label={`Tempoh ${index + 1}`}
+                  value={row.duration}
+                  onChange={updateJobWorkExperienceRow(index, "duration")}
+                />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {validationErrors.jobWorkExperienceRows ? <p className="student-table-error">{validationErrors.jobWorkExperienceRows}</p> : null}
+    </div>
+  );
+
+  const renderJobReferenceLine = (row, index, field, label) => (
+    <label className="student-job-reference-line">
+      <span>{label}</span>
+      <b aria-hidden="true">:</b>
+      <input
+        aria-label={`${label} rujukan ${index + 1}`}
+        value={row[field]}
+        onChange={updateJobReferenceRow(index, field)}
+      />
+    </label>
+  );
+
+  const renderJobReferencesSection = () => (
+    <div className="student-job-spm-table-wrap">
+      <table className="student-job-spm-table student-job-references-table">
+        <thead>
+          <tr>
+            <th className="student-job-spm-heading" colSpan={2}>
+              {activeInfoHeading}
+              <RequiredMarker />
+              <span className="student-job-heading-note">
+                (Sila berikan maklumat dua orang penama yang bukan ahli keluarga/ saudara-mara, yang dapat memberi keterangan dan pengesahan berkenaan maklumat diri anda)
+              </span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            {getJobReferenceRows(studentInfo).map((row, index) => (
+              <td key={index}>
+                <div className="student-job-reference-card">
+                  <span className="student-job-reference-number">{index + 1}.</span>
+                  <div className="student-job-reference-fields">
+                    {renderJobReferenceLine(row, index, "name", "Nama")}
+                    {renderJobReferenceLine(row, index, "address", "Alamat")}
+                    {renderJobReferenceLine(row, index, "occupation", "Pekerjaan")}
+                    {renderJobReferenceLine(row, index, "employer", "Majikan")}
+                    {renderJobReferenceLine(row, index, "phone", "No. Telefon")}
+                  </div>
+                </div>
+              </td>
+            ))}
+          </tr>
+        </tbody>
+      </table>
+      {validationErrors.jobReferenceRows ? <p className="student-table-error">{validationErrors.jobReferenceRows}</p> : null}
     </div>
   );
 
@@ -2517,8 +2821,8 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
                   {activeInfoTab === jobHigherEducationTab ? renderJobHigherEducationSection() : null}
                   {activeInfoTab === jobLanguageSkillsTab ? renderJobLanguageSkillsSection() : null}
                   {activeInfoTab === jobComputerSkillsTab ? renderJobComputerSkillsSection() : null}
-                  {activeInfoTab === jobWorkExperienceTab ? renderJobSimpleSection("jobWorkExperience", "Masukkan pengalaman bekerja.") : null}
-                  {activeInfoTab === jobReferencesTab ? renderJobSimpleSection("jobReferences", "Masukkan maklumat rujukan.") : null}
+                  {activeInfoTab === jobWorkExperienceTab ? renderJobWorkExperienceSection() : null}
+                  {activeInfoTab === jobReferencesTab ? renderJobReferencesSection() : null}
                   {activeInfoTab === jobDeclarationTab ? renderJobSimpleSection("jobDeclaration", "Masukkan perakuan pemohon.") : null}
                   {activeInfoTab === documentSupportTab ? renderDocumentFields() : null}
 
