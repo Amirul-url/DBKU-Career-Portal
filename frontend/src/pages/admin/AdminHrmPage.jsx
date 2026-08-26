@@ -3259,7 +3259,9 @@ function HrmApplicationDetailPage({
 }) {
   const [activeTab, setActiveTab] = useState("Maklumat Peribadi Pemohon");
   const isJobApplication = applicationType === "job";
-  const shouldShowDepartmentDecision = !isHrmWorkspace || Boolean(application?.assigned_department);
+  const shouldShowDepartmentDecision = isHrmWorkspace
+    ? hasSubmittedDepartmentDecision(application)
+    : Boolean(application?.assigned_department);
   const departmentRecommendation = getSavedDepartmentDecision(application).recommendation || "";
   const hasFinalDecision = hasSubmittedHrmFinalDecision(application);
   const hasFinalRejectionDecision =

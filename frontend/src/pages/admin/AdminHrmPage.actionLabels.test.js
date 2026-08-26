@@ -136,6 +136,7 @@ test("HRM job application detail shows A-L tabs and HRM review tab", () => {
   assert.match(source, /function HrmApplicationDetailPage\(\{/);
   assert.match(source, /applicationType=\{activeVacancyType\}/);
   assert.match(source, /const isJobApplication = applicationType === "job"/);
+  assert.match(source, /const shouldShowDepartmentDecision = isHrmWorkspace\s*\?\s*hasSubmittedDepartmentDecision\(application\)\s*:\s*Boolean\(application\?\.assigned_department\)/);
   assert.match(source, /\.\.\.\(isHrmWorkspace \? \[hrmReviewTab\] : \[\]\)/);
   assert.match(source, /\.\.\.\(shouldShowDepartmentDecision \? \[departmentDecisionTab\] : \[\]\)/);
   assert.match(source, /const detailTabGroups = isJobApplication \? \[\] : \[/);
