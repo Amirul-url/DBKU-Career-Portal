@@ -7526,7 +7526,7 @@ body:has(.applicant-profile-page) {
   text-decoration: none;
 }
 
-.student-job-language-table .student-job-fluency-cell {
+.student-job-language-table td.student-job-fluency-cell {
   text-align: center;
 }
 
