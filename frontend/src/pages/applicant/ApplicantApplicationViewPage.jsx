@@ -1768,6 +1768,9 @@ export default function ApplicantApplicationViewPage() {
     ...(hasHrmFinalRejectionDecision(application) ? [hrmDecisionTab] : []),
     ...(organizationFeedbackSent ? [organizationFeedbackTab, applicantConfirmationTab] : []),
   ];
+  const applicantTabGroups = isJobApplicationDetail(application)
+    ? [{ label: "PEMOHON", tabs: [...readOnlyJobInfoTabs, ...applicantExtraTabs] }]
+    : [];
 
   useEffect(() => {
     if (!user) {
@@ -1853,6 +1856,7 @@ export default function ApplicantApplicationViewPage() {
             maskAcceptedStatus={!organizationFeedbackSent}
             onBack={exitApplicationView}
             onTabChange={setActiveInfoTab}
+            tabGroups={applicantTabGroups}
             renderExtraTabContent={(tab) =>
               tab === hrmDecisionTab ? (
                 <ApplicantHrmDecisionTab application={application} />
