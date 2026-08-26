@@ -338,6 +338,8 @@ test("submitted job application detail uses the job A to L read-only module", ()
   assert.match(applicationViewSource, /renderJobWorkExperienceFields\(\)/);
   assert.match(applicationViewSource, /renderJobReferencesFields\(\)/);
   assert.match(applicationViewSource, /renderJobDeclarationFields\(\)/);
+  assert.match(applicationViewSource, /\{!isJobApplication \? \(\s*<section className="student-readonly-summary"/);
+  assert.match(applicationViewSource, /\{!isJobApplication \? <h2>\{activeInfoHeading\}<\/h2> : null\}/);
 });
 
 test("saved job vacancies open the selected job application form", () => {

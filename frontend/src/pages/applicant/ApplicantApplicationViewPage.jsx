@@ -1487,26 +1487,28 @@ export function InternshipApplicationReadOnlyPanel({
           {error ? <p className="student-info-notice error">{error}</p> : null}
           {!loading && application ? (
             <>
-              <section className="student-readonly-summary" aria-label="Ringkasan permohonan">
-                <div>
-                  <span>No. Rujukan</span>
-                  <strong>{formatReferenceNo(application)}</strong>
-                </div>
-                <div>
-                  <span>Permohonan</span>
-                  <strong>{vacancy.title || "Permohonan DBKU"}</strong>
-                </div>
-                <div>
-                  <span>Tarikh</span>
-                  <strong>{formatDate(getApplicationDate(application))}</strong>
-                </div>
-                <div>
-                  <span>Status</span>
-                  <strong className={`applicant-status-pill ${visibleStatus}`}>
-                    {getReadOnlyStatusLabel(status, maskAcceptedStatus, application, statusLabelOverrides)}
-                  </strong>
-                </div>
-              </section>
+              {!isJobApplication ? (
+                <section className="student-readonly-summary" aria-label="Ringkasan permohonan">
+                  <div>
+                    <span>No. Rujukan</span>
+                    <strong>{formatReferenceNo(application)}</strong>
+                  </div>
+                  <div>
+                    <span>Permohonan</span>
+                    <strong>{vacancy.title || "Permohonan DBKU"}</strong>
+                  </div>
+                  <div>
+                    <span>Tarikh</span>
+                    <strong>{formatDate(getApplicationDate(application))}</strong>
+                  </div>
+                  <div>
+                    <span>Status</span>
+                    <strong className={`applicant-status-pill ${visibleStatus}`}>
+                      {getReadOnlyStatusLabel(status, maskAcceptedStatus, application, statusLabelOverrides)}
+                    </strong>
+                  </div>
+                </section>
+              ) : null}
               {status === "incomplete" ? (
                 <div className="student-readonly-actions">
                   <Link
@@ -1534,7 +1536,7 @@ export function InternshipApplicationReadOnlyPanel({
               </nav>
 
               <section className="student-info-form">
-                <h2>{activeInfoHeading}</h2>
+                {!isJobApplication ? <h2>{activeInfoHeading}</h2> : null}
                 {isJobApplication ? renderJobActiveTabContent() : (
                   <>
                     {activeInfoTab === personalInfoTab ? renderPersonalFields() : null}
