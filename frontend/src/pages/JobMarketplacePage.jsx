@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { apiRequest, getStoredUser } from "../lib/authApi";
-import { getOpportunityApplicationTarget } from "../modules/applicant/jobApplicationRouting";
+import {
+  getBlockingJobApplicationForVacancy,
+  getOpportunityApplicationTarget,
+  jobEditableApplicationStatuses,
+} from "../modules/applicant/jobApplicationRouting";
 import { getSavedVacancies, removeSavedVacancy, upsertSavedVacancy } from "../modules/applicant/savedVacancies";
 
 const dateLabel = (value) =>
@@ -101,14 +105,15 @@ export function JobMarketplaceContent({ actionTarget = "/login", embedded = fals
   const [selectedId, setSelectedId] = useState(null);
   const [search, setSearch] = useState("");
   const [extraFilter, setExtraFilter] = useState("all");
-  const [savedVacancies, setSavedVacancies] = useState([]);
+  const user = useMemo(() => getStoredUser(), []);
+  const [savedVacancies, setSavedVacancies] = useState(() => getSavedVacancies(user));
+  const [applications, setApplications] = useState([]);
   const [saveNotice, setSaveNotice] = useState("");
   const employmentFilter = isInternshipPage
     ? extraFilter === "Latihan Industri" ? extraFilter : "all"
     : ["Tetap", "Kontrak"].includes(extraFilter) ? extraFilter : "all";
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const user = useMemo(() => getStoredUser(), []);
   useEffect(() => {
     apiRequest(`/jobs/?type=${vacancyType}`)
       .then((data) => {
@@ -120,8 +125,24 @@ export function JobMarketplaceContent({ actionTarget = "/login", embedded = fals
       .finally(() => setLoading(false));
   }, [vacancyType]);
   useEffect(() => {
-    setSavedVacancies(getSavedVacancies(user));
-  }, [user]);
+    if (actionTarget !== "/profile" || user?.role !== "applicant") {
+      return undefined;
+    }
+
+    let isMounted = true;
+    apiRequest(`/applications/?type=${vacancyType}`)
+      .then((data) => {
+        if (!isMounted) return;
+        setApplications(Array.isArray(data) ? data : data.results || []);
+      })
+      .catch(() => {
+        if (isMounted) setApplications([]);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [actionTarget, user?.id, user?.role, vacancyType]);
   const filteredOpportunities = useMemo(() => {
     const keyword = search.trim().toLowerCase();
     return opportunities.filter((job) =>
@@ -144,13 +165,22 @@ export function JobMarketplaceContent({ actionTarget = "/login", embedded = fals
   const emptyStateMessage = opportunities.length && hasActiveFilter
     ? "Sila ubah kata kunci carian atau pilihan tapisan untuk melihat peluang lain."
     : "";
-  useEffect(() => {
-    setSaveNotice("");
-  }, [selectedOpportunity?.id]);
   const selectedOpportunitySaved = selectedOpportunity
     ? savedVacancies.some((item) => item.id === selectedOpportunity.id)
     : false;
-  const applicationTarget = getOpportunityApplicationTarget(selectedOpportunity, { actionTarget });
+  const selectedExistingApplication = selectedOpportunity?.vacancy_type === "job"
+    ? getBlockingJobApplicationForVacancy(applications, selectedOpportunity.id)
+    : null;
+  const applicationTarget = getOpportunityApplicationTarget(selectedOpportunity, { actionTarget, applications });
+  const applicationActionLabel = selectedExistingApplication
+    ? jobEditableApplicationStatuses.has(selectedExistingApplication.status || "draft")
+      ? "Teruskan Permohonan"
+      : "Lihat Permohonan"
+    : "Mohon Sekarang";
+  const selectOpportunity = (id) => {
+    setSelectedId(id);
+    setSaveNotice("");
+  };
   const handleSaveToggle = () => {
     if (!selectedOpportunity) return;
 
@@ -173,7 +203,7 @@ export function JobMarketplaceContent({ actionTarget = "/login", embedded = fals
             <Icon>search</Icon>
             <input value={search} onChange={(event) => setSearch(event.target.value)} type="search" placeholder="Cari mengikut jawatan, kata kunci atau jabatan" />
           </label>
-          <button type="button" onClick={() => setSelectedId(filteredOpportunities[0]?.id ?? null)}>
+          <button type="button" onClick={() => selectOpportunity(filteredOpportunities[0]?.id ?? null)}>
             Cari
           </button>
           <select className="market-extra-filter" aria-label="Taraf jawatan" value={extraFilter} onChange={(event) => setExtraFilter(event.target.value)}>
@@ -217,7 +247,7 @@ export function JobMarketplaceContent({ actionTarget = "/login", embedded = fals
                   key={opportunity.id}
                   opportunity={opportunity}
                   selected={opportunity.id === selectedOpportunity?.id}
-                  onSelect={() => setSelectedId(opportunity.id)}
+                  onSelect={() => selectOpportunity(opportunity.id)}
                 />
               ))}
             </div>
@@ -272,7 +302,7 @@ export function JobMarketplaceContent({ actionTarget = "/login", embedded = fals
               </div>
 
               <div className="market-detail-actions">
-                <Link to={applicationTarget}>Mohon Sekarang</Link>
+                <Link to={applicationTarget}>{applicationActionLabel}</Link>
                 <button
                   type="button"
                   className={selectedOpportunitySaved ? "saved" : ""}

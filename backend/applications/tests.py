@@ -1508,6 +1508,57 @@ class CandidateApplicationReferenceNoTests(TestCase):
         self.assertEqual(CandidateApplication.objects.filter(applicant=applicant, vacancy=self.vacancy).count(), 2)
         self.assertNotEqual(response.data["status"], "rejected")
 
+    def test_applicant_cannot_create_duplicate_active_job_application(self):
+        applicant = self.create_applicant("duplicate-active-job@example.com")
+        job_vacancy = Vacancy.objects.create(
+            title="Penolong Pegawai Penerangan Gred S5",
+            vacancy_type="job",
+            department="Dewan Bandaraya Kuching Utara",
+            status="open",
+        )
+        CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=job_vacancy,
+            status="submitted",
+        )
+        client = APIClient()
+        client.force_authenticate(user=applicant)
+
+        response = client.post(
+            "/api/applications/",
+            {"vacancy": job_vacancy.id, "cover_letter": "Permohonan jawatan kedua."},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(CandidateApplication.objects.filter(applicant=applicant, vacancy=job_vacancy).count(), 1)
+
+    def test_applicant_can_create_new_job_application_after_rejection(self):
+        applicant = self.create_applicant("new-job-after-reject@example.com")
+        job_vacancy = Vacancy.objects.create(
+            title="Penolong Pegawai Penerangan Gred S5",
+            vacancy_type="job",
+            department="Dewan Bandaraya Kuching Utara",
+            status="open",
+        )
+        CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=job_vacancy,
+            status="rejected",
+        )
+        client = APIClient()
+        client.force_authenticate(user=applicant)
+
+        response = client.post(
+            "/api/applications/",
+            {"vacancy": job_vacancy.id, "cover_letter": "Permohonan jawatan baharu."},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(CandidateApplication.objects.filter(applicant=applicant, vacancy=job_vacancy).count(), 2)
+        self.assertNotEqual(response.data["status"], "rejected")
+
     def test_applicant_cannot_create_duplicate_active_application(self):
         applicant = self.create_applicant("duplicate-active@example.com")
         CandidateApplication.objects.create(

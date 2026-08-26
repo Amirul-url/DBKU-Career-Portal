@@ -7,6 +7,12 @@ import {
   hasNewOrganizationFeedbackForApplicant,
 } from "../../modules/applicant/applicationBadges";
 import { APPLICANT_ROUTES } from "../../modules/applicant/applicantRoutes";
+import {
+  getApplicationVacancyId,
+  getBlockingJobApplicationForVacancy,
+  getExistingJobApplicationTarget,
+  jobEditableApplicationStatuses,
+} from "../../modules/applicant/jobApplicationRouting";
 import { getSavedVacancies, removeSavedVacancy } from "../../modules/applicant/savedVacancies";
 import { useApplicantSidebarState } from "../../modules/applicant/useApplicantSidebarState";
 import {
@@ -447,13 +453,26 @@ function SavedVacancyCard({ onSelect, selected, vacancy }) {
   );
 }
 
-function SavedVacancyList({ onRemove, vacancies }) {
+function SavedVacancyList({ applications = [], onRemove, vacancies }) {
   const [selectedId, setSelectedId] = useState(vacancies[0]?.id ?? null);
   const activeSelectedId = vacancies.some((item) => item.id === selectedId) ? selectedId : vacancies[0]?.id;
   const selectedVacancy = useMemo(
     () => vacancies.find((item) => item.id === activeSelectedId) ?? null,
     [activeSelectedId, vacancies],
   );
+  const selectedExistingApplication = selectedVacancy?.vacancy_type !== "internship"
+    ? getBlockingJobApplicationForVacancy(applications, selectedVacancy?.id)
+    : null;
+  const selectedApplicationTarget = selectedExistingApplication
+    ? getExistingJobApplicationTarget(selectedExistingApplication)
+    : selectedVacancy?.vacancy_type === "internship"
+      ? APPLICANT_ROUTES.internships
+      : APPLICANT_ROUTES.jobApplicationForVacancy(selectedVacancy?.id);
+  const selectedApplicationLabel = selectedExistingApplication
+    ? jobEditableApplicationStatuses.has(selectedExistingApplication.status || "draft")
+      ? "Teruskan Permohonan"
+      : "Lihat Permohonan"
+    : "Mohon Sekarang";
 
   if (!vacancies.length) {
     return (
@@ -527,13 +546,7 @@ function SavedVacancyList({ onRemove, vacancies }) {
               </div>
 
               <div className="market-detail-actions">
-                <Link to={
-                  selectedVacancy.vacancy_type === "internship"
-                    ? APPLICANT_ROUTES.internships
-                    : APPLICANT_ROUTES.jobApplicationForVacancy(selectedVacancy.id)
-                }>
-                  Mohon Sekarang
-                </Link>
+                <Link to={selectedApplicationTarget}>{selectedApplicationLabel}</Link>
                 <button className="saved" type="button" onClick={() => onRemove(selectedVacancy.id)}>
                   <Icon>bookmark_added</Icon>
                   Disimpan
@@ -570,8 +583,13 @@ export default function ApplicantPortalListPage({ page }) {
     if (!isApplicationsPage) return applications;
 
     const hasBlockingInternshipApplication = applications.some(shouldHideLocalDraftForApplication);
+    const hasBlockingJobApplication = localJobDraftApplication
+      ? Boolean(getBlockingJobApplicationForVacancy(applications, getApplicationVacancyId(localJobDraftApplication)))
+      : false;
     const localDraftApplications = [localJobDraftApplication, localInternshipDraftApplication]
-      .filter((application) => application && (application !== localInternshipDraftApplication || !hasBlockingInternshipApplication));
+      .filter((application) => application
+        && (application !== localInternshipDraftApplication || !hasBlockingInternshipApplication)
+        && (application !== localJobDraftApplication || !hasBlockingJobApplication));
 
     return localDraftApplications.length ? [...localDraftApplications, ...applications] : applications;
   }, [applications, isApplicationsPage, localInternshipDraftApplication, localJobDraftApplication]);
@@ -581,24 +599,28 @@ export default function ApplicantPortalListPage({ page }) {
   );
 
   const loadApplications = useCallback(() => {
-    if (!user || user.role !== "applicant" || !isApplicationsPage) return undefined;
+    if (!user || user.role !== "applicant" || (!isApplicationsPage && page !== "saved")) return undefined;
 
     const controller = new AbortController();
     const timeoutId = window.setTimeout(() => controller.abort(), 10000);
     let isMounted = true;
 
-    setLoading(true);
-    setError("");
+    if (isApplicationsPage) {
+      setLoading(true);
+      setError("");
+    }
     apiRequest("/applications/", { signal: controller.signal })
       .then((data) => {
         if (isMounted) setApplications(getApplicationRows(data));
       })
       .catch((requestError) => {
         if (!isMounted) return;
-        const message = requestError.name === "AbortError"
-          ? "Permohonan mengambil masa terlalu lama untuk dimuatkan. Sila cuba semula."
-          : requestError.message || "Permohonan tidak dapat dimuatkan.";
-        setError(message);
+        if (isApplicationsPage) {
+          const message = requestError.name === "AbortError"
+            ? "Permohonan mengambil masa terlalu lama untuk dimuatkan. Sila cuba semula."
+            : requestError.message || "Permohonan tidak dapat dimuatkan.";
+          setError(message);
+        }
       })
       .finally(() => {
         window.clearTimeout(timeoutId);
@@ -610,7 +632,7 @@ export default function ApplicantPortalListPage({ page }) {
       window.clearTimeout(timeoutId);
       controller.abort();
     };
-  }, [isApplicationsPage, user]);
+  }, [isApplicationsPage, page, user]);
 
   useEffect(() => {
     if (!user) {
@@ -682,7 +704,7 @@ export default function ApplicantPortalListPage({ page }) {
           ) : isApplicationsPage ? (
             <ApplicationList applications={displayApplications} loading={loading} />
           ) : (
-            <SavedVacancyList vacancies={savedVacancies} onRemove={handleRemoveSavedVacancy} />
+            <SavedVacancyList applications={applications} vacancies={savedVacancies} onRemove={handleRemoveSavedVacancy} />
           )}
         </main>
       </div>

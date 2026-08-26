@@ -15,7 +15,9 @@ const cssSource = readFileSync(new URL("../../index.css", import.meta.url), "utf
 test("job vacancy CTA opens a job application form for the selected vacancy", () => {
   assert.match(routesSource, /jobApplicationForVacancy: \(id\) => `\/profile\/job-application\?vacancy=\$\{id\}`/);
   assert.match(marketplaceSource, /getOpportunityApplicationTarget/);
+  assert.match(marketplaceSource, /getOpportunityApplicationTarget\(selectedOpportunity, \{ actionTarget, applications \}\)/);
   assert.match(marketplaceSource, /to=\{applicationTarget\}/);
+  assert.match(marketplaceSource, /applicationActionLabel/);
   assert.match(appSource, /path="\/profile\/job-application"/);
 });
 
@@ -23,7 +25,7 @@ test("job application form reuses the internship personal information table", ()
   assert.match(jobFormSource, /<ApplicantInternshipApplicationPage applicationType="job" \/>/);
   assert.match(internshipFormSource, /applicationType = "internship"/);
   assert.match(internshipFormSource, /const isJobApplication = applicationType === "job"/);
-  assert.match(internshipFormSource, /isJobApplication \? personalInfoTab : getFirstIncompleteTab\(initialStudentInfo, currentRequiredInfoTabs\)/);
+  assert.match(internshipFormSource, /isJobApplication\s*\?\s*personalInfoTab\s*:\s*getFirstIncompleteTab\(initialStudentInfo, currentRequiredInfoTabs, applicationType\)/);
   assert.match(internshipFormSource, /<h1>\{applicationPageTitle\}<\/h1>/);
 });
 
@@ -71,10 +73,10 @@ test("job application extra sections are mandatory before submission", () => {
   assert.match(internshipFormSource, /jobSpmDetails: ""/);
   assert.match(internshipFormSource, /jobDeclaration: ""/);
   assert.doesNotMatch(internshipFormSource, /\["jobSpmDetails", "Butiran Peperiksaan SPM\/SC\/MCE\/SPM\(V\)\/UEC atau setaraf"\]/);
-  assert.match(internshipFormSource, /\["jobDeclaration", "Perakuan Pemohon"\]/);
-  assert.match(internshipFormSource, /const renderJobSimpleSection = \(field, placeholder\) => \(/);
+  assert.match(internshipFormSource, /const jobDeclarationValidation = getJobDeclarationValidation\(studentInfo\)/);
+  assert.match(internshipFormSource, /const renderJobDeclarationSection = \(\) => \(/);
   assert.doesNotMatch(internshipFormSource, /activeInfoTab === jobSpmTab \? renderJobSimpleSection\("jobSpmDetails"/);
-  assert.match(internshipFormSource, /activeInfoTab === jobDeclarationTab \? renderJobSimpleSection\("jobDeclaration"/);
+  assert.match(internshipFormSource, /activeInfoTab === jobDeclarationTab \? renderJobDeclarationSection\(\) : null/);
 });
 
 test("job application SPM section renders the official subject and grade table", () => {
@@ -237,9 +239,10 @@ test("job application sections A to H use local studentInfo state", () => {
 
   assert.match(internshipFormSource, /jobWorkExperience: ""/);
   assert.match(internshipFormSource, /jobReferences: ""/);
-  assert.match(internshipFormSource, /activeInfoTab === jobWorkExperienceTab \? renderJobSimpleSection\("jobWorkExperience", "Masukkan pengalaman bekerja\."\) : null/);
-  assert.match(internshipFormSource, /activeInfoTab === jobReferencesTab \? renderJobSimpleSection\("jobReferences", "Masukkan maklumat rujukan\."\) : null/);
-  assert.match(internshipFormSource, /const renderJobSimpleSection = \(field, placeholder\) => \([\s\S]*value=\{studentInfo\[field\]\}[\s\S]*onChange=\{updateStudentInfo\(field\)\}/);
+  assert.match(internshipFormSource, /activeInfoTab === jobWorkExperienceTab \? renderJobWorkExperienceSection\(\) : null/);
+  assert.match(internshipFormSource, /activeInfoTab === jobReferencesTab \? renderJobReferencesSection\(\) : null/);
+  assert.match(internshipFormSource, /const updateJobWorkExperienceRow = \(index, field\) => \(event\) => \{[\s\S]*setStudentInfo\(\(current\) => \{/);
+  assert.match(internshipFormSource, /const updateJobReferenceRow = \(index, field\) => \(event\) => \{[\s\S]*setStudentInfo\(\(current\) => \{/);
 });
 
 test("job application language and computer sections render official skill tables", () => {
@@ -331,7 +334,7 @@ test("submitted job application detail uses the job A to L read-only module", ()
   assert.match(applicationViewSource, /function isJobApplicationDetail\(application\)/);
   assert.match(applicationViewSource, /const readOnlyJobInfoTabs = \[[\s\S]*personalInfoTab[\s\S]*jobSpmTab[\s\S]*jobDeclarationTab[\s\S]*\]/);
   assert.match(applicationViewSource, /const isJobApplication = isJobApplicationDetail\(application\)/);
-  assert.match(applicationViewSource, /const panelTabs = isJobApplication\s*\?\s*readOnlyJobInfoTabs\s*:\s*\[\.\.\.infoTabs, \.\.\.extraTabs\]/);
+  assert.match(applicationViewSource, /const panelTabs = isJobApplication \? \[\.\.\.readOnlyJobInfoTabs, \.\.\.extraTabs\] : \[\.\.\.infoTabs, \.\.\.extraTabs\]/);
   assert.match(applicationViewSource, /const panelTitle = isJobApplication\s*\?\s*`Nama Jawatan Yang Dipohon: \$\{vacancy\.title \|\| "Jawatan DBKU"\}`\s*:\s*"Permohonan Latihan Industri"/);
   assert.match(applicationViewSource, /aria-label=\{isJobApplication \? "Bahagian permohonan jawatan kosong" : "Bahagian permohonan latihan industri"\}/);
   assert.match(applicationViewSource, /APPLICANT_ROUTES\.jobApplicationEdit\(application\.id\)/);
@@ -341,8 +344,9 @@ test("submitted job application detail uses the job A to L read-only module", ()
   assert.match(applicationViewSource, /function renderReadOnlyJobApplicationInstructions\(\)/);
   assert.match(applicationViewSource, /SILA BACA ARAHAN DI BAWAH DENGAN TELITI/);
   assert.match(applicationViewSource, /<div className="student-job-photo-guidance-row">[\s\S]*renderReadOnlyJobApplicationInstructions\(\)[\s\S]*renderReadOnlyPassportPhoto\(documents, studentInfo\)/);
-  assert.match(applicationViewSource, /\{!isJobApplication \? \(\s*<section className="student-readonly-summary"/);
-  assert.match(applicationViewSource, /\{!isJobApplication \? <h2>\{activeInfoHeading\}<\/h2> : null\}/);
+  assert.match(applicationViewSource, /<section className="student-readonly-summary" aria-label="Ringkasan permohonan">/);
+  assert.match(applicationViewSource, /const shouldShowActiveInfoHeading = !isJobApplication \|\| !readOnlyJobInfoTabs\.includes\(activeInfoTab\)/);
+  assert.match(applicationViewSource, /\{shouldShowActiveInfoHeading \? <h2>\{activeInfoHeading\}<\/h2> : null\}/);
   assert.match(applicationViewSource, /function isSameJobChoice\(value, option\)/);
   assert.match(applicationViewSource, /const renderReadOnlyJobField = \(label, value\) => \(/);
   assert.doesNotMatch(applicationViewSource, /renderReadOnlyJobRequiredTableLabel/);
@@ -363,7 +367,10 @@ test("submitted job application detail uses the job A to L read-only module", ()
 });
 
 test("saved job vacancies open the selected job application form", () => {
-  assert.match(listSource, /APPLICANT_ROUTES\.jobApplicationForVacancy\(selectedVacancy\.id\)/);
+  assert.match(listSource, /getBlockingJobApplicationForVacancy\(applications, selectedVacancy\?\.id\)/);
+  assert.match(listSource, /getExistingJobApplicationTarget\(selectedExistingApplication\)/);
+  assert.match(listSource, /APPLICANT_ROUTES\.jobApplicationForVacancy\(selectedVacancy\?\.id\)/);
+  assert.match(listSource, /selectedExistingApplication[\s\S]*\? "Teruskan Permohonan"[\s\S]*: "Lihat Permohonan"[\s\S]*: "Mohon Sekarang"/);
 });
 
 test("job back action saves a visible draft like internship applications", () => {

@@ -3,6 +3,12 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { apiRequest, getStoredUser } from "../../lib/authApi";
 import { countryCallingCodes, defaultCountryCallingCode } from "../../lib/countryCallingCodes";
 import { APPLICANT_ROUTES } from "../../modules/applicant/applicantRoutes";
+import {
+  getApplicationVacancyId,
+  getBlockingJobApplicationForVacancy,
+  getExistingJobApplicationTarget,
+  jobEditableApplicationStatuses,
+} from "../../modules/applicant/jobApplicationRouting";
 import { useApplicantSidebarState } from "../../modules/applicant/useApplicantSidebarState";
 import { Icon } from "./ApplicantAuthShared";
 import { ApplicantAddressMap, ProfileContentHeader, ProfileSidebar } from "./ApplicantProfilePage";
@@ -1524,7 +1530,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
   }, [applicationTypeQuery, selectedVacancyId, user?.id, user?.role]);
 
   useEffect(() => {
-    if (applicantRole !== "applicant" || (activeSavedDraft?.studentInfo && !editApplicationId)) {
+    if (applicantRole !== "applicant" || (!isJobApplication && activeSavedDraft?.studentInfo && !editApplicationId)) {
       return;
     }
 
@@ -1533,10 +1539,24 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
       .then((data) => {
         if (!isMounted) return;
         const applications = Array.isArray(data) ? data : data.results || [];
+        const selectedApplicationVacancyId = isJobApplication ? (selectedVacancyId || internshipVacancy?.id || "") : "";
+        const blockingJobApplication = !editApplicationId && isJobApplication
+          ? getBlockingJobApplicationForVacancy(applications, selectedApplicationVacancyId)
+          : null;
+        if (
+          blockingJobApplication
+          && !jobEditableApplicationStatuses.has(blockingJobApplication.status || "draft")
+        ) {
+          navigate(getExistingJobApplicationTarget(blockingJobApplication), { replace: true });
+          return;
+        }
+
         const draftApplication = applications.find((application) => {
           const status = application.status || "draft";
           if (!editableApplicationStatuses.has(status)) return false;
-          return editApplicationId ? String(application.id) === String(editApplicationId) : true;
+          if (editApplicationId) return String(application.id) === String(editApplicationId);
+          if (!isJobApplication || !selectedApplicationVacancyId) return true;
+          return String(getApplicationVacancyId(application)) === String(selectedApplicationVacancyId);
         });
         const draftStudentInfo = draftApplication?.profile_data?.student_info;
         if (!draftStudentInfo) return;
@@ -1560,7 +1580,19 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
     return () => {
       isMounted = false;
     };
-  }, [activeSavedDraft?.studentInfo, applicantDraftDefaults, applicantRole, applicationType, applicationTypeQuery, currentRequiredInfoTabs, editApplicationId]);
+  }, [
+    activeSavedDraft?.studentInfo,
+    applicantDraftDefaults,
+    applicantRole,
+    applicationType,
+    applicationTypeQuery,
+    currentRequiredInfoTabs,
+    editApplicationId,
+    internshipVacancy?.id,
+    isJobApplication,
+    navigate,
+    selectedVacancyId,
+  ]);
 
   useEffect(() => () => {
     if (passportPhotoPreviewUrlRef.current) {
@@ -1922,6 +1954,16 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
     try {
       const applicationsData = await apiRequest(`/applications/?type=${applicationTypeQuery}`);
       const applications = Array.isArray(applicationsData) ? applicationsData : applicationsData.results || [];
+      const blockingJobApplication = isJobApplication
+        ? getBlockingJobApplicationForVacancy(applications, internshipVacancy?.id)
+        : null;
+      if (
+        blockingJobApplication
+        && !jobEditableApplicationStatuses.has(blockingJobApplication.status || "draft")
+      ) {
+        navigate(getExistingJobApplicationTarget(blockingJobApplication), { replace: true });
+        return;
+      }
       const existingApplication = editableApplication
         || applications.find(
           (application) =>
