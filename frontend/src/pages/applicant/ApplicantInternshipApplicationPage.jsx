@@ -2275,8 +2275,9 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
         <thead>
           <tr>
             <th className="student-job-spm-heading" colSpan={2}>
-              {activeInfoHeading}
-              <RequiredMarker />
+              <span className="student-job-reference-heading-title">
+                {activeInfoHeading}
+              </span>
               <span className="student-job-heading-note">
                 (Sila berikan maklumat dua orang penama yang bukan ahli keluarga/ saudara-mara, yang dapat memberi keterangan dan pengesahan berkenaan maklumat diri anda)
               </span>

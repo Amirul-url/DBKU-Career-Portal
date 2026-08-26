@@ -7658,19 +7658,26 @@ body:has(.applicant-profile-page) {
 }
 
 .student-job-references-table thead th.student-job-spm-heading {
-  padding: 10px 16px;
+  padding: 10px 16px 8px;
   text-indent: 0;
+  text-decoration: none;
+}
+
+.student-job-reference-heading-title {
+  display: inline;
+  font-weight: 900;
+  text-decoration: underline;
 }
 
 .student-job-references-table .student-job-heading-note {
   display: block;
-  margin-top: 2px;
+  margin-top: 1px;
   font-weight: 500;
   text-decoration: none;
 }
 
 .student-job-references-table td {
-  padding: 10px 16px;
+  padding: 8px 18px 12px;
   vertical-align: top;
 }
 
@@ -7687,15 +7694,15 @@ body:has(.applicant-profile-page) {
 
 .student-job-reference-fields {
   display: grid;
-  gap: 16px;
+  gap: 0;
 }
 
-.student-job-reference-line {
+.student-job-references-table .student-job-reference-line {
   display: grid;
-  grid-template-columns: 128px 12px minmax(0, 1fr);
+  grid-template-columns: 132px 14px minmax(0, 1fr);
   gap: 8px;
   align-items: center;
-  min-height: 42px;
+  min-height: 58px;
 }
 
 .student-job-spm-table .student-job-reference-line input {
