@@ -6,7 +6,14 @@ A local-first job and internship portal using the same stack pattern as dbku-fas
 
 - `backend/` - Django REST API
 - `frontend/` - React/Vite frontend
-- `docs/` - Project notes
+- `docs/` - Project notes and Mermaid process flows
+
+## Documentation
+
+- [Permohonan Latihan Industri flow](docs/permohonan-li-flow.md)
+- [Permohonan Jawatan DBKU flow](docs/permohonan-jawatan-dbku-flow.md)
+
+The flow documents describe applicant, HRM, department, notification, status, and access-control workflows using Mermaid diagrams.
 
 ## Local Development
 
