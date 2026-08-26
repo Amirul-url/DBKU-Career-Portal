@@ -7536,10 +7536,14 @@ body:has(.applicant-profile-page) {
   text-align: center;
 }
 
-.student-job-computer-table th:first-child,
+.student-job-computer-table th[rowspan],
 .student-job-computer-table td:first-child {
   width: 170px;
   text-align: left;
+}
+
+.student-job-computer-table thead tr:last-child th {
+  text-align: center;
 }
 
 .student-job-other-language {
