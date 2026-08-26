@@ -1122,6 +1122,7 @@ export function InternshipApplicationReadOnlyPanel({
       ? getReadOnlyJobInfoHeading(activeInfoTab, readOnlyJobInfoTabs.indexOf(activeInfoTab))
       : activeInfoTab
     : activeInfoTab;
+  const shouldShowActiveInfoHeading = !isJobApplication || !readOnlyJobInfoTabs.includes(activeInfoTab);
   const currentDocumentFields = isJobApplication ? jobDocumentFields : documentFields;
   const defaultJobTabGroups = isJobApplication && extraTabs.length
     ? [
@@ -1695,7 +1696,7 @@ export function InternshipApplicationReadOnlyPanel({
               </nav>
 
               <section className="student-info-form">
-                {!isJobApplication ? <h2>{activeInfoHeading}</h2> : null}
+                {shouldShowActiveInfoHeading ? <h2>{activeInfoHeading}</h2> : null}
                 {isJobApplication ? renderJobActiveTabContent() : (
                   <>
                     {activeInfoTab === personalInfoTab ? renderPersonalFields() : null}

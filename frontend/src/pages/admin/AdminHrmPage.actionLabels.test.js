@@ -160,6 +160,12 @@ test("readonly job application details show the same summary cards as LI", () =>
   assert.doesNotMatch(applicantViewSource, /!\s*isJobApplication \? \(\s*<section className="student-readonly-summary"/);
 });
 
+test("job internal workflow tabs show the green section heading like LI", () => {
+  assert.match(applicantViewSource, /const shouldShowActiveInfoHeading = !isJobApplication \|\| !readOnlyJobInfoTabs\.includes\(activeInfoTab\)/);
+  assert.match(applicantViewSource, /\{shouldShowActiveInfoHeading \? <h2>\{activeInfoHeading\}<\/h2> : null\}/);
+  assert.doesNotMatch(applicantViewSource, /\{!isJobApplication \? <h2>\{activeInfoHeading\}<\/h2> : null\}/);
+});
+
 test("HRM assessment higher education fields can be edited and saved", () => {
   assert.match(source, /const \[assessmentInstitution, setAssessmentInstitution\] = useState\(savedAssessment\.institution \|\| studentInfo\.institution \|\| ""\)/);
   assert.match(source, /const \[assessmentSpecialization, setAssessmentSpecialization\] = useState\(savedAssessment\.specialization \|\| studentInfo\.program \|\| ""\)/);
