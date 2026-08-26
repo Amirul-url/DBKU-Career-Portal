@@ -7611,11 +7611,11 @@ body:has(.applicant-profile-page) {
 }
 
 .student-job-work-employer-col {
-  width: 34%;
+  width: 30%;
 }
 
 .student-job-work-title-col {
-  width: 28%;
+  width: 24%;
 }
 
 .student-job-work-salary-col {
@@ -7623,7 +7623,7 @@ body:has(.applicant-profile-page) {
 }
 
 .student-job-work-date-col {
-  width: 8%;
+  width: 12%;
 }
 
 .student-job-work-duration-col {
