@@ -811,10 +811,17 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
   const [isSaving, setIsSaving] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
+  const isJobApplication = isJobApplicationDetail(application);
   const isAgreed = confirmationState.isAgreed;
   const isRejected = hasApplicantRejectedOffer(application);
   const hasResponded = isAgreed || isRejected;
   const confirmationSubmittedDate = formatDate(confirmationState.submittedAt);
+  const documentUploadHint = isJobApplication
+    ? "Sila muat naik borang asal tersebut beserta surat permohonan kerja dalam format PDF."
+    : "Wajib muat naik sekurang-kurangnya satu dokumen pengesahan penerimaan tawaran dalam format PDF.";
+  const rejectConfirmationMessage = isJobApplication
+    ? "Anda yakin mahu menolak tawaran jawatan ini?"
+    : "Anda yakin mahu menolak tawaran latihan industri ini?";
   const documents = isAgreed
     ? confirmationState.documents
     : selectedFiles.map((file, index) => ({ file, id: `${file.name}-${index}`, name: file.name, url: "" }));
@@ -922,7 +929,7 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
               Dokumen pengesahan pemohon
               <span className="organization-feedback-required" aria-hidden="true">*</span>
             </h3>
-            <p>Wajib muat naik sekurang-kurangnya satu dokumen pengesahan penerimaan tawaran dalam format PDF.</p>
+            <p>{documentUploadHint}</p>
           </div>
           {!hasResponded ? (
             <div className="organization-feedback-section-actions">
@@ -1059,7 +1066,7 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
         <ApplicantConfirmationSendConfirmModal
           confirmLabel="Ya, Tolak"
           isSaving={isSaving}
-          message="Anda yakin mahu menolak tawaran latihan industri ini?"
+          message={rejectConfirmationMessage}
           onCancel={() => setShowRejectModal(false)}
           onConfirm={rejectConfirmation}
           title="Tolak tawaran?"

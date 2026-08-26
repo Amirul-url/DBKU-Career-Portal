@@ -271,7 +271,11 @@ test("applicant can submit acceptance confirmation after organization feedback",
   assert.match(viewSource, /function ApplicantConfirmationTab/);
   assert.match(viewSource, /Muat Naik Dokumen/);
   assert.match(viewSource, /Dokumen pengesahan pemohon[\s\S]*organization-feedback-required/);
+  assert.match(viewSource, /const isJobApplication = isJobApplicationDetail\(application\)/);
+  assert.match(viewSource, /Sila muat naik borang asal tersebut beserta surat permohonan kerja dalam format PDF\./);
   assert.match(viewSource, /Wajib muat naik sekurang-kurangnya satu dokumen pengesahan penerimaan tawaran dalam format PDF\./);
+  assert.match(viewSource, /Anda yakin mahu menolak tawaran jawatan ini\?/);
+  assert.match(viewSource, /Anda yakin mahu menolak tawaran latihan industri ini\?/);
   assert.match(viewSource, /applicantConfirmationDocuments/);
   assert.match(viewSource, /const \[confirmationState, setConfirmationState\] = useState\(\(\) => \(\{/);
   assert.match(viewSource, /isAgreed: hasApplicantAgreedToOffer\(application\)/);
