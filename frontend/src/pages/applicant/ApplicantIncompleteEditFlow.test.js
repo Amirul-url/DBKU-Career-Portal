@@ -283,6 +283,12 @@ test("applicant can submit acceptance confirmation after organization feedback",
   assert.match(viewSource, /submittedAt: getApplicantConfirmationSubmittedAt\(application\)/);
   assert.match(viewSource, /const isAgreed = confirmationState\.isAgreed/);
   assert.match(viewSource, /const confirmationSubmittedDate = formatDate\(confirmationState\.submittedAt\)/);
+  assert.match(viewSource, /const rejectedConfirmation = application\?\.profile_data\?\.applicant_confirmation \|\| \{\}/);
+  assert.match(viewSource, /const rejectedOfferMessage = isJobApplication\s*\?\s*"Anda telah menolak tawaran jawatan ini\."\s*:\s*"Anda telah menolak tawaran latihan industri ini\."/);
+  assert.match(viewSource, /if \(isRejected\) \{\s*return \(/);
+  assert.match(viewSource, /aria-label="Pengesahan penolakan pemohon"/);
+  assert.match(viewSource, /\{rejectedOfferMessage\}/);
+  assert.match(viewSource, /Dihantar pada \$\{rejectedConfirmationDate\}\./);
   assert.match(viewSource, /setConfirmationState\(\{/);
   assert.match(viewSource, /submittedAt: getApplicantConfirmationSubmittedAt\(updatedApplication\)/);
   assert.match(viewSource, /preview-applicant-confirmation-document/);
@@ -402,9 +408,13 @@ test("internship submission requires all mandatory info tabs", () => {
   assert.match(formSource, /requiredTabs\.find\(\(tab\) => !isTabComplete\(tab, studentInfo, applicationType\)\)/);
   assert.match(formSource, /requiredTabs\.forEach\(\(tab\) => \{/);
   assert.match(formSource, /const currentRequiredInfoTabs = isJobApplication \? jobInfoTabs : internshipRequiredInfoTabs/);
-  assert.match(formSource, /const requiredInfoTabsComplete = currentRequiredInfoTabs\.every\(\(tab\) => isTabComplete\(tab, studentInfo, applicationType\)\)/);
-  assert.match(formSource, /const isApplicationReadyToSubmit = \(isJobApplication \|\| declarationAccepted\) && requiredInfoTabsComplete/);
-  assert.match(formSource, /disabled=\{!isApplicationReadyToSubmit \|\| isSubmittingApplication\}/);
+  assert.match(formSource, /const \{ errors, missingFields \} = getMissingApplicationFields\(studentInfo, currentRequiredInfoTabs, applicationType\)/);
+  assert.match(formSource, /setActiveInfoTab\(getFirstIncompleteTab\(studentInfo, currentRequiredInfoTabs, applicationType\)\)/);
+  assert.match(formSource, /setNotice\(`Sila lengkapkan: \$\{missingFields\.join\(", "\)\}\.`\)/);
+  assert.match(formSource, /disabled=\{isSubmittingApplication\}/);
+  assert.doesNotMatch(formSource, /const requiredInfoTabsComplete = currentRequiredInfoTabs\.every/);
+  assert.doesNotMatch(formSource, /const isApplicationReadyToSubmit = \(isJobApplication \|\| declarationAccepted\) && requiredInfoTabsComplete/);
+  assert.doesNotMatch(formSource, /disabled=\{!isApplicationReadyToSubmit \|\| isSubmittingApplication\}/);
 });
 
 test("internship mandatory tabs and fields show red required markers", () => {

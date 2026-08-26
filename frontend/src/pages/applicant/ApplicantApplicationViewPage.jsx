@@ -817,6 +817,11 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
   const isRejected = hasApplicantRejectedOffer(application);
   const hasResponded = isAgreed || isRejected;
   const confirmationSubmittedDate = formatDate(confirmationState.submittedAt);
+  const rejectedConfirmation = application?.profile_data?.applicant_confirmation || {};
+  const rejectedConfirmationDate = formatDate(rejectedConfirmation.submitted_at);
+  const rejectedOfferMessage = isJobApplication
+    ? "Anda telah menolak tawaran jawatan ini."
+    : "Anda telah menolak tawaran latihan industri ini.";
   const documentUploadHint = isJobApplication
     ? "Sila muat naik borang asal tersebut beserta surat permohonan kerja dalam format PDF."
     : "Wajib muat naik sekurang-kurangnya satu dokumen pengesahan penerimaan tawaran dalam format PDF.";
@@ -945,6 +950,24 @@ function ApplicantConfirmationTab({ application, onConfirmed }) {
       openDocumentFile(document);
     }
   };
+
+  if (isRejected) {
+    return (
+      <div className="applicant-confirmation-panel">
+        <section className="organization-feedback-section" aria-label="Pengesahan penolakan pemohon">
+          <div className="organization-feedback-section-header">
+            <div className="organization-feedback-section-title">
+              <h3>Pengesahan pemohon</h3>
+              <p>
+                {rejectedOfferMessage}
+                {rejectedConfirmation.submitted_at ? ` Dihantar pada ${rejectedConfirmationDate}.` : ""}
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="applicant-confirmation-panel">
