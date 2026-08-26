@@ -7419,6 +7419,19 @@ body:has(.applicant-profile-page) {
   align-items: center;
 }
 
+.student-job-readonly-field {
+  display: grid;
+  grid-template-columns: max-content 10px minmax(0, 1fr);
+  gap: 4px;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+}
+
+.student-job-readonly-field .student-readonly-value {
+  justify-self: start;
+}
+
 .student-job-spm-table input {
   width: 100%;
   min-height: 26px;

@@ -343,16 +343,19 @@ test("submitted job application detail uses the job A to L read-only module", ()
   assert.match(applicationViewSource, /<div className="student-job-photo-guidance-row">[\s\S]*renderReadOnlyJobApplicationInstructions\(\)[\s\S]*renderReadOnlyPassportPhoto\(documents, studentInfo\)/);
   assert.match(applicationViewSource, /\{!isJobApplication \? \(\s*<section className="student-readonly-summary"/);
   assert.match(applicationViewSource, /\{!isJobApplication \? <h2>\{activeInfoHeading\}<\/h2> : null\}/);
-  assert.match(applicationViewSource, /const renderReadOnlyJobRequiredTableLabel = \(label\) => \(/);
-  assert.match(applicationViewSource, /const RequiredMarker = \(\) => <span className="student-required-marker" aria-hidden="true">\*<\/span>/);
-  assert.match(applicationViewSource, /renderReadOnlyJobRequiredTableLabel\("Sekolah"\)[\s\S]*renderReadOnlyJobRequiredTableLabel\("Mata Pelajaran"\)[\s\S]*renderReadOnlyJobRequiredTableLabel\("Gred"\)/);
-  assert.match(applicationViewSource, /student-job-bm-july-table[\s\S]*<colgroup>[\s\S]*renderReadOnlyJobRequiredTableLabel\("Keputusan Gred"\)[\s\S]*renderReadOnlyJobRequiredTableLabel\("Ujian Lisan"\)/);
-  assert.match(applicationViewSource, /renderReadOnlyJobRequiredTableLabel\("Tahun"\)[\s\S]*renderReadOnlyJobRequiredTableLabel\("Keputusan Gred"\)/);
-  assert.match(applicationViewSource, /renderReadOnlyJobRequiredTableLabel\("Sekolah"\)[\s\S]*renderReadOnlyJobRequiredTableLabel\("Mata Pelajaran"\)[\s\S]*renderReadOnlyJobRequiredTableLabel\("Gred"\)/);
-  assert.match(applicationViewSource, /<colgroup>[\s\S]*renderReadOnlyJobRequiredTableLabel\("Nama Sijil"\)[\s\S]*renderReadOnlyJobRequiredTableLabel\("Pengkhususan"\)/);
+  assert.match(applicationViewSource, /function isSameJobChoice\(value, option\)/);
+  assert.match(applicationViewSource, /const renderReadOnlyJobField = \(label, value\) => \(/);
+  assert.doesNotMatch(applicationViewSource, /renderReadOnlyJobRequiredTableLabel/);
+  assert.doesNotMatch(applicationViewSource, /RequiredMarker/);
+  assert.match(applicationViewSource, /renderReadOnlyJobField\("Sekolah", studentInfo\.jobSpmSchool\)[\s\S]*<th>Bil<\/th><th>Mata Pelajaran<\/th><th>Gred<\/th><th>Semakan<\/th>/);
+  assert.match(applicationViewSource, /student-job-bm-july-table[\s\S]*<colgroup>[\s\S]*<td>Keputusan Gred<\/td>[\s\S]*<td>Ujian Lisan<\/td>/);
+  assert.match(applicationViewSource, /<td>Tahun<\/td><td>\{renderJobValue\(studentInfo\.jobMathJulyYear\)\}<\/td>/);
+  assert.match(applicationViewSource, /renderReadOnlyJobField\("Sekolah", studentInfo\.jobStpmSchool\)[\s\S]*<th>Bil<\/th><th>Mata Pelajaran<\/th><th>Gred<\/th>/);
+  assert.match(applicationViewSource, /<colgroup>[\s\S]*<td>Nama Sijil<\/td>[\s\S]*<td>Pengkhususan<\/td>/);
   assert.match(applicationViewSource, /student-job-language-column-row[\s\S]*student-job-other-language-label[\s\S]*student-job-other-language-input/);
-  assert.match(applicationViewSource, /student-job-computer-table[\s\S]*<RequiredMarker \/>/);
-  assert.match(applicationViewSource, /student-job-work-experience-table[\s\S]*<colgroup>[\s\S]*<RequiredMarker \/>/);
+  assert.match(applicationViewSource, /isSameJobChoice\(row\.speaking, option\)/);
+  assert.match(applicationViewSource, /isSameJobChoice\(row\.level, option\)/);
+  assert.match(applicationViewSource, /student-job-work-experience-table[\s\S]*<colgroup>[\s\S]*<th className="student-job-spm-heading" colSpan=\{6\}>\{activeInfoHeading\}<\/th>/);
   assert.match(applicationViewSource, /student-job-reference-heading-title[\s\S]*student-job-heading-note/);
 });
 
