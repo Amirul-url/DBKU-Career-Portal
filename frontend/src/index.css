@@ -7526,6 +7526,10 @@ body:has(.applicant-profile-page) {
   text-decoration: none;
 }
 
+.student-job-language-table .student-job-fluency-cell {
+  text-align: center;
+}
+
 .student-job-computer-table th:first-child,
 .student-job-computer-table td:first-child {
   width: 170px;

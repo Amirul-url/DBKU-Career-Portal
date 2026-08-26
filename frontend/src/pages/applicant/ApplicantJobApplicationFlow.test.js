@@ -214,6 +214,8 @@ test("job application language and computer sections render official skill table
   assert.match(internshipFormSource, /Bahasa Malaysia/);
   assert.match(internshipFormSource, /Bahasa Inggeris/);
   assert.match(internshipFormSource, /<tr className="student-job-language-column-row">/);
+  assert.match(internshipFormSource, /<td className="student-job-fluency-cell">Pertuturan<\/td>/);
+  assert.match(internshipFormSource, /<td className="student-job-fluency-cell">Penulisan<\/td>/);
   assert.match(internshipFormSource, /className="student-job-other-language-input"/);
   assert.match(internshipFormSource, /updateJobLanguageSkillRow\(index, "speaking"/);
   assert.match(internshipFormSource, /updateJobLanguageSkillRow\(index, "writing"/);
@@ -226,6 +228,7 @@ test("job application language and computer sections render official skill table
   assert.doesNotMatch(internshipFormSource, /activeInfoTab === jobLanguageSkillsTab \? renderJobSimpleSection\("jobLanguageSkills"/);
   assert.doesNotMatch(internshipFormSource, /activeInfoTab === jobComputerSkillsTab \? renderJobSimpleSection\("jobComputerSkills"/);
   assert.match(cssSource, /\.student-job-language-table \.student-job-language-column-row th \{[\s\S]*background: #fff;[\s\S]*font-weight: 400;[\s\S]*text-decoration: none;/);
+  assert.match(cssSource, /\.student-job-language-table \.student-job-fluency-cell \{[\s\S]*text-align: center;/);
   assert.match(cssSource, /\.student-job-language-table \.student-job-heading-note,/);
   assert.match(cssSource, /\.student-job-other-language-input \{[\s\S]*border-bottom: 1px solid #111827;/);
 });

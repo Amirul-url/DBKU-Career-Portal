@@ -2326,11 +2326,11 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
                     </label>
                   )}
                 </td>
-                <td>Pertuturan</td>
+                <td className="student-job-fluency-cell">Pertuturan</td>
                 {jobSkillLevelOptions.map((option) => renderJobLanguageLevelCell(row, index, "speaking", option, updateJobLanguageSkillRow(index, "speaking")))}
               </tr>
               <tr>
-                <td>Penulisan</td>
+                <td className="student-job-fluency-cell">Penulisan</td>
                 {jobSkillLevelOptions.map((option) => renderJobLanguageLevelCell(row, index, "writing", option, updateJobLanguageSkillRow(index, "writing")))}
               </tr>
             </Fragment>
