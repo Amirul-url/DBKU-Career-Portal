@@ -2337,9 +2337,6 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
           ))}
         </tbody>
       </table>
-      {validationErrors.jobLanguageSkillRows ? (
-        <p className="student-field-error">{validationErrors.jobLanguageSkillRows}</p>
-      ) : null}
     </div>
   );
 
@@ -2397,9 +2394,6 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
           ))}
         </tbody>
       </table>
-      {validationErrors.jobComputerSkillRows ? (
-        <p className="student-field-error">{validationErrors.jobComputerSkillRows}</p>
-      ) : null}
     </div>
   );
 

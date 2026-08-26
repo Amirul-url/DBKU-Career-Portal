@@ -228,6 +228,8 @@ test("job application language and computer sections render official skill table
   assert.match(internshipFormSource, /activeInfoTab === jobComputerSkillsTab \? renderJobComputerSkillsSection\(\) : null/);
   assert.doesNotMatch(internshipFormSource, /activeInfoTab === jobLanguageSkillsTab \? renderJobSimpleSection\("jobLanguageSkills"/);
   assert.doesNotMatch(internshipFormSource, /activeInfoTab === jobComputerSkillsTab \? renderJobSimpleSection\("jobComputerSkills"/);
+  assert.doesNotMatch(internshipFormSource, /<p className="student-field-error">\{validationErrors\.jobLanguageSkillRows\}<\/p>/);
+  assert.doesNotMatch(internshipFormSource, /<p className="student-field-error">\{validationErrors\.jobComputerSkillRows\}<\/p>/);
   assert.match(cssSource, /\.student-job-language-table \.student-job-language-column-row th \{[\s\S]*background: #fff;[\s\S]*font-weight: 400;[\s\S]*text-decoration: none;/);
   assert.match(cssSource, /\.student-job-language-table td\.student-job-fluency-cell \{[\s\S]*text-align: center;/);
   assert.match(cssSource, /\.student-job-language-table \.student-job-heading-note,/);
