@@ -452,10 +452,12 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /getOrganizationFeedbackConfirmationDate\(application\)/);
   assert.match(source, /const \[feedbackRelease, setFeedbackRelease\] = useState\(\(\) => getOrganizationFeedbackRelease\(application\)\)/);
   assert.match(source, /const \[showSendConfirmModal, setShowSendConfirmModal\] = useState\(false\)/);
-  assert.match(source, /const hasRequiredOrganizationFeedbackDocuments = feedbackDocuments\.length > 0/);
+  assert.match(source, /const shouldShowOrganizationFeedbackDocuments = !isJobFeedbackApplication/);
+  assert.match(source, /const hasRequiredOrganizationFeedbackDocuments = shouldShowOrganizationFeedbackDocuments \? feedbackDocuments\.length > 0 : true/);
   assert.match(source, /const canSendOrganizationFeedbackToApplicant = Boolean\(/);
   assert.match(source, /hasRequiredOrganizationFeedbackDocuments/);
-  assert.match(source, /\(isJobFeedbackApplication \|\| feedbackInternshipPeriod\.trim\(\)\)/);
+  assert.match(source, /\(isJobFeedbackApplication \|\| \(hasRequiredOrganizationFeedbackDocuments && feedbackInternshipPeriod\.trim\(\)\)\)/);
+  assert.match(source, /if \(shouldShowOrganizationFeedbackDocuments && !hasRequiredOrganizationFeedbackDocuments\)/);
   assert.match(source, /disabled=\{!canSendOrganizationFeedbackToApplicant\}/);
   assert.match(source, /className="organization-feedback-required"/);
   assert.match(source, /className="organization-feedback-period-input"/);
@@ -514,6 +516,7 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /Program/);
   assert.match(source, /Bahagian Ditempatkan/);
   assert.match(source, /No\. Kad Pengenalan:/);
+  assert.match(source, /\{shouldShowOrganizationFeedbackDocuments \? \([\s\S]*<section className="organization-feedback-section" aria-label="Dokumen maklumbalas organisasi">/);
   assert.match(source, /Dengan segala hormatnya perkara di atas adalah dirujuk\./);
   assert.match(
     source,

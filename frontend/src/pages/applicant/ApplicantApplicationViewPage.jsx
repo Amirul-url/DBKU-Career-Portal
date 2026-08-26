@@ -611,6 +611,7 @@ function ApplicantOrganizationFeedbackTab({ application, onNext }) {
   const isJobFeedbackApplication = isJobApplicationDetail(application);
   const jobApplicationTitle = getJobApplicationTitle(application);
   const feedbackIntroText = getOrganizationFeedbackIntroText(application);
+  const shouldShowOrganizationFeedbackDocuments = !isJobFeedbackApplication;
 
   return (
     <div className="organization-feedback-panel applicant-organization-feedback-panel">
@@ -684,70 +685,72 @@ function ApplicantOrganizationFeedbackTab({ application, onNext }) {
         <p>Sekian. Terima kasih.</p>
       </section>
 
-      <div className="organization-feedback-table-wrap applicant-organization-document-wrap">
-        <p className="applicant-organization-download-note">
-          Sila muat turun dokumen maklumbalas organisasi di bawah.
-        </p>
-        <table className="organization-feedback-document-table applicant-organization-document-table">
-          <colgroup>
-            <col className="organization-feedback-col-index" />
-            <col className="organization-feedback-col-format" />
-            <col />
-            <col className="organization-feedback-col-actions applicant-organization-document-actions-col" />
-          </colgroup>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Format</th>
-              <th>Lampiran</th>
-              <th>Tindakan</th>
-            </tr>
-          </thead>
-          <tbody>
-            {feedbackDocuments.length ? (
-              feedbackDocuments.map((document, index) => (
-                <tr key={`organizationFeedbackDocument-${document.id || index}`}>
-                  <td>{index + 1}</td>
-                  <td>PDF</td>
-                  <td>
-                    <a
-                      className="organization-feedback-attachment-link"
-                      href={document.url || "#"}
-                      target="_blank"
-                      rel="noreferrer"
-                      aria-disabled={!document.url}
-                      onClick={(event) => {
-                        if (!document.url) event.preventDefault();
-                      }}
-                    >
-                      <Icon>description</Icon>
-                      <span>{document.name}</span>
-                    </a>
-                  </td>
-                  <td>
-                    <div className="organization-feedback-row-actions applicant-organization-document-actions">
-                      <button
-                        aria-label={`Lihat ${document.name}`}
-                        className="organization-feedback-icon-button organization-feedback-icon-button-view"
-                        disabled={!document.url}
-                        type="button"
-                        onClick={() => openDocumentFile(document)}
-                        title="Lihat fail"
-                      >
-                        <Icon>visibility</Icon>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr className="organization-feedback-empty-row">
-                <td colSpan={4}>--Tiada rekod--</td>
+      {shouldShowOrganizationFeedbackDocuments ? (
+        <div className="organization-feedback-table-wrap applicant-organization-document-wrap">
+          <p className="applicant-organization-download-note">
+            Sila muat turun dokumen maklumbalas organisasi di bawah.
+          </p>
+          <table className="organization-feedback-document-table applicant-organization-document-table">
+            <colgroup>
+              <col className="organization-feedback-col-index" />
+              <col className="organization-feedback-col-format" />
+              <col />
+              <col className="organization-feedback-col-actions applicant-organization-document-actions-col" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Format</th>
+                <th>Lampiran</th>
+                <th>Tindakan</th>
               </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {feedbackDocuments.length ? (
+                feedbackDocuments.map((document, index) => (
+                  <tr key={`organizationFeedbackDocument-${document.id || index}`}>
+                    <td>{index + 1}</td>
+                    <td>PDF</td>
+                    <td>
+                      <a
+                        className="organization-feedback-attachment-link"
+                        href={document.url || "#"}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-disabled={!document.url}
+                        onClick={(event) => {
+                          if (!document.url) event.preventDefault();
+                        }}
+                      >
+                        <Icon>description</Icon>
+                        <span>{document.name}</span>
+                      </a>
+                    </td>
+                    <td>
+                      <div className="organization-feedback-row-actions applicant-organization-document-actions">
+                        <button
+                          aria-label={`Lihat ${document.name}`}
+                          className="organization-feedback-icon-button organization-feedback-icon-button-view"
+                          disabled={!document.url}
+                          type="button"
+                          onClick={() => openDocumentFile(document)}
+                          title="Lihat fail"
+                        >
+                          <Icon>visibility</Icon>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr className="organization-feedback-empty-row">
+                  <td colSpan={4}>--Tiada rekod--</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      ) : null}
       <footer className="organization-feedback-send-actions applicant-organization-next-actions">
         <button className="hrm-primary organization-feedback-send" type="button" onClick={onNext}>
           Seterusnya

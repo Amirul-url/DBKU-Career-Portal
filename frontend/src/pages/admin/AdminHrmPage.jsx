@@ -2780,12 +2780,12 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
   const isSentToApplicant = Boolean(feedbackRelease.sent_to_applicant_at);
   const isPdfFile = (file) => file?.type === "application/pdf" || file?.name?.toLowerCase().endsWith(".pdf");
   const isBusy = isSaving || isSendingToApplicant || Boolean(deletingDocumentId);
-  const hasRequiredOrganizationFeedbackDocuments = feedbackDocuments.length > 0;
+  const shouldShowOrganizationFeedbackDocuments = !isJobFeedbackApplication;
+  const hasRequiredOrganizationFeedbackDocuments = shouldShowOrganizationFeedbackDocuments ? feedbackDocuments.length > 0 : true;
   const canSendOrganizationFeedbackToApplicant = Boolean(
     !isBusy &&
       !isSentToApplicant &&
-      hasRequiredOrganizationFeedbackDocuments &&
-      (isJobFeedbackApplication || feedbackInternshipPeriod.trim()),
+      (isJobFeedbackApplication || (hasRequiredOrganizationFeedbackDocuments && feedbackInternshipPeriod.trim())),
   );
 
   const addDocumentRow = () => {
@@ -2880,7 +2880,7 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
       setMessage("Sila isi tempoh latihan industri / praktikal sebelum hantar kepada pemohon.");
       return;
     }
-    if (!hasRequiredOrganizationFeedbackDocuments) {
+    if (shouldShowOrganizationFeedbackDocuments && !hasRequiredOrganizationFeedbackDocuments) {
       setMessage("Sila tambah sekurang-kurangnya satu fail maklumbalas organisasi sebelum hantar kepada pemohon.");
       return;
     }
@@ -2969,110 +2969,112 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
           </tbody>
         </table>
       </div>
-      <section className="organization-feedback-section" aria-label="Dokumen maklumbalas organisasi">
-        <div className="organization-feedback-section-header">
-          <div className="organization-feedback-section-title">
-            <h3>
-              Dokumen maklumbalas organisasi
-              <span className="organization-feedback-required" aria-hidden="true">*</span>
-            </h3>
-            <p>Wajib muat naik sekurang-kurangnya 1 fail PDF untuk dihantar kepada pemohon. Saiz fail maksimum 15MB.</p>
+      {shouldShowOrganizationFeedbackDocuments ? (
+        <section className="organization-feedback-section" aria-label="Dokumen maklumbalas organisasi">
+          <div className="organization-feedback-section-header">
+            <div className="organization-feedback-section-title">
+              <h3>
+                Dokumen maklumbalas organisasi
+                <span className="organization-feedback-required" aria-hidden="true">*</span>
+              </h3>
+              <p>Wajib muat naik sekurang-kurangnya 1 fail PDF untuk dihantar kepada pemohon. Saiz fail maksimum 15MB.</p>
+            </div>
+            <div className="organization-feedback-section-actions">
+              <button
+                className="organization-feedback-add"
+                type="button"
+                disabled={isBusy || isSentToApplicant}
+                onClick={addDocumentRow}
+              >
+                <Icon>add_circle</Icon>
+                <span>Tambah Dokumen</span>
+              </button>
+            </div>
           </div>
-          <div className="organization-feedback-section-actions">
-            <button
-              className="organization-feedback-add"
-              type="button"
-              disabled={isBusy || isSentToApplicant}
-              onClick={addDocumentRow}
-            >
-              <Icon>add_circle</Icon>
-              <span>Tambah Dokumen</span>
-            </button>
-          </div>
-        </div>
-        {message ? <p className="organization-feedback-message">{message}</p> : null}
-        <div className="organization-feedback-table-wrap">
-          <table className="organization-feedback-document-table">
-            <colgroup>
-              <col className="organization-feedback-col-index" />
-              <col className="organization-feedback-col-format" />
-              <col />
-              <col className="organization-feedback-col-actions" />
-            </colgroup>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Format</th>
-                <th>Lampiran</th>
-                <th>Tindakan</th>
-              </tr>
-            </thead>
-            <tbody>
-              {feedbackDocuments.length ? (
-                feedbackDocuments.map((document, index) => (
-                  <tr key={document.id || `${document.name}-${index}`}>
-                    <td>{index + 1}</td>
-                    <td>PDF</td>
-                    <td>
-                      <div className="organization-feedback-attachment-cell">
-                        {document.url ? (
-                          <a
-                            className="organization-feedback-attachment-link"
-                            href={document.url}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            <Icon>description</Icon>
-                            <span>{document.name}</span>
-                          </a>
-                        ) : (
-                          <p className="organization-feedback-empty">Tiada fail dipilih.</p>
-                        )}
-                      </div>
-                    </td>
-                    <td>
-                      <div className="organization-feedback-row-actions">
-                        <button
-                          className="organization-feedback-icon-button organization-feedback-icon-button-view"
-                          type="button"
-                          disabled={isBusy || !document.url}
-                          onClick={() => openFeedbackDocumentAction(document)}
-                          aria-label="Lihat fail"
-                          title="Lihat fail"
-                        >
-                          <Icon>visibility</Icon>
-                        </button>
-                        <button
-                          className="organization-feedback-icon-button organization-feedback-icon-button-remove-file"
-                          type="button"
-                          disabled={isBusy || isSentToApplicant}
-                          onClick={() => deleteFeedbackFile(document)}
-                          aria-label="Buang fail"
-                          title="Buang fail"
-                        >
-                          <Icon>delete</Icon>
-                        </button>
-                        <button
-                          className="organization-feedback-row-delete"
-                          type="button"
-                          disabled={isBusy || isSentToApplicant}
-                          onClick={() => removeDocumentRow(document)}
-                        >
-                          Padam baris
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr className="organization-feedback-empty-row">
-                  <td colSpan={4}>--Tiada rekod--</td>
+          {message ? <p className="organization-feedback-message">{message}</p> : null}
+          <div className="organization-feedback-table-wrap">
+            <table className="organization-feedback-document-table">
+              <colgroup>
+                <col className="organization-feedback-col-index" />
+                <col className="organization-feedback-col-format" />
+                <col />
+                <col className="organization-feedback-col-actions" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Format</th>
+                  <th>Lampiran</th>
+                  <th>Tindakan</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
+              </thead>
+              <tbody>
+                {feedbackDocuments.length ? (
+                  feedbackDocuments.map((document, index) => (
+                    <tr key={document.id || `${document.name}-${index}`}>
+                      <td>{index + 1}</td>
+                      <td>PDF</td>
+                      <td>
+                        <div className="organization-feedback-attachment-cell">
+                          {document.url ? (
+                            <a
+                              className="organization-feedback-attachment-link"
+                              href={document.url}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              <Icon>description</Icon>
+                              <span>{document.name}</span>
+                            </a>
+                          ) : (
+                            <p className="organization-feedback-empty">Tiada fail dipilih.</p>
+                          )}
+                        </div>
+                      </td>
+                      <td>
+                        <div className="organization-feedback-row-actions">
+                          <button
+                            className="organization-feedback-icon-button organization-feedback-icon-button-view"
+                            type="button"
+                            disabled={isBusy || !document.url}
+                            onClick={() => openFeedbackDocumentAction(document)}
+                            aria-label="Lihat fail"
+                            title="Lihat fail"
+                          >
+                            <Icon>visibility</Icon>
+                          </button>
+                          <button
+                            className="organization-feedback-icon-button organization-feedback-icon-button-remove-file"
+                            type="button"
+                            disabled={isBusy || isSentToApplicant}
+                            onClick={() => deleteFeedbackFile(document)}
+                            aria-label="Buang fail"
+                            title="Buang fail"
+                          >
+                            <Icon>delete</Icon>
+                          </button>
+                          <button
+                            className="organization-feedback-row-delete"
+                            type="button"
+                            disabled={isBusy || isSentToApplicant}
+                            onClick={() => removeDocumentRow(document)}
+                          >
+                            Padam baris
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr className="organization-feedback-empty-row">
+                    <td colSpan={4}>--Tiada rekod--</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ) : null}
       <section className="organization-feedback-report-note" aria-label="Maklumat lapor diri">
         <p>Sehubungan itu, pelajar tuan/puan adalah diminta untuk melapor diri pada tarikh, masa dan tempat seperti berikut:-</p>
         <dl className="organization-feedback-report-details">
