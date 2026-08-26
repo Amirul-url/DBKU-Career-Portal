@@ -77,6 +77,7 @@ const getDefaultJobReferenceRows = () => Array.from({ length: jobReferenceRowCou
   occupation: "",
   phone: "",
 }));
+const jobDeclarationText = "Saya dengan ini mengaku bahawa semua maklumat yang saya berikan adalah BENAR dan TEPAT. Saya juga bersetuju dan menerima bahawa sekiranya mana-mana daripada pengakuan ini didapati palsu atau tidak benar, pihak Dewan Bandaraya Kuching Utara berhak menarik balik keputusan tawaran dan menamatkan perkhidmatan saya dengan serta-merta tanpa apa-apa syarat.";
 const jobTabShortLabels = {
   [personalInfoTab]: "Peribadi",
   [jobSpmTab]: "SPM/UEC",
@@ -324,6 +325,10 @@ const getDefaultStudentInfo = () => ({
   jobBmJulyYear: "",
   jobComputerSkills: "",
   jobDeclaration: "",
+  jobDeclarationDate: "",
+  jobDeclarationIcNo: "",
+  jobDeclarationName: "",
+  jobDeclarationSignature: "",
   jobHigherEducationQualifications: Array.from({ length: jobHigherEducationRowCount }, () => ({
     certificateName: "",
     cgpa: "",
@@ -422,9 +427,7 @@ const requiredFieldsByTab = {
   [jobComputerSkillsTab]: [],
   [jobWorkExperienceTab]: [],
   [jobReferencesTab]: [],
-  [jobDeclarationTab]: [
-    ["jobDeclaration", "Perakuan Pemohon"],
-  ],
+  [jobDeclarationTab]: [],
   [personalInfoTab]: [
     ["name", "Nama"],
     ["icNo", "No. Kad Pengenalan Baru"],
@@ -875,6 +878,16 @@ function buildJobReferencesSummary(studentInfo = {}) {
     .join("\n");
 }
 
+function buildJobDeclarationSummary(studentInfo = {}) {
+  return [
+    jobDeclarationText,
+    `Nama: ${normalizeJobTableValue(studentInfo.jobDeclarationName) || "-"}`,
+    `No. Kad Pengenalan: ${normalizeJobTableValue(studentInfo.jobDeclarationIcNo) || "-"}`,
+    `Tandatangan Pemohon: ${normalizeJobTableValue(studentInfo.jobDeclarationSignature) || "-"}`,
+    `Tarikh: ${normalizeJobTableValue(studentInfo.jobDeclarationDate) || "-"}`,
+  ].join("\n");
+}
+
 function buildJobSpmSubjectSummary(studentInfo = {}) {
   return getJobSpmSubjects(studentInfo)
     .filter((row) => row.subject.trim() && row.grade.trim())
@@ -1045,6 +1058,27 @@ function getJobReferencesValidation(studentInfo = {}) {
   return { errors, incompleteRows, missingFields };
 }
 
+function getJobDeclarationValidation(studentInfo = {}) {
+  const requiredFields = [
+    ["jobDeclarationName", "Nama"],
+    ["jobDeclarationIcNo", "No. Kad Pengenalan"],
+    ["jobDeclarationSignature", "Tandatangan Pemohon"],
+    ["jobDeclarationDate", "Tarikh"],
+  ];
+  const missingCells = requiredFields
+    .filter(([field]) => !String(studentInfo[field] || "").trim())
+    .map(([, label]) => label);
+  const errors = {};
+  const missingFields = [];
+
+  if (missingCells.length) {
+    missingFields.push(`Lengkapkan Perakuan Pemohon: ${missingCells.join(", ")}`);
+    errors.jobDeclaration = "Lengkapkan semua maklumat Perakuan Pemohon.";
+  }
+
+  return { errors, missingCells, missingFields };
+}
+
 function isJobSpmTabComplete(studentInfo = {}) {
   const hasRequiredFields = (requiredFieldsByTab[jobSpmTab] || [])
     .every(([field]) => String(studentInfo[field] || "").trim());
@@ -1081,6 +1115,10 @@ function isJobReferencesTabComplete(studentInfo = {}) {
   return getJobReferencesValidation(studentInfo).missingFields.length === 0;
 }
 
+function isJobDeclarationTabComplete(studentInfo = {}) {
+  return getJobDeclarationValidation(studentInfo).missingFields.length === 0;
+}
+
 function normalizeStudentInfoDraft(studentInfo = {}, user = null) {
   const defaults = getDefaultStudentInfo();
   const birthDate = studentInfo.birthDate || studentInfo.dateOfBirth || "";
@@ -1107,6 +1145,11 @@ function normalizeStudentInfoDraft(studentInfo = {}, user = null) {
     jobBmJulyYear: normalizeJobTableValue(studentInfo.jobBmJulyYear),
     jobComputerSkillRows: normalizedJobComputerSkillRows,
     jobComputerSkills: studentInfo.jobComputerSkills || buildJobComputerSkillsSummary({ ...studentInfo, jobComputerSkillRows: normalizedJobComputerSkillRows }),
+    jobDeclaration: studentInfo.jobDeclaration || buildJobDeclarationSummary(studentInfo),
+    jobDeclarationDate: normalizeJobTableValue(studentInfo.jobDeclarationDate),
+    jobDeclarationIcNo: normalizeJobTableValue(studentInfo.jobDeclarationIcNo),
+    jobDeclarationName: normalizeJobTableValue(studentInfo.jobDeclarationName),
+    jobDeclarationSignature: normalizeJobTableValue(studentInfo.jobDeclarationSignature),
     jobHigherEducationQualifications: normalizedJobHigherEducationQualifications,
     jobLanguageSkillRows: normalizedJobLanguageSkillRows,
     jobLanguageSkills: studentInfo.jobLanguageSkills || buildJobLanguageSkillsSummary({ ...studentInfo, jobLanguageSkillRows: normalizedJobLanguageSkillRows }),
@@ -1186,6 +1229,7 @@ function isTabComplete(tab, studentInfo) {
   if (tab === jobComputerSkillsTab) return isJobComputerSkillsTabComplete(studentInfo);
   if (tab === jobWorkExperienceTab) return isJobWorkExperienceTabComplete(studentInfo);
   if (tab === jobReferencesTab) return isJobReferencesTabComplete(studentInfo);
+  if (tab === jobDeclarationTab) return isJobDeclarationTabComplete(studentInfo);
 
   const requiredFields = requiredFieldsByTab[tab] || [];
   const hasRequiredFields = requiredFields.every(([field]) => String(studentInfo[field] || "").trim());
@@ -1250,6 +1294,12 @@ function getMissingApplicationFields(studentInfo, requiredTabs = internshipRequi
       const jobReferencesValidation = getJobReferencesValidation(studentInfo);
       missingFields.push(...jobReferencesValidation.missingFields.map((field) => `${tab}: ${field}`));
       Object.assign(errors, jobReferencesValidation.errors);
+    }
+
+    if (tab === jobDeclarationTab) {
+      const jobDeclarationValidation = getJobDeclarationValidation(studentInfo);
+      missingFields.push(...jobDeclarationValidation.missingFields.map((field) => `${tab}: ${field}`));
+      Object.assign(errors, jobDeclarationValidation.errors);
     }
   });
 
@@ -1657,6 +1707,15 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
       ));
       const next = { ...current, jobReferenceRows: nextRows };
       return { ...next, jobReferences: buildJobReferencesSummary(next) };
+    });
+  };
+
+  const updateJobDeclarationValue = (field) => (event) => {
+    setNotice("");
+    clearValidationFields(["jobDeclaration"]);
+    setStudentInfo((current) => {
+      const next = { ...current, [field]: normalizeJobTableValue(event.target.value) };
+      return { ...next, jobDeclaration: buildJobDeclarationSummary(next) };
     });
   };
 
@@ -2149,20 +2208,43 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
     </div>
   );
 
-  const renderJobSimpleSection = (field, placeholder) => (
-    <div className="student-personal-table-wrap">
-      <table className="student-personal-table">
+  const renderJobDeclarationLine = (field, label) => (
+    <label className="student-job-declaration-line">
+      <span>{label}</span>
+      <b aria-hidden="true">:</b>
+      <input
+        aria-label={label}
+        required
+        value={studentInfo[field]}
+        onChange={updateJobDeclarationValue(field)}
+      />
+    </label>
+  );
+
+  const renderJobDeclarationSection = () => (
+    <div className="student-job-spm-table-wrap">
+      <table className="student-job-spm-table student-job-declaration-table">
+        <thead>
+          <tr>
+            <th className="student-job-spm-heading">
+              {activeInfoHeading}
+            </th>
+          </tr>
+        </thead>
         <tbody>
-          {renderPersonalRow(
-            activeInfoTab,
-            <textarea
-              required
-              rows={8}
-              placeholder={placeholder}
-              value={studentInfo[field]}
-              onChange={updateStudentInfo(field)}
-            />,
-          )}
+          <tr>
+            <td>
+              <p className="student-job-declaration-copy">
+                Saya dengan ini mengaku bahawa semua maklumat yang saya berikan adalah <strong>BENAR</strong> dan <strong>TEPAT</strong>. Saya juga bersetuju dan menerima bahawa sekiranya mana-mana daripada pengakuan ini didapati palsu atau tidak benar, pihak Dewan Bandaraya Kuching Utara berhak menarik balik keputusan tawaran dan menamatkan perkhidmatan saya dengan serta-merta tanpa apa-apa syarat.
+              </p>
+              <div className="student-job-declaration-fields">
+                {renderJobDeclarationLine("jobDeclarationName", "Nama")}
+                {renderJobDeclarationLine("jobDeclarationIcNo", "No. Kad Pengenalan")}
+                {renderJobDeclarationLine("jobDeclarationSignature", "Tandatangan Pemohon")}
+                {renderJobDeclarationLine("jobDeclarationDate", "Tarikh")}
+              </div>
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -2825,7 +2907,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
                   {activeInfoTab === jobComputerSkillsTab ? renderJobComputerSkillsSection() : null}
                   {activeInfoTab === jobWorkExperienceTab ? renderJobWorkExperienceSection() : null}
                   {activeInfoTab === jobReferencesTab ? renderJobReferencesSection() : null}
-                  {activeInfoTab === jobDeclarationTab ? renderJobSimpleSection("jobDeclaration", "Masukkan perakuan pemohon.") : null}
+                  {activeInfoTab === jobDeclarationTab ? renderJobDeclarationSection() : null}
                   {activeInfoTab === documentSupportTab ? renderDocumentFields() : null}
 
                   <div className="student-info-actions">

@@ -7715,6 +7715,61 @@ body:has(.applicant-profile-page) {
   font-weight: 500;
 }
 
+.student-job-declaration-table {
+  min-width: 900px;
+  table-layout: fixed;
+}
+
+.student-job-declaration-table thead th.student-job-spm-heading {
+  padding: 14px 18px 8px;
+  text-align: left;
+  text-indent: 0;
+}
+
+.student-job-declaration-table th:first-child,
+.student-job-declaration-table td:first-child {
+  width: auto;
+  text-align: left;
+}
+
+.student-job-declaration-table td {
+  padding: 12px 18px 18px;
+}
+
+.student-job-declaration-copy {
+  max-width: 100%;
+  margin: 0;
+  color: #030712;
+  font-size: 16px;
+  line-height: 1.75;
+  text-align: left;
+}
+
+.student-job-declaration-fields {
+  display: grid;
+  gap: 8px;
+  max-width: 780px;
+  margin-top: 24px;
+}
+
+.student-job-declaration-line {
+  display: grid;
+  grid-template-columns: 260px 16px minmax(260px, 470px);
+  gap: 8px;
+  align-items: end;
+  min-height: 54px;
+}
+
+.student-job-declaration-line b {
+  font-weight: 500;
+}
+
+.student-job-spm-table .student-job-declaration-line input {
+  min-height: 28px;
+  border-bottom: 1px solid #111827;
+  padding: 0 4px;
+}
+
 .student-passport-upload {
   position: relative;
   box-sizing: border-box;
