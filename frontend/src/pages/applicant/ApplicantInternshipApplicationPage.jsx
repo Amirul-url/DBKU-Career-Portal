@@ -41,6 +41,14 @@ const minimumJobSpmSubjectRows = 3;
 const jobStpmSubjectRowCount = 5;
 const minimumJobStpmSubjectRows = 3;
 const jobHigherEducationRowCount = 2;
+const jobHigherEducationRequiredFields = [
+  ["certificateName", "Nama Sijil"],
+  ["entryDate", "Tarikh Masuk"],
+  ["cgpa", "CGPA"],
+  ["completionDate", "Tarikh Tamat Pengajian"],
+  ["institution", "Institusi"],
+  ["specialization", "Pengkhususan"],
+];
 const jobComputerSkillRowCount = 5;
 const minimumJobComputerSkillRows = 2;
 const jobSkillLevelOptions = ["Baik", "Sederhana", "Lemah"];
@@ -856,6 +864,24 @@ function getJobStpmValidation(studentInfo = {}) {
   return { completedRows, errors, missingFields, partialRows };
 }
 
+function getJobHigherEducationValidation(studentInfo = {}) {
+  const rows = getJobHigherEducationQualifications(studentInfo);
+  const missingCells = rows.flatMap((row, rowIndex) => (
+    jobHigherEducationRequiredFields
+      .filter(([field]) => !String(row[field] || "").trim())
+      .map(([, label]) => `${label} ${rowIndex + 1}`)
+  ));
+  const missingFields = [];
+  const errors = {};
+
+  if (missingCells.length) {
+    missingFields.push("Semua maklumat Kelulusan Pengajian Tinggi wajib diisi");
+    errors.jobHigherEducationQualifications = `Lengkapkan: ${missingCells.join(", ")}.`;
+  }
+
+  return { errors, missingCells, missingFields };
+}
+
 function getJobLanguageSkillsValidation(studentInfo = {}) {
   const rows = getJobLanguageSkillRows(studentInfo);
   const missingRequiredRows = rows.filter((row) => row.required && (!row.speaking || !row.writing));
@@ -917,6 +943,10 @@ function isJobStpmTabComplete(studentInfo = {}) {
   const validation = getJobStpmValidation(studentInfo);
 
   return hasRequiredFields && validation.missingFields.length === 0;
+}
+
+function isJobHigherEducationTabComplete(studentInfo = {}) {
+  return getJobHigherEducationValidation(studentInfo).missingFields.length === 0;
 }
 
 function isJobLanguageSkillsTabComplete(studentInfo = {}) {
@@ -1021,6 +1051,7 @@ function clearStudentInfoDraft(user, applicationType = "internship") {
 function isTabComplete(tab, studentInfo) {
   if (tab === jobSpmTab) return isJobSpmTabComplete(studentInfo);
   if (tab === jobStpmTab) return isJobStpmTabComplete(studentInfo);
+  if (tab === jobHigherEducationTab) return isJobHigherEducationTabComplete(studentInfo);
   if (tab === jobLanguageSkillsTab) return isJobLanguageSkillsTabComplete(studentInfo);
   if (tab === jobComputerSkillsTab) return isJobComputerSkillsTabComplete(studentInfo);
 
@@ -1057,6 +1088,12 @@ function getMissingApplicationFields(studentInfo, requiredTabs = internshipRequi
       const jobStpmValidation = getJobStpmValidation(studentInfo);
       missingFields.push(...jobStpmValidation.missingFields.map((field) => `${tab}: ${field}`));
       Object.assign(errors, jobStpmValidation.errors);
+    }
+
+    if (tab === jobHigherEducationTab) {
+      const jobHigherEducationValidation = getJobHigherEducationValidation(studentInfo);
+      missingFields.push(...jobHigherEducationValidation.missingFields.map((field) => `${tab}: ${field}`));
+      Object.assign(errors, jobHigherEducationValidation.errors);
     }
 
     if (tab === jobLanguageSkillsTab) {
@@ -1582,6 +1619,12 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
       const jobStpmValidation = getJobStpmValidation(studentInfo);
       missingFields.push(...jobStpmValidation.missingFields);
       Object.assign(errors, jobStpmValidation.errors);
+    }
+
+    if (activeInfoTab === jobHigherEducationTab) {
+      const jobHigherEducationValidation = getJobHigherEducationValidation(studentInfo);
+      missingFields.push(...jobHigherEducationValidation.missingFields);
+      Object.assign(errors, jobHigherEducationValidation.errors);
     }
 
     if (activeInfoTab === jobLanguageSkillsTab) {
@@ -2154,6 +2197,13 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
     </div>
   );
 
+  const renderJobHigherEducationLabel = (label) => (
+    <>
+      {label}
+      <RequiredMarker />
+    </>
+  );
+
   const renderJobHigherEducationSection = () => (
     <div className="student-job-spm-table-wrap">
       {getJobHigherEducationQualifications(studentInfo).map((row, index) => (
@@ -2178,40 +2228,43 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
           ) : null}
           <tbody>
             <tr>
-              <td>Nama Sijil</td>
+              <td>{renderJobHigherEducationLabel("Nama Sijil")}</td>
               <td>
-                <input value={row.certificateName} onChange={updateJobHigherEducationRow(index, "certificateName")} />
+                <input required value={row.certificateName} onChange={updateJobHigherEducationRow(index, "certificateName")} />
               </td>
-              <td>Tarikh Masuk</td>
+              <td>{renderJobHigherEducationLabel("Tarikh Masuk")}</td>
               <td>
-                <input value={row.entryDate} onChange={updateJobHigherEducationRow(index, "entryDate")} />
-              </td>
-            </tr>
-            <tr>
-              <td>CGPA</td>
-              <td>
-                <input value={row.cgpa} onChange={updateJobHigherEducationRow(index, "cgpa")} />
-              </td>
-              <td>Tarikh Tamat Pengajian</td>
-              <td>
-                <input value={row.completionDate} onChange={updateJobHigherEducationRow(index, "completionDate")} />
+                <input required value={row.entryDate} onChange={updateJobHigherEducationRow(index, "entryDate")} />
               </td>
             </tr>
             <tr>
-              <td>Institusi</td>
+              <td>{renderJobHigherEducationLabel("CGPA")}</td>
+              <td>
+                <input required value={row.cgpa} onChange={updateJobHigherEducationRow(index, "cgpa")} />
+              </td>
+              <td>{renderJobHigherEducationLabel("Tarikh Tamat Pengajian")}</td>
+              <td>
+                <input required value={row.completionDate} onChange={updateJobHigherEducationRow(index, "completionDate")} />
+              </td>
+            </tr>
+            <tr>
+              <td>{renderJobHigherEducationLabel("Institusi")}</td>
               <td colSpan={3}>
-                <input value={row.institution} onChange={updateJobHigherEducationRow(index, "institution")} />
+                <input required value={row.institution} onChange={updateJobHigherEducationRow(index, "institution")} />
               </td>
             </tr>
             <tr>
-              <td>Pengkhususan</td>
+              <td>{renderJobHigherEducationLabel("Pengkhususan")}</td>
               <td colSpan={3}>
-                <input value={row.specialization} onChange={updateJobHigherEducationRow(index, "specialization")} />
+                <input required value={row.specialization} onChange={updateJobHigherEducationRow(index, "specialization")} />
               </td>
             </tr>
           </tbody>
         </table>
       ))}
+      {validationErrors.jobHigherEducationQualifications ? (
+        <p className="student-field-error">{validationErrors.jobHigherEducationQualifications}</p>
+      ) : null}
     </div>
   );
 
