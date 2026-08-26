@@ -6725,11 +6725,11 @@ body:has(.applicant-profile-page) {
 }
 
 .student-info-tabs.job-application-tabs {
-  flex-wrap: nowrap;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 8px;
-  overflow-x: auto;
+  overflow-x: visible;
   padding: 12px;
-  scrollbar-width: thin;
 }
 
 .student-info-tabs button {
@@ -6745,22 +6745,9 @@ body:has(.applicant-profile-page) {
 }
 
 .student-info-tabs.job-application-tabs button {
-  flex: 0 0 auto;
+  width: 100%;
   min-width: 0;
   min-height: 40px;
-  white-space: nowrap;
-  padding: 0 14px;
-}
-
-.applicant-application-readonly-panel .student-info-tabs.job-application-tabs {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 6px;
-  overflow-x: visible;
-}
-
-.applicant-application-readonly-panel .student-info-tabs.job-application-tabs button {
-  width: 100%;
   white-space: normal;
   padding: 0 6px;
 }
@@ -8350,13 +8337,13 @@ body:has(.applicant-profile-page) {
 }
 
 @media (max-width: 1100px) {
-  .applicant-application-readonly-panel .student-info-tabs.job-application-tabs {
+  .student-info-tabs.job-application-tabs {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 700px) {
-  .applicant-application-readonly-panel .student-info-tabs.job-application-tabs {
+  .student-info-tabs.job-application-tabs {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

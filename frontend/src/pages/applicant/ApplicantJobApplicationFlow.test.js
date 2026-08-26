@@ -11,6 +11,13 @@ const internshipFormSource = readFileSync(new URL("./ApplicantInternshipApplicat
 const listSource = readFileSync(new URL("./ApplicantPortalListPage.jsx", import.meta.url), "utf8");
 const applicationViewSource = readFileSync(new URL("./ApplicantApplicationViewPage.jsx", import.meta.url), "utf8");
 const cssSource = readFileSync(new URL("../../index.css", import.meta.url), "utf8");
+const getCssBlock = (selector) => {
+  const start = cssSource.indexOf(selector);
+  assert.ok(start >= 0, `${selector} block exists`);
+  const end = cssSource.indexOf("\n}", start);
+  assert.ok(end > start, `${selector} block is closed`);
+  return cssSource.slice(start, end + 2);
+};
 
 test("job vacancy CTA opens a job application form for the selected vacancy", () => {
   assert.match(routesSource, /jobApplicationForVacancy: \(id\) => `\/profile\/job-application\?vacancy=\$\{id\}`/);
@@ -65,8 +72,12 @@ test("job application tabs use compact labels without changing tab state values"
   assert.match(internshipFormSource, /onClick=\{\(\) => openInfoTab\(tab\)\}/);
   assert.match(internshipFormSource, /\{getInfoTabLabel\(tab, index\)\}/);
   assert.match(internshipFormSource, /activeInfoTab === documentSupportTab/);
-  assert.match(cssSource, /\.student-info-tabs\.job-application-tabs \{[\s\S]*overflow-x: auto;/);
-  assert.match(cssSource, /\.student-info-tabs\.job-application-tabs button \{[\s\S]*white-space: nowrap;/);
+  const jobTabsCss = getCssBlock(".student-info-tabs.job-application-tabs {");
+  assert.match(jobTabsCss, /display: grid;/);
+  assert.match(jobTabsCss, /grid-template-columns: repeat\(7, minmax\(0, 1fr\)\);/);
+  assert.match(jobTabsCss, /overflow-x: visible;/);
+  assert.doesNotMatch(jobTabsCss, /overflow-x: auto;/);
+  assert.match(getCssBlock(".student-info-tabs.job-application-tabs button {"), /white-space: normal;/);
 });
 
 test("job application extra sections are mandatory before submission", () => {
