@@ -1129,6 +1129,7 @@ export function InternshipApplicationReadOnlyPanel({
   application,
   backLabel = "Kembali",
   className = "",
+  disableDefaultTabGroups = false,
   error = "",
   extraTabs = [],
   loading = false,
@@ -1160,7 +1161,7 @@ export function InternshipApplicationReadOnlyPanel({
     : activeInfoTab;
   const shouldShowActiveInfoHeading = !isJobApplication || !readOnlyJobInfoTabs.includes(activeInfoTab);
   const currentDocumentFields = isJobApplication ? jobDocumentFields : documentFields;
-  const defaultJobTabGroups = isJobApplication && extraTabs.length
+  const defaultJobTabGroups = isJobApplication && extraTabs.length && !disableDefaultTabGroups
     ? [
         { label: "PEMOHON", tabs: readOnlyJobInfoTabs },
         { label: "URUSAN DALAMAN", tabs: extraTabs },
@@ -1768,9 +1769,6 @@ export default function ApplicantApplicationViewPage() {
     ...(hasHrmFinalRejectionDecision(application) ? [hrmDecisionTab] : []),
     ...(organizationFeedbackSent ? [organizationFeedbackTab, applicantConfirmationTab] : []),
   ];
-  const applicantTabGroups = isJobApplicationDetail(application)
-    ? [{ label: "PEMOHON", tabs: [...readOnlyJobInfoTabs, ...applicantExtraTabs] }]
-    : [];
 
   useEffect(() => {
     if (!user) {
@@ -1850,13 +1848,13 @@ export default function ApplicantApplicationViewPage() {
           <InternshipApplicationReadOnlyPanel
             activeInfoTab={activeInfoTab}
             application={application}
+            disableDefaultTabGroups
             error={error}
             extraTabs={applicantExtraTabs}
             loading={loading}
             maskAcceptedStatus={!organizationFeedbackSent}
             onBack={exitApplicationView}
             onTabChange={setActiveInfoTab}
-            tabGroups={applicantTabGroups}
             renderExtraTabContent={(tab) =>
               tab === hrmDecisionTab ? (
                 <ApplicantHrmDecisionTab application={application} />

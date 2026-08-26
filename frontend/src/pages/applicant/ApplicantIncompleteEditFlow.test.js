@@ -122,10 +122,9 @@ test("applicant accepted applications stay hidden behind review status until HRM
   assert.match(viewSource, /function hasOrganizationFeedbackBeenSent\(application\)/);
   assert.match(viewSource, /const applicantExtraTabs = \[/);
   assert.match(viewSource, /\.\.\.\(organizationFeedbackSent \? \[organizationFeedbackTab, applicantConfirmationTab\] : \[\]\)/);
-  assert.match(viewSource, /const applicantTabGroups = isJobApplicationDetail\(application\)/);
-  assert.match(viewSource, /label: "PEMOHON", tabs: \[\.\.\.readOnlyJobInfoTabs, \.\.\.applicantExtraTabs\]/);
   assert.match(viewSource, /extraTabs=\{applicantExtraTabs\}/);
-  assert.match(viewSource, /tabGroups=\{applicantTabGroups\}/);
+  assert.match(viewSource, /disableDefaultTabGroups/);
+  assert.match(viewSource, /isJobApplication && extraTabs\.length && !disableDefaultTabGroups/);
   assert.match(viewSource, /maskAcceptedStatus=\{!organizationFeedbackSent\}/);
   assert.match(viewSource, /function ApplicantOrganizationFeedbackTab/);
   assert.match(viewSource, /function getApplicantFeedbackPlacementDepartment\(application\)/);
