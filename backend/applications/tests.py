@@ -1769,3 +1769,73 @@ class CandidateApplicationReferenceNoTests(TestCase):
         self.assertEqual(application.profile_data["department_decision"]["recommendation"], "Tolak")
         self.assertEqual(application.profile_data["hrm_final_decision"]["decision"], "Tolak")
         self.assertEqual(application.profile_data["hrm_final_decision"]["department_recommendation"], "Tolak")
+
+    @override_settings(NOTIFICATION_EMAIL_ENABLED=True, WHATSAPP_ENABLED=True)
+    @patch("applications.services.send_whatsapp_message")
+    @patch("notifications.services.send_notification_email")
+    def test_final_hrm_job_decision_notifies_applicant_by_email_and_whatsapp(
+        self,
+        mock_send_email,
+        mock_send_whatsapp,
+    ):
+        applicant = self.create_applicant("final-job-decision@example.com", mobile_number="60128887777")
+        staff = self.user_model.objects.create_user(
+            username="hrm-final-job@example.com",
+            email="hrm-final-job@example.com",
+            password="Password123!",
+            role="admin",
+            department="Bahagian Pengurusan Sumber Manusia (HRM)",
+        )
+        job_vacancy = Vacancy.objects.create(
+            title="Penolong Pegawai Teknologi Maklumat Gred FA5",
+            vacancy_type="job",
+            department="Dewan Bandaraya Kuching Utara",
+            summary="Jawatan kosong DBKU.",
+            status="open",
+        )
+        application = CandidateApplication.objects.create(
+            applicant=applicant,
+            vacancy=job_vacancy,
+            status="shortlisted",
+            assigned_department="Bahagian Teknologi Maklumat (ICT)",
+            reference_no="PK.2026-0006",
+            profile_data={
+                "department_decision": {
+                    "recommendation": "Tolak",
+                    "remarks": "Tidak memenuhi keperluan bahagian.",
+                    "submitted_at": "2026-08-27T09:00:00+08:00",
+                }
+            },
+        )
+        client = APIClient()
+        client.force_authenticate(user=staff)
+
+        response = client.post(
+            f"/api/applications/{application.id}/review/",
+            {
+                "status": "rejected",
+                "hrm_final_decision": {
+                    "decision": "Tolak",
+                    "department_recommendation": "Tolak",
+                    "remarks": "Permohonan tidak berjaya dipertimbangkan buat masa ini.",
+                    "submitted_by": "HRM",
+                },
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        application.refresh_from_db()
+        self.assertEqual(application.status, "rejected")
+        self.assertEqual(application.profile_data["hrm_final_decision"]["decision"], "Tolak")
+        notification = Notification.objects.get(application=application, user=applicant)
+        expected_title = "Keputusan Permohonan Jawatan Penolong Pegawai Teknologi Maklumat Gred FA5"
+        expected_message = (
+            "Dukacita dimaklumkan bahawa permohonan Jawatan Penolong Pegawai Teknologi Maklumat Gred FA5 "
+            "anda dengan No. rujukan PK.2026-0006 tidak berjaya dipertimbangkan buat masa ini. "
+            "Untuk maklumat lanjut, sila layari Portal Kerjaya DBKU."
+        )
+        self.assertEqual(notification.title, expected_title)
+        self.assertEqual(notification.message, expected_message)
+        mock_send_email.assert_called_once_with(applicant, expected_title, expected_message)
+        mock_send_whatsapp.assert_called_once_with(applicant.mobile_number, expected_message)

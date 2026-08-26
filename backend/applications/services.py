@@ -176,6 +176,17 @@ def build_hrm_offer_rejection_notification(application):
 
 
 def build_application_review_notification(application, next_status):
+    if application.vacancy.vacancy_type == "job" and next_status == "rejected":
+        job_label = get_job_application_label(application)
+        return {
+            "title": f"Keputusan Permohonan {job_label}",
+            "message": (
+                f"Dukacita dimaklumkan bahawa permohonan {job_label} anda dengan No. rujukan {application.reference_no} "
+                "tidak berjaya dipertimbangkan buat masa ini. "
+                "Untuk maklumat lanjut, sila layari Portal Kerjaya DBKU."
+            ),
+        }
+
     copy = {
         "incomplete": {
             "title": "Permohonan Tidak Lengkap",
