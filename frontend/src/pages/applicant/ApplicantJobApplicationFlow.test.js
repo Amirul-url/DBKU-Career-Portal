@@ -233,6 +233,12 @@ test("job application sections A to H use local studentInfo state", () => {
   assert.match(internshipFormSource, /activeInfoTab === jobComputerSkillsTab \? renderJobComputerSkillsSection\(\) : null/);
   assert.match(internshipFormSource, /getJobComputerSkillRows\(studentInfo\)\.map\(\(row, index\) =>/);
   assert.match(internshipFormSource, /const updateJobComputerSkillRow = \(index, field\) => \(event\) => \{[\s\S]*setStudentInfo\(\(current\) => \{/);
+
+  assert.match(internshipFormSource, /jobWorkExperience: ""/);
+  assert.match(internshipFormSource, /jobReferences: ""/);
+  assert.match(internshipFormSource, /activeInfoTab === jobWorkExperienceTab \? renderJobSimpleSection\("jobWorkExperience", "Masukkan pengalaman bekerja\."\) : null/);
+  assert.match(internshipFormSource, /activeInfoTab === jobReferencesTab \? renderJobSimpleSection\("jobReferences", "Masukkan maklumat rujukan\."\) : null/);
+  assert.match(internshipFormSource, /const renderJobSimpleSection = \(field, placeholder\) => \([\s\S]*value=\{studentInfo\[field\]\}[\s\S]*onChange=\{updateStudentInfo\(field\)\}/);
 });
 
 test("job application language and computer sections render official skill tables", () => {
