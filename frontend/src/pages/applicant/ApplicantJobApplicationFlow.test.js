@@ -338,8 +338,22 @@ test("submitted job application detail uses the job A to L read-only module", ()
   assert.match(applicationViewSource, /renderJobWorkExperienceFields\(\)/);
   assert.match(applicationViewSource, /renderJobReferencesFields\(\)/);
   assert.match(applicationViewSource, /renderJobDeclarationFields\(\)/);
+  assert.match(applicationViewSource, /function renderReadOnlyJobApplicationInstructions\(\)/);
+  assert.match(applicationViewSource, /SILA BACA ARAHAN DI BAWAH DENGAN TELITI/);
+  assert.match(applicationViewSource, /<div className="student-job-photo-guidance-row">[\s\S]*renderReadOnlyJobApplicationInstructions\(\)[\s\S]*renderReadOnlyPassportPhoto\(documents, studentInfo\)/);
   assert.match(applicationViewSource, /\{!isJobApplication \? \(\s*<section className="student-readonly-summary"/);
   assert.match(applicationViewSource, /\{!isJobApplication \? <h2>\{activeInfoHeading\}<\/h2> : null\}/);
+  assert.match(applicationViewSource, /const renderReadOnlyJobRequiredTableLabel = \(label\) => \(/);
+  assert.match(applicationViewSource, /const RequiredMarker = \(\) => <span className="student-required-marker" aria-hidden="true">\*<\/span>/);
+  assert.match(applicationViewSource, /renderReadOnlyJobRequiredTableLabel\("Sekolah"\)[\s\S]*renderReadOnlyJobRequiredTableLabel\("Mata Pelajaran"\)[\s\S]*renderReadOnlyJobRequiredTableLabel\("Gred"\)/);
+  assert.match(applicationViewSource, /student-job-bm-july-table[\s\S]*<colgroup>[\s\S]*renderReadOnlyJobRequiredTableLabel\("Keputusan Gred"\)[\s\S]*renderReadOnlyJobRequiredTableLabel\("Ujian Lisan"\)/);
+  assert.match(applicationViewSource, /renderReadOnlyJobRequiredTableLabel\("Tahun"\)[\s\S]*renderReadOnlyJobRequiredTableLabel\("Keputusan Gred"\)/);
+  assert.match(applicationViewSource, /renderReadOnlyJobRequiredTableLabel\("Sekolah"\)[\s\S]*renderReadOnlyJobRequiredTableLabel\("Mata Pelajaran"\)[\s\S]*renderReadOnlyJobRequiredTableLabel\("Gred"\)/);
+  assert.match(applicationViewSource, /<colgroup>[\s\S]*renderReadOnlyJobRequiredTableLabel\("Nama Sijil"\)[\s\S]*renderReadOnlyJobRequiredTableLabel\("Pengkhususan"\)/);
+  assert.match(applicationViewSource, /student-job-language-column-row[\s\S]*student-job-other-language-label[\s\S]*student-job-other-language-input/);
+  assert.match(applicationViewSource, /student-job-computer-table[\s\S]*<RequiredMarker \/>/);
+  assert.match(applicationViewSource, /student-job-work-experience-table[\s\S]*<colgroup>[\s\S]*<RequiredMarker \/>/);
+  assert.match(applicationViewSource, /student-job-reference-heading-title[\s\S]*student-job-heading-note/);
 });
 
 test("saved job vacancies open the selected job application form", () => {

@@ -440,6 +440,50 @@ function renderReadOnlyPassportPhoto(documents, studentInfo) {
   );
 }
 
+function renderReadOnlyJobApplicationInstructions() {
+  return (
+    <section className="student-job-application-instructions" aria-label="Arahan permohonan jawatan kosong">
+      <table className="student-job-instructions-table">
+        <thead>
+          <tr>
+            <th colSpan={2}>SILA BACA ARAHAN DI BAWAH DENGAN TELITI</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1.</td>
+            <td>Pemohon hendaklah membaca iklan jawatan yang dipohon dengan teliti.</td>
+          </tr>
+          <tr>
+            <td>2.</td>
+            <td>Hanya pemohon yang memenuhi syarat-syarat yang dikehendaki sahaja akan dipertimbangkan.</td>
+          </tr>
+          <tr>
+            <td>3.</td>
+            <td>Gunakan <strong>HURUF BESAR</strong> sahaja. Tuliskan <strong>TB</strong> pada ruangan yang tidak berkenaan.</td>
+          </tr>
+          <tr>
+            <td>4.</td>
+            <td>Borang ini hendaklah diisi dengan lengkap dan dihantar sebelum atau pada tarikh akhir iklan.</td>
+          </tr>
+          <tr>
+            <td>5.</td>
+            <td>Permohonan yang tidak lengkap, tidak memenuhi syarat atau diterima selepas tarikh iklan ditutup akan ditolak.</td>
+          </tr>
+          <tr>
+            <td>6.</td>
+            <td>
+              Pemohon yang sedang berkhidmat dengan Kerajaan/ Badan Berkanun/ Pihak Berkuasa Tempatan hendaklah
+              menghantar permohonan melalui Ketua Jabatan masing-masing dengan melampirkan Laporan Penilaian
+              Prestasi yang terkini serta penyata perkhidmatan yang disahkan.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  );
+}
+
 function renderDocumentRow(document, documents, studentInfo) {
   const file = normalizeDocumentFile(
     documents[document.field],
@@ -1142,6 +1186,15 @@ export function InternshipApplicationReadOnlyPanel({
     </div>
   );
 
+  const RequiredMarker = () => <span className="student-required-marker" aria-hidden="true">*</span>;
+
+  const renderReadOnlyJobRequiredTableLabel = (label) => (
+    <>
+      {label}
+      <RequiredMarker />
+    </>
+  );
+
   const renderJobValue = (value) => <span className="student-readonly-value">{displayValue(value)}</span>;
 
   const renderJobHeading = (colSpan, note = null) => (
@@ -1157,7 +1210,10 @@ export function InternshipApplicationReadOnlyPanel({
 
   const renderJobPersonalFields = () => (
     <>
-      {renderReadOnlyPassportPhoto(documents, studentInfo)}
+      <div className="student-job-photo-guidance-row">
+        {renderReadOnlyJobApplicationInstructions()}
+        {renderReadOnlyPassportPhoto(documents, studentInfo)}
+      </div>
       <div className="student-personal-table-wrap">
         <table className="student-personal-table student-readonly-table">
           <thead>
@@ -1198,12 +1254,31 @@ export function InternshipApplicationReadOnlyPanel({
           {renderJobHeading(4)}
           <tbody>
             <tr>
-              <td colSpan={3}><strong>Sekolah :</strong> {renderJobValue(studentInfo.jobSpmSchool)}</td>
+              <td colSpan={3}>
+                <label>
+                  <span>{renderReadOnlyJobRequiredTableLabel("Sekolah")} :</span>
+                  {renderJobValue(studentInfo.jobSpmSchool)}
+                </label>
+              </td>
               <td className="hrm-use-cell" rowSpan={3}>UNTUK KEGUNAAN URUSETIA (BHG HRM)</td>
             </tr>
-            <tr><td colSpan={3}><strong>Tahun :</strong> {renderJobValue(studentInfo.jobSpmYear)}</td></tr>
-            <tr><td colSpan={3}><strong>Nama Peperiksaan</strong> {renderJobValue(studentInfo.jobSpmExamName)}</td></tr>
-            <tr><th>Bil</th><th>Mata Pelajaran</th><th>Gred</th><th>Semakan</th></tr>
+            <tr>
+              <td colSpan={3}>
+                <label>
+                  <span>{renderReadOnlyJobRequiredTableLabel("Tahun")} :</span>
+                  {renderJobValue(studentInfo.jobSpmYear)}
+                </label>
+              </td>
+            </tr>
+            <tr>
+              <td colSpan={3}>
+                <label>
+                  <span>{renderReadOnlyJobRequiredTableLabel("Nama Peperiksaan")}</span>
+                  {renderJobValue(studentInfo.jobSpmExamName)}
+                </label>
+              </td>
+            </tr>
+            <tr><th>Bil</th><th>{renderReadOnlyJobRequiredTableLabel("Mata Pelajaran")}</th><th>{renderReadOnlyJobRequiredTableLabel("Gred")}</th><th>Semakan</th></tr>
             {rows.map((row, index) => (
               <tr key={index}>
                 <td>{index + 1}</td>
@@ -1221,14 +1296,20 @@ export function InternshipApplicationReadOnlyPanel({
   const renderJobBmJulyFields = () => (
     <div className="student-job-spm-table-wrap">
       <table className="student-job-spm-table student-job-compact-table student-job-bm-july-table">
+        <colgroup>
+          <col />
+          <col />
+          <col />
+          <col />
+        </colgroup>
         {renderJobHeading(4)}
         <tbody>
-          <tr><td colSpan={2}>Tahun</td><td colSpan={2}>{renderJobValue(studentInfo.jobBmJulyYear)}</td></tr>
-          <tr><td colSpan={2}>Nama Peperiksaan</td><td colSpan={2}>{renderJobValue(studentInfo.jobBmJulyExamName)}</td></tr>
+          <tr><td colSpan={2}>{renderReadOnlyJobRequiredTableLabel("Tahun")}</td><td colSpan={2}>{renderJobValue(studentInfo.jobBmJulyYear)}</td></tr>
+          <tr><td colSpan={2}>{renderReadOnlyJobRequiredTableLabel("Nama Peperiksaan")}</td><td colSpan={2}>{renderJobValue(studentInfo.jobBmJulyExamName)}</td></tr>
           <tr>
-            <td>Keputusan Gred</td>
+            <td>{renderReadOnlyJobRequiredTableLabel("Keputusan Gred")}</td>
             <td>{renderJobValue(studentInfo.jobBmJulyGradeDecision)}</td>
-            <td>Ujian Lisan</td>
+            <td>{renderReadOnlyJobRequiredTableLabel("Ujian Lisan")}</td>
             <td>{renderJobValue(studentInfo.jobBmJulyOralExam)}</td>
           </tr>
         </tbody>
@@ -1241,8 +1322,8 @@ export function InternshipApplicationReadOnlyPanel({
       <table className="student-job-spm-table student-job-compact-table">
         {renderJobHeading(2)}
         <tbody>
-          <tr><td>Tahun</td><td>{renderJobValue(studentInfo.jobMathJulyYear)}</td></tr>
-          <tr><td>Keputusan Gred</td><td>{renderJobValue(studentInfo.jobMathJulyGradeDecision)}</td></tr>
+          <tr><td>{renderReadOnlyJobRequiredTableLabel("Tahun")}</td><td>{renderJobValue(studentInfo.jobMathJulyYear)}</td></tr>
+          <tr><td>{renderReadOnlyJobRequiredTableLabel("Keputusan Gred")}</td><td>{renderJobValue(studentInfo.jobMathJulyGradeDecision)}</td></tr>
         </tbody>
       </table>
     </div>
@@ -1255,10 +1336,31 @@ export function InternshipApplicationReadOnlyPanel({
         <table className="student-job-spm-table student-job-stpm-table">
           {renderJobHeading(3)}
           <tbody>
-            <tr><td colSpan={3}><strong>Sekolah</strong> {renderJobValue(studentInfo.jobStpmSchool)}</td></tr>
-            <tr><td colSpan={3}><strong>Tahun</strong> {renderJobValue(studentInfo.jobStpmYear)}</td></tr>
-            <tr><td colSpan={3}><strong>Nama Peperiksaan</strong> {renderJobValue(studentInfo.jobStpmExamName)}</td></tr>
-            <tr><th>Bil</th><th>Mata Pelajaran</th><th>Gred</th></tr>
+            <tr>
+              <td colSpan={3}>
+                <label>
+                  <span>{renderReadOnlyJobRequiredTableLabel("Sekolah")}</span>
+                  {renderJobValue(studentInfo.jobStpmSchool)}
+                </label>
+              </td>
+            </tr>
+            <tr>
+              <td colSpan={3}>
+                <label>
+                  <span>{renderReadOnlyJobRequiredTableLabel("Tahun")}</span>
+                  {renderJobValue(studentInfo.jobStpmYear)}
+                </label>
+              </td>
+            </tr>
+            <tr>
+              <td colSpan={3}>
+                <label>
+                  <span>{renderReadOnlyJobRequiredTableLabel("Nama Peperiksaan")}</span>
+                  {renderJobValue(studentInfo.jobStpmExamName)}
+                </label>
+              </td>
+            </tr>
+            <tr><th>Bil</th><th>{renderReadOnlyJobRequiredTableLabel("Mata Pelajaran")}</th><th>{renderReadOnlyJobRequiredTableLabel("Gred")}</th></tr>
             {rows.map((row, index) => (
               <tr key={index}>
                 <td>{index + 1}</td>
@@ -1285,12 +1387,18 @@ export function InternshipApplicationReadOnlyPanel({
       <div className="student-job-spm-table-wrap">
         {rows.map((row, index) => (
           <table className="student-job-spm-table student-job-higher-education-table" key={index}>
+            <colgroup>
+              <col />
+              <col />
+              <col />
+              <col />
+            </colgroup>
             {index === 0 ? renderJobHeading(4, "(Sila lengkapkan maklumat kelulusan pendidikan tinggi jika jawatan yang dipohon memerlukan kelayakan tersebut. Jika tidak, ruangan ini hendaklah dikosongkan.)") : null}
             <tbody>
-              <tr><td>Nama Sijil</td><td>{renderJobValue(row.certificateName)}</td><td>Tarikh Masuk</td><td>{renderJobValue(row.entryDate)}</td></tr>
-              <tr><td>CGPA</td><td>{renderJobValue(row.cgpa)}</td><td>Tarikh Tamat Pengajian</td><td>{renderJobValue(row.completionDate)}</td></tr>
-              <tr><td>Institusi</td><td colSpan={3}>{renderJobValue(row.institution)}</td></tr>
-              <tr><td>Pengkhususan</td><td colSpan={3}>{renderJobValue(row.specialization)}</td></tr>
+              <tr><td>{renderReadOnlyJobRequiredTableLabel("Nama Sijil")}</td><td>{renderJobValue(row.certificateName)}</td><td>{renderReadOnlyJobRequiredTableLabel("Tarikh Masuk")}</td><td>{renderJobValue(row.entryDate)}</td></tr>
+              <tr><td>{renderReadOnlyJobRequiredTableLabel("CGPA")}</td><td>{renderJobValue(row.cgpa)}</td><td>{renderReadOnlyJobRequiredTableLabel("Tarikh Tamat Pengajian")}</td><td>{renderJobValue(row.completionDate)}</td></tr>
+              <tr><td>{renderReadOnlyJobRequiredTableLabel("Institusi")}</td><td colSpan={3}>{renderJobValue(row.institution)}</td></tr>
+              <tr><td>{renderReadOnlyJobRequiredTableLabel("Pengkhususan")}</td><td colSpan={3}>{renderJobValue(row.specialization)}</td></tr>
             </tbody>
           </table>
         ))}
@@ -1303,13 +1411,36 @@ export function InternshipApplicationReadOnlyPanel({
     return (
       <div className="student-job-spm-table-wrap">
         <table className="student-job-spm-table student-job-language-table">
-          {renderJobHeading(5, "(Sila tandakan (/) di petak yang berkenaan)")}
+          <thead>
+            <tr>
+              <th className="student-job-spm-heading" colSpan={5}>
+                {activeInfoHeading}
+                <span className="student-job-heading-note">(Sila tandakan (/) di petak yang berkenaan)</span>
+              </th>
+            </tr>
+            <tr className="student-job-language-column-row">
+              <th>Bahasa:</th>
+              <th>Kelancaran</th>
+              {jobSkillLevelOptions.map((option) => <th key={option}>{option}</th>)}
+            </tr>
+          </thead>
           <tbody>
-            <tr className="student-job-language-column-row"><th>Bahasa:</th><th>Kelancaran</th>{jobSkillLevelOptions.map((option) => <th key={option}>{option}</th>)}</tr>
             {rows.map((row, index) => (
               <Fragment key={index}>
                 <tr>
-                  <td rowSpan={2}>{displayValue(row.language || (row.required ? "" : "Bahasa Lain"))}</td>
+                  <td rowSpan={2}>
+                    {row.required ? (
+                      <>
+                        {row.language}
+                        <RequiredMarker />
+                      </>
+                    ) : (
+                      <span className="student-job-other-language">
+                        <span className="student-job-other-language-label">Bahasa Lain:</span>
+                        <span className="student-job-other-language-input">{renderJobValue(row.language)}</span>
+                      </span>
+                    )}
+                  </td>
                   <td className="student-job-fluency-cell">Pertuturan</td>
                   {jobSkillLevelOptions.map((option) => <td className="student-job-radio-table-cell" key={option}>{row.speaking === option ? "/" : ""}</td>)}
                 </tr>
@@ -1330,10 +1461,23 @@ export function InternshipApplicationReadOnlyPanel({
     return (
       <div className="student-job-spm-table-wrap">
         <table className="student-job-spm-table student-job-computer-table">
-          {renderJobHeading(5, "(Sila tandakan (/) di petak yang berkenaan)")}
-          <tbody>
-            <tr><th rowSpan={2}>Nama Perisian</th><th colSpan={4}>Tahap Kemahiran</th></tr>
+          <thead>
+            <tr>
+              <th className="student-job-spm-heading" colSpan={5}>
+                {activeInfoHeading}
+                <span className="student-job-heading-note">(Sila tandakan (/) di petak yang berkenaan)</span>
+              </th>
+            </tr>
+            <tr>
+              <th rowSpan={2}>
+                Nama Perisian
+                <RequiredMarker />
+              </th>
+              <th colSpan={4}>Tahap Kemahiran</th>
+            </tr>
             <tr>{jobComputerLevelOptions.map((option) => <th key={option}>{option}</th>)}</tr>
+          </thead>
+          <tbody>
             {rows.map((row, index) => (
               <tr key={index}>
                 <td>{renderJobValue(row.softwareName)}</td>
@@ -1358,10 +1502,25 @@ export function InternshipApplicationReadOnlyPanel({
     return (
       <div className="student-job-spm-table-wrap">
         <table className="student-job-spm-table student-job-work-experience-table">
-          {renderJobHeading(6)}
-          <tbody>
+          <colgroup>
+            <col className="student-job-work-employer-col" />
+            <col className="student-job-work-title-col" />
+            <col className="student-job-work-salary-col" />
+            <col className="student-job-work-date-col" />
+            <col className="student-job-work-date-col" />
+            <col className="student-job-work-duration-col" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th className="student-job-spm-heading" colSpan={6}>
+                {activeInfoHeading}
+                <RequiredMarker />
+              </th>
+            </tr>
             <tr><th rowSpan={2}>Nama &amp; Alamat Majikan</th><th rowSpan={2}>Nama Jawatan</th><th rowSpan={2}>Gaji Bersih Sebulan</th><th colSpan={2}>Tempoh Bekerja</th><th rowSpan={2}>Tempoh</th></tr>
             <tr><th>Dari</th><th>Hingga</th></tr>
+          </thead>
+          <tbody>
             {rows.map((row, index) => (
               <tr key={index}>
                 <td>{renderJobValue(row.employerAddress)}</td>
@@ -1393,10 +1552,22 @@ export function InternshipApplicationReadOnlyPanel({
         {renderJobValue(row[field])}
       </label>
     );
+
     return (
       <div className="student-job-spm-table-wrap">
         <table className="student-job-spm-table student-job-references-table">
-          {renderJobHeading(2, "(Sila berikan maklumat dua orang penama yang bukan ahli keluarga/ saudara-mara, yang dapat memberi keterangan dan pengesahan berkenaan maklumat diri anda)")}
+          <thead>
+            <tr>
+              <th className="student-job-spm-heading" colSpan={2}>
+                <span className="student-job-reference-heading-title">
+                  {activeInfoHeading}
+                </span>
+                <span className="student-job-heading-note">
+                  (Sila berikan maklumat dua orang penama yang bukan ahli keluarga/ saudara-mara, yang dapat memberi keterangan dan pengesahan berkenaan maklumat diri anda)
+                </span>
+              </th>
+            </tr>
+          </thead>
           <tbody>
             <tr>
               {rows.map((row, index) => (
