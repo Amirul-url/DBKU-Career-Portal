@@ -2012,8 +2012,8 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
           <tr>
             <td colSpan={3}>
               <label>
-                <span>Sekolah :</span>
-                <input value={studentInfo.jobSpmSchool} onChange={updateJobSpmValue("jobSpmSchool")} />
+                <span>{renderJobRequiredTableLabel("Sekolah")} :</span>
+                <input required value={studentInfo.jobSpmSchool} onChange={updateJobSpmValue("jobSpmSchool")} />
               </label>
             </td>
             <td className="hrm-use-cell" rowSpan={3}>
@@ -2023,23 +2023,23 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
           <tr>
             <td colSpan={3}>
               <label>
-                <span>Tahun :</span>
-                <input value={studentInfo.jobSpmYear} onChange={updateJobSpmValue("jobSpmYear")} />
+                <span>{renderJobRequiredTableLabel("Tahun")} :</span>
+                <input required value={studentInfo.jobSpmYear} onChange={updateJobSpmValue("jobSpmYear")} />
               </label>
             </td>
           </tr>
           <tr>
             <td colSpan={3}>
               <label>
-                <span>Nama Peperiksaan</span>
-                <input value={studentInfo.jobSpmExamName} onChange={updateJobSpmValue("jobSpmExamName")} />
+                <span>{renderJobRequiredTableLabel("Nama Peperiksaan")}</span>
+                <input required value={studentInfo.jobSpmExamName} onChange={updateJobSpmValue("jobSpmExamName")} />
               </label>
             </td>
           </tr>
           <tr>
             <th>Bil</th>
-            <th>Mata Pelajaran</th>
-            <th>Gred</th>
+            <th>{renderJobRequiredTableLabel("Mata Pelajaran")}</th>
+            <th>{renderJobRequiredTableLabel("Gred")}</th>
             <th>Semakan</th>
           </tr>
           {getJobSpmSubjects(studentInfo).map((row, index) => (
@@ -2083,25 +2083,25 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
         </thead>
         <tbody>
           <tr>
-            <td colSpan={2}>Tahun</td>
+            <td colSpan={2}>{renderJobRequiredTableLabel("Tahun")}</td>
             <td colSpan={2}>
-              <input value={studentInfo.jobBmJulyYear} onChange={updateJobBmJulyValue("jobBmJulyYear")} />
+              <input required value={studentInfo.jobBmJulyYear} onChange={updateJobBmJulyValue("jobBmJulyYear")} />
             </td>
           </tr>
           <tr>
-            <td colSpan={2}>Nama Peperiksaan</td>
+            <td colSpan={2}>{renderJobRequiredTableLabel("Nama Peperiksaan")}</td>
             <td colSpan={2}>
-              <input value={studentInfo.jobBmJulyExamName} onChange={updateJobBmJulyValue("jobBmJulyExamName")} />
+              <input required value={studentInfo.jobBmJulyExamName} onChange={updateJobBmJulyValue("jobBmJulyExamName")} />
             </td>
           </tr>
           <tr>
-            <td>Keputusan Gred</td>
+            <td>{renderJobRequiredTableLabel("Keputusan Gred")}</td>
             <td>
-              <input value={studentInfo.jobBmJulyGradeDecision} onChange={updateJobBmJulyValue("jobBmJulyGradeDecision")} />
+              <input required value={studentInfo.jobBmJulyGradeDecision} onChange={updateJobBmJulyValue("jobBmJulyGradeDecision")} />
             </td>
-            <td>Ujian Lisan</td>
+            <td>{renderJobRequiredTableLabel("Ujian Lisan")}</td>
             <td>
-              <input value={studentInfo.jobBmJulyOralExam} onChange={updateJobBmJulyValue("jobBmJulyOralExam")} />
+              <input required value={studentInfo.jobBmJulyOralExam} onChange={updateJobBmJulyValue("jobBmJulyOralExam")} />
             </td>
           </tr>
         </tbody>
@@ -2119,15 +2119,15 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
         </thead>
         <tbody>
           <tr>
-            <td>Tahun</td>
+            <td>{renderJobRequiredTableLabel("Tahun")}</td>
             <td>
-              <input value={studentInfo.jobMathJulyYear} onChange={updateJobMathJulyValue("jobMathJulyYear")} />
+              <input required value={studentInfo.jobMathJulyYear} onChange={updateJobMathJulyValue("jobMathJulyYear")} />
             </td>
           </tr>
           <tr>
-            <td>Keputusan Gred</td>
+            <td>{renderJobRequiredTableLabel("Keputusan Gred")}</td>
             <td>
-              <input value={studentInfo.jobMathJulyGradeDecision} onChange={updateJobMathJulyValue("jobMathJulyGradeDecision")} />
+              <input required value={studentInfo.jobMathJulyGradeDecision} onChange={updateJobMathJulyValue("jobMathJulyGradeDecision")} />
             </td>
           </tr>
         </tbody>
@@ -2147,31 +2147,31 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
           <tr>
             <td colSpan={3}>
               <label>
-                <span>Sekolah</span>
-                <input value={studentInfo.jobStpmSchool} onChange={updateJobStpmValue("jobStpmSchool")} />
+                <span>{renderJobRequiredTableLabel("Sekolah")}</span>
+                <input required value={studentInfo.jobStpmSchool} onChange={updateJobStpmValue("jobStpmSchool")} />
               </label>
             </td>
           </tr>
           <tr>
             <td colSpan={3}>
               <label>
-                <span>Tahun</span>
-                <input value={studentInfo.jobStpmYear} onChange={updateJobStpmValue("jobStpmYear")} />
+                <span>{renderJobRequiredTableLabel("Tahun")}</span>
+                <input required value={studentInfo.jobStpmYear} onChange={updateJobStpmValue("jobStpmYear")} />
               </label>
             </td>
           </tr>
           <tr>
             <td colSpan={3}>
               <label>
-                <span>Nama Peperiksaan</span>
-                <input value={studentInfo.jobStpmExamName} onChange={updateJobStpmValue("jobStpmExamName")} />
+                <span>{renderJobRequiredTableLabel("Nama Peperiksaan")}</span>
+                <input required value={studentInfo.jobStpmExamName} onChange={updateJobStpmValue("jobStpmExamName")} />
               </label>
             </td>
           </tr>
           <tr>
             <th>Bil</th>
-            <th>Mata Pelajaran</th>
-            <th>Gred</th>
+            <th>{renderJobRequiredTableLabel("Mata Pelajaran")}</th>
+            <th>{renderJobRequiredTableLabel("Gred")}</th>
           </tr>
           {getJobStpmSubjects(studentInfo).map((row, index) => (
             <tr key={index}>
@@ -2197,7 +2197,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
     </div>
   );
 
-  const renderJobHigherEducationLabel = (label) => (
+  const renderJobRequiredTableLabel = (label) => (
     <>
       {label}
       <RequiredMarker />
@@ -2228,33 +2228,33 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
           ) : null}
           <tbody>
             <tr>
-              <td>{renderJobHigherEducationLabel("Nama Sijil")}</td>
+              <td>{renderJobRequiredTableLabel("Nama Sijil")}</td>
               <td>
                 <input required value={row.certificateName} onChange={updateJobHigherEducationRow(index, "certificateName")} />
               </td>
-              <td>{renderJobHigherEducationLabel("Tarikh Masuk")}</td>
+              <td>{renderJobRequiredTableLabel("Tarikh Masuk")}</td>
               <td>
                 <input required value={row.entryDate} onChange={updateJobHigherEducationRow(index, "entryDate")} />
               </td>
             </tr>
             <tr>
-              <td>{renderJobHigherEducationLabel("CGPA")}</td>
+              <td>{renderJobRequiredTableLabel("CGPA")}</td>
               <td>
                 <input required value={row.cgpa} onChange={updateJobHigherEducationRow(index, "cgpa")} />
               </td>
-              <td>{renderJobHigherEducationLabel("Tarikh Tamat Pengajian")}</td>
+              <td>{renderJobRequiredTableLabel("Tarikh Tamat Pengajian")}</td>
               <td>
                 <input required value={row.completionDate} onChange={updateJobHigherEducationRow(index, "completionDate")} />
               </td>
             </tr>
             <tr>
-              <td>{renderJobHigherEducationLabel("Institusi")}</td>
+              <td>{renderJobRequiredTableLabel("Institusi")}</td>
               <td colSpan={3}>
                 <input required value={row.institution} onChange={updateJobHigherEducationRow(index, "institution")} />
               </td>
             </tr>
             <tr>
-              <td>{renderJobHigherEducationLabel("Pengkhususan")}</td>
+              <td>{renderJobRequiredTableLabel("Pengkhususan")}</td>
               <td colSpan={3}>
                 <input required value={row.specialization} onChange={updateJobHigherEducationRow(index, "specialization")} />
               </td>

@@ -139,10 +139,17 @@ test("job application BM July, Math July and STPM sections render official table
   assert.match(internshipFormSource, /const renderJobBmJulySection = \(\) => \(/);
   assert.match(internshipFormSource, /student-job-bm-july-table/);
   assert.match(internshipFormSource, /<colgroup>\s*<col \/>\s*<col \/>\s*<col \/>\s*<col \/>\s*<\/colgroup>/);
-  assert.match(internshipFormSource, /<td colSpan=\{2\}>Tahun<\/td>[\s\S]*<td colSpan=\{2\}>[\s\S]*jobBmJulyYear/);
-  assert.match(internshipFormSource, /<td colSpan=\{2\}>Nama Peperiksaan<\/td>[\s\S]*<td colSpan=\{2\}>[\s\S]*jobBmJulyExamName/);
+  assert.match(internshipFormSource, /renderJobRequiredTableLabel\("Tahun"\)[\s\S]*jobBmJulyYear/);
+  assert.match(internshipFormSource, /renderJobRequiredTableLabel\("Nama Peperiksaan"\)[\s\S]*jobBmJulyExamName/);
+  assert.match(internshipFormSource, /renderJobRequiredTableLabel\("Keputusan Gred"\)[\s\S]*jobBmJulyGradeDecision/);
+  assert.match(internshipFormSource, /renderJobRequiredTableLabel\("Ujian Lisan"\)[\s\S]*jobBmJulyOralExam/);
   assert.match(internshipFormSource, /const renderJobMathJulySection = \(\) => \(/);
+  assert.match(internshipFormSource, /renderJobRequiredTableLabel\("Tahun"\)[\s\S]*jobMathJulyYear/);
+  assert.match(internshipFormSource, /renderJobRequiredTableLabel\("Keputusan Gred"\)[\s\S]*jobMathJulyGradeDecision/);
   assert.match(internshipFormSource, /const renderJobStpmSection = \(\) => \(/);
+  assert.match(internshipFormSource, /renderJobRequiredTableLabel\("Sekolah"\)[\s\S]*jobStpmSchool/);
+  assert.match(internshipFormSource, /renderJobRequiredTableLabel\("Tahun"\)[\s\S]*jobStpmYear/);
+  assert.match(internshipFormSource, /renderJobRequiredTableLabel\("Nama Peperiksaan"\)[\s\S]*jobStpmExamName/);
   assert.match(internshipFormSource, /activeInfoTab === jobBmJulyTab \? renderJobBmJulySection\(\) : null/);
   assert.match(internshipFormSource, /activeInfoTab === jobMathJulyTab \? renderJobMathJulySection\(\) : null/);
   assert.match(internshipFormSource, /activeInfoTab === jobStpmTab \? renderJobStpmSection\(\) : null/);
@@ -167,16 +174,25 @@ test("job application higher education section renders the official qualificatio
   assert.match(internshipFormSource, /student-job-higher-education-table/);
   assert.match(internshipFormSource, /Sila lengkapkan maklumat kelulusan pendidikan tinggi jika jawatan yang dipohon memerlukan kelayakan tersebut/);
   assert.match(internshipFormSource, /getJobHigherEducationQualifications\(studentInfo\)\.map\(\(row, index\) =>/);
-  assert.match(internshipFormSource, /renderJobHigherEducationLabel\("Nama Sijil"\)/);
-  assert.match(internshipFormSource, /renderJobHigherEducationLabel\("Tarikh Masuk"\)/);
-  assert.match(internshipFormSource, /renderJobHigherEducationLabel\("CGPA"\)/);
-  assert.match(internshipFormSource, /renderJobHigherEducationLabel\("Tarikh Tamat Pengajian"\)/);
-  assert.match(internshipFormSource, /renderJobHigherEducationLabel\("Institusi"\)/);
-  assert.match(internshipFormSource, /renderJobHigherEducationLabel\("Pengkhususan"\)/);
+  assert.match(internshipFormSource, /renderJobRequiredTableLabel\("Nama Sijil"\)/);
+  assert.match(internshipFormSource, /renderJobRequiredTableLabel\("Tarikh Masuk"\)/);
+  assert.match(internshipFormSource, /renderJobRequiredTableLabel\("CGPA"\)/);
+  assert.match(internshipFormSource, /renderJobRequiredTableLabel\("Tarikh Tamat Pengajian"\)/);
+  assert.match(internshipFormSource, /renderJobRequiredTableLabel\("Institusi"\)/);
+  assert.match(internshipFormSource, /renderJobRequiredTableLabel\("Pengkhususan"\)/);
   assert.match(internshipFormSource, /updateJobHigherEducationRow\(index, "certificateName"\)/);
   assert.match(internshipFormSource, /updateJobHigherEducationRow\(index, "completionDate"\)/);
   assert.match(internshipFormSource, /activeInfoTab === jobHigherEducationTab \? renderJobHigherEducationSection\(\) : null/);
   assert.doesNotMatch(internshipFormSource, /activeInfoTab === academicInfoTab \|\| activeInfoTab === jobHigherEducationTab \? renderAcademicFields\(\) : null/);
+});
+
+test("job application required exam table labels show required markers", () => {
+  assert.match(internshipFormSource, /const renderJobRequiredTableLabel = \(label\) => \(/);
+  assert.match(internshipFormSource, /renderJobRequiredTableLabel\("Sekolah"\)[\s\S]*jobSpmSchool/);
+  assert.match(internshipFormSource, /renderJobRequiredTableLabel\("Tahun"\)[\s\S]*jobSpmYear/);
+  assert.match(internshipFormSource, /renderJobRequiredTableLabel\("Nama Peperiksaan"\)[\s\S]*jobSpmExamName/);
+  assert.match(internshipFormSource, /renderJobRequiredTableLabel\("Mata Pelajaran"\)/);
+  assert.match(internshipFormSource, /renderJobRequiredTableLabel\("Gred"\)/);
 });
 
 test("job application language and computer sections render official skill tables", () => {
