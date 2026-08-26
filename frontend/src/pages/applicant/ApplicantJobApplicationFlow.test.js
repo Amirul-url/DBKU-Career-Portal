@@ -239,6 +239,7 @@ test("job application language and computer sections render official skill table
   assert.match(cssSource, /\.student-job-language-table \.student-job-heading-note,/);
   assert.match(cssSource, /\.student-job-other-language-label \{[\s\S]*display: block;/);
   assert.match(cssSource, /\.student-job-spm-table \.student-job-other-language-input \{[\s\S]*border-bottom: 1px solid #111827;/);
+  assert.match(cssSource, /\.student-job-radio-cell \{[\s\S]*place-items: center;[\s\S]*width: 100%;/);
 });
 
 test("job application personal table includes required salutation row above name", () => {

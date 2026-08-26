@@ -7559,6 +7559,7 @@ body:has(.applicant-profile-page) {
   position: relative;
   display: grid;
   place-items: center;
+  width: 100%;
   min-height: 24px;
   cursor: pointer;
 }
