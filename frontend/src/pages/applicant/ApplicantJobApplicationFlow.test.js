@@ -96,6 +96,15 @@ test("job application extra sections are mandatory before submission", () => {
   assert.match(internshipFormSource, /activeInfoTab === jobDeclarationTab \? renderJobDeclarationSection\(\) : null/);
 });
 
+test("job application submit button remains clickable so validation can explain missing sections", () => {
+  assert.doesNotMatch(internshipFormSource, /const requiredInfoTabsComplete = currentRequiredInfoTabs\.every/);
+  assert.doesNotMatch(internshipFormSource, /const isApplicationReadyToSubmit = \(isJobApplication \|\| declarationAccepted\) && requiredInfoTabsComplete/);
+  assert.doesNotMatch(internshipFormSource, /disabled=\{!isApplicationReadyToSubmit \|\| isSubmittingApplication\}/);
+  assert.match(internshipFormSource, /disabled=\{isSubmittingApplication\}/);
+  assert.match(internshipFormSource, /setActiveInfoTab\(getFirstIncompleteTab\(studentInfo, currentRequiredInfoTabs, applicationType\)\)/);
+  assert.match(internshipFormSource, /setNotice\(`Sila lengkapkan: \$\{missingFields\.join\(", "\)\}\.`\)/);
+});
+
 test("job application SPM section renders the official subject and grade table", () => {
   assert.match(internshipFormSource, /const jobSpmSubjectRowCount = 12/);
   assert.match(internshipFormSource, /const minimumJobSpmSubjectRows = 3/);

@@ -2913,8 +2913,6 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
   const renderInfoHeading = () => (
     <h2>{activeInfoHeading}</h2>
   );
-  const requiredInfoTabsComplete = currentRequiredInfoTabs.every((tab) => isTabComplete(tab, studentInfo, applicationType));
-  const isApplicationReadyToSubmit = (isJobApplication || declarationAccepted) && requiredInfoTabsComplete;
   const isFinalInfoTab = activeInfoTab === currentInfoTabs[currentInfoTabs.length - 1];
 
   return (
@@ -2977,7 +2975,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
                     {isFinalInfoTab ? (
                       <button
                         className="student-info-submit"
-                        disabled={!isApplicationReadyToSubmit || isSubmittingApplication}
+                        disabled={isSubmittingApplication}
                         type="button"
                         onClick={handleSubmitApplication}
                       >
