@@ -3281,7 +3281,7 @@ function HrmApplicationDetailPage({
     ...(isHrmWorkspace ? [hrmReviewTab] : []),
     ...(shouldShowDepartmentDecision ? [departmentDecisionTab] : []),
     ...(!isJobApplication && shouldShowHrmFinalDecision ? [hrmFinalDecisionTab] : []),
-    ...(!isJobApplication && shouldShowOrganizationFeedback ? [organizationFeedbackTab] : []),
+    ...(shouldShowOrganizationFeedback ? [organizationFeedbackTab] : []),
     ...(!isJobApplication && hasApplicantRespondedToOffer(application) ? [applicantConfirmationTab] : []),
   ];
   const detailTabGroups = isJobApplication ? [] : [

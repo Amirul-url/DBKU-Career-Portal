@@ -323,7 +323,7 @@ test("HRM makes the final internship decision after department recommendation", 
   assert.match(source, /const departmentRecommendation = getSavedDepartmentDecision\(application\)\.recommendation \|\| ""/);
   assert.match(source, /departmentRecommendation === "Tolak"[\s\S]*application\?\.status === "shortlisted"/);
   assert.match(source, /const shouldShowHrmFinalDecision = isHrmWorkspace && \(needsFinalDecision \|\| hasFinalRejectionDecision\)/);
-  assert.match(source, /\.\.\.\(!isJobApplication && shouldShowOrganizationFeedback \? \[organizationFeedbackTab\] : \[\]\)/);
+  assert.match(source, /\.\.\.\(shouldShowOrganizationFeedback \? \[organizationFeedbackTab\] : \[\]\)/);
   assert.match(source, /const \[finalRemarks, setFinalRemarks\] = useState/);
   assert.match(source, /<textarea[\s\S]*value=\{finalRemarks\}[\s\S]*onChange=\{\(event\) => setFinalRemarks\(event\.target\.value\)\}/);
   assert.match(source, /buildHrmFinalDecisionPayload\(application, user, finalRemarks\)/);
@@ -334,10 +334,12 @@ test("HRM makes the final internship decision after department recommendation", 
   assert.match(source, /: "Hantar ke Pemohon"/);
 });
 
-test("HRM uses organization feedback after department accepts an internship application", () => {
+test("HRM uses organization feedback after department accepts an application", () => {
   assert.match(source, /const departmentRecommendation = getSavedDepartmentDecision\(application\)\.recommendation \|\| ""/);
   assert.match(source, /const shouldShowOrganizationFeedback =\s*isHrmWorkspace &&\s*\(departmentRecommendation === "Terima" \|\| application\?\.status === "offered" \|\| application\?\.status === "accepted"\)/);
   assert.match(source, /const shouldShowHrmFinalDecision = isHrmWorkspace && \(needsFinalDecision \|\| hasFinalRejectionDecision\)/);
+  assert.match(source, /\.\.\.\(shouldShowOrganizationFeedback \? \[organizationFeedbackTab\] : \[\]\)/);
+  assert.doesNotMatch(source, /\.\.\.\(!isJobApplication && shouldShowOrganizationFeedback \? \[organizationFeedbackTab\] : \[\]\)/);
   assert.doesNotMatch(source, /const shouldShowOrganizationFeedback = isHrmWorkspace && application\?\.status === "accepted"/);
 });
 
@@ -388,7 +390,7 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.match(source, /const organizationFeedbackTab = "Maklumbalas Organisasi"/);
   assert.match(source, /const applicantDetailTabs = \["Maklumat Peribadi Pemohon", "Maklumat Akademik", "Dokumen Sokongan"\]/);
   assert.match(source, /const shouldShowOrganizationFeedback =\s*isHrmWorkspace &&\s*\(departmentRecommendation === "Terima" \|\| application\?\.status === "offered" \|\| application\?\.status === "accepted"\)/);
-  assert.match(source, /\.\.\.\(!isJobApplication && shouldShowOrganizationFeedback \? \[organizationFeedbackTab\] : \[\]\)/);
+  assert.match(source, /\.\.\.\(shouldShowOrganizationFeedback \? \[organizationFeedbackTab\] : \[\]\)/);
   assert.match(source, /const detailTabGroups = isJobApplication \? \[\] : \[\s*\{ label: "Pemohon", tabs: applicantDetailTabs \},\s*\{ label: "Urusan Dalaman", tabs: extraTabs \},\s*\]/);
   assert.match(source, /tabGroups=\{detailTabGroups\}/);
   assert.match(source, /import \{ InternshipApplicationReadOnlyPanel \} from "\.\.\/applicant\/ApplicantApplicationViewPage"/);
