@@ -7520,6 +7520,12 @@ body:has(.applicant-profile-page) {
   text-align: center;
 }
 
+.student-job-language-table .student-job-language-column-row th {
+  background: #fff;
+  font-weight: 400;
+  text-decoration: none;
+}
+
 .student-job-computer-table th:first-child,
 .student-job-computer-table td:first-child {
   width: 170px;
@@ -7530,6 +7536,11 @@ body:has(.applicant-profile-page) {
   display: grid;
   grid-template-columns: 1fr;
   gap: 4px;
+}
+
+.student-job-other-language-input {
+  max-width: 96px;
+  border-bottom: 1px solid #111827;
 }
 
 .student-job-radio-cell {
@@ -7565,6 +7576,12 @@ body:has(.applicant-profile-page) {
   margin-top: 2px;
   font-weight: 500;
   text-decoration: none;
+}
+
+.student-job-language-table .student-job-heading-note,
+.student-job-computer-table .student-job-heading-note {
+  display: inline;
+  margin-left: 4px;
 }
 
 .student-passport-upload {

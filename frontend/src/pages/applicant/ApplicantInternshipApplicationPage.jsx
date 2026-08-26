@@ -2298,7 +2298,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
               <span className="student-job-heading-note">(Sila tandakan (/) di petak yang berkenaan)</span>
             </th>
           </tr>
-          <tr>
+          <tr className="student-job-language-column-row">
             <th>Bahasa:</th>
             <th>Kelancaran</th>
             {jobSkillLevelOptions.map((option) => <th key={option}>{option}</th>)}
@@ -2319,6 +2319,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
                       <span>Bahasa Lain:</span>
                       <input
                         aria-label={`Bahasa Lain ${index - 1}`}
+                        className="student-job-other-language-input"
                         value={row.language}
                         onChange={updateJobLanguageSkillRow(index, "language")}
                       />
