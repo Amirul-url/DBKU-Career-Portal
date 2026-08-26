@@ -1265,6 +1265,7 @@ export default function AdminHrmPage() {
                 ) : (
                   <JobApplicationsPanel
                     applications={filteredApplications}
+                    isHrmWorkspace={isHrmWorkspace}
                     onView={(application) => navigate(`${ADMIN_ROUTES.applications.job}/${application.id}`)}
                   />
                 )}
@@ -1909,7 +1910,7 @@ function InstitutionSearchFilter({ onChange, options, value }) {
     </div>
   );
 }
-function JobApplicationsPanel({ applications, onView }) {
+function JobApplicationsPanel({ applications, isHrmWorkspace, onView }) {
   const rowsPerPage = 5;
   const [jobFilter, setJobFilter] = useState("all");
   const [monthFilter, setMonthFilter] = useState("all");
@@ -1933,14 +1934,14 @@ function JobApplicationsPanel({ applications, onView }) {
     return Array.from(years).sort((first, second) => Number(second) - Number(first));
   }, [applications]);
   const statusOptions = useMemo(() => {
-    const statuses = new Set(applications.map((application) => application.status || "submitted"));
+    const statuses = new Set(applications.map((application) => getInternshipApplicationDisplayStatus(application, isHrmWorkspace)));
     return Array.from(statuses);
-  }, [applications]);
+  }, [applications, isHrmWorkspace]);
   const filteredApplications = useMemo(() => {
     return applications.filter((application) => {
       const jobTitle = getJobApplicationTitle(application);
       const applicationDate = getApplicationDateParts(application);
-      const displayStatus = application.status || "submitted";
+      const displayStatus = getInternshipApplicationDisplayStatus(application, isHrmWorkspace);
       return (
         (jobFilter === "all" || jobTitle === jobFilter) &&
         (monthFilter === "all" || applicationDate.month === monthFilter) &&
@@ -1948,7 +1949,7 @@ function JobApplicationsPanel({ applications, onView }) {
         (statusFilter === "all" || displayStatus === statusFilter)
       );
     });
-  }, [applications, jobFilter, monthFilter, statusFilter, yearFilter]);
+  }, [applications, isHrmWorkspace, jobFilter, monthFilter, statusFilter, yearFilter]);
   const totalPages = Math.max(1, Math.ceil(filteredApplications.length / rowsPerPage));
   const activePage = Math.min(currentPage, totalPages);
   const startIndex = (activePage - 1) * rowsPerPage;
@@ -2056,7 +2057,7 @@ function JobApplicationsPanel({ applications, onView }) {
           <tbody>
             {visibleApplications.length ? (
               visibleApplications.map((app) => {
-                const displayStatus = app.status || "submitted";
+                const displayStatus = getInternshipApplicationDisplayStatus(app, isHrmWorkspace);
                 return (
                   <tr key={app.id}>
                     <td>

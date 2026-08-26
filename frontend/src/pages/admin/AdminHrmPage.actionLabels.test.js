@@ -89,8 +89,9 @@ test("internship application table uses icon-only view actions", () => {
 });
 
 test("HRM job application table follows the internship list layout", () => {
-  assert.match(source, /function JobApplicationsPanel\(\{ applications, onView \}\)/);
+  assert.match(source, /function JobApplicationsPanel\(\{ applications, isHrmWorkspace, onView \}\)/);
   assert.match(source, /<JobApplicationsPanel[\s\S]*applications=\{filteredApplications\}[\s\S]*onView=\{\(application\) => navigate\(`\$\{ADMIN_ROUTES\.applications\.job\}\/\$\{application\.id\}`\)\}/);
+  assert.match(source, /<JobApplicationsPanel[\s\S]*isHrmWorkspace=\{isHrmWorkspace\}/);
   assert.match(source, /className="hrm-internship-applications-card hrm-job-applications-card"/);
   assert.match(source, /className="applicant-table-controls hrm-internship-filters hrm-job-application-filters"/);
   assert.match(source, />\s*Jawatan Dipohon\s*</);
@@ -102,6 +103,18 @@ test("HRM job application table follows the internship list layout", () => {
   assert.match(source, /<footer className="applicant-table-pagination">[\s\S]*Memaparkan \{visibleStart\}-\{visibleEnd\} daripada \{filteredApplications\.length\} permohonan/);
   assert.match(cssSource, /\.hrm-job-applications-table \{[\s\S]*min-width: 1080px;/);
   assert.match(cssSource, /\.hrm-job-applications-table th:nth-child\(6\),[\s\S]*\.hrm-job-applications-table td:nth-child\(6\) \{[\s\S]*width: 9%;[\s\S]*text-align: center;/);
+});
+
+test("HRM job application table shows department review status after assignment", () => {
+  const jobPanelSource = source.slice(
+    source.indexOf("function JobApplicationsPanel"),
+    source.indexOf("function InternshipApplicationsPanel"),
+  );
+  assert.match(jobPanelSource, /applications\.map\(\(application\) => getInternshipApplicationDisplayStatus\(application, isHrmWorkspace\)\)/);
+  assert.match(jobPanelSource, /const displayStatus = getInternshipApplicationDisplayStatus\(application, isHrmWorkspace\)/);
+  assert.match(jobPanelSource, /const displayStatus = getInternshipApplicationDisplayStatus\(app, isHrmWorkspace\)/);
+  assert.match(jobPanelSource, /<Badge status=\{displayStatus\} \/>/);
+  assert.doesNotMatch(jobPanelSource, /const displayStatus = app\.status \|\| "submitted"/);
 });
 
 test("HRM job application table uses only the blue eye action", () => {
