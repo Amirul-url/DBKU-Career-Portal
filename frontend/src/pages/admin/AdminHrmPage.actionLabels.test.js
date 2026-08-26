@@ -417,16 +417,26 @@ test("HRM detail includes an organization feedback document tab", () => {
   assert.doesNotMatch(source, /organization-feedback-attachment-size/);
   assert.doesNotMatch(source, /organization-feedback-attachment-hint/);
   assert.match(source, /className="organization-feedback-report-note"/);
-  assert.match(source, /Sehubungan itu, pelajar tuan\/puan adalah diminta untuk melapor diri/);
+  assert.match(source, /Sehubungan itu, tuan\/puan adalah diminta untuk melapor diri/);
   assert.match(source, /className="organization-feedback-confirmation-note"/);
-  assert.match(source, /Sila buat pengesahan secara bertulis/);
-  assert.match(source, /seperti di Lampiran II/);
+  const confirmationSectionSource = source.slice(
+    source.indexOf('<section className="organization-feedback-confirmation-note"'),
+    source.indexOf('<footer className="organization-feedback-send-actions">'),
+  );
+  assert.match(confirmationSectionSource, /isJobFeedbackApplication \? \(/);
+  assert.match(confirmationSectionSource, /Sila isi Borang Permohonan Jawatan Kosong DBKU/);
+  assert.match(confirmationSectionSource, /Sila\s+kemukakan borang asal tersebut beserta surat permohonan kerja SAHAJA/);
+  assert.match(confirmationSectionSource, /:\s*\(\s*<p>\s*Sila buat pengesahan secara bertulis/);
+  assert.match(confirmationSectionSource, /seperti di Lampiran II/);
   assert.match(source, /aria-label="Tarikh akhir pengesahan bertulis"/);
   assert.match(source, /className="organization-feedback-inline-date-input"/);
   assert.match(source, /date: ""/);
   assert.match(source, /confirmationDate: ""/);
   assert.match(source, /time: "8\.00 pagi"/);
-  assert.match(source, /Unit Pengurusan Latihan/);
+  assert.match(
+    source,
+    /Bahagian Pengurusan Sumber Manusia\\nDewan Bandaraya Kuching Utara\\nTingkat 3, Bangunan DBKU\\nBukit Siol, Jalan Semariang\\nPetra Jaya, 93050 Kuching/,
+  );
   assert.match(source, /className="organization-feedback-row-actions"/);
   assert.match(source, /organization-feedback-icon-button organization-feedback-icon-button-view/);
   assert.match(source, /organization-feedback-icon-button organization-feedback-icon-button-remove-file/);

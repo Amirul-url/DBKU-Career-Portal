@@ -50,7 +50,7 @@ const organizationFeedbackReportDefaults = {
   date: "",
   time: "8.00 pagi",
   place:
-    "Unit Pengurusan Latihan\nBahagian Pengurusan Sumber Manusia\nTingkat 3, Bangunan Dewan Bandaraya Kuching Utara\nBukit Siol, Jalan Semariang, Petra Jaya\n93050 Kuching, SARAWAK",
+    "Bahagian Pengurusan Sumber Manusia\nDewan Bandaraya Kuching Utara\nTingkat 3, Bangunan DBKU\nBukit Siol, Jalan Semariang\nPetra Jaya, 93050 Kuching",
   confirmationDate: "",
 };
 const internshipOrganizationFeedbackIntro =
@@ -675,13 +675,21 @@ function ApplicantOrganizationFeedbackTab({ application, onNext }) {
       </section>
 
       <section className="organization-feedback-confirmation-note" aria-label="Pengesahan bertulis">
-        <p>
-          Sila buat pengesahan secara bertulis <strong>(seperti di Lampiran II)</strong>, kemudian sila muat naik dokumen
-          pengesahan tersebut kepada Dewan Bandaraya Kuching Utara dan sebelum atau pada{" "}
-          <span className="organization-feedback-confirmation-date">{feedbackConfirmationDate}</span>. Sekiranya pihak kami tidak
-          menerima sebarang maklumbalas selepas tarikh tersebut, maka kami beranggapan bahawa anda telah menolak tawaran
-          tersebut. Sebarang surat-menyurat selepas tarikh tersebut tidak akan dilayan.
-        </p>
+        {isJobFeedbackApplication ? (
+          <p>
+            Sila isi Borang Permohonan Jawatan Kosong DBKU dan muat naik borang asal pada pengesahan pemohon. Sila
+            kemukakan borang asal tersebut beserta surat permohonan kerja SAHAJA dengan menggunakan sampul surat
+            bersaiz 4”x 9” kepada tempat dinyatakan.
+          </p>
+        ) : (
+          <p>
+            Sila buat pengesahan secara bertulis <strong>(seperti di Lampiran II)</strong>, kemudian sila muat naik
+            dokumen pengesahan tersebut kepada Dewan Bandaraya Kuching Utara dan sebelum atau pada{" "}
+            <span className="organization-feedback-confirmation-date">{feedbackConfirmationDate}</span>. Sekiranya
+            pihak kami tidak menerima sebarang maklumbalas selepas tarikh tersebut, maka kami beranggapan bahawa anda
+            telah menolak tawaran tersebut. Sebarang surat-menyurat selepas tarikh tersebut tidak akan dilayan.
+          </p>
+        )}
         <p>Sekian. Terima kasih.</p>
       </section>
 

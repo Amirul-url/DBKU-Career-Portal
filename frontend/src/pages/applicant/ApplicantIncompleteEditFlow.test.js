@@ -161,10 +161,21 @@ test("applicant accepted applications stay hidden behind review status until HRM
   assert.match(viewSource, /feedbackReportPlace\.split\("\\n"\)/);
   assert.match(viewSource, /\{feedbackConfirmationDate\}<\/span>/);
   assert.match(viewSource, /Maklumat lapor diri adalah seperti berikut:/);
+  assert.match(
+    viewSource,
+    /Bahagian Pengurusan Sumber Manusia\\nDewan Bandaraya Kuching Utara\\nTingkat 3, Bangunan DBKU\\nBukit Siol, Jalan Semariang\\nPetra Jaya, 93050 Kuching/,
+  );
   assert.match(viewSource, /className="organization-feedback-report-note applicant-organization-report-note"/);
   assert.match(viewSource, /className="organization-feedback-confirmation-note"/);
-  assert.match(viewSource, /Sila buat pengesahan secara bertulis/);
-  assert.match(viewSource, /seperti di Lampiran II/);
+  const confirmationSectionSource = viewSource.slice(
+    viewSource.indexOf('<section className="organization-feedback-confirmation-note"'),
+    viewSource.indexOf('{shouldShowOrganizationFeedbackDocuments ? ('),
+  );
+  assert.match(confirmationSectionSource, /isJobFeedbackApplication \? \(/);
+  assert.match(confirmationSectionSource, /Sila isi Borang Permohonan Jawatan Kosong DBKU/);
+  assert.match(confirmationSectionSource, /Sila\s+kemukakan borang asal tersebut beserta surat permohonan kerja SAHAJA/);
+  assert.match(confirmationSectionSource, /:\s*\(\s*<p>\s*Sila buat pengesahan secara bertulis/);
+  assert.match(confirmationSectionSource, /seperti di Lampiran II/);
   assert.match(viewSource, /className="organization-feedback-confirmation-date"/);
   assert.match(viewSource, /Sila muat turun dokumen maklumbalas organisasi di bawah\./);
   assert.match(viewSource, /const \[feedbackRelease\] = useState\(\(\) => getOrganizationFeedbackRelease\(application\)\)/);

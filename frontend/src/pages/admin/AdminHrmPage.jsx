@@ -119,7 +119,7 @@ const organizationFeedbackReportDefaults = {
   date: "",
   time: "8.00 pagi",
   place:
-    "Unit Pengurusan Latihan\nBahagian Pengurusan Sumber Manusia\nTingkat 3, Bangunan Dewan Bandaraya Kuching Utara\nBukit Siol, Jalan Semariang, Petra Jaya\n93050 Kuching, SARAWAK",
+    "Bahagian Pengurusan Sumber Manusia\nDewan Bandaraya Kuching Utara\nTingkat 3, Bangunan DBKU\nBukit Siol, Jalan Semariang\nPetra Jaya, 93050 Kuching",
   confirmationDate: "",
 };
 const internshipOrganizationFeedbackIntro =
@@ -3076,7 +3076,7 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
         </section>
       ) : null}
       <section className="organization-feedback-report-note" aria-label="Maklumat lapor diri">
-        <p>Sehubungan itu, pelajar tuan/puan adalah diminta untuk melapor diri pada tarikh, masa dan tempat seperti berikut:-</p>
+        <p>Sehubungan itu, tuan/puan adalah diminta untuk melapor diri pada tarikh, masa dan tempat seperti berikut:-</p>
         <dl className="organization-feedback-report-details">
           <dt>Tarikh</dt>
           <dd>:</dd>
@@ -3114,20 +3114,29 @@ function OrganizationFeedbackTab({ application, onDeleteDocument, onSaveDocument
         </dl>
       </section>
       <section className="organization-feedback-confirmation-note" aria-label="Pengesahan bertulis">
-        <p>
-          Sila buat pengesahan secara bertulis <strong>(seperti di Lampiran II)</strong>, kemudian sila muat naik dokumen
-          pengesahan tersebut kepada Dewan Bandaraya Kuching Utara dan sebelum atau pada{" "}
-          <input
-            aria-label="Tarikh akhir pengesahan bertulis"
-            className="organization-feedback-inline-date-input"
-            disabled={isSentToApplicant}
-            onChange={(event) => setFeedbackConfirmationDate(event.target.value)}
-            type="text"
-            value={feedbackConfirmationDate}
-          />
-          . Sekiranya pihak kami tidak menerima sebarang maklumbalas selepas tarikh tersebut, maka kami beranggapan bahawa
-          anda telah menolak tawaran tersebut. Sebarang surat-menyurat selepas tarikh tersebut tidak akan dilayan.
-        </p>
+        {isJobFeedbackApplication ? (
+          <p>
+            Sila isi Borang Permohonan Jawatan Kosong DBKU dan muat naik borang asal pada pengesahan pemohon. Sila
+            kemukakan borang asal tersebut beserta surat permohonan kerja SAHAJA dengan menggunakan sampul surat
+            bersaiz 4”x 9” kepada tempat dinyatakan.
+          </p>
+        ) : (
+          <p>
+            Sila buat pengesahan secara bertulis <strong>(seperti di Lampiran II)</strong>, kemudian sila muat naik
+            dokumen pengesahan tersebut kepada Dewan Bandaraya Kuching Utara dan sebelum atau pada{" "}
+            <input
+              aria-label="Tarikh akhir pengesahan bertulis"
+              className="organization-feedback-inline-date-input"
+              disabled={isSentToApplicant}
+              onChange={(event) => setFeedbackConfirmationDate(event.target.value)}
+              type="text"
+              value={feedbackConfirmationDate}
+            />
+            . Sekiranya pihak kami tidak menerima sebarang maklumbalas selepas tarikh tersebut, maka kami beranggapan
+            bahawa anda telah menolak tawaran tersebut. Sebarang surat-menyurat selepas tarikh tersebut tidak akan
+            dilayan.
+          </p>
+        )}
         <p>Sekian. Terima kasih.</p>
       </section>
       <footer className="organization-feedback-send-actions">
