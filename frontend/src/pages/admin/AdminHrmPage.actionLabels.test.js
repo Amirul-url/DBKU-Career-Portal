@@ -364,6 +364,13 @@ test("HRM assessment locks after the application is sent to a department", () =>
   assert.doesNotMatch(source, /disabled=\{!application \|\| isFinal \|\| isSavingAssessment/);
 });
 
+test("HRM assessment locks after incomplete or rejected decisions", () => {
+  assert.match(source, /const hrmReviewFinalStatuses = new Set\(\["shortlisted", "incomplete", "rejected"\]\)/);
+  assert.match(source, /const isFinal = application \? hrmReviewFinalStatuses\.has\(application\.status\) : false/);
+  assert.match(source, /disabled=\{hrmReviewFinalStatuses\.has\(app\.status\)\}/);
+  assert.match(source, /\{!isAssessmentLocked \? \(\s*<footer className="hrm-application-detail-actions">/);
+});
+
 test("HRM and department decision tabs keep draft selections in local state until submitted", () => {
   assert.match(source, /const \[decision, setDecision\] = useState\(savedAssessment\.decision \|\| ""\)/);
   assert.match(source, /const \[educationLevel, setEducationLevel\] = useState/);

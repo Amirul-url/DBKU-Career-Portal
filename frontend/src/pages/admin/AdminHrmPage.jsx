@@ -109,6 +109,7 @@ const statusClass = {
   withdrawn: "slate",
   draft: "slate",
 };
+const hrmReviewFinalStatuses = new Set(["shortlisted", "incomplete", "rejected"]);
 const hrmReviewTab = "Semakan HRM";
 const departmentDecisionTab = "Keputusan Bahagian";
 const hrmFinalDecisionTab = "Keputusan Akhir HRM";
@@ -2362,7 +2363,7 @@ function HrmInternshipAssessmentTab({ application, onReview, onSaveAssessment })
   const [assessmentCgpa, setAssessmentCgpa] = useState(savedAssessment.cgpa || studentInfo.cgpa || "");
   const [assignedDepartment, setAssignedDepartment] = useState(application?.assigned_department || "");
   const [isSavingAssessment, setIsSavingAssessment] = useState(false);
-  const isFinal = application ? ["shortlisted", "rejected"].includes(application.status) : false;
+  const isFinal = application ? hrmReviewFinalStatuses.has(application.status) : false;
   const isAssignedToDepartment = Boolean(application?.assigned_department);
   const isAssessmentLocked = isFinal || isAssignedToDepartment;
   const decisions = ["Layak", "Tidak Layak", "Tidak Lengkap"];
@@ -3430,27 +3431,21 @@ function ApplicationTable({ applications, isHrmWorkspace = true, onReview, compa
                       <button
                         className="shortlist"
                         onClick={() => onReview(app.id, "shortlisted")}
-                        disabled={["shortlisted", "rejected"].includes(
-                          app.status,
-                        )}
+                        disabled={hrmReviewFinalStatuses.has(app.status)}
                       >
                         Hantar ke Bahagian
                       </button>
                       <button
                         className="incomplete"
                         onClick={() => onReview(app.id, "incomplete")}
-                        disabled={["shortlisted", "rejected"].includes(
-                          app.status,
-                        )}
+                        disabled={hrmReviewFinalStatuses.has(app.status)}
                       >
                         Tidak Lengkap
                       </button>
                       <button
                         className="reject"
                         onClick={() => onReview(app.id, "rejected")}
-                        disabled={["shortlisted", "rejected"].includes(
-                          app.status,
-                        )}
+                        disabled={hrmReviewFinalStatuses.has(app.status)}
                       >
                         Tidak Layak
                       </button>
