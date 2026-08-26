@@ -2316,7 +2316,7 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
                     </>
                   ) : (
                     <label className="student-job-other-language">
-                      <span>Bahasa Lain:</span>
+                      <span className="student-job-other-language-label">Bahasa Lain:</span>
                       <input
                         aria-label={`Bahasa Lain ${index - 1}`}
                         className="student-job-other-language-input"

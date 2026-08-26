@@ -7539,12 +7539,20 @@ body:has(.applicant-profile-page) {
 .student-job-other-language {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 4px;
+  gap: 8px;
 }
 
-.student-job-other-language-input {
-  max-width: 96px;
+.student-job-other-language-label {
+  display: block;
+}
+
+.student-job-spm-table .student-job-other-language-input {
+  display: block;
+  width: 112px;
+  min-height: 18px;
+  max-width: 112px;
   border-bottom: 1px solid #111827;
+  padding: 0;
 }
 
 .student-job-radio-cell {
