@@ -961,6 +961,7 @@ export function ApplicantAddressMap({ address, addressError, latitude, locationE
   const popupRef = useRef(null);
   const debounceRef = useRef(null);
   const suggestionRequestRef = useRef(0);
+  const suppressAddressSuggestionsRef = useRef(false);
   const [mapAddress, setMapAddress] = useState(() => formatMapAddressText(address));
   const selectedAddressRef = useRef(formatMapAddressText(address));
   const [mapMode, setMapMode] = useState("2d");
@@ -1053,6 +1054,7 @@ export function ApplicantAddressMap({ address, addressError, latitude, locationE
         formatMapAddressWithPostcode([buildingName, road, suburb, city, state, "Malaysia"], postcode, city) ||
         formatMapAddressText(data?.display_name);
 
+      suppressAddressSuggestionsRef.current = true;
       setMapAddress(nextAddress);
       selectedAddressRef.current = nextAddress;
       pushLocationChange(nextAddress, nextLatitude, nextLongitude);
@@ -1101,6 +1103,9 @@ export function ApplicantAddressMap({ address, addressError, latitude, locationE
       }
 
       updateMarkerPosition(center[0], center[1]);
+      suppressAddressSuggestionsRef.current = true;
+      window.clearTimeout(debounceRef.current);
+      setSearching(false);
       setSuggestions([]);
       setMapAddress(place.placeName);
       selectedAddressRef.current = place.placeName;
@@ -1204,6 +1209,7 @@ export function ApplicantAddressMap({ address, addressError, latitude, locationE
   }, []);
 
   const selectSuggestion = (place) => {
+    suppressAddressSuggestionsRef.current = true;
     suggestionRequestRef.current += 1;
     window.clearTimeout(debounceRef.current);
     setSearching(false);
@@ -1279,6 +1285,13 @@ export function ApplicantAddressMap({ address, addressError, latitude, locationE
 
     window.clearTimeout(debounceRef.current);
 
+    if (suppressAddressSuggestionsRef.current) {
+      suggestionRequestRef.current += 1;
+      setSearching(false);
+      setSuggestions([]);
+      return undefined;
+    }
+
     if (selectedAddressRef.current && mapAddress === selectedAddressRef.current) {
       suggestionRequestRef.current += 1;
       setSearching(false);
@@ -1323,6 +1336,7 @@ export function ApplicantAddressMap({ address, addressError, latitude, locationE
 
     const nextAddress = event.target.value;
 
+    suppressAddressSuggestionsRef.current = false;
     setMapAddress(nextAddress);
     onLocationChange({ address: nextAddress });
   };
