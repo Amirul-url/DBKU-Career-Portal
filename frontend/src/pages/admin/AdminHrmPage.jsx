@@ -127,6 +127,13 @@ const internshipOrganizationFeedbackIntro =
   "Sukacita dimaklumkan bahawa Dewan Bandaraya Kuching Utara tiada halangan untuk menerima anda bagi menjalani Latihan Industri / Praktikal seperti berikut:-";
 const jobOrganizationFeedbackIntro =
   "Sukacita dimaklumkan bahawa Dewan Bandaraya Kuching Utara telah bersetuju untuk melantik anda bagi mengisi jawatan yang telah dipohon seperti berikut:-";
+const jobFinalRejectionMessage = `Dukacita dimaklumkan bahawa permohonan tuan/puan untuk jawatan di Dewan Bandaraya Kuching Utara (DBKU) telah diterima dan diteliti oleh pihak kami.
+
+Walau bagaimanapun, setelah mengambil kira keperluan semasa serta keputusan penilaian, dukacita dimaklumkan bahawa pihak DBKU tidak dapat mempertimbangkan permohonan jawatan tersebut buat masa ini.
+
+Pihak DBKU merakamkan setinggi-tinggi penghargaan atas minat dan kepercayaan tuan/puan untuk memohon jawatan bersama DBKU. Kami memohon maaf atas segala kesulitan yang mungkin timbul dan berharap tuan/puan akan memperoleh peluang pekerjaan yang bersesuaian pada masa akan datang.
+
+Sekian, terima kasih.`;
 const dateValue = (value) =>
   value
     ? new Date(value).toLocaleDateString("ms-MY", {
@@ -368,6 +375,10 @@ function isJobApplicationDetail(application) {
 
 function getOrganizationFeedbackIntroText(application) {
   return isJobApplicationDetail(application) ? jobOrganizationFeedbackIntro : internshipOrganizationFeedbackIntro;
+}
+
+function getHrmFinalRejectionMessage(application) {
+  return isJobApplicationDetail(application) ? jobFinalRejectionMessage : hrmFinalRejectionMessage;
 }
 
 function getSidebarApplicationBadgeCount(item, metrics, { isHrmWorkspace = true } = {}) {
@@ -2692,7 +2703,7 @@ function buildHrmFinalDecisionPayload(application, user, remarks) {
 }
 function HrmFinalDecisionTab({ application, onSaveFinalDecision, onSubmitted, user }) {
   const finalDecision = getSavedHrmFinalDecision(application);
-  const [finalRemarks, setFinalRemarks] = useState(() => normalizeHrmFinalRejectionRemarks(finalDecision.remarks || hrmFinalRejectionMessage));
+  const [finalRemarks, setFinalRemarks] = useState(() => normalizeHrmFinalRejectionRemarks(finalDecision.remarks || getHrmFinalRejectionMessage(application)));
   const [message, setMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const isFinalized = Boolean(finalDecision.submitted_at) || ["accepted", "rejected"].includes(application?.status);

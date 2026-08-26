@@ -313,6 +313,10 @@ test("department decision tab replaces HRM review for department workspaces", ()
 test("HRM makes the final decision after department recommendation", () => {
   assert.match(source, /const hrmFinalDecisionTab = "Keputusan Akhir HRM"/);
   assert.match(source, /hrmFinalRejectionMessage,[\s\S]*normalizeHrmFinalRejectionRemarks/);
+  assert.match(source, /const jobFinalRejectionMessage = `Dukacita dimaklumkan bahawa permohonan tuan\/puan untuk jawatan di Dewan Bandaraya Kuching Utara \(DBKU\) telah diterima dan diteliti/);
+  assert.match(source, /peluang pekerjaan yang bersesuaian pada masa akan datang/);
+  assert.match(source, /function getHrmFinalRejectionMessage\(application\)/);
+  assert.match(source, /isJobApplicationDetail\(application\) \? jobFinalRejectionMessage : hrmFinalRejectionMessage/);
   assert.match(decisionCopySource, /Dukacita dimaklumkan bahawa permohonan saudara\/i untuk menjalani latihan industri di Dewan Bandaraya Kuching Utara \(DBKU\) telah diterima dan diteliti/);
   assert.match(decisionCopySource, /normalizeHrmFinalRejectionRemarks/);
   assert.doesNotMatch(source, /Sukacita dimaklumkan bahawa permohonan saudara\/i/);
@@ -329,6 +333,8 @@ test("HRM makes the final decision after department recommendation", () => {
   assert.match(source, /const shouldShowHrmFinalDecision = isHrmWorkspace && \(needsFinalDecision \|\| hasFinalRejectionDecision\)/);
   assert.match(source, /\.\.\.\(shouldShowOrganizationFeedback \? \[organizationFeedbackTab\] : \[\]\)/);
   assert.match(source, /const \[finalRemarks, setFinalRemarks\] = useState/);
+  assert.match(source, /finalDecision\.remarks \|\| getHrmFinalRejectionMessage\(application\)/);
+  assert.doesNotMatch(source, /finalDecision\.remarks \|\| hrmFinalRejectionMessage/);
   assert.match(source, /<textarea[\s\S]*value=\{finalRemarks\}[\s\S]*onChange=\{\(event\) => setFinalRemarks\(event\.target\.value\)\}/);
   assert.match(source, /buildHrmFinalDecisionPayload\(application, user, finalRemarks\)/);
   assert.match(source, /const normalizedRemarks = normalizeHrmFinalRejectionRemarks\(remarks\)/);
