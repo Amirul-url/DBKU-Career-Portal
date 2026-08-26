@@ -2259,7 +2259,6 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
           ))}
         </tbody>
       </table>
-      {validationErrors.jobWorkExperienceRows ? <p className="student-table-error">{validationErrors.jobWorkExperienceRows}</p> : null}
     </div>
   );
 
@@ -2308,7 +2307,6 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
           </tr>
         </tbody>
       </table>
-      {validationErrors.jobReferenceRows ? <p className="student-table-error">{validationErrors.jobReferenceRows}</p> : null}
     </div>
   );
 

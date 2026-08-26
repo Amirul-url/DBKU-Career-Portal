@@ -7708,13 +7708,6 @@ body:has(.applicant-profile-page) {
   font-weight: 500;
 }
 
-.student-table-error {
-  margin: 8px 0 0;
-  color: #b91c1c;
-  font-size: 13px;
-  font-weight: 700;
-}
-
 .student-passport-upload {
   position: relative;
   box-sizing: border-box;
