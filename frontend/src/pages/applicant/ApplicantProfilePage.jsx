@@ -960,6 +960,7 @@ export function ApplicantAddressMap({ address, addressError, latitude, locationE
   const markerRef = useRef(null);
   const popupRef = useRef(null);
   const debounceRef = useRef(null);
+  const suggestionRequestRef = useRef(0);
   const [mapAddress, setMapAddress] = useState(() => formatMapAddressText(address));
   const selectedAddressRef = useRef(formatMapAddressText(address));
   const [mapMode, setMapMode] = useState("2d");
@@ -1164,9 +1165,14 @@ export function ApplicantAddressMap({ address, addressError, latitude, locationE
     const cleanKeyword = keyword.trim();
 
     if (!MAPBOX_TOKEN || !cleanKeyword || cleanKeyword.length < 3) {
+      suggestionRequestRef.current += 1;
+      setSearching(false);
       setSuggestions([]);
       return;
     }
+
+    const requestId = suggestionRequestRef.current + 1;
+    suggestionRequestRef.current = requestId;
 
     try {
       setSearching(true);
@@ -1181,15 +1187,28 @@ export function ApplicantAddressMap({ address, addressError, latitude, locationE
         places = await fetchMapboxAddressResults(`${cleanKeyword}, Malaysia`);
       }
 
+      if (requestId !== suggestionRequestRef.current) {
+        return;
+      }
+
       setSuggestions(places);
     } catch {
-      setSuggestions([]);
+      if (requestId === suggestionRequestRef.current) {
+        setSuggestions([]);
+      }
     } finally {
-      setSearching(false);
+      if (requestId === suggestionRequestRef.current) {
+        setSearching(false);
+      }
     }
   }, []);
 
   const selectSuggestion = (place) => {
+    suggestionRequestRef.current += 1;
+    window.clearTimeout(debounceRef.current);
+    setSearching(false);
+    setSuggestions([]);
+
     const [selectedLongitude, selectedLatitude] = place.center;
     const fixedLongitude = Number(selectedLongitude.toFixed(6));
     const fixedLatitude = Number(selectedLatitude.toFixed(6));
@@ -1205,7 +1224,6 @@ export function ApplicantAddressMap({ address, addressError, latitude, locationE
     pushLocationChange(place.placeName, fixedLatitude, fixedLongitude);
     setMapAddress(place.placeName);
     selectedAddressRef.current = place.placeName;
-    setSuggestions([]);
     setMapMessage("Lokasi alamat dipilih pada map.");
   };
 
@@ -1262,6 +1280,8 @@ export function ApplicantAddressMap({ address, addressError, latitude, locationE
     window.clearTimeout(debounceRef.current);
 
     if (selectedAddressRef.current && mapAddress === selectedAddressRef.current) {
+      suggestionRequestRef.current += 1;
+      setSearching(false);
       setSuggestions([]);
       return undefined;
     }
