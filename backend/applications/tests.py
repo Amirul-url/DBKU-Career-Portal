@@ -163,7 +163,7 @@ class CandidateApplicationReferenceNoTests(TestCase):
         mock_send_email,
         mock_send_whatsapp,
     ):
-        applicant = self.create_applicant("new-job-submission@example.com")
+        applicant = self.create_applicant("new-job-submission@example.com", mobile_number="60128889993")
         hrm = self.user_model.objects.create_user(
             username="hrm-new-job-submission@example.com",
             email="hrm-new-job-submission@example.com",
@@ -193,13 +193,29 @@ class CandidateApplicationReferenceNoTests(TestCase):
         self.assertEqual(response.status_code, 200)
         applicant_notification = Notification.objects.get(application=application, user=applicant)
         hrm_notification = Notification.objects.get(application=application, user=hrm)
-        self.assertIn("Permohonan jawatan kosong", applicant_notification.message)
+        expected_applicant_title = "Permohonan Jawatan Penolong Pegawai Penerangan Gred S5"
+        expected_applicant_message = (
+            "Permohonan Jawatan Penolong Pegawai Penerangan Gred S5 anda telah berjaya dihantar. "
+            "No. rujukan: PK.2026-0011. "
+            "Sila semak status permohonan melalui Portal Kerjaya DBKU."
+        )
+        expected_hrm_title = "Permohonan Jawatan Penolong Pegawai Penerangan Gred S5 Baharu Untuk Semakan."
+        expected_hrm_message = (
+            "Portal Kerjaya DBKU\n\n"
+            "Terdapat permohonan Jawatan Penolong Pegawai Penerangan Gred S5 baharu untuk semakan HRM.\n"
+            "No. Rujukan: PK.2026-0011\n\n"
+            "Sila semak permohonan melalui Portal Kerjaya DBKU."
+        )
+        self.assertEqual(applicant_notification.title, expected_applicant_title)
+        self.assertEqual(applicant_notification.message, expected_applicant_message)
         self.assertNotIn("latihan industri", applicant_notification.message.lower())
-        self.assertEqual(hrm_notification.title, "Permohonan Jawatan Baharu Untuk Semakan - PK.2026-0011")
-        self.assertIn("permohonan jawatan kosong baharu", hrm_notification.message.lower())
+        self.assertEqual(hrm_notification.title, expected_hrm_title)
+        self.assertEqual(hrm_notification.message, expected_hrm_message)
         self.assertNotIn("Latihan Industri", hrm_notification.message)
-        mock_send_email.assert_any_call(hrm, hrm_notification.title, hrm_notification.message)
-        mock_send_whatsapp.assert_any_call(hrm.mobile_number, hrm_notification.message)
+        mock_send_email.assert_any_call(applicant, expected_applicant_title, expected_applicant_message)
+        mock_send_email.assert_any_call(hrm, expected_hrm_title, expected_hrm_message)
+        mock_send_whatsapp.assert_any_call(applicant.mobile_number, expected_applicant_message)
+        mock_send_whatsapp.assert_any_call(hrm.mobile_number, expected_hrm_message)
 
     def test_internship_document_upload_is_saved_and_returned(self):
         applicant = self.create_applicant("documents@example.com")

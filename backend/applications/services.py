@@ -29,11 +29,12 @@ HRM_DEPARTMENT_ALIASES = {
 
 def get_application_type_copy(application):
     if application.vacancy.vacancy_type == "job":
+        job_label = get_job_application_label(application)
         return {
-            "applicant_success_title": "Permohonan Jawatan Kosong Berjaya Dihantar",
-            "applicant_type_label": "jawatan kosong",
-            "hrm_submission_title": "Permohonan Jawatan Baharu Untuk Semakan",
-            "hrm_submission_message": "Terdapat permohonan jawatan kosong baharu untuk semakan HRM.",
+            "applicant_success_title": f"Permohonan {job_label}",
+            "applicant_type_label": job_label,
+            "hrm_submission_title": f"Permohonan {job_label} Baharu Untuk Semakan.",
+            "hrm_submission_message": f"Terdapat permohonan {job_label} baharu untuk semakan HRM.",
         }
 
     return {
@@ -42,6 +43,15 @@ def get_application_type_copy(application):
         "hrm_submission_title": "Permohonan LI Baharu Untuk Semakan",
         "hrm_submission_message": "Terdapat permohonan Latihan Industri baharu untuk semakan HRM.",
     }
+
+
+def get_job_application_label(application):
+    title = str(getattr(application.vacancy, "title", "") or "").strip()
+    if not title:
+        return "Jawatan Kosong DBKU"
+    if title.lower().startswith("jawatan "):
+        return title
+    return f"Jawatan {title}"
 
 
 def build_application_submitted_message(application):
@@ -55,8 +65,11 @@ def build_application_submitted_message(application):
 
 def build_hrm_application_submission_notification(application):
     copy = get_application_type_copy(application)
+    title = copy["hrm_submission_title"]
+    if application.vacancy.vacancy_type != "job":
+        title = f"{title} - {application.reference_no}"
     return {
-        "title": f"{copy['hrm_submission_title']} - {application.reference_no}",
+        "title": title,
         "message": (
             "Portal Kerjaya DBKU\n\n"
             f"{copy['hrm_submission_message']}\n"
