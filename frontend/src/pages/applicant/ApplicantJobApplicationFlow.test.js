@@ -9,6 +9,7 @@ const jobFormUrl = new URL("./ApplicantJobApplicationPage.jsx", import.meta.url)
 const jobFormSource = existsSync(jobFormUrl) ? readFileSync(jobFormUrl, "utf8") : "";
 const internshipFormSource = readFileSync(new URL("./ApplicantInternshipApplicationPage.jsx", import.meta.url), "utf8");
 const listSource = readFileSync(new URL("./ApplicantPortalListPage.jsx", import.meta.url), "utf8");
+const applicationViewSource = readFileSync(new URL("./ApplicantApplicationViewPage.jsx", import.meta.url), "utf8");
 const cssSource = readFileSync(new URL("../../index.css", import.meta.url), "utf8");
 
 test("job vacancy CTA opens a job application form for the selected vacancy", () => {
@@ -324,6 +325,19 @@ test("job application personal information values are normalized to uppercase on
 test("draft and incomplete job applications reopen the job form", () => {
   assert.match(routesSource, /jobApplicationEdit: \(id\) => `\/profile\/job-application\?application=\$\{id\}`/);
   assert.match(listSource, /isInternshipApplication\(application\)\s*\?\s*APPLICANT_ROUTES\.internshipApplicationEdit\(application\.id\)\s*:\s*APPLICANT_ROUTES\.jobApplicationEdit\(application\.id\)/);
+});
+
+test("submitted job application detail uses the job A to L read-only module", () => {
+  assert.match(applicationViewSource, /function isJobApplicationDetail\(application\)/);
+  assert.match(applicationViewSource, /const readOnlyJobInfoTabs = \[[\s\S]*personalInfoTab[\s\S]*jobSpmTab[\s\S]*jobDeclarationTab[\s\S]*\]/);
+  assert.match(applicationViewSource, /const isJobApplication = isJobApplicationDetail\(application\)/);
+  assert.match(applicationViewSource, /const panelTabs = isJobApplication\s*\?\s*readOnlyJobInfoTabs\s*:\s*\[\.\.\.infoTabs, \.\.\.extraTabs\]/);
+  assert.match(applicationViewSource, /const panelTitle = isJobApplication\s*\?\s*`Nama Jawatan Yang Dipohon: \$\{vacancy\.title \|\| "Jawatan DBKU"\}`\s*:\s*"Permohonan Latihan Industri"/);
+  assert.match(applicationViewSource, /aria-label=\{isJobApplication \? "Bahagian permohonan jawatan kosong" : "Bahagian permohonan latihan industri"\}/);
+  assert.match(applicationViewSource, /APPLICANT_ROUTES\.jobApplicationEdit\(application\.id\)/);
+  assert.match(applicationViewSource, /renderJobWorkExperienceFields\(\)/);
+  assert.match(applicationViewSource, /renderJobReferencesFields\(\)/);
+  assert.match(applicationViewSource, /renderJobDeclarationFields\(\)/);
 });
 
 test("saved job vacancies open the selected job application form", () => {

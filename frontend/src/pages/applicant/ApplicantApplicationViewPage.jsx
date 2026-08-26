@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { apiRequest, getStoredUser, resolveMediaUrl } from "../../lib/authApi";
 import { countryCallingCodes, defaultCountryCallingCode } from "../../lib/countryCallingCodes";
@@ -16,7 +16,33 @@ import { Icon } from "./ApplicantAuthShared";
 import { ApplicantAddressMap, ProfileContentHeader, ProfileSidebar } from "./ApplicantProfilePage";
 
 const personalInfoTab = "Maklumat Peribadi Pemohon";
-const infoTabs = [personalInfoTab, "Maklumat Akademik", "Dokumen Sokongan"];
+const academicInfoTab = "Maklumat Akademik";
+const documentSupportTab = "Dokumen Sokongan";
+const infoTabs = [personalInfoTab, academicInfoTab, documentSupportTab];
+const jobSpmTab = "MAKLUMAT PEPERIKSAAN SPM/SC/MCE/SPM(V) MENGIKUT SISTEM TERBUKA/ UNIFIED EXAMINATION CERTIFICATE (UEC) ATAU SETARAF (SILA KEMUKAKAN SEMUA MATA PELAJARAN YANG DIAMBIL)";
+const jobBmJulyTab = "BM KERTAS JULAI/ STPM/ UNIVERSITI ATAU SETARAF";
+const jobMathJulyTab = "PEPERIKSAAN MATEMATIK KERTAS JULAI";
+const jobStpmTab = "PEPERIKSAAN STPM/ STAM/ STP/ HSC/ SIJIL MATRIKULASI";
+const jobHigherEducationTab = "KELULUSAN PENGAJIAN TINGGI (PHD/ MASTER/ IJAZAH/ DIPLOMA/ SIJIL)";
+const jobLanguageSkillsTab = "PENGETAHUAN DAN KEMAHIRAN BAHASA";
+const jobComputerSkillsTab = "MAKLUMAT KEMAHIRAN KOMPUTER";
+const jobWorkExperienceTab = "PENGALAMAN BEKERJA";
+const jobReferencesTab = "RUJUKAN";
+const jobDeclarationTab = "PERAKUAN PEMOHON";
+const readOnlyJobInfoTabs = [
+  personalInfoTab,
+  jobSpmTab,
+  jobBmJulyTab,
+  jobMathJulyTab,
+  jobStpmTab,
+  jobHigherEducationTab,
+  jobLanguageSkillsTab,
+  jobComputerSkillsTab,
+  jobWorkExperienceTab,
+  jobReferencesTab,
+  documentSupportTab,
+  jobDeclarationTab,
+];
 const organizationFeedbackTab = "Maklumbalas Organisasi";
 const applicantConfirmationTab = "Pengesahan Pemohon";
 const hrmDecisionTab = "Keputusan Permohonan";
@@ -32,6 +58,28 @@ const applicantInternshipLifecycleStatusLabels = {
   internship_active: internshipLifecycleStatusLabels.internship_active,
   internship_completed: internshipLifecycleStatusLabels.internship_completed,
 };
+const jobTabShortLabels = {
+  [personalInfoTab]: "Peribadi",
+  [jobSpmTab]: "SPM/UEC",
+  [jobBmJulyTab]: "BM Julai/STPM",
+  [jobMathJulyTab]: "Matematik Julai",
+  [jobStpmTab]: "STPM/STAM",
+  [jobHigherEducationTab]: "Pengajian Tinggi",
+  [jobLanguageSkillsTab]: "Bahasa",
+  [jobComputerSkillsTab]: "Komputer",
+  [jobWorkExperienceTab]: "Pengalaman",
+  [jobReferencesTab]: "Rujukan",
+  [documentSupportTab]: "Dokumen",
+  [jobDeclarationTab]: "Perakuan",
+};
+const jobSkillLevelOptions = ["Baik", "Sederhana", "Lemah"];
+const jobComputerLevelOptions = ["Sangat Mahir", "Mahir", "Sederhana", "Tidak Mahir"];
+const jobSpmSubjectRowCount = 12;
+const jobStpmSubjectRowCount = 5;
+const jobHigherEducationRowCount = 2;
+const jobWorkExperienceRowCount = 5;
+const jobReferenceRowCount = 2;
+const jobDeclarationText = "Saya dengan ini mengaku bahawa semua maklumat yang saya berikan adalah BENAR dan TEPAT. Saya juga bersetuju dan menerima bahawa sekiranya mana-mana daripada pengakuan ini didapati palsu atau tidak benar, pihak Dewan Bandaraya Kuching Utara berhak menarik balik keputusan tawaran dan menamatkan perkhidmatan saya dengan serta-merta tanpa apa-apa syarat.";
 
 const statusLabels = {
   draft: "Draf",
@@ -122,6 +170,9 @@ const documentFields = [
   { field: "passportPhotoFile", label: "1 keping gambar berukuran passport" },
   { field: "bankAccountFile", label: "1 salinan muka depan akaun bank" },
 ];
+const jobDocumentFields = documentFields.filter(
+  (document) => !["universityLetterFile", "transcriptFile"].includes(document.field),
+);
 
 const personalRows = [
   ["name", "Nama"],
@@ -156,6 +207,27 @@ const academicRows = [
   ["supervisorName", "Nama Penyelaras Program"],
   ["supervisorEmail", "Emel Penyelaras Program"],
 ];
+
+function isJobApplicationDetail(application) {
+  return application?.vacancy_type === "job"
+    || application?.type === "job"
+    || application?.vacancy_detail?.vacancy_type === "job";
+}
+
+const getJobTabCode = (index) => `(${String.fromCharCode(65 + index)})`;
+
+function getReadOnlyJobTabLabel(tab, index) {
+  return `${getJobTabCode(index)} ${jobTabShortLabels[tab] || tab}`;
+}
+
+function getReadOnlyJobInfoHeading(tab, index) {
+  return `${getJobTabCode(index)} ${tab.toUpperCase()}`;
+}
+
+function getRows(value, count, fallback) {
+  const rows = Array.isArray(value) ? value : [];
+  return Array.from({ length: count }, (_, index) => ({ ...fallback, ...(rows[index] || {}) }));
+}
 
 const countriesByLongestCode = [...countryCallingCodes].sort(
   (first, second) =>
@@ -990,11 +1062,17 @@ export function InternshipApplicationReadOnlyPanel({
     ...(application?.document_files || {}),
   };
   const vacancy = application?.vacancy_detail || {};
+  const isJobApplication = isJobApplicationDetail(application);
   const status = application?.status || "draft";
   const visibleStatus = hasApplicantAgreedToOffer(application)
     ? getApplicantAgreedInternshipStatus(application)
     : getApplicantVisibleStatus(status, maskAcceptedStatus, application);
-  const panelTabs = [...infoTabs, ...extraTabs];
+  const panelTabs = isJobApplication ? readOnlyJobInfoTabs : [...infoTabs, ...extraTabs];
+  const panelTitle = isJobApplication ? `Nama Jawatan Yang Dipohon: ${vacancy.title || "Jawatan DBKU"}` : "Permohonan Latihan Industri";
+  const activeInfoHeading = isJobApplication
+    ? getReadOnlyJobInfoHeading(activeInfoTab, readOnlyJobInfoTabs.indexOf(activeInfoTab))
+    : activeInfoTab;
+  const currentDocumentFields = isJobApplication ? jobDocumentFields : documentFields;
   const groupedTabs = tabGroups
     .map((group) => ({
       ...group,
@@ -1006,10 +1084,11 @@ export function InternshipApplicationReadOnlyPanel({
     <button
       className={activeInfoTab === tab ? "active" : ""}
       key={tab}
+      title={isJobApplication ? getReadOnlyJobInfoHeading(tab, readOnlyJobInfoTabs.indexOf(tab)) : undefined}
       type="button"
       onClick={() => onTabChange(tab)}
     >
-      {tab}
+      {isJobApplication ? getReadOnlyJobTabLabel(tab, readOnlyJobInfoTabs.indexOf(tab)) : tab}
     </button>
   );
 
@@ -1057,16 +1136,345 @@ export function InternshipApplicationReadOnlyPanel({
     <div className="student-personal-table-wrap">
       <table className="student-personal-table student-readonly-table">
         <tbody>
-          {documentFields.map((document) => renderDocumentRow(document, documents, studentInfo))}
+          {currentDocumentFields.map((document) => renderDocumentRow(document, documents, studentInfo))}
         </tbody>
       </table>
     </div>
   );
 
+  const renderJobValue = (value) => <span className="student-readonly-value">{displayValue(value)}</span>;
+
+  const renderJobHeading = (colSpan, note = null) => (
+    <thead>
+      <tr>
+        <th className="student-job-spm-heading" colSpan={colSpan}>
+          {activeInfoHeading}
+          {note ? <span className="student-job-heading-note">{note}</span> : null}
+        </th>
+      </tr>
+    </thead>
+  );
+
+  const renderJobPersonalFields = () => (
+    <>
+      {renderReadOnlyPassportPhoto(documents, studentInfo)}
+      <div className="student-personal-table-wrap">
+        <table className="student-personal-table student-readonly-table">
+          <thead>
+            <tr className="student-personal-section-heading">
+              <th colSpan={2}>{activeInfoHeading}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {renderReadOnlyRow("salutation", "Gelaran (Encik/ Puan/ Cik)", studentInfo.salutation)}
+            {personalRows.slice(0, 2).map(([field, label]) => renderReadOnlyRow(field, label, studentInfo[field]))}
+            {renderPhoneRow("phone", "No. Telefon Bimbit/ Telefon Rumah", studentInfo.phone)}
+            <tr className="map-row">
+              <th scope="row">Alamat Surat Menyurat</th>
+              <td>
+                <ApplicantAddressMap
+                  address={studentInfo.address}
+                  latitude={studentInfo.latitude}
+                  longitude={studentInfo.longitude}
+                  onLocationChange={() => {}}
+                  readOnly
+                />
+              </td>
+            </tr>
+            {personalRows.slice(3, 5).map(([field, label]) => renderReadOnlyRow(field, label, studentInfo[field]))}
+            {renderDateOfBirthRow(studentInfo.birthDate)}
+            {personalRows.slice(6).map(([field, label]) => renderReadOnlyRow(field, label, studentInfo[field]))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+
+  const renderJobSpmFields = () => {
+    const rows = getRows(studentInfo.jobSpmSubjects, jobSpmSubjectRowCount, { grade: "", subject: "" });
+    return (
+      <div className="student-job-spm-table-wrap">
+        <table className="student-job-spm-table">
+          {renderJobHeading(4)}
+          <tbody>
+            <tr>
+              <td colSpan={3}><strong>Sekolah :</strong> {renderJobValue(studentInfo.jobSpmSchool)}</td>
+              <td className="hrm-use-cell" rowSpan={3}>UNTUK KEGUNAAN URUSETIA (BHG HRM)</td>
+            </tr>
+            <tr><td colSpan={3}><strong>Tahun :</strong> {renderJobValue(studentInfo.jobSpmYear)}</td></tr>
+            <tr><td colSpan={3}><strong>Nama Peperiksaan</strong> {renderJobValue(studentInfo.jobSpmExamName)}</td></tr>
+            <tr><th>Bil</th><th>Mata Pelajaran</th><th>Gred</th><th>Semakan</th></tr>
+            {rows.map((row, index) => (
+              <tr key={index}>
+                <td>{index + 1}</td>
+                <td>{renderJobValue(row.subject)}</td>
+                <td>{renderJobValue(row.grade)}</td>
+                <td className="hrm-check-cell" />
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
+  const renderJobBmJulyFields = () => (
+    <div className="student-job-spm-table-wrap">
+      <table className="student-job-spm-table student-job-compact-table student-job-bm-july-table">
+        {renderJobHeading(4)}
+        <tbody>
+          <tr><td colSpan={2}>Tahun</td><td colSpan={2}>{renderJobValue(studentInfo.jobBmJulyYear)}</td></tr>
+          <tr><td colSpan={2}>Nama Peperiksaan</td><td colSpan={2}>{renderJobValue(studentInfo.jobBmJulyExamName)}</td></tr>
+          <tr>
+            <td>Keputusan Gred</td>
+            <td>{renderJobValue(studentInfo.jobBmJulyGradeDecision)}</td>
+            <td>Ujian Lisan</td>
+            <td>{renderJobValue(studentInfo.jobBmJulyOralExam)}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+
+  const renderJobMathJulyFields = () => (
+    <div className="student-job-spm-table-wrap">
+      <table className="student-job-spm-table student-job-compact-table">
+        {renderJobHeading(2)}
+        <tbody>
+          <tr><td>Tahun</td><td>{renderJobValue(studentInfo.jobMathJulyYear)}</td></tr>
+          <tr><td>Keputusan Gred</td><td>{renderJobValue(studentInfo.jobMathJulyGradeDecision)}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  );
+
+  const renderJobStpmFields = () => {
+    const rows = getRows(studentInfo.jobStpmSubjects, jobStpmSubjectRowCount, { grade: "", subject: "" });
+    return (
+      <div className="student-job-spm-table-wrap">
+        <table className="student-job-spm-table student-job-stpm-table">
+          {renderJobHeading(3)}
+          <tbody>
+            <tr><td colSpan={3}><strong>Sekolah</strong> {renderJobValue(studentInfo.jobStpmSchool)}</td></tr>
+            <tr><td colSpan={3}><strong>Tahun</strong> {renderJobValue(studentInfo.jobStpmYear)}</td></tr>
+            <tr><td colSpan={3}><strong>Nama Peperiksaan</strong> {renderJobValue(studentInfo.jobStpmExamName)}</td></tr>
+            <tr><th>Bil</th><th>Mata Pelajaran</th><th>Gred</th></tr>
+            {rows.map((row, index) => (
+              <tr key={index}>
+                <td>{index + 1}</td>
+                <td>{renderJobValue(row.subject)}</td>
+                <td>{renderJobValue(row.grade)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
+  const renderJobHigherEducationFields = () => {
+    const rows = getRows(studentInfo.jobHigherEducationQualifications, jobHigherEducationRowCount, {
+      certificateName: "",
+      cgpa: "",
+      completionDate: "",
+      entryDate: "",
+      institution: "",
+      specialization: "",
+    });
+    return (
+      <div className="student-job-spm-table-wrap">
+        {rows.map((row, index) => (
+          <table className="student-job-spm-table student-job-higher-education-table" key={index}>
+            {index === 0 ? renderJobHeading(4, "(Sila lengkapkan maklumat kelulusan pendidikan tinggi jika jawatan yang dipohon memerlukan kelayakan tersebut. Jika tidak, ruangan ini hendaklah dikosongkan.)") : null}
+            <tbody>
+              <tr><td>Nama Sijil</td><td>{renderJobValue(row.certificateName)}</td><td>Tarikh Masuk</td><td>{renderJobValue(row.entryDate)}</td></tr>
+              <tr><td>CGPA</td><td>{renderJobValue(row.cgpa)}</td><td>Tarikh Tamat Pengajian</td><td>{renderJobValue(row.completionDate)}</td></tr>
+              <tr><td>Institusi</td><td colSpan={3}>{renderJobValue(row.institution)}</td></tr>
+              <tr><td>Pengkhususan</td><td colSpan={3}>{renderJobValue(row.specialization)}</td></tr>
+            </tbody>
+          </table>
+        ))}
+      </div>
+    );
+  };
+
+  const renderJobLanguageSkillsFields = () => {
+    const rows = Array.isArray(studentInfo.jobLanguageSkillRows) ? studentInfo.jobLanguageSkillRows : [];
+    return (
+      <div className="student-job-spm-table-wrap">
+        <table className="student-job-spm-table student-job-language-table">
+          {renderJobHeading(5, "(Sila tandakan (/) di petak yang berkenaan)")}
+          <tbody>
+            <tr className="student-job-language-column-row"><th>Bahasa:</th><th>Kelancaran</th>{jobSkillLevelOptions.map((option) => <th key={option}>{option}</th>)}</tr>
+            {rows.map((row, index) => (
+              <Fragment key={index}>
+                <tr>
+                  <td rowSpan={2}>{displayValue(row.language || (row.required ? "" : "Bahasa Lain"))}</td>
+                  <td className="student-job-fluency-cell">Pertuturan</td>
+                  {jobSkillLevelOptions.map((option) => <td className="student-job-radio-table-cell" key={option}>{row.speaking === option ? "/" : ""}</td>)}
+                </tr>
+                <tr>
+                  <td className="student-job-fluency-cell">Penulisan</td>
+                  {jobSkillLevelOptions.map((option) => <td className="student-job-radio-table-cell" key={option}>{row.writing === option ? "/" : ""}</td>)}
+                </tr>
+              </Fragment>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
+  const renderJobComputerSkillsFields = () => {
+    const rows = getRows(studentInfo.jobComputerSkillRows, 5, { level: "", softwareName: "" });
+    return (
+      <div className="student-job-spm-table-wrap">
+        <table className="student-job-spm-table student-job-computer-table">
+          {renderJobHeading(5, "(Sila tandakan (/) di petak yang berkenaan)")}
+          <tbody>
+            <tr><th rowSpan={2}>Nama Perisian</th><th colSpan={4}>Tahap Kemahiran</th></tr>
+            <tr>{jobComputerLevelOptions.map((option) => <th key={option}>{option}</th>)}</tr>
+            {rows.map((row, index) => (
+              <tr key={index}>
+                <td>{renderJobValue(row.softwareName)}</td>
+                {jobComputerLevelOptions.map((option) => <td className="student-job-radio-table-cell" key={option}>{row.level === option ? "/" : ""}</td>)}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
+  const renderJobWorkExperienceFields = () => {
+    const rows = getRows(studentInfo.jobWorkExperienceRows, jobWorkExperienceRowCount, {
+      duration: "",
+      employerAddress: "",
+      jobTitle: "",
+      netSalary: "",
+      periodFrom: "",
+      periodTo: "",
+    });
+    return (
+      <div className="student-job-spm-table-wrap">
+        <table className="student-job-spm-table student-job-work-experience-table">
+          {renderJobHeading(6)}
+          <tbody>
+            <tr><th rowSpan={2}>Nama &amp; Alamat Majikan</th><th rowSpan={2}>Nama Jawatan</th><th rowSpan={2}>Gaji Bersih Sebulan</th><th colSpan={2}>Tempoh Bekerja</th><th rowSpan={2}>Tempoh</th></tr>
+            <tr><th>Dari</th><th>Hingga</th></tr>
+            {rows.map((row, index) => (
+              <tr key={index}>
+                <td>{renderJobValue(row.employerAddress)}</td>
+                <td>{renderJobValue(row.jobTitle)}</td>
+                <td>{renderJobValue(row.netSalary)}</td>
+                <td>{renderJobValue(row.periodFrom)}</td>
+                <td>{renderJobValue(row.periodTo)}</td>
+                <td>{renderJobValue(row.duration)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
+  const renderJobReferencesFields = () => {
+    const rows = getRows(studentInfo.jobReferenceRows, jobReferenceRowCount, {
+      address: "",
+      employer: "",
+      name: "",
+      occupation: "",
+      phone: "",
+    });
+    const referenceLine = (row, field, label) => (
+      <label className="student-job-reference-line">
+        <span>{label}</span>
+        <b aria-hidden="true">:</b>
+        {renderJobValue(row[field])}
+      </label>
+    );
+    return (
+      <div className="student-job-spm-table-wrap">
+        <table className="student-job-spm-table student-job-references-table">
+          {renderJobHeading(2, "(Sila berikan maklumat dua orang penama yang bukan ahli keluarga/ saudara-mara, yang dapat memberi keterangan dan pengesahan berkenaan maklumat diri anda)")}
+          <tbody>
+            <tr>
+              {rows.map((row, index) => (
+                <td key={index}>
+                  <div className="student-job-reference-card">
+                    <span className="student-job-reference-number">{index + 1}.</span>
+                    <div className="student-job-reference-fields">
+                      {referenceLine(row, "name", "Nama")}
+                      {referenceLine(row, "address", "Alamat")}
+                      {referenceLine(row, "occupation", "Pekerjaan")}
+                      {referenceLine(row, "employer", "Majikan")}
+                      {referenceLine(row, "phone", "No. Telefon")}
+                    </div>
+                  </div>
+                </td>
+              ))}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
+  const renderJobDeclarationFields = () => {
+    const declarationLine = (field, label) => (
+      <label className="student-job-declaration-line">
+        <span>{label}</span>
+        <b aria-hidden="true">:</b>
+        {renderJobValue(studentInfo[field])}
+      </label>
+    );
+    return (
+      <div className="student-job-spm-table-wrap">
+        <table className="student-job-spm-table student-job-declaration-table">
+          {renderJobHeading(1)}
+          <tbody>
+            <tr>
+              <td>
+                <p className="student-job-declaration-copy">
+                  {jobDeclarationText.split("BENAR dan TEPAT")[0]}<strong>BENAR</strong> dan <strong>TEPAT</strong>{jobDeclarationText.split("BENAR dan TEPAT")[1]}
+                </p>
+                <div className="student-job-declaration-fields">
+                  {declarationLine("jobDeclarationName", "Nama")}
+                  {declarationLine("jobDeclarationIcNo", "No. Kad Pengenalan")}
+                  {declarationLine("jobDeclarationDate", "Tarikh")}
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
+  const renderJobActiveTabContent = () => (
+    <>
+      {activeInfoTab === personalInfoTab ? renderJobPersonalFields() : null}
+      {activeInfoTab === jobSpmTab ? renderJobSpmFields() : null}
+      {activeInfoTab === jobBmJulyTab ? renderJobBmJulyFields() : null}
+      {activeInfoTab === jobMathJulyTab ? renderJobMathJulyFields() : null}
+      {activeInfoTab === jobStpmTab ? renderJobStpmFields() : null}
+      {activeInfoTab === jobHigherEducationTab ? renderJobHigherEducationFields() : null}
+      {activeInfoTab === jobLanguageSkillsTab ? renderJobLanguageSkillsFields() : null}
+      {activeInfoTab === jobComputerSkillsTab ? renderJobComputerSkillsFields() : null}
+      {activeInfoTab === jobWorkExperienceTab ? renderJobWorkExperienceFields() : null}
+      {activeInfoTab === jobReferencesTab ? renderJobReferencesFields() : null}
+      {activeInfoTab === documentSupportTab ? renderDocumentFields() : null}
+      {activeInfoTab === jobDeclarationTab ? renderJobDeclarationFields() : null}
+    </>
+  );
+
   return (
-    <section className={`student-info-panel student-readonly-panel ${className}`} aria-label="Paparan permohonan latihan industri">
+    <section
+      className={`student-info-panel student-readonly-panel ${className}`}
+      aria-label={isJobApplication ? "Paparan permohonan jawatan kosong" : "Paparan permohonan latihan industri"}
+    >
       <header className="student-info-titlebar">
-        <h1>Permohonan Latihan Industri</h1>
+        <h1>{panelTitle}</h1>
         <button className="student-info-back" type="button" onClick={onBack}>
           <Icon>arrow_back</Icon>
           {backLabel}
@@ -1101,7 +1509,10 @@ export function InternshipApplicationReadOnlyPanel({
               </section>
               {status === "incomplete" ? (
                 <div className="student-readonly-actions">
-                  <Link className="applicant-table-action" to={APPLICANT_ROUTES.internshipApplicationEdit(application.id)}>
+                  <Link
+                    className="applicant-table-action"
+                    to={isJobApplication ? APPLICANT_ROUTES.jobApplicationEdit(application.id) : APPLICANT_ROUTES.internshipApplicationEdit(application.id)}
+                  >
                     <Icon>edit</Icon>
                     Kemaskini Permohonan
                   </Link>
@@ -1109,8 +1520,8 @@ export function InternshipApplicationReadOnlyPanel({
               ) : null}
 
               <nav
-                className={`student-info-tabs${groupedTabs.length ? " student-info-tabs-grouped" : ""}`}
-                aria-label="Bahagian permohonan latihan industri"
+                className={`student-info-tabs${isJobApplication ? " job-application-tabs" : ""}${groupedTabs.length ? " student-info-tabs-grouped" : ""}`}
+                aria-label={isJobApplication ? "Bahagian permohonan jawatan kosong" : "Bahagian permohonan latihan industri"}
               >
                 {groupedTabs.length
                   ? groupedTabs.map((group) => (
@@ -1123,11 +1534,15 @@ export function InternshipApplicationReadOnlyPanel({
               </nav>
 
               <section className="student-info-form">
-                <h2>{activeInfoTab}</h2>
-                {activeInfoTab === personalInfoTab ? renderPersonalFields() : null}
-                {activeInfoTab === "Maklumat Akademik" ? renderAcademicFields() : null}
-                {activeInfoTab === "Dokumen Sokongan" ? renderDocumentFields() : null}
-                {!infoTabs.includes(activeInfoTab) && renderExtraTabContent ? renderExtraTabContent(activeInfoTab) : null}
+                <h2>{activeInfoHeading}</h2>
+                {isJobApplication ? renderJobActiveTabContent() : (
+                  <>
+                    {activeInfoTab === personalInfoTab ? renderPersonalFields() : null}
+                    {activeInfoTab === academicInfoTab ? renderAcademicFields() : null}
+                    {activeInfoTab === documentSupportTab ? renderDocumentFields() : null}
+                    {!infoTabs.includes(activeInfoTab) && renderExtraTabContent ? renderExtraTabContent(activeInfoTab) : null}
+                  </>
+                )}
               </section>
             </>
           ) : null}
@@ -1175,15 +1590,22 @@ export default function ApplicantApplicationViewPage() {
       apiRequest(`/applications/${applicationId}/`, { signal: controller.signal })
         .then((data) => {
           if (!isMounted) return;
+          const isJobDetail = isJobApplicationDetail(data);
           if ((data.status || "draft") === "draft") {
-            navigate(APPLICANT_ROUTES.internshipApplication, { replace: true });
+            navigate(isJobDetail ? APPLICANT_ROUTES.jobApplicationEdit(data.id) : APPLICANT_ROUTES.internshipApplication, { replace: true });
             return;
           }
           setApplication(data);
-          if (requestedInfoTab === hrmDecisionTab && hasHrmFinalRejectionDecision(data)) {
+          if (isJobDetail && readOnlyJobInfoTabs.includes(requestedInfoTab)) {
+            setActiveInfoTab(requestedInfoTab);
+          } else if (isJobDetail) {
+            setActiveInfoTab(personalInfoTab);
+          } else if (requestedInfoTab === hrmDecisionTab && hasHrmFinalRejectionDecision(data)) {
             setActiveInfoTab(hrmDecisionTab);
           } else if (requestedInfoTab === organizationFeedbackTab && hasOrganizationFeedbackBeenSent(data)) {
             setActiveInfoTab(organizationFeedbackTab);
+          } else {
+            setActiveInfoTab(personalInfoTab);
           }
         })
         .catch((requestError) => {
