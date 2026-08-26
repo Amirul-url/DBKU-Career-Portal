@@ -3319,7 +3319,7 @@ function HrmApplicationDetailPage({
   const extraTabs = [
     ...(isHrmWorkspace ? [hrmReviewTab] : []),
     ...(shouldShowDepartmentDecision ? [departmentDecisionTab] : []),
-    ...(!isJobApplication && shouldShowHrmFinalDecision ? [hrmFinalDecisionTab] : []),
+    ...(shouldShowHrmFinalDecision ? [hrmFinalDecisionTab] : []),
     ...(shouldShowOrganizationFeedback ? [organizationFeedbackTab] : []),
     ...(hasApplicantRespondedToOffer(application) ? [applicantConfirmationTab] : []),
   ];

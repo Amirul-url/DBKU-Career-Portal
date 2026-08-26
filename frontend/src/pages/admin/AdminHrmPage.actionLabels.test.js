@@ -139,9 +139,12 @@ test("HRM job application detail shows A-L tabs and HRM review tab", () => {
   assert.match(source, /const shouldShowDepartmentDecision = isHrmWorkspace\s*\?\s*hasSubmittedDepartmentDecision\(application\)\s*:\s*Boolean\(application\?\.assigned_department\)/);
   assert.match(source, /\.\.\.\(isHrmWorkspace \? \[hrmReviewTab\] : \[\]\)/);
   assert.match(source, /\.\.\.\(shouldShowDepartmentDecision \? \[departmentDecisionTab\] : \[\]\)/);
+  assert.match(source, /\.\.\.\(shouldShowHrmFinalDecision \? \[hrmFinalDecisionTab\] : \[\]\)/);
+  assert.doesNotMatch(source, /\.\.\.\(!isJobApplication && shouldShowHrmFinalDecision \? \[hrmFinalDecisionTab\] : \[\]\)/);
   assert.match(source, /const detailTabGroups = isJobApplication \? \[\] : \[/);
   assert.match(source, /tab === hrmReviewTab \? \(\s*<HrmInternshipAssessmentTab/);
   assert.match(source, /tab === departmentDecisionTab \? \(\s*<DepartmentDecisionTab/);
+  assert.match(source, /tab === hrmFinalDecisionTab \? \(\s*<HrmFinalDecisionTab/);
   assert.match(applicantViewSource, /const readOnlyJobInfoTabs = \[/);
   assert.match(applicantViewSource, /const panelTabs = isJobApplication \? \[\.\.\.readOnlyJobInfoTabs, \.\.\.extraTabs\] : \[\.\.\.infoTabs, \.\.\.extraTabs\]/);
   assert.match(applicantViewSource, /const defaultJobTabGroups = isJobApplication && extraTabs\.length/);
@@ -307,7 +310,7 @@ test("department decision tab replaces HRM review for department workspaces", ()
   assert.match(source, /maskAcceptedStatus=\{false\}/);
 });
 
-test("HRM makes the final internship decision after department recommendation", () => {
+test("HRM makes the final decision after department recommendation", () => {
   assert.match(source, /const hrmFinalDecisionTab = "Keputusan Akhir HRM"/);
   assert.match(source, /hrmFinalRejectionMessage,[\s\S]*normalizeHrmFinalRejectionRemarks/);
   assert.match(decisionCopySource, /Dukacita dimaklumkan bahawa permohonan saudara\/i untuk menjalani latihan industri di Dewan Bandaraya Kuching Utara \(DBKU\) telah diterima dan diteliti/);
@@ -319,7 +322,8 @@ test("HRM makes the final internship decision after department recommendation", 
   assert.match(source, /status: nextStatus/);
   assert.match(source, /const nextStatus = "rejected"/);
   assert.match(source, /onSaveFinalDecision=\{saveHrmFinalDecision\}/);
-  assert.match(source, /\.\.\.\(!isJobApplication && shouldShowHrmFinalDecision \? \[hrmFinalDecisionTab\] : \[\]\)/);
+  assert.match(source, /\.\.\.\(shouldShowHrmFinalDecision \? \[hrmFinalDecisionTab\] : \[\]\)/);
+  assert.doesNotMatch(source, /\.\.\.\(!isJobApplication && shouldShowHrmFinalDecision \? \[hrmFinalDecisionTab\] : \[\]\)/);
   assert.match(source, /const departmentRecommendation = getSavedDepartmentDecision\(application\)\.recommendation \|\| ""/);
   assert.match(source, /departmentRecommendation === "Tolak"[\s\S]*application\?\.status === "shortlisted"/);
   assert.match(source, /const shouldShowHrmFinalDecision = isHrmWorkspace && \(needsFinalDecision \|\| hasFinalRejectionDecision\)/);
