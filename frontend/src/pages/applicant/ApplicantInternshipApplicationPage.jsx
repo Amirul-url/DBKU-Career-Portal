@@ -2183,6 +2183,14 @@ export default function ApplicantInternshipApplicationPage({ applicationType = "
   const renderJobWorkExperienceSection = () => (
     <div className="student-job-spm-table-wrap">
       <table className="student-job-spm-table student-job-work-experience-table">
+        <colgroup>
+          <col className="student-job-work-employer-col" />
+          <col className="student-job-work-title-col" />
+          <col className="student-job-work-salary-col" />
+          <col className="student-job-work-date-col" />
+          <col className="student-job-work-date-col" />
+          <col className="student-job-work-duration-col" />
+        </colgroup>
         <thead>
           <tr>
             <th className="student-job-spm-heading" colSpan={6}>

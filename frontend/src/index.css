@@ -7606,37 +7606,33 @@ body:has(.applicant-profile-page) {
 }
 
 .student-job-work-experience-table {
-  width: min(100%, 1120px);
-  min-width: 840px;
+  min-width: 980px;
   table-layout: fixed;
+}
+
+.student-job-work-employer-col {
+  width: 34%;
+}
+
+.student-job-work-title-col {
+  width: 28%;
+}
+
+.student-job-work-salary-col {
+  width: 12%;
+}
+
+.student-job-work-date-col {
+  width: 8%;
+}
+
+.student-job-work-duration-col {
+  width: 10%;
 }
 
 .student-job-work-experience-table th:first-child,
 .student-job-work-experience-table td:first-child {
-  width: 26%;
   text-align: center;
-}
-
-.student-job-work-experience-table th:nth-child(2),
-.student-job-work-experience-table td:nth-child(2) {
-  width: 24%;
-}
-
-.student-job-work-experience-table th:nth-child(3),
-.student-job-work-experience-table td:nth-child(3) {
-  width: 13%;
-}
-
-.student-job-work-experience-table th:nth-child(4),
-.student-job-work-experience-table td:nth-child(4),
-.student-job-work-experience-table th:nth-child(5),
-.student-job-work-experience-table td:nth-child(5) {
-  width: 11%;
-}
-
-.student-job-work-experience-table th:nth-child(6),
-.student-job-work-experience-table td:nth-child(6) {
-  width: 12%;
 }
 
 .student-job-work-experience-table tbody td {
