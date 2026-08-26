@@ -33,8 +33,8 @@ const jobInfoTabs = [
   jobComputerSkillsTab,
   jobWorkExperienceTab,
   jobReferencesTab,
-  jobDeclarationTab,
   documentSupportTab,
+  jobDeclarationTab,
 ];
 const jobSpmSubjectRowCount = 12;
 const minimumJobSpmSubjectRows = 3;
