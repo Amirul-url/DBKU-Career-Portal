@@ -176,6 +176,10 @@ function hasApplicationDecisionTab(application) {
 
 function getApplicationViewTarget(application) {
   const baseTarget = APPLICANT_ROUTES.applicationView(application.id);
+  if (!isInternshipApplication(application) && hasOrganizationFeedbackBeenSent(application)) {
+    return `${baseTarget}?tab=${encodeURIComponent(organizationFeedbackTab)}`;
+  }
+
   if (hasNewOrganizationFeedbackForApplicant(application)) {
     return `${baseTarget}?tab=${encodeURIComponent(organizationFeedbackTab)}`;
   }

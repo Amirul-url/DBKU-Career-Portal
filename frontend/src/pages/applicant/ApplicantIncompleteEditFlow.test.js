@@ -93,12 +93,13 @@ test("applicant view action opens rejected applications on the application decis
   assert.match(listSource, /function hasApplicationDecisionTab\(application\)/);
   assert.match(listSource, /function getApplicationViewTarget\(application\)/);
   assert.match(listSource, /encodeURIComponent\(applicationDecisionTab\)/);
+  assert.match(listSource, /!isInternshipApplication\(application\) && hasOrganizationFeedbackBeenSent\(application\)[\s\S]*encodeURIComponent\(organizationFeedbackTab\)/);
   assert.match(listSource, /hasNewOrganizationFeedbackForApplicant\(application\)[\s\S]*encodeURIComponent\(organizationFeedbackTab\)/);
   assert.match(listSource, /to=\{getApplicationViewTarget\(application\)\}/);
   assert.match(viewSource, /useSearchParams/);
   assert.match(viewSource, /const requestedInfoTab = searchParams\.get\("tab"\) \|\| ""/);
   assert.match(viewSource, /requestedInfoTab === hrmDecisionTab && hasHrmFinalRejectionDecision\(data\)[\s\S]*setActiveInfoTab\(hrmDecisionTab\)/);
-  assert.match(viewSource, /requestedInfoTab === organizationFeedbackTab && hasOrganizationFeedbackBeenSent\(data\)[\s\S]*setActiveInfoTab\(organizationFeedbackTab\)/);
+  assert.match(viewSource, /requestedInfoTab === organizationFeedbackTab && hasOrganizationFeedbackBeenSent\(data\)[\s\S]*setActiveInfoTab\(organizationFeedbackTab\)[\s\S]*isJobDetail && readOnlyJobInfoTabs\.includes\(requestedInfoTab\)/);
 });
 
 test("applicant accepted applications stay hidden behind review status until HRM notification", () => {

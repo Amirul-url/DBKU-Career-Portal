@@ -1795,14 +1795,14 @@ export default function ApplicantApplicationViewPage() {
             return;
           }
           setApplication(data);
-          if (isJobDetail && readOnlyJobInfoTabs.includes(requestedInfoTab)) {
+          if (requestedInfoTab === organizationFeedbackTab && hasOrganizationFeedbackBeenSent(data)) {
+            setActiveInfoTab(organizationFeedbackTab);
+          } else if (isJobDetail && readOnlyJobInfoTabs.includes(requestedInfoTab)) {
             setActiveInfoTab(requestedInfoTab);
           } else if (isJobDetail) {
             setActiveInfoTab(personalInfoTab);
           } else if (requestedInfoTab === hrmDecisionTab && hasHrmFinalRejectionDecision(data)) {
             setActiveInfoTab(hrmDecisionTab);
-          } else if (requestedInfoTab === organizationFeedbackTab && hasOrganizationFeedbackBeenSent(data)) {
-            setActiveInfoTab(organizationFeedbackTab);
           } else {
             setActiveInfoTab(personalInfoTab);
           }
