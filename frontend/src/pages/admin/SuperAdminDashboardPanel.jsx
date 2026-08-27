@@ -3,6 +3,8 @@ import { apiRequest } from "../../lib/authApi";
 import { Icon } from "../applicant/ApplicantAuthShared";
 
 const display = (value) => value || "-";
+const ACTIVITY_PAGE_SIZE = 5;
+
 function toDateInputValue(date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -59,7 +61,7 @@ function buildActivitySessions(activities) {
     sessions.push({ ...activity, sessionLabel: activity.action_label || "Log masuk" });
   });
 
-  return sessions.slice(0, 5);
+  return sessions;
 }
 
 function StatCard({ accentClass, icon, rows, title }) {
@@ -134,6 +136,7 @@ export default function SuperAdminDashboardPanel({ user }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [activityLoading, setActivityLoading] = useState(true);
+  const [activityPage, setActivityPage] = useState(1);
 
   const loadActivities = useCallback((selectedDate = activityDate) => {
     setActivityLoading(true);
@@ -170,8 +173,17 @@ export default function SuperAdminDashboardPanel({ user }) {
   }, [activityDate, loadActivities]);
 
   const activitySessions = useMemo(() => buildActivitySessions(activities), [activities]);
+  const activityPageCount = Math.max(1, Math.ceil(activitySessions.length / ACTIVITY_PAGE_SIZE));
+  const activeActivityPage = Math.min(activityPage, activityPageCount);
+  const visibleActivitySessions = activitySessions.slice(
+    (activeActivityPage - 1) * ACTIVITY_PAGE_SIZE,
+    activeActivityPage * ACTIVITY_PAGE_SIZE,
+  );
+  const canShowPreviousActivities = activeActivityPage > 1;
+  const canShowNextActivities = activeActivityPage < activityPageCount;
 
   const updateActivityDate = (value) => {
+    setActivityPage(1);
     setActivityDate(value || todayInputValue());
   };
 
@@ -195,14 +207,28 @@ export default function SuperAdminDashboardPanel({ user }) {
           <header className="flex items-center justify-between gap-4 border-b border-slate-200 px-5 py-3.5">
             <div>
               <h2 className="text-base font-bold text-slate-950">Aktiviti Terkini</h2>
-              <p className="mt-1 text-xs text-slate-500">{activityLoading ? "Memuatkan aktiviti..." : `${activitySessions.length} aktiviti akaun terkini`}</p>
+              <p className="mt-1 text-xs text-slate-500">
+                {activityLoading ? "Memuatkan aktiviti..." : `${visibleActivitySessions.length} daripada ${activitySessions.length} aktiviti akaun terkini`}
+              </p>
             </div>
             <div className="flex items-center gap-2">
               <input className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100" type="date" value={activityDate} onChange={(event) => updateActivityDate(event.target.value)} aria-label="Pilih tarikh aktiviti" />
-              <button className="inline-flex h-10 w-10 cursor-not-allowed items-center justify-center rounded-md border border-slate-200 text-slate-400 opacity-50" type="button" aria-label="Tarikh sebelumnya" disabled>
+              <button
+                className={`inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-200 transition ${canShowPreviousActivities ? "text-slate-600 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700" : "cursor-not-allowed text-slate-400 opacity-50"}`}
+                type="button"
+                aria-label="Aktiviti sebelumnya"
+                disabled={!canShowPreviousActivities}
+                onClick={() => setActivityPage((page) => Math.max(1, page - 1))}
+              >
                 <Icon>chevron_left</Icon>
               </button>
-              <button className="inline-flex h-10 w-10 cursor-not-allowed items-center justify-center rounded-md border border-slate-200 text-slate-400 opacity-50" type="button" aria-label="Tarikh seterusnya" disabled>
+              <button
+                className={`inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-200 transition ${canShowNextActivities ? "text-slate-600 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700" : "cursor-not-allowed text-slate-400 opacity-50"}`}
+                type="button"
+                aria-label="Aktiviti seterusnya"
+                disabled={!canShowNextActivities}
+                onClick={() => setActivityPage((page) => Math.min(activityPageCount, page + 1))}
+              >
                 <Icon>chevron_right</Icon>
               </button>
             </div>
@@ -217,7 +243,7 @@ export default function SuperAdminDashboardPanel({ user }) {
               </thead>
               <tbody>
                 {activityLoading ? <tr><td className="px-5 py-6 text-slate-500" colSpan="2">Memuatkan aktiviti...</td></tr> : null}
-                {!activityLoading && activitySessions.length ? activitySessions.map((activity) => (
+                {!activityLoading && visibleActivitySessions.length ? visibleActivitySessions.map((activity) => (
                   <tr className="border-t border-slate-100" key={activity.id}>
                     <td className="px-5 py-4">
                       <p className="text-sm font-bold text-slate-950">{display(activity.full_name || activity.email).toUpperCase()}</p>
