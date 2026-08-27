@@ -7,6 +7,44 @@ import { useApplicantSidebarState } from "../../modules/applicant/useApplicantSi
 import { Icon } from "./ApplicantAuthShared";
 import { ProfileContentHeader, ProfileSidebar } from "./ApplicantProfilePage";
 
+function hasText(value) {
+  return Boolean(String(value || "").trim());
+}
+
+function hasCompleteExperience(profileData) {
+  const experience = profileData?.experience || {};
+  const hasExperience = String(experience.hasExperience || "");
+  const records = Array.isArray(experience.records) ? experience.records : [];
+  const hasWorkRecord = records.some((record) =>
+    hasText(record.title) &&
+    hasText(record.careerLevel) &&
+    hasText(record.organisation) &&
+    Array.isArray(record.sectors) &&
+    record.sectors.length > 0,
+  );
+
+  return hasText(experience.employmentStatus) && hasText(hasExperience) && (!hasExperience.startsWith("Ya") || hasWorkRecord);
+}
+
+function hasCompleteAcademic(profileData) {
+  const records = Array.isArray(profileData?.academic?.records) ? profileData.academic.records : [];
+  return records.some((record) => hasText(record.level) && hasText(record.institution));
+}
+
+function hasCompleteSkills(profileData) {
+  const skills = profileData?.skills || {};
+  const technicalSkills = Array.isArray(skills.skills) ? skills.skills : [];
+  const languages = Array.isArray(skills.languages) ? skills.languages : [];
+  const hasLanguage = languages.some((language) =>
+    hasText(language.name) &&
+    hasText(language.reading) &&
+    hasText(language.speaking) &&
+    hasText(language.writing),
+  );
+
+  return technicalSkills.length > 0 && hasLanguage;
+}
+
 function getProfileChecklist(user, profileData) {
   const personal = profileData?.personal || {};
   const details = personal.details || {};
@@ -26,6 +64,9 @@ function getProfileChecklist(user, profileData) {
     { done: Boolean(details.latitude && details.longitude), label: "Lokasi alamat" },
     { done: Boolean(details.primaryPhone || user?.mobile_number), label: "Nombor telefon utama" },
     { done: Boolean(details.careerObjective), label: "Matlamat kerjaya" },
+    { done: hasCompleteExperience(profileData), label: "Pengalaman" },
+    { done: hasCompleteAcademic(profileData), label: "Akademik" },
+    { done: hasCompleteSkills(profileData), label: "Kemahiran" },
   ];
 }
 
@@ -40,6 +81,7 @@ export default function ApplicantDashboardPage() {
   const checklist = useMemo(() => getProfileChecklist(user, profileData), [profileData, user]);
   const completedCount = checklist.filter((item) => item.done).length;
   const completionPercent = Math.round((completedCount / checklist.length) * 100);
+  const completionLabel = completionPercent === 100 ? "Profil lengkap" : "Profil belum lengkap";
 
   useEffect(() => {
     if (!user) {
@@ -123,7 +165,7 @@ export default function ApplicantDashboardPage() {
 
             <aside aria-label="Status kelengkapan profil">
               <strong>{completionPercent}%</strong>
-              <span>Profil lengkap</span>
+              <span>{completionLabel}</span>
               <div className="dashboard-progress-track">
                 <span style={{ width: `${completionPercent}%` }} />
               </div>
