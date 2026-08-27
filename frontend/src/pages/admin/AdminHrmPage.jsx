@@ -5,6 +5,7 @@ import {
   clearAuthSession,
   getStoredUser,
   recordLogoutActivity,
+  resolveMediaUrl,
 } from "../../lib/authApi";
 import { buildHrmDashboardMetrics, buildRecentApplicationsView } from "../../modules/admin/hrmDashboardMetrics";
 import { ADMIN_ROUTES, adminNavItems, getAdminRoutePath, getAdminRouteState } from "../../modules/admin/adminRoutes";
@@ -1665,7 +1666,7 @@ function JobActionModal({ form, job, mode, onChange, onClose, onSave, saving }) 
             <div className="market-detail-document">
               <span>Untuk mengetahui lebih lanjut, sila klik di sini:</span>
               {job.official_document ? (
-                <a href={job.official_document_view_url || job.official_document} target="_blank" rel="noreferrer">
+                <a href={resolveMediaUrl(job.official_document) || job.official_document_view_url} target="_blank" rel="noreferrer">
                   Muat turun dokumen
                 </a>
               ) : (

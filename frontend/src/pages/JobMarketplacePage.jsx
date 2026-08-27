@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { apiRequest, getStoredUser } from "../lib/authApi";
+import { apiRequest, getStoredUser, resolveMediaUrl } from "../lib/authApi";
 import {
   getBlockingJobApplicationForVacancy,
   getOpportunityApplicationTarget,
@@ -292,7 +292,7 @@ export function JobMarketplaceContent({ actionTarget = "/login", embedded = fals
                 <span>Untuk mengetahui lebih lanjut, sila klik di sini:</span>
                 {selectedOpportunity.official_document && (
                   <a
-                    href={selectedOpportunity.official_document_view_url || selectedOpportunity.official_document}
+                    href={resolveMediaUrl(selectedOpportunity.official_document) || selectedOpportunity.official_document_view_url}
                     target="_blank"
                     rel="noreferrer"
                   >

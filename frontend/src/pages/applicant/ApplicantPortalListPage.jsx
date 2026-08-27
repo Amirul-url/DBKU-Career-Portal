@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { apiRequest, getStoredUser } from "../../lib/authApi";
+import { apiRequest, getStoredUser, resolveMediaUrl } from "../../lib/authApi";
 import {
   getApplicantApplicationBadgeCount,
   getApplicationRows,
@@ -534,7 +534,7 @@ function SavedVacancyList({ applications = [], onRemove, vacancies }) {
                 <span>Untuk mengetahui lebih lanjut, sila klik di sini:</span>
                 {selectedVacancy.official_document ? (
                   <a
-                    href={selectedVacancy.official_document_view_url || selectedVacancy.official_document}
+                    href={resolveMediaUrl(selectedVacancy.official_document) || selectedVacancy.official_document_view_url}
                     target="_blank"
                     rel="noreferrer"
                   >
