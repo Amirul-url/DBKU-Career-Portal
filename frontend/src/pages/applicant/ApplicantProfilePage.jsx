@@ -2626,7 +2626,7 @@ function PersonalInformationForm({ onDraftChange, onSave, profileData, saveReque
                     onChange={updateReference(reference.id, "name")}
                   />
                 </PersonalField>
-                <PersonalField label="Nama DBKU Rujukan" error={validationErrors[`reference-${reference.id}-employerName`]}>
+                <PersonalField label="Nama Syarikat Rujukan" error={validationErrors[`reference-${reference.id}-employerName`]}>
                   <input
                     type="text"
                     value={reference.employerName}
